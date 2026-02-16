@@ -1,0 +1,133 @@
+.seller-tracking {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-tracking-card {
+  transition: box-shadow 0.2s ease;
+}
+
+.product-tracking-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.product-header {
+  user-select: none;
+}
+
+.product-image {
+  background-color: var(--color-muted);
+}
+
+.order-detail-card {
+  transition: all 0.2s ease;
+}
+
+.order-detail-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.order-icon,
+.buyer-icon,
+.location-icon {
+  flex-shrink: 0;
+}
+
+.stat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode adjustments */
+.dark .product-tracking-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .order-detail-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dark .stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .product-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: left;
+  }
+  
+  .product-stats > div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .product-stats .text-2xl {
+    font-size: 1rem;
+  }
+  
+  .product-stats .text-xs {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+  }
+  
+  .search-box,
+  .status-filter {
+    width: 100%;
+  }
+  
+  .product-header {
+    flex-wrap: wrap;
+  }
+  
+  .product-info {
+    flex: 1 1 calc(100% - 5rem);
+  }
+  
+  .product-stats {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+/* Animation for expandable content */
+.orders-list {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+  }
+}
+
+/* Status badge animations */
+.badge {
+  transition: all 0.2s ease;
+}
+
+.badge:hover {
+  transform: scale(1.05);
+}

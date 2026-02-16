@@ -1,0 +1,445 @@
+/* Forum Page Styles - Light/Dark Theme Support */
+
+/* Thread Card Styles */
+.thread-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.thread-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Category Tag Styles */
+.category-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.category-tag.general {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    opacity: 0.9;
+}
+
+.category-tag.products {
+    background: var(--color-chart-2, var(--color-accent));
+    color: var(--color-accent-foreground);
+    opacity: 0.9;
+}
+
+.category-tag.tips {
+    background: var(--color-chart-3, var(--color-warning));
+    color: var(--color-warning-foreground);
+    opacity: 0.9;
+}
+
+.category-tag.help {
+    background: var(--color-chart-4, var(--color-destructive));
+    color: var(--color-destructive-foreground);
+    opacity: 0.9;
+}
+
+.category-tag.announcements {
+    background: var(--color-destructive);
+    color: var(--color-destructive-foreground);
+    opacity: 0.9;
+}
+
+/* Button Styles */
+.btn-new-thread {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-ring) 100%);
+    color: var(--color-primary-foreground);
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-new-thread:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--color-primary);
+    opacity: 0.8;
+}
+
+.btn-back {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-muted);
+    border: none;
+    border-radius: 8px;
+    color: var(--color-foreground);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-back:hover {
+    background: var(--color-border);
+}
+
+.btn-submit {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-ring) 100%);
+    color: var(--color-primary-foreground);
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-submit:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-cancel {
+    padding: 0.75rem 1.5rem;
+    background: var(--color-muted);
+    border: none;
+    border-radius: 10px;
+    color: var(--color-foreground);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Thread Detail Styles */
+.thread-content {
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+}
+
+.thread-body p {
+    white-space: pre-wrap;
+}
+
+.thread-engagement {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Like Button */
+.like-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-muted);
+    border: none;
+    border-radius: 8px;
+    color: var(--color-muted-foreground);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.like-btn:hover {
+    background: var(--color-destructive);
+    opacity: 0.1;
+    color: var(--color-destructive);
+}
+
+.like-btn.liked {
+    background: var(--color-destructive);
+    opacity: 0.1;
+    color: var(--color-destructive);
+}
+
+/* Reply Card */
+.reply-card {
+    padding: 1rem;
+    background: var(--color-muted);
+    border-radius: 10px;
+}
+
+/* Reply Form */
+.reply-form textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    resize: vertical;
+    font-size: 0.95rem;
+    background: var(--color-background);
+    color: var(--color-foreground);
+}
+
+.reply-form textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-ring);
+    opacity: 0.2;
+}
+
+/* File Upload */
+.file-upload-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--color-foreground);
+}
+
+.selected-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.file-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--color-primary);
+    opacity: 0.1;
+    color: var(--color-primary);
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.file-tag button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    font-size: 1rem;
+}
+
+/* Attachments */
+.attachment-item img {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.file-attachment {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-muted);
+    border-radius: 8px;
+    color: var(--color-foreground);
+}
+
+/* New Thread Form */
+.new-thread-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.new-thread-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-foreground);
+}
+
+.new-thread-form input,
+.new-thread-form textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: var(--color-background);
+    color: var(--color-foreground);
+}
+
+.new-thread-form input:focus,
+.new-thread-form textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-ring);
+    opacity: 0.2;
+}
+
+.char-count {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--color-muted-foreground);
+    margin-top: 0.25rem;
+}
+
+/* Category Selector */
+.category-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.category-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--color-muted);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--color-foreground);
+}
+
+.category-option:hover {
+    background: var(--color-border);
+}
+
+.category-option.selected {
+    background: var(--color-primary);
+    opacity: 0.1;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* File Upload Area */
+.file-upload-area {
+    border: 2px dashed var(--color-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--color-muted-foreground);
+}
+
+.upload-zone small {
+    font-size: 0.8rem;
+    color: var(--color-muted-foreground);
+}
+
+.uploaded-files {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: var(--color-muted);
+    border-radius: 8px;
+}
+
+.file-item button {
+    background: none;
+    border: none;
+    color: var(--color-destructive);
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+/* Login Prompt */
+.login-prompt {
+    text-align: center;
+    padding: 2rem;
+    background: var(--color-muted);
+    border-radius: 10px;
+}
+
+.login-prompt a {
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+/* Reply Actions */
+.reply-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Thread Actions */
+.thread-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.thread-actions button {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.thread-actions .btn-edit {
+    background: var(--color-accent);
+    opacity: 0.1;
+    color: var(--color-accent);
+    border: none;
+}
+
+.thread-actions .btn-delete {
+    background: var(--color-destructive);
+    opacity: 0.1;
+    color: var(--color-destructive);
+    border: none;
+}
+
+/* Pinned Badge */
+.pinned-badge {
+    font-size: 0.75rem;
+    color: var(--color-warning);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .thread-content {
+        padding: 1.5rem;
+    }
+    
+    .new-thread-form {
+        padding: 1.5rem;
+    }
+}

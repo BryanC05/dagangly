@@ -1,0 +1,18 @@
+{
+  "name": "n8n-nodes-msme",
+  "version": "1.0.0",
+  "description": "n8n nodes for MSME Marketplace integration",
+  "keywords": [
+    "n8n-community-node-package"
+  ],
+  "license": "MIT",
+  "n8n": {
+    "credentials": [
+      "credentials/MsmeApi.credentials.js"
+    ],
+    "nodes": [
+      "nodes/MsmeTrigger/MsmeTrigger.node.js",
+      "nodes/MsmeAction/MsmeAction.node.js"
+    ]
+  }
+}

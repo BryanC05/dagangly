@@ -1,0 +1,94 @@
+{
+    "name": "MSME - Order Status Update Email",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "order-status",
+                "responseMode": "onReceived",
+                "options": {}
+            },
+            "id": "trigger-2",
+            "name": "Status Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1.1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.event }}",
+                            "value2": "order.status_changed"
+                        }
+                    ]
+                }
+            },
+            "id": "filter-1",
+            "name": "Filter Status Events",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "={{ $env.SMTP_USER || 'your.email@gmail.com' }}",
+                "toEmail": "={{ $json.data.buyer.email }}",
+                "subject": "Order #{{ $json.data.orderNumber }} - Status Updated to {{ $json.data.status }}",
+                "text": "Hi {{ $json.data.buyer.name }},\n\nYour order #{{ $json.data.orderNumber }} status has been updated.\n\nNew Status: {{ $json.data.status }}\nTotal: Rp {{ $json.data.totalAmount }}\nSeller: {{ $json.data.seller.name }}\n\nThank you for shopping at MSME Marketplace!\n\n---\nMSME Marketplace Team",
+                "options": {}
+            },
+            "id": "smtp-2",
+            "name": "Send Status Email",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2,
+            "position": [
+                750,
+                200
+            ],
+            "credentials": {
+                "smtp": {
+                    "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID",
+                    "name": "Gmail SMTP"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Status Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Filter Status Events",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filter Status Events": {
+            "main": [
+                [
+                    {
+                        "node": "Send Status Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "meta": {
+        "instanceId": "msme-marketplace"
+    }
+}

@@ -1,0 +1,205 @@
+.location-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    background: var(--bg-card);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.picker-header {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-background);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-form {
+    flex: 1;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding: 0.6rem 0.75rem 0.6rem 2.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.search-input-wrapper input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btn-search {
+    padding: 0 1rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-search:hover {
+    background: var(--primary-hover);
+}
+
+.btn-search:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-locate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-locate:hover {
+    background: var(--bg-hover);
+    color: var(--primary-color);
+}
+
+.search-results {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+}
+
+.search-results li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-results li:last-child {
+    border-bottom: none;
+}
+
+.search-results li:hover {
+    background: var(--bg-hover);
+}
+
+.search-results li svg {
+    margin-top: 0.2rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.search-results li span {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.map-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.picker-map {
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}
+
+.selected-address {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+[data-theme='dark'] .selected-address {
+    background: rgba(30, 41, 59, 0.9);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.selected-address .label {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.selected-address .value {
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.picker-instructions {
+    padding: 0.5rem 1rem 1rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.clear-search {
+    position: absolute;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.clear-search:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+}
