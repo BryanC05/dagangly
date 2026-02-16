@@ -203,6 +203,43 @@ router.get('/status', auth, async (req, res) => {
 });
 
 /**
+ * POST /api/logo/reset-limit
+ * Reset daily generation limit (for testing only)
+ */
+router.post('/reset-limit', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.logoGenerationCount.count = 0;
+    user.logoGenerationCount.lastResetDate = new Date();
+    await user.save();
+
+    const { DAILY_LIMIT } = require('../middleware/logoLimiter');
+
+    res.json({
+      success: true,
+      message: 'Logo generation limit reset successfully',
+      status: {
+        limit: DAILY_LIMIT,
+        used: 0,
+        remaining: DAILY_LIMIT,
+        resetTime: (() => {
+          const t = new Date();
+          t.setUTCHours(24, 0, 0, 0);
+          return t.toISOString();
+        })(),
+      }
+    });
+  } catch (error) {
+    console.error('Error resetting limit:', error);
+    res.status(500).json({ success: false, error: 'Failed to reset limit' });
+  }
+});
+
+/**
  * PUT /api/logo/select/:logoId
  * Select a logo as the business logo
  */
