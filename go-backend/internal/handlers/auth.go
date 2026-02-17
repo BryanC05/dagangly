@@ -137,7 +137,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"message": err.Error()})
+		c.JSON(400, gin.H{"message": "Invalid request: " + err.Error()})
 		return
 	}
 
@@ -146,13 +146,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var user models.User
 	err := collection.FindOne(context.Background(), bson.M{"email": req.Email}).Decode(&user)
 	if err != nil {
-		c.JSON(400, gin.H{"message": "Invalid credentials"})
+		c.JSON(400, gin.H{"message": "User not found with email: " + req.Email})
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		c.JSON(400, gin.H{"message": "Invalid credentials"})
+		c.JSON(400, gin.H{"message": "Password does not match"})
 		return
 	}
 
