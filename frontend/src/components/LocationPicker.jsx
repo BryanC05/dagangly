@@ -3,10 +3,6 @@ import { MapPin, Search, Navigation } from 'lucide-react';
 import api from '../utils/api';
 import './LocationPicker.css';
 
-// Module-level flag to track if map was initialized 
-// (similar to NearbyMap to prevent double init in strict mode)
-let mapInitialized = false;
-
 function LocationPicker({ onLocationSelect, initialLocation }) {
     const [position, setPosition] = useState(initialLocation || null);
     const [address, setAddress] = useState('');
@@ -22,7 +18,11 @@ function LocationPicker({ onLocationSelect, initialLocation }) {
 
     // Initialize Map
     useEffect(() => {
-        if (mapInitialized) return;
+        const container = mapContainerRef.current;
+        if (!container) return;
+
+        // Check if map is already initialized on this container
+        if (container._leaflet_id) return;
 
         const initMap = async () => {
             try {
@@ -102,7 +102,6 @@ function LocationPicker({ onLocationSelect, initialLocation }) {
 
                 mapRef.current = map;
                 markerRef.current = marker;
-                mapInitialized = true;
                 setMapReady(true);
 
                 // Don't auto-request location - let user click the map or use "Locate Me" button
@@ -119,7 +118,6 @@ function LocationPicker({ onLocationSelect, initialLocation }) {
             if (mapRef.current) {
                 mapRef.current.remove();
                 mapRef.current = null;
-                mapInitialized = false;
             }
         };
     }, []);
