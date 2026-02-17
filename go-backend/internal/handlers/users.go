@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -103,6 +104,11 @@ func (h *UserHandler) GetNearbySellers(c *gin.Context) {
 		return
 	}
 
+	radius, err := strconv.Atoi(radiusStr)
+	if err != nil {
+		radius = 10000
+	}
+
 	collection := database.GetDB().Collection("users")
 
 	filter := bson.M{
@@ -113,7 +119,7 @@ func (h *UserHandler) GetNearbySellers(c *gin.Context) {
 					"type":        "Point",
 					"coordinates": []interface{}{lng, lat},
 				},
-				"$maxDistance": radiusStr,
+				"$maxDistance": radius,
 			},
 		},
 	}

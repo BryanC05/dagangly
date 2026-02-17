@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -30,8 +31,23 @@ func Connect(uri, dbName string) error {
 	}
 
 	DB = client.Database(dbName)
+
+	createIndexes(ctx)
+
 	fmt.Println("✅ Connected to MongoDB")
 	return nil
+}
+
+func createIndexes(ctx context.Context) {
+	users := DB.Collection("users")
+	_, err := users.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "location", Value: "2dsphere"}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create 2dsphere index on users.location: %v\n", err)
+	} else {
+		fmt.Println("✅ Created 2dsphere index on users.location")
+	}
 }
 
 func GetDB() *mongo.Database {
