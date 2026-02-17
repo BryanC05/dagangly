@@ -47,7 +47,12 @@ function Cart() {
             const orderData = {
                 products: items.map(item => ({
                     productId: item.product._id,
-                    quantity: item.quantity
+                    quantity: item.quantity,
+                    variantName: item.variant?.name || null,
+                    selectedOptions: (item.selectedOptions || []).map(o => ({
+                        groupName: o.groupName,
+                        chosen: o.chosen
+                    }))
                 })),
                 deliveryAddress: address,
                 notes,
@@ -92,59 +97,77 @@ function Cart() {
                     <div className="grid lg:grid-cols-3 gap-8">
                         {/* Cart Items */}
                         <div className="lg:col-span-2 space-y-4">
-                            {items.map((item) => (
-                                <Card key={item.product._id}>
-                                    <CardContent className="p-4 flex gap-4">
-                                        <div className="h-24 w-24 rounded-md overflow-hidden border shrink-0">
-                                            <img
-                                                src={item.product.images?.[0] || PLACEHOLDER_IMAGE}
-                                                alt={item.product.name}
-                                                className="h-full w-full object-cover"
-                                            />
-                                        </div>
-                                        <div className="flex-1 flex flex-col justify-between">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h3 className="font-semibold">{item.product.name}</h3>
-                                                    <p className="text-sm text-muted-foreground">{item.product.stock} in stock</p>
-                                                </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                    onClick={() => removeFromCart(item.product._id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                            {items.map((item) => {
+                                const unitPrice = item.variant ? item.variant.price : item.product.price;
+                                const optionAdjust = (item.selectedOptions || []).reduce((sum, o) => sum + (o.priceAdjust || 0), 0);
+                                const linePrice = unitPrice + optionAdjust;
+                                return (
+                                    <Card key={`${item.product._id}-${item.variant?.name || ''}-${(item.selectedOptions || []).map(o => o.chosen?.join(',')).join('-')}`}>
+                                        <CardContent className="p-4 flex gap-4">
+                                            <div className="h-24 w-24 rounded-md overflow-hidden border shrink-0">
+                                                <img
+                                                    src={item.product.images?.[0] || PLACEHOLDER_IMAGE}
+                                                    alt={item.product.name}
+                                                    className="h-full w-full object-cover"
+                                                />
                                             </div>
-                                            <div className="flex justify-between items-end">
-                                                <p className="font-semibold">Rp {item.product.price.toLocaleString('id-ID')}</p>
-                                                <div className="flex items-center gap-2 border rounded-md p-1">
+                                            <div className="flex-1 flex flex-col justify-between">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h3 className="font-semibold">{item.product.name}</h3>
+                                                        {item.variant && (
+                                                            <p className="text-xs text-primary font-medium mt-0.5">Variant: {item.variant.name}</p>
+                                                        )}
+                                                        {item.selectedOptions?.length > 0 && (
+                                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                                {item.selectedOptions.map((opt, oi) => (
+                                                                    <span key={oi} className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                                                                        {opt.groupName}: {opt.chosen?.join(', ')}
+                                                                        {opt.priceAdjust > 0 && ` (+Rp${opt.priceAdjust.toLocaleString('id-ID')})`}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                        <p className="text-sm text-muted-foreground">{item.product.stock} in stock</p>
+                                                    </div>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-6 w-6"
-                                                        onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
-                                                        disabled={item.quantity <= 1}
+                                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                        onClick={() => removeFromCart(item.product._id, item.variant, item.selectedOptions)}
                                                     >
-                                                        <Minus className="h-3 w-3" />
-                                                    </Button>
-                                                    <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-6 w-6"
-                                                        onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
-                                                        disabled={item.quantity >= item.product.stock}
-                                                    >
-                                                        <Plus className="h-3 w-3" />
+                                                        <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 </div>
+                                                <div className="flex justify-between items-end">
+                                                    <p className="font-semibold">Rp {linePrice.toLocaleString('id-ID')}</p>
+                                                    <div className="flex items-center gap-2 border rounded-md p-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-6 w-6"
+                                                            onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.variant, item.selectedOptions)}
+                                                            disabled={item.quantity <= 1}
+                                                        >
+                                                            <Minus className="h-3 w-3" />
+                                                        </Button>
+                                                        <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-6 w-6"
+                                                            onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.variant, item.selectedOptions)}
+                                                            disabled={item.quantity >= item.product.stock}
+                                                        >
+                                                            <Plus className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
                         </div>
 
                         {/* Order Summary */}

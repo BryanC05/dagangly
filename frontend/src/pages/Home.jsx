@@ -17,18 +17,20 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "@/utils/api";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // Category definitions with icons (counts fetched from API)
 const categoryDefs = [
-  { id: "food", name: "Food & Beverages", icon: "🍜" },
-  { id: "handicrafts", name: "Handicrafts", icon: "🎨" },
-  { id: "clothing", name: "Fashion & Apparel", icon: "👗" },
-  { id: "beauty", name: "Health & Beauty", icon: "🌿" },
-  { id: "home", name: "Home & Living", icon: "🏠" },
-  { id: "electronics", name: "Electronics", icon: "📱" },
+  { id: "food", key: "food", icon: "🍜" },
+  { id: "handicrafts", key: "handicrafts", icon: "🎨" },
+  { id: "clothing", key: "fashion", icon: "👗" },
+  { id: "beauty", key: "health", icon: "🌿" },
+  { id: "home", key: "home", icon: "🏠" },
+  { id: "electronics", key: "electronics", icon: "📱" },
 ];
 
 const Home = () => {
+  const { t } = useTranslation();
   const [categoryCounts, setCategoryCounts] = useState({});
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [recentForumPosts, setRecentForumPosts] = useState([]);
@@ -88,26 +90,26 @@ const Home = () => {
         <div className="container py-20 md:py-32">
           <div className="max-w-3xl mx-auto text-center">
             <Badge variant="secondary" className="mb-4">
-              Supporting Indonesian MSMEs
+              {t('home.heroBadge')}
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-6">
-              Discover Local Products,{" "}
-              <span className="text-primary">Support Local Businesses</span>
+              {t('home.heroHeading')}{" "}
+              <span className="text-primary">{t('home.heroHeadingAccent')}</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Connect with micro, small, and medium enterprises in your area. Buy quality products directly from local sellers and help grow your community.
+              {t('home.heroDescription')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/products">
                 <Button size="lg" className="gap-2 w-full sm:w-auto">
                   <ShoppingBag className="h-5 w-5" />
-                  Browse Products
+                  {t('home.browseProducts')}
                 </Button>
               </Link>
               <Link to="/nearby">
                 <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
                   <MapPin className="h-5 w-5" />
-                  Find Nearby
+                  {t('home.findNearby')}
                 </Button>
               </Link>
             </div>
@@ -118,10 +120,10 @@ const Home = () => {
         <div className="container pb-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Active Sellers", value: stats.sellers.toString(), icon: Users },
-              { label: "Products Listed", value: stats.products.toString(), icon: ShoppingBag },
-              { label: "Cities Covered", value: "1", icon: MapPin },
-              { label: "Categories", value: categoryDefs.length.toString(), icon: TrendingUp },
+              { label: t('home.activeSellers'), value: stats.sellers.toString(), icon: Users },
+              { label: t('home.productsListed'), value: stats.products.toString(), icon: ShoppingBag },
+              { label: t('home.citiesCovered'), value: "1", icon: MapPin },
+              { label: t('home.categoriesCount'), value: categoryDefs.length.toString(), icon: TrendingUp },
             ].map((stat) => (
               <Card key={stat.label} className="text-center">
                 <CardContent className="pt-6">
@@ -140,12 +142,12 @@ const Home = () => {
         <div className="container">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold">Shop by Category</h2>
-              <p className="text-muted-foreground mt-1">Find products that match your needs</p>
+              <h2 className="text-2xl md:text-3xl font-bold">{t('home.shopByCategory')}</h2>
+              <p className="text-muted-foreground mt-1">{t('home.findProductsMatch')}</p>
             </div>
             <Link to="/categories">
               <Button variant="ghost" className="gap-2">
-                View All <ArrowRight className="h-4 w-4" />
+                {t('home.viewAll')} <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -155,8 +157,8 @@ const Home = () => {
                 <Card className="text-center hover:shadow-md hover:border-primary/20 transition-all cursor-pointer">
                   <CardContent className="pt-6">
                     <span className="text-4xl mb-3 block">{category.icon}</span>
-                    <h3 className="font-medium text-sm">{category.name}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">{categoryCounts[category.id] || 0} products</p>
+                    <h3 className="font-medium text-sm">{t(`categories.${category.key}`)}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">{categoryCounts[category.id] || 0} {t('products.productsCount')}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -170,12 +172,12 @@ const Home = () => {
         <div className="container">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold">Featured Products</h2>
-              <p className="text-muted-foreground mt-1">Handpicked quality items from local sellers</p>
+              <h2 className="text-2xl md:text-3xl font-bold">{t('home.featuredProducts')}</h2>
+              <p className="text-muted-foreground mt-1">{t('home.handpickedItems')}</p>
             </div>
             <Link to="/products">
               <Button variant="ghost" className="gap-2">
-                View All <ArrowRight className="h-4 w-4" />
+                {t('home.viewAll')} <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -191,40 +193,40 @@ const Home = () => {
       <section className="py-16 bg-card">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold">Why Choose MSMEHub?</h2>
-            <p className="text-muted-foreground mt-2">Built for local businesses, trusted by communities</p>
+            <h2 className="text-2xl md:text-3xl font-bold">{t('home.whyChoose')}</h2>
+            <p className="text-muted-foreground mt-2">{t('home.whyChooseDesc')}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 icon: MapPin,
-                title: "Discover Nearby Sellers",
-                description: "Find quality products from businesses in your city or region. Support your local economy.",
+                title: t('home.featureNearby'),
+                description: t('home.featureNearbyDesc'),
               },
               {
                 icon: Shield,
-                title: "Verified Sellers",
-                description: "All sellers go through our verification process. Shop with confidence knowing you're dealing with legitimate businesses.",
+                title: t('home.featureVerified'),
+                description: t('home.featureVerifiedDesc'),
               },
               {
                 icon: MessageCircle,
-                title: "Direct Communication",
-                description: "Chat directly with sellers. Ask questions, negotiate, and build relationships with local entrepreneurs.",
+                title: t('home.featureChat'),
+                description: t('home.featureChatDesc'),
               },
               {
                 icon: Users,
-                title: "Community Forums",
-                description: "Join discussions, share experiences, and learn from fellow buyers and sellers in our community.",
+                title: t('home.featureForums'),
+                description: t('home.featureForumsDesc'),
               },
               {
                 icon: Zap,
-                title: "Easy to Use",
-                description: "Simple listing process for sellers, smooth browsing experience for buyers. No technical skills needed.",
+                title: t('home.featureEasy'),
+                description: t('home.featureEasyDesc'),
               },
               {
                 icon: TrendingUp,
-                title: "Grow Your Business",
-                description: "Access tools, insights, and a supportive community to help your MSME thrive and reach more customers.",
+                title: t('home.featureGrow'),
+                description: t('home.featureGrowDesc'),
               },
             ].map((feature) => (
               <Card key={feature.title} className="text-center">
@@ -246,12 +248,12 @@ const Home = () => {
         <div className="container">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold">Community Discussions</h2>
-              <p className="text-muted-foreground mt-1">Learn and share with fellow entrepreneurs</p>
+              <h2 className="text-2xl md:text-3xl font-bold">{t('home.communityDiscussions')}</h2>
+              <p className="text-muted-foreground mt-1">{t('home.communityDesc')}</p>
             </div>
             <Link to="/forums">
               <Button variant="ghost" className="gap-2">
-                View All <ArrowRight className="h-4 w-4" />
+                {t('home.viewAll')} <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -267,21 +269,21 @@ const Home = () => {
       <section className="py-20 bg-primary text-primary-foreground">
         <div className="container text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Grow Your Business?
+            {t('home.ctaTitle')}
           </h2>
           <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-            Join thousands of MSMEs already selling on our platform. List your products, reach local customers, and watch your business thrive.
+            {t('home.ctaDescription')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/sell">
               <Button size="lg" variant="secondary" className="gap-2 w-full sm:w-auto">
-                Start Selling Today
+                {t('home.startSelling')}
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
             <Link to="/nearby">
               <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto">
-                Find Shops Nearby
+                {t('home.findShopsNearby')}
               </Button>
             </Link>
           </div>

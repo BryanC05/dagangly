@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Upload, Plus, X, MapPin } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, X, MapPin, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import api from '../utils/api';
 import LocationPicker from '../components/LocationPicker';
 import Layout from '@/components/layout/Layout';
@@ -20,7 +20,6 @@ const categories = [
 ];
 
 function AddProduct() {
-  // const { user } = useAuthStore(); // Removed unused user
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [images, setImages] = useState([]);
@@ -28,6 +27,13 @@ function AddProduct() {
   const [tagInput, setTagInput] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
   const [, setLocationStatus] = useState('getting');
+
+  // Variant state
+  const [hasVariants, setHasVariants] = useState(false);
+  const [variants, setVariants] = useState([{ name: '', price: '', stock: '' }]);
+
+  // Option groups state
+  const [optionGroups, setOptionGroups] = useState([]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -67,9 +73,7 @@ function AddProduct() {
       return response.data;
     },
     onSuccess: () => {
-      // Invalidate specific query key to ensure dashboard updates
       queryClient.invalidateQueries(['sellerProducts']);
-      // Also invalidate with user ID if possible, or just exact match
       queryClient.invalidateQueries({ queryKey: ['sellerProducts'] });
       navigate('/seller/dashboard');
     },
@@ -84,7 +88,22 @@ function AddProduct() {
       stock: Number(formData.stock),
       images,
       tags,
-      currentLocation: currentLocation, // Pass current location as fallback
+      currentLocation,
+      hasVariants,
+      variants: hasVariants ? variants.map(v => ({
+        name: v.name,
+        price: Number(v.price),
+        stock: Number(v.stock)
+      })) : [],
+      optionGroups: optionGroups.map(g => ({
+        name: g.name,
+        required: g.required,
+        multiple: g.multiple,
+        options: g.options.map(o => ({
+          name: o.name,
+          priceAdjust: Number(o.priceAdjust) || 0
+        }))
+      }))
     };
 
     addMutation.mutate(productData);
@@ -117,6 +136,70 @@ function AddProduct() {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
+  // --- Variant helpers ---
+  const addVariant = () => {
+    setVariants([...variants, { name: '', price: '', stock: '' }]);
+  };
+
+  const updateVariant = (index, field, value) => {
+    setVariants(variants.map((v, i) => i === index ? { ...v, [field]: value } : v));
+  };
+
+  const removeVariant = (index) => {
+    if (variants.length > 1) {
+      setVariants(variants.filter((_, i) => i !== index));
+    }
+  };
+
+  // --- Option group helpers ---
+  const addOptionGroup = () => {
+    setOptionGroups([...optionGroups, {
+      name: '',
+      required: false,
+      multiple: false,
+      options: [{ name: '', priceAdjust: '' }],
+      collapsed: false
+    }]);
+  };
+
+  const updateOptionGroup = (gIndex, field, value) => {
+    setOptionGroups(optionGroups.map((g, i) => i === gIndex ? { ...g, [field]: value } : g));
+  };
+
+  const removeOptionGroup = (gIndex) => {
+    setOptionGroups(optionGroups.filter((_, i) => i !== gIndex));
+  };
+
+  const addOption = (gIndex) => {
+    setOptionGroups(optionGroups.map((g, i) =>
+      i === gIndex ? { ...g, options: [...g.options, { name: '', priceAdjust: '' }] } : g
+    ));
+  };
+
+  const updateOption = (gIndex, oIndex, field, value) => {
+    setOptionGroups(optionGroups.map((g, i) =>
+      i === gIndex ? {
+        ...g,
+        options: g.options.map((o, j) => j === oIndex ? { ...o, [field]: value } : o)
+      } : g
+    ));
+  };
+
+  const removeOption = (gIndex, oIndex) => {
+    setOptionGroups(optionGroups.map((g, i) =>
+      i === gIndex ? {
+        ...g,
+        options: g.options.length > 1 ? g.options.filter((_, j) => j !== oIndex) : g.options
+      } : g
+    ));
+  };
+
+  const toggleGroupCollapse = (gIndex) => {
+    setOptionGroups(optionGroups.map((g, i) =>
+      i === gIndex ? { ...g, collapsed: !g.collapsed } : g
+    ));
+  };
+
   return (
     <Layout>
       <div className="add-product container py-8">
@@ -132,6 +215,7 @@ function AddProduct() {
           </div>
 
           <form onSubmit={handleSubmit} className="product-form space-y-8">
+            {/* Basic Info */}
             <div className="form-section p-6 border rounded-lg bg-card">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Basic Information</h3>
 
@@ -196,47 +280,236 @@ function AddProduct() {
                       <option value="meters">Meters (m)</option>
                       <option value="pairs">Pairs</option>
                       <option value="dozen">Dozen</option>
+                      <option value="cups">Cups</option>
+                      <option value="portions">Portions</option>
                     </select>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* Pricing & Stock */}
             <div className="form-section p-6 border rounded-lg bg-card">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Pricing & Stock</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-group">
-                  <label htmlFor="price" className="block text-sm font-medium mb-1">Price (Rp) *</label>
+              {/* Variant Toggle */}
+              <div className="flex items-center gap-3 mb-6 p-3 rounded-lg bg-muted/50 border">
+                <label className="relative inline-flex items-center cursor-pointer">
                   <input
-                    type="number"
-                    id="price"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    required
-                    min="0"
-                    step="0.01"
-                    placeholder="Enter price"
-                    className="w-full p-2 border rounded-md bg-background text-foreground"
+                    type="checkbox"
+                    checked={hasVariants}
+                    onChange={(e) => setHasVariants(e.target.checked)}
+                    className="sr-only peer"
                   />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="stock" className="block text-sm font-medium mb-1">Stock Quantity *</label>
-                  <input
-                    type="number"
-                    id="stock"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    required
-                    min="0"
-                    placeholder="Available stock"
-                    className="w-full p-2 border rounded-md bg-background text-foreground"
-                  />
+                  <div className="w-11 h-6 bg-muted-foreground/30 rounded-full peer peer-checked:bg-primary transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                </label>
+                <div>
+                  <span className="text-sm font-medium">This product has size/type variants</span>
+                  <p className="text-xs text-muted-foreground">e.g. Small, Medium, Large with different prices</p>
                 </div>
               </div>
+
+              {!hasVariants ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="form-group">
+                    <label htmlFor="price" className="block text-sm font-medium mb-1">Price (Rp) *</label>
+                    <input
+                      type="number"
+                      id="price"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      required
+                      min="0"
+                      step="0.01"
+                      placeholder="Enter price"
+                      className="w-full p-2 border rounded-md bg-background text-foreground"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="stock" className="block text-sm font-medium mb-1">Stock Quantity *</label>
+                    <input
+                      type="number"
+                      id="stock"
+                      value={formData.stock}
+                      onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                      required
+                      min="0"
+                      placeholder="Available stock"
+                      className="w-full p-2 border rounded-md bg-background text-foreground"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="variants-builder space-y-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Product Variants</label>
+                    <button
+                      type="button"
+                      onClick={addVariant}
+                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                    >
+                      <Plus size={14} /> Add Variant
+                    </button>
+                  </div>
+                  {variants.map((variant, index) => (
+                    <div key={index} className="flex items-center gap-2 p-3 border rounded-lg bg-muted/30">
+                      <input
+                        type="text"
+                        value={variant.name}
+                        onChange={(e) => updateVariant(index, 'name', e.target.value)}
+                        placeholder="Variant name (e.g. Large)"
+                        className="flex-1 p-2 border rounded-md bg-background text-foreground text-sm"
+                        required
+                      />
+                      <input
+                        type="number"
+                        value={variant.price}
+                        onChange={(e) => updateVariant(index, 'price', e.target.value)}
+                        placeholder="Price (Rp)"
+                        className="w-28 p-2 border rounded-md bg-background text-foreground text-sm"
+                        min="0"
+                        required
+                      />
+                      <input
+                        type="number"
+                        value={variant.stock}
+                        onChange={(e) => updateVariant(index, 'stock', e.target.value)}
+                        placeholder="Stock"
+                        className="w-20 p-2 border rounded-md bg-background text-foreground text-sm"
+                        min="0"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeVariant(index)}
+                        className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                        disabled={variants.length <= 1}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
+            {/* Custom Option Groups (Menus) */}
+            <div className="form-section p-6 border rounded-lg bg-card">
+              <div className="flex items-center justify-between mb-2 pb-2 border-b">
+                <div>
+                  <h3 className="text-xl font-semibold">Custom Options (Optional)</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Add customizable menus like &quot;Choose chicken part&quot;, &quot;Ice level&quot;, etc.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addOptionGroup}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                >
+                  <Plus size={14} /> Add Menu
+                </button>
+              </div>
+
+              {optionGroups.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  <p>No custom options added yet.</p>
+                  <p className="text-xs mt-1">Great for food & beverages — let buyers customize their order!</p>
+                </div>
+              ) : (
+                <div className="space-y-4 mt-4">
+                  {optionGroups.map((group, gIndex) => (
+                    <div key={gIndex} className="border rounded-lg overflow-hidden">
+                      {/* Group Header */}
+                      <div className="flex items-center gap-2 p-3 bg-muted/50 cursor-pointer" onClick={() => toggleGroupCollapse(gIndex)}>
+                        <button type="button" className="p-0.5">
+                          {group.collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                        </button>
+                        <input
+                          type="text"
+                          value={group.name}
+                          onChange={(e) => updateOptionGroup(gIndex, 'name', e.target.value)}
+                          placeholder="Menu name (e.g. Choose Chicken Part)"
+                          className="flex-1 p-1.5 border rounded-md bg-background text-foreground text-sm"
+                          onClick={(e) => e.stopPropagation()}
+                          required
+                        />
+                        <label className="inline-flex items-center gap-1 text-xs whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={group.required}
+                            onChange={(e) => updateOptionGroup(gIndex, 'required', e.target.checked)}
+                            className="rounded"
+                          />
+                          Required
+                        </label>
+                        <label className="inline-flex items-center gap-1 text-xs whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={group.multiple}
+                            onChange={(e) => updateOptionGroup(gIndex, 'multiple', e.target.checked)}
+                            className="rounded"
+                          />
+                          Multi-select
+                        </label>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); removeOptionGroup(gIndex); }}
+                          className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+
+                      {/* Group Options */}
+                      {!group.collapsed && (
+                        <div className="p-3 space-y-2">
+                          {group.options.map((option, oIndex) => (
+                            <div key={oIndex} className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={option.name}
+                                onChange={(e) => updateOption(gIndex, oIndex, 'name', e.target.value)}
+                                placeholder="Option name (e.g. Breast)"
+                                className="flex-1 p-2 border rounded-md bg-background text-foreground text-sm"
+                                required
+                              />
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs text-muted-foreground">+Rp</span>
+                                <input
+                                  type="number"
+                                  value={option.priceAdjust}
+                                  onChange={(e) => updateOption(gIndex, oIndex, 'priceAdjust', e.target.value)}
+                                  placeholder="0"
+                                  className="w-24 p-2 border rounded-md bg-background text-foreground text-sm"
+                                  min="0"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeOption(gIndex, oIndex)}
+                                className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                                disabled={group.options.length <= 1}
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => addOption(gIndex)}
+                            className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-1"
+                          >
+                            <Plus size={14} /> Add Option
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Location */}
             <div className="form-section p-6 border rounded-lg bg-card">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Product Location</h3>
               <p className="text-sm text-muted-foreground mb-4">Where is this product located? (Defaults to your current location)</p>
@@ -257,6 +530,7 @@ function AddProduct() {
               </div>
             </div>
 
+            {/* Images */}
             <div className="form-section p-6 border rounded-lg bg-card">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Product Images</h3>
 
@@ -293,6 +567,7 @@ function AddProduct() {
               )}
             </div>
 
+            {/* Tags */}
             <div className="form-section p-6 border rounded-lg bg-card">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Tags</h3>
 
@@ -328,6 +603,7 @@ function AddProduct() {
               </div>
             </div>
 
+            {/* Submit */}
             <div className="form-actions flex gap-4 pt-4 border-t">
               <button
                 type="button"

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapPin, Store, Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../utils/api';
+import { useTranslation } from '../hooks/useTranslation';
 import Layout from '@/components/layout/Layout';
 import './NearbyMap.css';
 
@@ -22,6 +23,7 @@ function NearbyMap() {
   const markersLayerRef = useRef(null);
   const radiusCircleRef = useRef(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Get user location
   useEffect(() => {
@@ -113,7 +115,7 @@ function NearbyMap() {
         // Add user marker
         L.marker([userLocation.lat, userLocation.lng])
           .addTo(map)
-          .bindPopup('You are here');
+          .bindPopup(t('nearby.youAreHere') || 'You are here');
 
       } catch (err) {
         if (isActive && currentAttempt === initAttempt) {
@@ -233,7 +235,7 @@ function NearbyMap() {
     return (
       <Layout>
         <div className="nearby-map-page loading-container">
-          <div className="loading">Getting your location...</div>
+          <div className="loading">{t('nearby.gettingLocation')}</div>
         </div>
       </Layout>
     );
@@ -244,11 +246,11 @@ function NearbyMap() {
       <div className="nearby-map-page h-[calc(100vh-theme(spacing.16))] flex flex-col md:flex-row">
         <div className="map-sidebar md:w-1/3 lg:w-1/4 p-4 border-r overflow-y-auto">
           <div className="sidebar-header mb-4">
-            <h2 className="text-xl font-bold">Find Nearby Sellers</h2>
-            <p className="text-sm text-muted-foreground">Discover MSMEs near your location</p>
+            <h2 className="text-xl font-bold">{t('nearby.findNearbySellers')}</h2>
+            <p className="text-sm text-muted-foreground">{t('nearby.discoverMSMEs')}</p>
             {isUsingDefaultLocation && (
               <p className="mt-2 text-xs bg-yellow-100 text-yellow-800 p-2 rounded">
-                📍 Using default location (Delhi, India). Enable location access for better results.
+                📍 {t('nearby.defaultLocation')}
               </p>
             )}
           </div>
@@ -257,7 +259,7 @@ function NearbyMap() {
             <Search size={16} className="absolute left-3 top-3 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search sellers..."
+              placeholder={t('nearby.searchSellers')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 p-2 border rounded-md"
@@ -265,7 +267,7 @@ function NearbyMap() {
           </div>
 
           <div className="radius-control mb-6">
-            <label className="block text-sm font-medium mb-2">Search Radius: {(radius / 1000).toFixed(0)} km</label>
+            <label className="block text-sm font-medium mb-2">{t('nearby.searchRadius')}: {(radius / 1000).toFixed(0)} km</label>
             <input
               type="range"
               min="1000"
@@ -283,11 +285,11 @@ function NearbyMap() {
           </div>
 
           <div className="sellers-list">
-            <h3 className="font-semibold mb-3">Nearby Sellers ({filteredSellers?.length || 0})</h3>
+            <h3 className="font-semibold mb-3">{t('nearby.nearbySellers')} ({filteredSellers?.length || 0})</h3>
             {sellersLoading ? (
-              <p className="text-sm text-muted-foreground">Loading sellers...</p>
+              <p className="text-sm text-muted-foreground">{t('nearby.loadingSellers')}</p>
             ) : filteredSellers?.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No sellers found in this area.</p>
+              <p className="text-sm text-muted-foreground">{t('nearby.noSellers')}</p>
             ) : (
               <div className="space-y-3">
                 {filteredSellers?.map((seller) => (
@@ -302,7 +304,7 @@ function NearbyMap() {
                       </div>
                       <div>
                         <h4 className="font-medium text-sm">{seller.businessName || seller.name}</h4>
-                        <p className="text-xs text-muted-foreground capitalize">{seller.businessType} Enterprise</p>
+                        <p className="text-xs text-muted-foreground capitalize">{seller.businessType} {t('nearby.enterprise')}</p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                           <MapPin size={10} />
                           {seller.location?.city}
@@ -322,8 +324,8 @@ function NearbyMap() {
         <div className="map-container flex-1 bg-muted relative">
           {mapError ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-              <p className="text-destructive mb-2">Error loading map: {mapError}</p>
-              <button onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-primary-foreground rounded-md">Retry</button>
+              <p className="text-destructive mb-2">{t('nearby.errorLoadingMap')}: {mapError}</p>
+              <button onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-primary-foreground rounded-md">{t('nearby.retry')}</button>
             </div>
           ) : (
             <div ref={mapContainerRef} className="h-full w-full" />

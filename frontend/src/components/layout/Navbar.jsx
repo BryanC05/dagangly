@@ -66,7 +66,7 @@ const Navbar = () => {
     const navLinks = [
         { href: "/products", label: t('nav.products'), icon: ShoppingBag },
         { href: "/nearby", label: t('nav.nearby'), icon: MapPin },
-        { href: "/forums", label: "Forums", icon: Users },
+        { href: "/forums", label: t('nav.forums'), icon: Users },
     ];
 
     const isActive = (path) => location.pathname === path;
@@ -89,7 +89,7 @@ const Navbar = () => {
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             type="search"
-                            placeholder="Search products, sellers..."
+                            placeholder={t('nav.searchPlaceholder')}
                             className="pl-10 bg-secondary/50"
                         />
                     </div>
@@ -127,7 +127,7 @@ const Navbar = () => {
                             <Link to="/orders">
                                 <Button variant={isActive("/orders") ? "secondary" : "ghost"} size="sm" className="gap-2 relative">
                                     <Package className="h-4 w-4" />
-                                    Orders
+                                    {t('nav.orders')}
                                     {activeOrderCount > 0 && (
                                         <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[10px] text-white font-bold">
                                             {activeOrderCount}
@@ -138,7 +138,7 @@ const Navbar = () => {
                             <Link to="/saved-products">
                                 <Button variant={isActive("/saved-products") ? "secondary" : "ghost"} size="sm" className="gap-2">
                                     <Heart className="h-4 w-4" />
-                                    Saved
+                                    {t('nav.saved')}
                                 </Button>
                             </Link>
                         </>
@@ -166,13 +166,13 @@ const Navbar = () => {
                             <Link to="/seller/product-tracking">
                                 <Button variant="ghost" size="sm" className="gap-2">
                                     <Map className="h-4 w-4" />
-                                    Tracking
+                                    {t('nav.tracking')}
                                 </Button>
                             </Link>
                             <Link to="/logo-generator">
                                 <Button variant="ghost" size="sm" className="gap-2">
                                     <Sparkles className="h-4 w-4" />
-                                    Logo Generator
+                                    {t('nav.logoGenerator')}
                                 </Button>
                             </Link>
                             {user.automationEnabled && (
@@ -185,7 +185,7 @@ const Navbar = () => {
                                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
-                                        Automation
+                                        {t('nav.automation')}
                                     </Button>
                                 </Link>
                             )}
@@ -230,7 +230,7 @@ const Navbar = () => {
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="search"
-                                placeholder="Search products, sellers..."
+                                placeholder={t('nav.searchPlaceholder')}
                                 className="pl-10"
                             />
                         </div>
@@ -261,13 +261,13 @@ const Navbar = () => {
                                     <Link to="/orders" onClick={() => setIsMenuOpen(false)}>
                                         <Button variant={isActive("/orders") ? "secondary" : "ghost"} className="w-full justify-start gap-2">
                                             <Package className="h-4 w-4" />
-                                            Orders {activeOrderCount > 0 && `(${activeOrderCount})`}
+                                            {t('nav.orders')} {activeOrderCount > 0 && `(${activeOrderCount})`}
                                         </Button>
                                     </Link>
                                     <Link to="/saved-products" onClick={() => setIsMenuOpen(false)}>
                                         <Button variant="ghost" className="w-full justify-start gap-2">
                                             <Heart className="h-4 w-4" />
-                                            Saved Products
+                                            {t('nav.savedProducts')}
                                         </Button>
                                     </Link>
                                 </>)
@@ -278,7 +278,7 @@ const Navbar = () => {
                                     <Globe className="mr-2 h-4 w-4" /> {language.toUpperCase()}
                                 </Button>
                                 <Button variant="outline" size="sm" onClick={toggleTheme} className="flex-1">
-                                    {theme === 'light' ? <Moon className="mr-2 h-4 w-4" /> : <Sun className="mr-2 h-4 w-4" />} Theme
+                                    {theme === 'light' ? <Moon className="mr-2 h-4 w-4" /> : <Sun className="mr-2 h-4 w-4" />} {t('nav.theme')}
                                 </Button>
                             </div>
 
@@ -287,7 +287,7 @@ const Navbar = () => {
                                     <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
                                         <Button variant="ghost" className="w-full justify-start gap-2">
                                             <User className="h-4 w-4" />
-                                            Profile ({user.name})
+                                            {t('nav.profile')} ({user.name})
                                         </Button>
                                     </Link>
                                     <Link to="/seller/dashboard" onClick={() => setIsMenuOpen(false)}>
@@ -299,12 +299,12 @@ const Navbar = () => {
                                     <Link to="/logo-generator" onClick={() => setIsMenuOpen(false)}>
                                         <Button variant="ghost" className="w-full justify-start gap-2">
                                             <Sparkles className="h-4 w-4" />
-                                            Logo Generator
+                                            {t('nav.logoGenerator')}
                                         </Button>
                                     </Link>
                                     <Button variant="destructive" className="w-full justify-start gap-2" onClick={handleLogout}>
                                         <LogOut className="h-4 w-4" />
-                                        Logout
+                                        {t('nav.logout')}
                                     </Button>
                                 </>
                             ) : (

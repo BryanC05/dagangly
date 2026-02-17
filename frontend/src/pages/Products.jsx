@@ -17,27 +17,10 @@ import {
 } from "@/components/ui/select";
 import { Search, SlidersHorizontal, X, Loader2, Package } from "lucide-react";
 import api from "@/utils/api";
-
-// Categories matching the seeded data
-const categories = [
-  { id: "all", name: "All Categories" },
-  { id: "food", name: "Food & Beverages" },
-  { id: "clothing", name: "Fashion & Apparel" },
-  { id: "electronics", name: "Electronics" },
-  { id: "handicrafts", name: "Handicrafts" },
-  { id: "home", name: "Home & Living" },
-  { id: "beauty", name: "Health & Beauty" },
-  { id: "agriculture", name: "Agriculture" },
-];
-
-const sortOptions = [
-  { id: "newest", name: "Newest" },
-  { id: "price-low", name: "Price: Low to High" },
-  { id: "price-high", name: "Price: High to Low" },
-  { id: "rating", name: "Highest Rated" },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Products = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +31,25 @@ const Products = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+
+  // Categories matching the seeded data
+  const categories = [
+    { id: "all", name: t('products.allCategories') },
+    { id: "food", name: t('categories.food') },
+    { id: "clothing", name: t('categories.fashion') },
+    { id: "electronics", name: t('categories.electronics') },
+    { id: "handicrafts", name: t('categories.handicrafts') },
+    { id: "home", name: t('categories.home') },
+    { id: "beauty", name: t('categories.health') },
+    { id: "agriculture", name: t('categories.agriculture') },
+  ];
+
+  const sortOptions = [
+    { id: "newest", name: t('products.newest') },
+    { id: "price-low", name: t('products.priceLowHigh') },
+    { id: "price-high", name: t('products.priceHighLow') },
+    { id: "rating", name: t('products.highestRated') },
+  ];
 
   // Fetch products from API
   useEffect(() => {
@@ -115,9 +117,9 @@ const Products = () => {
       <div className="container py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Browse Products</h1>
+          <h1 className="text-3xl font-bold mb-2">{t('products.browseProducts')}</h1>
           <p className="text-muted-foreground">
-            Discover quality products from local MSMEs near you
+            {t('products.browseDesc')}
           </p>
         </div>
 
@@ -127,7 +129,7 @@ const Products = () => {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search products..."
+              placeholder={t('products.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -136,7 +138,7 @@ const Products = () => {
           <div className="flex gap-2">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Category" />
+                <SelectValue placeholder={t('products.allCategories')} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
@@ -153,7 +155,7 @@ const Products = () => {
               className="gap-2"
             >
               <SlidersHorizontal className="h-4 w-4" />
-              Filters
+              {t('products.filters')}
               {activeFiltersCount > 0 && (
                 <Badge variant="secondary" className="ml-1">
                   {activeFiltersCount}
@@ -185,7 +187,7 @@ const Products = () => {
               </Badge>
             )}
             <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Clear all
+              {t('products.clearAll')}
             </Button>
           </div>
         )}
@@ -195,12 +197,12 @@ const Products = () => {
           {showFilters && (
             <Card className="w-64 shrink-0 h-fit sticky top-24">
               <CardHeader>
-                <CardTitle className="text-lg">Filters</CardTitle>
+                <CardTitle className="text-lg">{t('products.filters')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Price Range */}
                 <div>
-                  <h4 className="font-medium mb-3">Price Range (Rp)</h4>
+                  <h4 className="font-medium mb-3">{t('products.priceRange')}</h4>
                   <div className="flex gap-2 items-center">
                     <Input
                       type="number"
@@ -222,9 +224,9 @@ const Products = () => {
 
                 {/* Seller Type */}
                 <div>
-                  <h4 className="font-medium mb-3">Seller Type</h4>
+                  <h4 className="font-medium mb-3">{t('products.sellerType')}</h4>
                   <div className="space-y-2">
-                    {["Verified Sellers", "Top Rated", "New Sellers"].map((type) => (
+                    {[t('products.verifiedSellers'), t('products.topRated'), t('products.newSellers')].map((type) => (
                       <div key={type} className="flex items-center gap-2">
                         <Checkbox id={type} />
                         <Label htmlFor={type} className="text-sm">
@@ -242,11 +244,11 @@ const Products = () => {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
               <p className="text-muted-foreground">
-                {loading ? "Loading..." : `Showing ${products.length} of ${pagination.total} products`}
+                {loading ? t('common.loading') : `${t('products.showing')} ${products.length} ${t('products.of')} ${pagination.total} ${t('products.productsCount')}`}
               </p>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by" />
+                  <SelectValue placeholder={t('products.sortBy')} />
                 </SelectTrigger>
                 <SelectContent>
                   {sortOptions.map((option) => (
@@ -278,17 +280,17 @@ const Products = () => {
                       disabled={pagination.page <= 1}
                       onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
                     >
-                      Previous
+                      {t('products.previous')}
                     </Button>
                     <span className="flex items-center px-4 text-sm text-muted-foreground">
-                      Page {pagination.page} of {pagination.pages}
+                      {t('products.page')} {pagination.page} {t('products.of')} {pagination.pages}
                     </span>
                     <Button
                       variant="outline"
                       disabled={pagination.page >= pagination.pages}
                       onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
                     >
-                      Next
+                      {t('products.next')}
                     </Button>
                   </div>
                 )}
@@ -298,10 +300,10 @@ const Products = () => {
                 <CardContent>
                   <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-4">
-                    No products found matching your criteria
+                    {t('products.noProductsDesc')}
                   </p>
                   <Button variant="outline" onClick={clearFilters}>
-                    Clear Filters
+                    {t('products.clearFilters')}
                   </Button>
                 </CardContent>
               </Card>

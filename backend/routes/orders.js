@@ -37,10 +37,51 @@ router.post('/', auth, async (req, res) => {
         return res.status(404).json({ message: `Product ${item.productId} not found` });
       }
 
-      if (product.stock < item.quantity) {
-        return res.status(400).json({
-          message: `Insufficient stock for ${product.name}. Available: ${product.stock}`
-        });
+      let itemPrice = product.price;
+      let variantName = null;
+      let selectedOptions = [];
+
+      // Handle variant-based products
+      if (product.hasVariants && item.variantName) {
+        const variant = product.variants.find(v => v.name === item.variantName);
+        if (!variant) {
+          return res.status(400).json({ message: `Variant "${item.variantName}" not found for ${product.name}` });
+        }
+        if (variant.stock < item.quantity) {
+          return res.status(400).json({
+            message: `Insufficient stock for ${product.name} (${variant.name}). Available: ${variant.stock}`
+          });
+        }
+        itemPrice = variant.price;
+        variantName = variant.name;
+        variant.stock -= item.quantity;
+      } else {
+        // Standard product stock check
+        if (product.stock < item.quantity) {
+          return res.status(400).json({
+            message: `Insufficient stock for ${product.name}. Available: ${product.stock}`
+          });
+        }
+        product.stock -= item.quantity;
+      }
+
+      // Handle option group selections and price adjustments
+      if (item.selectedOptions && item.selectedOptions.length > 0) {
+        for (const sel of item.selectedOptions) {
+          const group = product.optionGroups.find(g => g.name === sel.groupName);
+          if (!group) continue;
+          let groupAdjust = 0;
+          const chosenNames = [];
+          for (const chosenName of (sel.chosen || [])) {
+            const opt = group.options.find(o => o.name === chosenName);
+            if (opt) {
+              groupAdjust += opt.priceAdjust || 0;
+              chosenNames.push(opt.name);
+            }
+          }
+          selectedOptions.push({ groupName: sel.groupName, chosen: chosenNames, priceAdjust: groupAdjust });
+          itemPrice += groupAdjust;
+        }
       }
 
       if (!sellerId) {
@@ -52,12 +93,13 @@ router.post('/', auth, async (req, res) => {
       orderProducts.push({
         product: product._id,
         quantity: item.quantity,
-        price: product.price
+        price: itemPrice,
+        variantName,
+        selectedOptions
       });
 
-      totalAmount += product.price * item.quantity;
+      totalAmount += itemPrice * item.quantity;
 
-      product.stock -= item.quantity;
       await product.save();
     }
 

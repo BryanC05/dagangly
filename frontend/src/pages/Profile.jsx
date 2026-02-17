@@ -49,6 +49,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import api from "@/utils/api";
 
 const statusConfig = {
@@ -65,6 +66,7 @@ const formatCurrency = (amount) => `Rp ${(amount || 0).toLocaleString('id-ID')}`
 const ProfileOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -101,7 +103,7 @@ const ProfileOrders = () => {
           <Link to="/orders">
             <Button variant="outline" size="sm" className="gap-2">
               <ShoppingBag className="h-4 w-4" />
-              View All Orders
+              {t('profile.viewAllOrders')}
             </Button>
           </Link>
         )}
@@ -110,7 +112,7 @@ const ProfileOrders = () => {
       {activeCount > 0 && (
         <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20 flex items-center gap-2 text-sm">
           <Clock className="h-4 w-4 text-primary" />
-          <span className="text-primary font-medium">{activeCount} active order{activeCount !== 1 ? 's' : ''}</span>
+          <span className="text-primary font-medium">{activeCount} {t('profile.activeOrders')}</span>
         </div>
       )}
 
@@ -118,11 +120,11 @@ const ProfileOrders = () => {
         <Card className="py-12 text-center">
           <CardContent>
             <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">No orders yet</p>
+            <p className="text-muted-foreground mb-4">{t('profile.noOrdersYet')}</p>
             <Link to="/products">
               <Button className="gap-2">
                 <ShoppingBag className="h-4 w-4" />
-                Browse Products
+                {t('profile.browseProducts')}
               </Button>
             </Link>
           </CardContent>
@@ -199,7 +201,7 @@ const ProfileOrders = () => {
             <div className="text-center pt-2">
               <Link to="/orders">
                 <Button variant="ghost" size="sm">
-                  View {orders.length - 5} more orders →
+                  {t('profile.viewMoreOrders')} →
                 </Button>
               </Link>
             </div>
@@ -213,6 +215,7 @@ const ProfileOrders = () => {
 const Profile = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, setUser } = useAuthStore();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [myProducts, setMyProducts] = useState([]);
@@ -323,8 +326,8 @@ const Profile = () => {
       <Layout>
         <div className="container py-20 text-center">
           <User className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-bold mb-2">Profile not found</h2>
-          <Button onClick={() => navigate("/")}>Go Home</Button>
+          <h2 className="text-2xl font-bold mb-2">{t('profile.profileNotFound')}</h2>
+          <Button onClick={() => navigate("/")}>{t('profile.goHome')}</Button>
         </div>
       </Layout>
     );
@@ -348,7 +351,7 @@ const Profile = () => {
               // Edit Mode
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold">Edit Profile</h2>
+                  <h2 className="text-xl font-bold">{t('profile.editProfile')}</h2>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -362,18 +365,18 @@ const Profile = () => {
                   {/* Basic Info */}
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="name">{t('profile.fullName')}</Label>
                       <Input
                         id="name"
                         value={editForm.name}
                         onChange={(e) =>
                           setEditForm({ ...editForm, name: e.target.value })
                         }
-                        placeholder="Your full name"
+                        placeholder={t('profile.yourFullName')}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="phone">{t('profile.phoneNumber')}</Label>
                       <Input
                         id="phone"
                         value={editForm.phone}
@@ -386,7 +389,7 @@ const Profile = () => {
                     {profile.role === "seller" && (
                       <>
                         <div>
-                          <Label htmlFor="businessName">Business Name</Label>
+                          <Label htmlFor="businessName">{t('profile.businessName')}</Label>
                           <Input
                             id="businessName"
                             value={editForm.businessName}
@@ -396,11 +399,11 @@ const Profile = () => {
                                 businessName: e.target.value,
                               })
                             }
-                            placeholder="Your store name"
+                            placeholder={t('profile.yourStoreName')}
                           />
                         </div>
                         <div>
-                          <Label htmlFor="businessType">Business Size</Label>
+                          <Label htmlFor="businessType">{t('profile.businessSize')}</Label>
                           <Select
                             value={editForm.businessType}
                             onValueChange={(value) =>
@@ -408,12 +411,12 @@ const Profile = () => {
                             }
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Select business size" />
+                              <SelectValue placeholder={t('profile.selectBusinessSize')} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="micro">Micro</SelectItem>
-                              <SelectItem value="small">Small</SelectItem>
-                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="micro">{t('auth.micro')}</SelectItem>
+                              <SelectItem value="small">{t('auth.small')}</SelectItem>
+                              <SelectItem value="medium">{t('auth.medium')}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -425,7 +428,7 @@ const Profile = () => {
                   <div className="space-y-4">
                     {/* Map Picker Button */}
                     <div>
-                      <Label>Location</Label>
+                      <Label>{t('profile.location')}</Label>
                       <Dialog open={showMapPicker} onOpenChange={setShowMapPicker}>
                         <DialogTrigger asChild>
                           <Button
@@ -438,7 +441,7 @@ const Profile = () => {
                               {editForm.address ? (
                                 <div>
                                   <p className="font-medium text-sm">
-                                    {editForm.city || 'Location set'}
+                                    {editForm.city || t('profile.locationSet')}
                                   </p>
                                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                                     {editForm.address}
@@ -446,7 +449,7 @@ const Profile = () => {
                                 </div>
                               ) : (
                                 <span className="text-muted-foreground">
-                                  Click to set location on map
+                                  {t('profile.setLocation')}
                                 </span>
                               )}
                             </div>
@@ -457,7 +460,7 @@ const Profile = () => {
                           <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
                               <MapPin className="h-5 w-5 text-primary" />
-                              Set Your Location
+                              {t('profile.setYourLocation')}
                             </DialogTitle>
                           </DialogHeader>
                           <div className="h-[500px]">
@@ -484,10 +487,10 @@ const Profile = () => {
                               variant="outline"
                               onClick={() => setShowMapPicker(false)}
                             >
-                              Cancel
+                              {t('common.cancel')}
                             </Button>
                             <Button onClick={() => setShowMapPicker(false)}>
-                              Confirm Location
+                              {t('profile.confirmLocation')}
                             </Button>
                           </div>
                         </DialogContent>
@@ -497,25 +500,25 @@ const Profile = () => {
                     {/* Manual Address Fields (optional override) */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="city">City</Label>
+                        <Label htmlFor="city">{t('profile.city')}</Label>
                         <Input
                           id="city"
                           value={editForm.city}
                           onChange={(e) =>
                             setEditForm({ ...editForm, city: e.target.value })
                           }
-                          placeholder="City"
+                          placeholder={t('profile.city')}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="state">State/Province</Label>
+                        <Label htmlFor="state">{t('profile.stateProvince')}</Label>
                         <Input
                           id="state"
                           value={editForm.state}
                           onChange={(e) =>
                             setEditForm({ ...editForm, state: e.target.value })
                           }
-                          placeholder="State"
+                          placeholder={t('profile.stateProvince')}
                         />
                       </div>
                     </div>
@@ -528,18 +531,18 @@ const Profile = () => {
                     onClick={() => setIsEditing(false)}
                     disabled={saving}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button onClick={handleSaveProfile} disabled={saving}>
                     {saving ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Saving...
+                        {t('profile.saving')}
                       </>
                     ) : (
                       <>
                         <Save className="h-4 w-4 mr-2" />
-                        Save Changes
+                        {t('profile.saveChanges')}
                       </>
                     )}
                   </Button>
@@ -564,12 +567,12 @@ const Profile = () => {
                     {profile.role === "seller" && profile.isVerified && (
                       <Badge className="w-fit gap-1">
                         <Shield className="h-3 w-3" />
-                        Verified Seller
+                        {t('profile.verifiedSeller')}
                       </Badge>
                     )}
                     {profile.role === "buyer" && (
                       <Badge variant="secondary" className="w-fit">
-                        Buyer
+                        {t('profile.buyer')}
                       </Badge>
                     )}
                   </div>
@@ -593,12 +596,12 @@ const Profile = () => {
                     {profile.role === "seller" && profile.rating > 0 && (
                       <span className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-warning text-warning" />
-                        {profile.rating.toFixed(1)} rating
+                        {profile.rating.toFixed(1)} {t('profile.rating')}
                       </span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Member since {formatDate(profile.createdAt)}
+                    {t('profile.memberSince')} {formatDate(profile.createdAt)}
                   </p>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
@@ -608,7 +611,7 @@ const Profile = () => {
                     onClick={() => setIsEditing(true)}
                   >
                     <Edit className="h-4 w-4" />
-                    Edit Profile
+                    {t('profile.editProfile')}
                   </Button>
                 </div>
               </div>
@@ -624,16 +627,16 @@ const Profile = () => {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <ImageIcon className="h-5 w-5" />
-                    Business Logo
+                    {t('profile.businessLogo')}
                   </CardTitle>
                   <CardDescription>
-                    Your logo represents your brand across the marketplace
+                    {t('profile.logoDesc')}
                   </CardDescription>
                 </div>
                 <Link to="/logo-generator">
                   <Button variant="outline" className="gap-2">
                     <Sparkles className="h-4 w-4" />
-                    {profile.businessLogo ? 'Change Logo' : 'Create Logo'}
+                    {profile.businessLogo ? t('profile.changeLogo') : t('profile.createLogo')}
                   </Button>
                 </Link>
               </div>
@@ -650,14 +653,14 @@ const Profile = () => {
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">
-                      {profile.hasCustomLogo 
-                        ? 'You have uploaded a custom logo' 
-                        : 'You are using an AI-generated logo'}
+                      {profile.hasCustomLogo
+                        ? t('profile.customLogo')
+                        : t('profile.aiLogo')}
                     </p>
                     <div className="flex gap-2">
                       <Link to="/logo-generator">
                         <Button variant="outline" size="sm">
-                          Manage Logos
+                          {t('profile.manageLogo')}
                         </Button>
                       </Link>
                     </div>
@@ -675,7 +678,7 @@ const Profile = () => {
                   <Link to="/logo-generator">
                     <Button className="gap-2">
                       <Sparkles className="h-4 w-4" />
-                      Create Logo
+                      {t('profile.createLogo')}
                     </Button>
                   </Link>
                 </div>
@@ -690,16 +693,16 @@ const Profile = () => {
             {profile.role === "seller" && (
               <TabsTrigger value="products" className="gap-2">
                 <Package className="h-4 w-4" />
-                My Products
+                {t('profile.myProducts')}
               </TabsTrigger>
             )}
             <TabsTrigger value="orders" className="gap-2">
               <ShoppingBag className="h-4 w-4" />
-              Orders
+              {t('profile.ordersTab')}
             </TabsTrigger>
             <TabsTrigger value="saved" className="gap-2">
               <Heart className="h-4 w-4" />
-              Saved
+              {t('profile.savedTab')}
             </TabsTrigger>
           </TabsList>
 
@@ -712,7 +715,7 @@ const Profile = () => {
                 </h2>
                 <Button className="gap-2" onClick={() => navigate("/add-product")}>
                   <Package className="h-4 w-4" />
-                  Add New Product
+                  {t('profile.addNewProduct')}
                 </Button>
               </div>
               {myProducts.length > 0 ? (
@@ -726,10 +729,10 @@ const Profile = () => {
                   <CardContent>
                     <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">
-                      You haven't listed any products yet
+                      {t('profile.noProductsYet')}
                     </p>
                     <Button onClick={() => navigate("/add-product")}>
-                      Add Your First Product
+                      {t('profile.addFirstProduct')}
                     </Button>
                   </CardContent>
                 </Card>
@@ -744,12 +747,12 @@ const Profile = () => {
 
           {/* Saved Products */}
           <TabsContent value="saved">
-            <h2 className="text-xl font-semibold mb-6">Saved Products</h2>
+            <h2 className="text-xl font-semibold mb-6">{t('profile.savedProducts')}</h2>
             <Card className="py-12 text-center">
               <CardContent>
                 <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
-                  You haven't saved any products yet
+                  {t('profile.noSavedProducts')}
                 </p>
               </CardContent>
             </Card>

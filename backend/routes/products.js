@@ -176,7 +176,7 @@ router.get('/:id', async (req, res) => {
 // All authenticated users can create products
 router.post('/', auth, async (req, res) => {
   try {
-    const { name, description, price, category, stock, unit, images, tags, currentLocation } = req.body;
+    const { name, description, price, category, stock, unit, images, tags, currentLocation, hasVariants, variants, optionGroups } = req.body;
 
     // Check if user has valid location in profile
     const userLocation = req.user.location;
@@ -233,7 +233,10 @@ router.post('/', auth, async (req, res) => {
       images,
       tags,
       seller: req.user._id,
-      location: productLocation
+      location: productLocation,
+      hasVariants: hasVariants || false,
+      variants: hasVariants ? variants : [],
+      optionGroups: optionGroups || []
     });
 
     await product.save();

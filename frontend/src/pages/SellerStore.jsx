@@ -70,8 +70,13 @@ function SellerStore() {
                         {seller.profileImage ? (
                             <img src={seller.profileImage} alt={seller.businessName} className="w-32 h-32 rounded-full object-cover" />
                         ) : (
-                            <div className="store-placeholder w-32 h-32 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                                <Store size={48} />
+                            <div className="store-placeholder w-32 h-32 rounded-full flex items-center justify-center text-3xl font-bold text-white">
+                                {(seller.businessName || seller.name || 'S')
+                                    .split(' ')
+                                    .map(w => w[0])
+                                    .join('')
+                                    .toUpperCase()
+                                    .slice(0, 2)}
                             </div>
                         )}
                     </div>

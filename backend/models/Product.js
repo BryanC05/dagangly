@@ -55,6 +55,24 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  hasVariants: {
+    type: Boolean,
+    default: false
+  },
+  variants: [{
+    name: { type: String, required: true },
+    price: { type: Number, required: true, min: 0 },
+    stock: { type: Number, required: true, min: 0 }
+  }],
+  optionGroups: [{
+    name: { type: String, required: true },
+    required: { type: Boolean, default: false },
+    multiple: { type: Boolean, default: false },
+    options: [{
+      name: { type: String, required: true },
+      priceAdjust: { type: Number, default: 0 }
+    }]
+  }],
   tags: [{
     type: String
   }],

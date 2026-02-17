@@ -4,6 +4,7 @@ import { MapPin, Store, Phone, Star, ArrowLeft, ShoppingCart, MessageCircle, Shi
 import { useState, useEffect } from 'react';
 import { useCartStore, useAuthStore } from '../store/authStore';
 import { useSavedProductsStore } from '../store/savedProductsStore';
+import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -17,8 +18,11 @@ function ProductDetail() {
   const location = useLocation();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedOptions, setSelectedOptions] = useState({});
   const { addToCart } = useCartStore();
   const { user } = useAuthStore();
+  const { t } = useTranslation();
 
   // Track where user came from for back navigation
   useEffect(() => {
@@ -46,11 +50,61 @@ function ProductDetail() {
     },
   });
 
+  // Compute dynamic price
+  const getUnitPrice = () => {
+    if (!product) return 0;
+    let price = product.hasVariants && selectedVariant ? selectedVariant.price : product.price;
+    Object.values(selectedOptions).forEach(sel => {
+      price += (sel.priceAdjust || 0);
+    });
+    return price;
+  };
+
+  const getAvailableStock = () => {
+    if (!product) return 0;
+    if (product.hasVariants && selectedVariant) return selectedVariant.stock;
+    return product.stock;
+  };
+
+  const handleOptionSelect = (groupName, optionName, priceAdjust, isMultiple) => {
+    setSelectedOptions(prev => {
+      if (isMultiple) {
+        const current = prev[groupName] || { chosen: [], priceAdjust: 0 };
+        const isSelected = current.chosen.includes(optionName);
+        const group = product.optionGroups.find(g => g.name === groupName);
+        if (isSelected) {
+          const newChosen = current.chosen.filter(n => n !== optionName);
+          const newAdjust = newChosen.reduce((sum, n) => {
+            const opt = group?.options.find(o => o.name === n);
+            return sum + (opt?.priceAdjust || 0);
+          }, 0);
+          return { ...prev, [groupName]: { groupName, chosen: newChosen, priceAdjust: newAdjust } };
+        } else {
+          const newChosen = [...current.chosen, optionName];
+          return { ...prev, [groupName]: { groupName, chosen: newChosen, priceAdjust: current.priceAdjust + priceAdjust } };
+        }
+      } else {
+        return { ...prev, [groupName]: { groupName, chosen: [optionName], priceAdjust } };
+      }
+    });
+  };
+
   const handleAddToCart = () => {
-    if (product) {
-      addToCart(product, quantity);
-      alert(`Added ${quantity} ${product.name} to cart!`);
+    if (!product) return;
+    if (product.hasVariants && !selectedVariant) {
+      alert('Please select a variant first.');
+      return;
     }
+    // Check required option groups
+    const missingRequired = product.optionGroups?.filter(g => g.required && (!selectedOptions[g.name] || selectedOptions[g.name].chosen.length === 0));
+    if (missingRequired?.length > 0) {
+      alert(`Please select: ${missingRequired.map(g => g.name).join(', ')}`);
+      return;
+    }
+    const variant = selectedVariant ? { name: selectedVariant.name, price: selectedVariant.price } : null;
+    const optionsArr = Object.values(selectedOptions).filter(o => o.chosen.length > 0);
+    addToCart(product, quantity, variant, optionsArr);
+    alert(`Added ${quantity} ${product.name} to cart!`);
   };
 
   const { isProductSaved, toggleSaveProduct, isLoading: isSaveLoading } = useSavedProductsStore();
@@ -69,7 +123,7 @@ function ProductDetail() {
       <Layout>
         <div className="container py-20">
           <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="animate-pulse text-muted-foreground">Loading product...</div>
+            <div className="animate-pulse text-muted-foreground">{t('productDetail.loadingProduct')}</div>
           </div>
         </div>
       </Layout>
@@ -82,9 +136,9 @@ function ProductDetail() {
         <div className="container py-20">
           <div className="text-center py-12">
             <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-2xl font-bold mb-2">Product not found</h2>
-            <p className="text-muted-foreground mb-4">The product you're looking for doesn't exist.</p>
-            <Button onClick={() => navigate('/products')}>Browse Products</Button>
+            <h2 className="text-2xl font-bold mb-2">{t('productDetail.productNotFound')}</h2>
+            <p className="text-muted-foreground mb-4">{t('productDetail.productNotFoundDesc')}</p>
+            <Button onClick={() => navigate('/products')}>{t('profile.browseProducts')}</Button>
           </div>
         </div>
       </Layout>
@@ -99,7 +153,7 @@ function ProductDetail() {
         {/* Back Button */}
         <Button variant="ghost" onClick={handleBack} className="mb-6 gap-2">
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t('productDetail.back')}
         </Button>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
@@ -149,11 +203,11 @@ function ProductDetail() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-lg">{product.seller?.businessName || 'Local Store'}</span>
+                          <span className="font-semibold text-lg">{product.seller?.businessName || t('productDetail.localStore')}</span>
                           {product.seller?.isVerified && (
                             <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
                               <Shield className="h-3 w-3 mr-1" />
-                              Verified
+                              {t('productDetail.verified')}
                             </Badge>
                           )}
                         </div>
@@ -177,7 +231,7 @@ function ProductDetail() {
 
             {/* Description */}
             <div>
-              <h3 className="font-semibold mb-2">Description</h3>
+              <h3 className="font-semibold mb-2">{t('productDetail.description')}</h3>
               <p className="text-muted-foreground leading-relaxed">{product.description}</p>
             </div>
 
@@ -185,7 +239,7 @@ function ProductDetail() {
             <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
               <MapPin className="h-5 w-5 mt-0.5 text-muted-foreground shrink-0" />
               <div className="text-sm">
-                <p className="font-medium">{product.location?.address || 'Local pickup available'}</p>
+                <p className="font-medium">{product.location?.address || t('productDetail.localPickup')}</p>
                 <p className="text-muted-foreground">{product.location?.city}, {product.location?.state}</p>
               </div>
             </div>
@@ -193,23 +247,77 @@ function ProductDetail() {
             {/* Price & Purchase Card */}
             <Card>
               <CardContent className="p-6 space-y-6">
+                {/* Variant Selector */}
+                {product.hasVariants && product.variants?.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Select Variant</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {product.variants.map((v) => (
+                        <button
+                          key={v.name}
+                          type="button"
+                          onClick={() => { setSelectedVariant(v); setQuantity(1); }}
+                          className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${selectedVariant?.name === v.name
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-muted/50 hover:bg-muted border-border'
+                            } ${v.stock <= 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                          disabled={v.stock <= 0}
+                        >
+                          <span>{v.name}</span>
+                          <span className="block text-xs mt-0.5">Rp{v.price?.toLocaleString('id-ID')}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Option Groups */}
+                {product.optionGroups?.length > 0 && product.optionGroups.map((group) => (
+                  <div key={group.name}>
+                    <h4 className="text-sm font-medium mb-2">
+                      {group.name} {group.required && <span className="text-destructive">*</span>}
+                      {group.multiple && <span className="text-xs text-muted-foreground ml-1">(select multiple)</span>}
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {group.options.map((opt) => {
+                        const isSelected = selectedOptions[group.name]?.chosen?.includes(opt.name);
+                        return (
+                          <button
+                            key={opt.name}
+                            type="button"
+                            onClick={() => handleOptionSelect(group.name, opt.name, opt.priceAdjust || 0, group.multiple)}
+                            className={`px-3 py-1.5 rounded-lg border text-sm transition-colors ${isSelected
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-muted/50 hover:bg-muted border-border'
+                              }`}
+                          >
+                            {opt.name}
+                            {opt.priceAdjust > 0 && <span className="text-xs ml-1">(+Rp{opt.priceAdjust.toLocaleString('id-ID')})</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Price Display */}
                 <div className="flex justify-between items-baseline">
                   <div>
                     <span className="text-3xl font-bold text-primary">
-                      Rp{product.price?.toLocaleString('id-ID')}
+                      Rp{getUnitPrice().toLocaleString('id-ID')}
                     </span>
                     <span className="text-muted-foreground ml-1">/ {product.unit || 'item'}</span>
                   </div>
-                  <Badge variant={product.stock > 0 ? 'default' : 'destructive'}>
-                    {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                  <Badge variant={getAvailableStock() > 0 ? 'default' : 'destructive'}>
+                    {getAvailableStock() > 0 ? `${getAvailableStock()} ${t('productDetail.inStock')}` : t('productDetail.outOfStock')}
                   </Badge>
                 </div>
 
-                {product.stock > 0 && (
+                {getAvailableStock() > 0 && (
                   <div className="space-y-4">
                     {/* Quantity Selector */}
                     <div className="flex items-center gap-4">
-                      <span className="text-sm text-muted-foreground">Quantity:</span>
+                      <span className="text-sm text-muted-foreground">{t('productDetail.quantity')}:</span>
                       <div className="flex items-center border rounded-lg">
                         <button
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -220,8 +328,8 @@ function ProductDetail() {
                         </button>
                         <span className="w-12 text-center font-medium">{quantity}</span>
                         <button
-                          onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                          disabled={quantity >= product.stock}
+                          onClick={() => setQuantity(Math.min(getAvailableStock(), quantity + 1))}
+                          disabled={quantity >= getAvailableStock()}
                           className="w-10 h-10 flex items-center justify-center hover:bg-muted rounded-r-lg text-lg font-bold disabled:opacity-50 transition-colors"
                         >
                           +
@@ -232,7 +340,7 @@ function ProductDetail() {
                     {/* Add to Cart Button */}
                     <Button onClick={handleAddToCart} size="lg" className="w-full gap-2">
                       <ShoppingCart className="h-5 w-5" />
-                      Add to Cart - Rp{(product.price * quantity).toLocaleString('id-ID')}
+                      {t('productDetail.addToCart')} - Rp{(getUnitPrice() * quantity).toLocaleString('id-ID')}
                     </Button>
 
                     {/* Save Product Button */}
@@ -245,7 +353,7 @@ function ProductDetail() {
                         disabled={isSaveLoading}
                       >
                         <Heart className={`h-5 w-5 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
-                        {isSaved ? 'Saved' : 'Save Product'}
+                        {isSaved ? t('productDetail.saved') : t('productDetail.saveProduct')}
                       </Button>
                     )}
                   </div>
@@ -256,7 +364,7 @@ function ProductDetail() {
                   {product.seller?.phone && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Phone className="h-4 w-4" />
-                      <span>Contact: {product.seller.phone}</span>
+                      <span>{t('productDetail.contact')}: {product.seller.phone}</span>
                     </div>
                   )}
 
@@ -267,7 +375,7 @@ function ProductDetail() {
                       onClick={() => navigate(`/chat?seller=${product.seller?._id}&from=product&productId=${product._id}`)}
                     >
                       <MessageCircle className="h-4 w-4" />
-                      Chat with Seller
+                      {t('productDetail.chatWithSeller')}
                     </Button>
                   )}
                 </div>
@@ -277,7 +385,7 @@ function ProductDetail() {
             {/* Tags */}
             {product.tags?.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium mb-3 text-muted-foreground">Tags</h4>
+                <h4 className="text-sm font-medium mb-3 text-muted-foreground">{t('productDetail.tags')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {product.tags.map((tag, index) => (
                     <Badge key={index} variant="outline">

@@ -25,7 +25,16 @@ const orderSchema = new mongoose.Schema({
     price: {
       type: Number,
       required: true
-    }
+    },
+    variantName: {
+      type: String,
+      default: null
+    },
+    selectedOptions: [{
+      groupName: String,
+      chosen: [String],
+      priceAdjust: { type: Number, default: 0 }
+    }]
   }],
   totalAmount: {
     type: Number,

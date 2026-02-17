@@ -3,21 +3,23 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Plus, Eye, Heart, Clock, Search, Filter } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
 import Layout from '@/components/layout/Layout';
 import './Forum.css';
 
-const categories = [
-    { id: 'all', label: 'All Topics', icon: '📋' },
-    { id: 'general', label: 'General', icon: '💬' },
-    { id: 'products', label: 'Products', icon: '🛍️' },
-    { id: 'tips', label: 'Tips & Tricks', icon: '💡' },
-    { id: 'help', label: 'Help & Support', icon: '🆘' },
-    { id: 'announcements', label: 'Announcements', icon: '📢' },
+const categoryKeys = [
+    { id: 'all', key: 'allTopics', icon: '📋' },
+    { id: 'general', key: 'general', icon: '💬' },
+    { id: 'products', key: 'productsCategory', icon: '🛍️' },
+    { id: 'tips', key: 'tipsAndTricks', icon: '💡' },
+    { id: 'help', key: 'helpAndSupport', icon: '🆘' },
+    { id: 'announcements', key: 'announcements', icon: '📢' },
 ];
 
 function Forum() {
     const { user } = useAuthStore();
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -55,13 +57,13 @@ function Forum() {
             <div className="forum-page container py-8">
                 <div className="forum-header flex justify-between items-center mb-8 pb-8 border-b">
                     <div className="header-content">
-                        <h1 className="text-3xl font-bold mb-1">Community Forum</h1>
-                        <p className="text-muted-foreground">Discuss with fellow sellers and buyers</p>
+                        <h1 className="text-3xl font-bold mb-1">{t('forum.communityForum')}</h1>
+                        <p className="text-muted-foreground">{t('forum.discussWith')}</p>
                     </div>
                     {user && (
                         <button className="btn-new-thread inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90" onClick={() => navigate('/forum/new')}>
                             <Plus size={20} />
-                            New Thread
+                            {t('forum.newThread')}
                         </button>
                     )}
                 </div>
@@ -72,7 +74,7 @@ function Forum() {
                             <Search size={16} className="absolute left-3 top-3 text-muted-foreground" />
                             <input
                                 type="text"
-                                placeholder="Search discussions..."
+                                placeholder={t('forum.searchDiscussions')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-9 p-2 border rounded-md"
@@ -80,16 +82,16 @@ function Forum() {
                         </div>
 
                         <div className="category-list border rounded-lg overflow-hidden bg-card">
-                            <h3 className="font-semibold p-4 bg-muted/50 border-b">Categories</h3>
+                            <h3 className="font-semibold p-4 bg-muted/50 border-b">{t('forum.categories')}</h3>
                             <div className="flex flex-col">
-                                {categories.map((cat) => (
+                                {categoryKeys.map((cat) => (
                                     <button
                                         key={cat.id}
                                         className={`category-btn flex items-center gap-3 p-3 hover:bg-muted text-left transition-colors border-b last:border-0 ${selectedCategory === cat.id ? 'bg-primary/5 text-primary font-medium' : ''}`}
                                         onClick={() => setSelectedCategory(cat.id)}
                                     >
                                         <span className="cat-icon">{cat.icon}</span>
-                                        <span>{cat.label}</span>
+                                        <span>{t(`forum.${cat.key}`)}</span>
                                     </button>
                                 ))}
                             </div>
@@ -98,15 +100,15 @@ function Forum() {
 
                     <main className="forum-main lg:col-span-3">
                         {isLoading ? (
-                            <div className="loading text-center py-12 text-muted-foreground">Loading discussions...</div>
+                            <div className="loading text-center py-12 text-muted-foreground">{t('forum.loadingDiscussions')}</div>
                         ) : data?.threads?.length === 0 ? (
                             <div className="empty-state text-center py-16 border rounded-lg bg-card bg-muted/10">
                                 <MessageSquare size={48} className="mx-auto mb-4 text-muted-foreground/50" />
-                                <h3 className="text-xl font-semibold mb-2">No discussions yet</h3>
-                                <p className="text-muted-foreground mb-6">Be the first to start a conversation!</p>
+                                <h3 className="text-xl font-semibold mb-2">{t('forum.noDiscussionsYet')}</h3>
+                                <p className="text-muted-foreground mb-6">{t('forum.beFirst')}</p>
                                 {user && (
                                     <button className="btn-primary px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90" onClick={() => navigate('/forum/new')}>
-                                        Start a Discussion
+                                        {t('forum.startDiscussion')}
                                     </button>
                                 )}
                             </div>
@@ -118,9 +120,9 @@ function Forum() {
                                             <div className="thread-main">
                                                 <div className="thread-meta-top flex items-center gap-2 mb-2 text-xs">
                                                     <span className={`category-tag px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground flex items-center gap-1 ${thread.category}`}>
-                                                        {categories.find(c => c.id === thread.category)?.icon} <span className="capitalize">{thread.category}</span>
+                                                        {categoryKeys.find(c => c.id === thread.category)?.icon} <span className="capitalize">{thread.category}</span>
                                                     </span>
-                                                    {thread.isPinned && <span className="pinned-badge bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400 px-2 py-0.5 rounded-full font-medium">📌 Pinned</span>}
+                                                    {thread.isPinned && <span className="pinned-badge bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400 px-2 py-0.5 rounded-full font-medium">📌 {t('forum.pinned')}</span>}
                                                 </div>
                                                 <h3 className="thread-title text-xl font-semibold mb-2 group-hover:text-primary">{thread.title}</h3>
                                                 <p className="thread-excerpt text-muted-foreground mb-4 line-clamp-2">
@@ -155,15 +157,15 @@ function Forum() {
                                             disabled={page === 1}
                                             onClick={() => setPage(p => p - 1)}
                                         >
-                                            Previous
+                                            {t('forum.previous')}
                                         </button>
-                                        <span className="text-sm">Page {page} of {data.totalPages}</span>
+                                        <span className="text-sm">{t('forum.page')} {page} / {data.totalPages}</span>
                                         <button
                                             className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-muted"
                                             disabled={page === data.totalPages}
                                             onClick={() => setPage(p => p + 1)}
                                         >
-                                            Next
+                                            {t('forum.next')}
                                         </button>
                                     </div>
                                 )}

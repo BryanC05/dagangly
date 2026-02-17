@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import api from '../utils/api';
 import { useAuthStore } from '../store/authStore';
+import { useTranslation } from '../hooks/useTranslation';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +39,7 @@ const filterTabs = [
 
 function Orders() {
   const { user } = useAuthStore();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeFilter, setActiveFilter] = useState('all');
   const [expandedOrders, setExpandedOrders] = useState({});
@@ -125,12 +127,12 @@ function Orders() {
             <div className="empty-icon-wrapper">
               <ShoppingBag size={48} />
             </div>
-            <h2>No Orders Yet</h2>
-            <p>Start shopping to see your orders here!</p>
+            <h2>{t('orders.noOrdersTitle')}</h2>
+            <p>{t('orders.startShopping')}</p>
             <Link to="/products">
               <Button className="mt-4 gap-2">
                 <ShoppingBag className="h-4 w-4" />
-                Browse Products
+                {t('orders.browseProducts')}
               </Button>
             </Link>
           </div>
@@ -145,8 +147,8 @@ function Orders() {
         {/* Header */}
         <div className="orders-header">
           <div>
-            <h1>My Orders</h1>
-            <p className="orders-subtitle">{orders.length} total order{orders.length !== 1 ? 's' : ''}</p>
+            <h1>{t('orders.title')}</h1>
+            <p className="orders-subtitle">{orders.length} {t('orders.totalOrders')}</p>
           </div>
         </div>
 
@@ -187,7 +189,7 @@ function Orders() {
                   <div className="order-header" onClick={() => toggleExpand(order._id)}>
                     <div className="order-header-left">
                       <div className="order-id-section">
-                        <span className="order-label">Order</span>
+                        <span className="order-label">{t('orders.order')}</span>
                         <span className="order-id">#{order._id.slice(-8).toUpperCase()}</span>
                       </div>
                       <div className="order-date">
@@ -228,6 +230,18 @@ function Orders() {
                             </div>
                             <div className="item-details">
                               <h4>{item.product?.name || 'Product'}</h4>
+                              {item.variantName && (
+                                <p style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 500 }}>Variant: {item.variantName}</p>
+                              )}
+                              {item.selectedOptions?.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.15rem' }}>
+                                  {item.selectedOptions.map((opt, oi) => (
+                                    <span key={oi} style={{ fontSize: '0.7rem', background: 'var(--muted)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                                      {opt.groupName}: {opt.chosen?.join(', ')}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                               <p>Qty: {item.quantity} × {formatCurrency(item.price)}</p>
                             </div>
                             <div className="item-total">{formatCurrency(item.quantity * item.price)}</div>
@@ -241,7 +255,7 @@ function Orders() {
                           {/* Seller/Buyer Info - Check if user is seller of this order */}
                           {order.seller?._id === user?.id ? (
                             <div className="meta-row">
-                              <span className="meta-label">Buyer</span>
+                              <span className="meta-label">{t('orders.buyer')}</span>
                               <span className="meta-value">
                                 {order.buyer?.name}
                                 {order.buyer?.phone && (
@@ -253,7 +267,7 @@ function Orders() {
                             </div>
                           ) : (
                             <div className="meta-row">
-                              <span className="meta-label">Seller</span>
+                              <span className="meta-label">{t('orders.seller')}</span>
                               <span className="meta-value">
                                 {order.seller?.businessName || order.seller?.name}
                                 {order.seller?.phone && (
@@ -268,7 +282,7 @@ function Orders() {
                           {/* Delivery Address */}
                           {order.deliveryAddress && (
                             <div className="meta-row">
-                              <span className="meta-label">Delivery</span>
+                              <span className="meta-label">{t('orders.delivery')}</span>
                               <span className="meta-value">
                                 <MapPin size={12} />
                                 {order.deliveryAddress.address}
@@ -279,7 +293,7 @@ function Orders() {
 
                           {/* Payment Method */}
                           <div className="meta-row">
-                            <span className="meta-label">Payment</span>
+                            <span className="meta-label">{t('orders.payment')}</span>
                             <span className="meta-value payment-badge">
                               <PaymentIcon size={14} />
                               {payment.label}
@@ -289,7 +303,7 @@ function Orders() {
                           {/* Notes */}
                           {order.notes && (
                             <div className="meta-row">
-                              <span className="meta-label">Notes</span>
+                              <span className="meta-label">{t('orders.notes')}</span>
                               <span className="meta-value note-text">{order.notes}</span>
                             </div>
                           )}
@@ -298,7 +312,7 @@ function Orders() {
                         {/* Total + Action */}
                         <div className="order-total-section">
                           <div className="total-row">
-                            <span>Total</span>
+                            <span>{t('orders.total')}</span>
                             <span className="total-amount">{formatCurrency(order.totalAmount)}</span>
                           </div>
 
@@ -316,7 +330,7 @@ function Orders() {
                               disabled={updateStatusMutation.isPending}
                               className="update-status-btn"
                             >
-                              Mark as {statusConfig[nextStatus].label}
+                              {t('orders.markAs')} {statusConfig[nextStatus].label}
                             </Button>
                           )}
                         </div>

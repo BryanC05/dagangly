@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
+import { useTranslation } from '@/hooks/useTranslation';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ function Login() {
 
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,9 +44,9 @@ function Login() {
       <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">{t('auth.welcomeBack')}</CardTitle>
             <CardDescription className="text-center">
-              Login to your MSME Marketplace account
+              {t('auth.loginDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -55,13 +57,13 @@ function Login() {
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t('auth.enterEmail')}
                     className="pl-9"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -70,13 +72,13 @@ function Login() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
+                    placeholder={t('auth.enterPassword')}
                     className="pl-9 pr-9"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -92,16 +94,16 @@ function Login() {
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Logging in...' : 'Login'}
+                {isLoading ? t('auth.loggingIn') : t('auth.login')}
                 {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex justify-center">
             <p className="text-sm text-muted-foreground">
-              Don't have an account?{' '}
+              {t('auth.dontHaveAccount')}{' '}
               <Link to="/register" className="text-primary hover:underline">
-                Create Account
+                {t('auth.createAccount')}
               </Link>
             </p>
           </CardFooter>

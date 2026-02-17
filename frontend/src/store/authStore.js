@@ -61,7 +61,7 @@ export const useCartStore = create(
       items: [],
       sellerId: null,
 
-      addToCart: (product, quantity = 1) => {
+      addToCart: (product, quantity = 1, variant = null, selectedOptions = []) => {
         const { items, sellerId } = get();
 
         if (sellerId && sellerId !== product.seller._id) {
@@ -70,12 +70,26 @@ export const useCartStore = create(
           }
         }
 
-        const existingItem = items.find(item => item.product._id === product._id);
+        // Composite key: productId + variant name + sorted option selections
+        const itemKey = [
+          product._id,
+          variant?.name || '',
+          ...selectedOptions.map(o => `${o.groupName}:${o.chosen.join(',')}`).sort()
+        ].join('|');
 
-        if (existingItem) {
+        const existingIndex = items.findIndex(item => {
+          const existKey = [
+            item.product._id,
+            item.variant?.name || '',
+            ...(item.selectedOptions || []).map(o => `${o.groupName}:${o.chosen.join(',')}`).sort()
+          ].join('|');
+          return existKey === itemKey;
+        });
+
+        if (existingIndex >= 0) {
           set({
-            items: items.map(item =>
-              item.product._id === product._id
+            items: items.map((item, i) =>
+              i === existingIndex
                 ? { ...item, quantity: item.quantity + quantity }
                 : item
             ),
@@ -83,33 +97,55 @@ export const useCartStore = create(
           });
         } else {
           set({
-            items: [...items, { product, quantity }],
+            items: [...items, { product, quantity, variant, selectedOptions }],
             sellerId: product.seller._id,
           });
         }
       },
 
-      removeFromCart: (productId) => {
+      removeFromCart: (productId, variant = null, selectedOptions = []) => {
         const { items } = get();
-        const newItems = items.filter(item => item.product._id !== productId);
+        const itemKey = [
+          productId,
+          variant?.name || '',
+          ...(selectedOptions || []).map(o => `${o.groupName}:${o.chosen.join(',')}`).sort()
+        ].join('|');
+
+        const newItems = items.filter(item => {
+          const existKey = [
+            item.product._id,
+            item.variant?.name || '',
+            ...(item.selectedOptions || []).map(o => `${o.groupName}:${o.chosen.join(',')}`).sort()
+          ].join('|');
+          return existKey !== itemKey;
+        });
         set({
           items: newItems,
           sellerId: newItems.length > 0 ? get().sellerId : null,
         });
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (productId, quantity, variant = null, selectedOptions = []) => {
         const { items } = get();
         if (quantity <= 0) {
-          get().removeFromCart(productId);
+          get().removeFromCart(productId, variant, selectedOptions);
           return;
         }
+        const itemKey = [
+          productId,
+          variant?.name || '',
+          ...(selectedOptions || []).map(o => `${o.groupName}:${o.chosen.join(',')}`).sort()
+        ].join('|');
+
         set({
-          items: items.map(item =>
-            item.product._id === productId
-              ? { ...item, quantity }
-              : item
-          ),
+          items: items.map(item => {
+            const existKey = [
+              item.product._id,
+              item.variant?.name || '',
+              ...(item.selectedOptions || []).map(o => `${o.groupName}:${o.chosen.join(',')}`).sort()
+            ].join('|');
+            return existKey === itemKey ? { ...item, quantity } : item;
+          }),
         });
       },
 
@@ -122,7 +158,14 @@ export const useCartStore = create(
       },
 
       getTotalPrice: () => {
-        return get().items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+        return get().items.reduce((total, item) => {
+          let unitPrice = item.variant ? item.variant.price : item.product.price;
+          // Add option group price adjustments
+          if (item.selectedOptions && item.selectedOptions.length > 0) {
+            unitPrice += item.selectedOptions.reduce((sum, opt) => sum + (opt.priceAdjust || 0), 0);
+          }
+          return total + (unitPrice * item.quantity);
+        }, 0);
       },
     }),
     {

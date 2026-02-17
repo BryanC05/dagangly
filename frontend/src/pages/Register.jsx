@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Phone, Store, ArrowRight, Building2, Sparkles, ImageIcon } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
+import { useTranslation } from '@/hooks/useTranslation';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +34,7 @@ function Register() {
 
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,9 +62,9 @@ function Register() {
       <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
         <Card className="w-full max-w-2xl">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">{t('auth.createAccount')}</CardTitle>
             <CardDescription className="text-center">
-              Join MSME Marketplace today - Buy and sell products!
+              {t('auth.createAccountDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -73,7 +75,7 @@ function Register() {
             )}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{t('auth.name')}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -81,7 +83,7 @@ function Register() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="pl-9"
-                    placeholder="Enter your full name"
+                    placeholder={t('auth.enterName')}
                     required
                   />
                 </div>
@@ -89,7 +91,7 @@ function Register() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('auth.email')}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -98,13 +100,13 @@ function Register() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="pl-9"
-                      placeholder="Enter your email"
+                      placeholder={t('auth.enterEmail')}
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{t('auth.phone')}</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -113,7 +115,7 @@ function Register() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="pl-9"
-                      placeholder="Enter your phone number"
+                      placeholder={t('auth.enterPhone')}
                       required
                     />
                   </div>
@@ -146,7 +148,7 @@ function Register() {
                     Business Details (Optional)
                   </h3>
                   <div className="space-y-2">
-                    <Label htmlFor="businessName">Business Name</Label>
+                    <Label htmlFor="businessName">{t('auth.businessName')}</Label>
                     <div className="relative">
                       <Store className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -154,24 +156,24 @@ function Register() {
                         value={formData.businessName}
                         onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
                         className="pl-9"
-                        placeholder="Enter your business name"
+                        placeholder={t('auth.enterBusinessName')}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Business Type</Label>
+                    <Label>{t('auth.businessType')}</Label>
                     <Select
                       value={formData.businessType}
                       onValueChange={(value) => setFormData({ ...formData, businessType: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select business type" />
+                        <SelectValue placeholder={t('auth.selectBusinessType')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="micro">Micro Enterprise</SelectItem>
-                        <SelectItem value="small">Small Enterprise</SelectItem>
-                        <SelectItem value="medium">Medium Enterprise</SelectItem>
+                        <SelectItem value="micro">{t('auth.micro')}</SelectItem>
+                        <SelectItem value="small">{t('auth.small')}</SelectItem>
+                        <SelectItem value="medium">{t('auth.medium')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -226,22 +228,22 @@ function Register() {
                       Create a professional logo for your business or upload your own
                     </p>
                     <div className="flex gap-2">
-                      <Link 
-                        to="/logo-generator?from=registration" 
+                      <Link
+                        to="/logo-generator?from=registration"
                         className="flex-1"
                       >
-                        <Button 
-                          type="button" 
-                          variant="outline" 
+                        <Button
+                          type="button"
+                          variant="outline"
                           className="w-full gap-2"
                         >
                           <Sparkles className="h-4 w-4" />
                           Generate Logo
                         </Button>
                       </Link>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
+                      <Button
+                        type="button"
+                        variant="outline"
                         className="flex-1"
                         onClick={() => alert('Logo upload will be available after registration')}
                       >
@@ -253,7 +255,7 @@ function Register() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -277,16 +279,16 @@ function Register() {
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {isLoading ? t('auth.creatingAccount') : t('auth.createAccount')}
                 {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex justify-center">
             <p className="text-sm text-muted-foreground">
-              Already have an account?{' '}
+              {t('auth.alreadyHaveAccount')}{' '}
               <Link to="/login" className="text-primary hover:underline">
-                Login
+                {t('auth.login')}
               </Link>
             </p>
           </CardFooter>

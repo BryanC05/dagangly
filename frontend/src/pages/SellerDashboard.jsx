@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit2, Trash2, Package, TrendingUp, DollarSign, ShoppingBag, Save, X, AlertTriangle, Map, BarChart3 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
 import Layout from '@/components/layout/Layout';
 import './SellerDashboard.css';
 
 function SellerDashboard() {
   const { user } = useAuthStore();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   // Edit state - stores product id being edited and its temp values
@@ -88,10 +90,10 @@ function SellerDashboard() {
     return (
       <Layout>
         <div className="access-denied container py-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">Please Login</h2>
-          <p className="mb-4">You need to be logged in to access your dashboard.</p>
+          <h2 className="text-2xl font-bold mb-4">{t('seller.pleaseLogin')}</h2>
+          <p className="mb-4">{t('seller.loginRequired')}</p>
           <Link to="/login" className="btn-primary">
-            Login
+            {t('auth.login')}
           </Link>
         </div>
       </Layout>
@@ -116,33 +118,33 @@ function SellerDashboard() {
               <div className="modal-icon warning flex justify-center mb-4 text-warning">
                 <AlertTriangle size={48} />
               </div>
-              <h3 className="text-xl font-bold text-center mb-2">Confirm Changes</h3>
-              <p className="text-center text-muted-foreground mb-4">You are about to update <strong>{confirmModal.productName}</strong>:</p>
+              <h3 className="text-xl font-bold text-center mb-2">{t('seller.confirmChanges')}</h3>
+              <p className="text-center text-muted-foreground mb-4">{t('seller.aboutToUpdate')} <strong>{confirmModal.productName}</strong>:</p>
               <div className="change-summary bg-muted p-4 rounded-md mb-4 space-y-2">
                 <div className="change-item flex justify-between">
-                  <span>New Price:</span>
+                  <span>{t('seller.newPrice')}:</span>
                   <strong>Rp {editValues.price}</strong>
                 </div>
                 <div className="change-item flex justify-between">
-                  <span>New Stock:</span>
-                  <strong>{editValues.stock} units</strong>
+                  <span>{t('seller.newStock')}:</span>
+                  <strong>{editValues.stock} {t('seller.units')}</strong>
                 </div>
               </div>
-              <p className="warning-text text-sm text-muted-foreground text-center mb-6">This action will update the product information visible to all customers.</p>
+              <p className="warning-text text-sm text-muted-foreground text-center mb-6">{t('seller.updateWarning')}</p>
               <div className="modal-actions flex gap-4">
                 <button
                   className="btn-cancel flex-1 py-2 border rounded-md hover:bg-muted"
                   onClick={() => setConfirmModal({ show: false, productId: null, productName: '' })}
                   disabled={updateMutation.isPending}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   className="btn-confirm flex-1 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
                   onClick={confirmUpdate}
                   disabled={updateMutation.isPending}
                 >
-                  {updateMutation.isPending ? 'Updating...' : 'Confirm Update'}
+                  {updateMutation.isPending ? t('seller.updating') : t('seller.confirmUpdate')}
                 </button>
               </div>
             </div>
@@ -151,8 +153,8 @@ function SellerDashboard() {
 
         <div className="dashboard-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Seller Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, {user.businessName || user.name}!</p>
+            <h1 className="text-3xl font-bold">{t('seller.dashboard')}</h1>
+            <p className="text-muted-foreground">{t('seller.welcomeBack')}, {user.businessName || user.name}!</p>
           </div>
           <div className="flex gap-3">
             <Link
@@ -160,11 +162,11 @@ function SellerDashboard() {
               className="btn-secondary inline-flex items-center gap-2 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
             >
               <BarChart3 size={20} />
-              Product Tracking
+              {t('seller.productTracking')}
             </Link>
             <Link to="/seller/add-product" className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
               <Plus size={20} />
-              Add Product
+              {t('seller.addProduct')}
             </Link>
           </div>
         </div>
@@ -176,7 +178,7 @@ function SellerDashboard() {
             </div>
             <div className="stat-info">
               <h3 className="text-2xl font-bold">{products?.length || 0}</h3>
-              <p className="text-sm text-muted-foreground">Products</p>
+              <p className="text-sm text-muted-foreground">{t('seller.products')}</p>
             </div>
           </div>
           <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
@@ -185,7 +187,7 @@ function SellerDashboard() {
             </div>
             <div className="stat-info">
               <h3 className="text-2xl font-bold">{orders?.length || 0}</h3>
-              <p className="text-sm text-muted-foreground">Total Orders</p>
+              <p className="text-sm text-muted-foreground">{t('seller.totalOrders')}</p>
             </div>
           </div>
           <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
@@ -194,7 +196,7 @@ function SellerDashboard() {
             </div>
             <div className="stat-info">
               <h3 className="text-2xl font-bold">{pendingOrders}</h3>
-              <p className="text-sm text-muted-foreground">Pending Orders</p>
+              <p className="text-sm text-muted-foreground">{t('seller.pendingOrders')}</p>
             </div>
           </div>
           <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
@@ -203,20 +205,20 @@ function SellerDashboard() {
             </div>
             <div className="stat-info">
               <h3 className="text-2xl font-bold">Rp {totalSales.toFixed(2)}</h3>
-              <p className="text-sm text-muted-foreground">Total Revenue</p>
+              <p className="text-sm text-muted-foreground">{t('seller.totalRevenue')}</p>
             </div>
           </div>
         </div>
 
         <div className="dashboard-section mb-8">
-          <h2 className="text-xl font-semibold mb-4">My Products</h2>
+          <h2 className="text-xl font-semibold mb-4">{t('seller.myProducts')}</h2>
           {productsLoading ? (
-            <div className="loading">Loading products...</div>
+            <div className="loading">{t('seller.loadingProducts')}</div>
           ) : products?.length === 0 ? (
             <div className="empty-state text-center py-12 border rounded-lg">
-              <p className="mb-4 text-muted-foreground">No products yet. Start by adding your first product!</p>
+              <p className="mb-4 text-muted-foreground">{t('seller.noProductsEmpty')}</p>
               <Link to="/seller/add-product" className="btn-primary px-4 py-2 bg-primary text-primary-foreground rounded-md">
-                Add Product
+                {t('seller.addProduct')}
               </Link>
             </div>
           ) : (
@@ -224,12 +226,12 @@ function SellerDashboard() {
               <table className="products-table w-full text-left">
                 <thead className="bg-muted text-muted-foreground">
                   <tr>
-                    <th className="p-4 font-medium">Product</th>
-                    <th className="p-4 font-medium">Category</th>
-                    <th className="p-4 font-medium">Price</th>
-                    <th className="p-4 font-medium">Stock</th>
-                    <th className="p-4 font-medium">Status</th>
-                    <th className="p-4 font-medium">Actions</th>
+                    <th className="p-4 font-medium">{t('seller.product')}</th>
+                    <th className="p-4 font-medium">{t('seller.category')}</th>
+                    <th className="p-4 font-medium">{t('seller.price')}</th>
+                    <th className="p-4 font-medium">{t('seller.stock')}</th>
+                    <th className="p-4 font-medium">{t('seller.status')}</th>
+                    <th className="p-4 font-medium">{t('seller.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -277,7 +279,7 @@ function SellerDashboard() {
                       </td>
                       <td className="p-4">
                         <span className={`status-badge px-2 py-1 rounded-full text-xs font-medium ${product.isAvailable ? 'bg-green-500/15 text-green-600 dark:bg-green-500/20 dark:text-green-400' : 'bg-red-500/15 text-red-600 dark:bg-red-500/20 dark:text-red-400'}`}>
-                          {product.isAvailable ? 'Active' : 'Inactive'}
+                          {product.isAvailable ? t('seller.active') : t('seller.inactive')}
                         </span>
                       </td>
                       <td className="p-4">
@@ -333,7 +335,7 @@ function SellerDashboard() {
 
         {orders && orders.length > 0 && (
           <div className="dashboard-section">
-            <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('seller.recentOrders')}</h2>
             <div className="orders-list space-y-4">
               {orders.slice(0, 5).map((order) => (
                 <div key={order._id} className="order-card p-4 border rounded-lg flex justify-between items-center bg-card">
@@ -344,13 +346,13 @@ function SellerDashboard() {
                       }`}>{order.status}</span>
                   </div>
                   <div className="order-details text-right">
-                    <span className="block">{order.products.length} items</span>
+                    <span className="block">{order.products.length} {t('seller.items')}</span>
                     <span className="order-amount font-bold text-primary">Rp {order.totalAmount}</span>
                   </div>
                 </div>
               ))}
             </div>
-            <Link to="/orders" className="view-all block mt-4 text-center text-primary hover:underline">View All Orders</Link>
+            <Link to="/orders" className="view-all block mt-4 text-center text-primary hover:underline">{t('seller.viewAllOrders')}</Link>
           </div>
         )}
       </div>

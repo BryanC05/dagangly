@@ -1,0 +1,156 @@
+package handlers
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"msme-marketplace/internal/database"
+	"msme-marketplace/internal/models"
+)
+
+type WebhookHandler struct{}
+
+func NewWebhookHandler() *WebhookHandler {
+	return &WebhookHandler{}
+}
+
+func (h *WebhookHandler) N8nCallback(c *gin.Context) {
+	secret := c.GetHeader("X-Webhook-Secret")
+	expectedSecret := "msme-webhook-secret-2024"
+
+	if secret != expectedSecret {
+		c.JSON(401, gin.H{"error": "Invalid webhook secret"})
+		return
+	}
+
+	var req struct {
+		Action string      `json:"action"`
+		Data   interface{} `json:"data"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	if req.Action == "update_order_status" {
+		dataMap, ok := req.Data.(map[string]interface{})
+		if !ok {
+			c.JSON(400, gin.H{"error": "Invalid data"})
+			return
+		}
+
+		orderIDStr, ok := dataMap["orderId"].(string)
+		if !ok {
+			c.JSON(400, gin.H{"error": "Invalid orderId"})
+			return
+		}
+
+		status, ok := dataMap["status"].(string)
+		if !ok {
+			c.JSON(400, gin.H{"error": "Invalid status"})
+			return
+		}
+
+		orderID, err := primitive.ObjectIDFromHex(orderIDStr)
+		if err != nil {
+			c.JSON(400, gin.H{"error": "Invalid order ID"})
+			return
+		}
+
+		ordersCollection := database.GetDB().Collection("orders")
+		_, err = ordersCollection.UpdateOne(
+			context.Background(),
+			bson.M{"_id": orderID},
+			bson.M{"$set": bson.M{"status": status}},
+		)
+		if err != nil {
+			c.JSON(404, gin.H{"error": "Order not found"})
+			return
+		}
+
+		c.JSON(200, gin.H{"success": true})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": true, "message": "Callback received"})
+}
+
+func (h *WebhookHandler) TestWebhook(c *gin.Context) {
+	var req struct {
+		WebhookURL string `json:"webhookUrl" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "webhookUrl is required"})
+		return
+	}
+
+	payload := map[string]interface{}{
+		"event":     "test",
+		"timestamp": "2026-02-17T00:00:00Z",
+		"data": map[string]interface{}{
+			"message":     "Test webhook from MSME Marketplace",
+			"orderId":     "test-123",
+			"buyer":       map[string]string{"name": "Test Buyer", "email": "test@example.com"},
+			"seller":      map[string]string{"name": "Test Seller", "businessName": "Test Store"},
+			"totalAmount": 50000,
+		},
+	}
+
+	jsonData, _ := json.Marshal(payload)
+
+	httpClient := &http.Client{}
+	resp, err := httpClient.Post(req.WebhookURL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	c.JSON(200, gin.H{
+		"success": resp.StatusCode >= 200 && resp.StatusCode < 300,
+		"status":  resp.StatusCode,
+		"message": "Webhook test completed",
+	})
+}
+
+func (h *WebhookHandler) TriggerOrderConfirmation(order models.Order, sellerID primitive.ObjectID) {
+	workflowsCollection := database.GetDB().Collection("workflows")
+	var workflow models.Workflow
+	err := workflowsCollection.FindOne(context.Background(), bson.M{
+		"seller":   sellerID,
+		"type":     "order_confirmation",
+		"isActive": true,
+	}).Decode(&workflow)
+
+	if err != nil || workflow.WebhookURL == nil {
+		return
+	}
+
+	payload := map[string]interface{}{
+		"event":     "order.created",
+		"timestamp": "2026-02-17T00:00:00Z",
+		"data": map[string]interface{}{
+			"orderId":     order.ID.Hex(),
+			"buyer":       map[string]string{"name": "Customer"},
+			"seller":      map[string]string{"id": sellerID.Hex()},
+			"totalAmount": order.TotalAmount,
+			"status":      order.Status,
+		},
+	}
+
+	jsonData, _ := json.Marshal(payload)
+	httpClient := &http.Client{}
+	httpClient.Post(*workflow.WebhookURL, "application/json", bytes.NewBuffer(jsonData))
+
+	workflowsCollection.UpdateOne(context.Background(), bson.M{"_id": workflow.ID}, bson.M{
+		"$inc": bson.M{"executionCount": 1},
+		"$set": bson.M{"lastExecuted": "2026-02-17T00:00:00Z"},
+	})
+}
