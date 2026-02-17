@@ -127,9 +127,9 @@ export default function HomeScreen({ navigation }) {
     };
 
     const statsData = [
-        { icon: 'people', label: t.seller, value: stats.sellers },
-        { icon: 'cube', label: t.tabProducts, value: stats.products },
-        { icon: 'grid', label: t.category, value: categories.length },
+        { key: 'sellers', icon: 'people', label: t.seller, value: stats.sellers },
+        { key: 'products', icon: 'cube', label: t.tabProducts, value: stats.products },
+        { key: 'categories', icon: 'grid', label: t.category, value: categories.length },
     ];
 
     return (
@@ -163,7 +163,7 @@ export default function HomeScreen({ navigation }) {
 
             <View style={styles.statsRow}>
                 {statsData.map((s) => (
-                    <View key={s.icon} style={styles.statCard}>
+                    <View key={s.key} style={styles.statCard}>
                         <Ionicons name={s.icon} size={22} color={colors.primary} />
                         <Text style={styles.statValue}>{s.value}</Text>
                         <Text style={styles.statLabel}>{s.label}</Text>
