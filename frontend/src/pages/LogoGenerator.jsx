@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Sparkles, Upload, AlertCircle, Loader2, Check, ArrowLeft } from 'lucide-react';
+import { Sparkles, Upload, AlertCircle, Loader2, Check, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -44,6 +44,7 @@ function LogoGenerator() {
     generateLogo,
     getHistory,
     getStatus,
+    resetLimit,
     selectLogo,
     deleteLogo,
     uploadLogo,
@@ -142,6 +143,15 @@ function LogoGenerator() {
     }
   };
 
+  const handleResetLimit = async () => {
+    try {
+      await resetLimit();
+      setSuccessMessage('Daily generation limit has been reset');
+    } catch (err) {
+      // Error is handled by the hook
+    }
+  };
+
   const getLimitProgress = () => {
     if (!status) return 0;
     return (status.used / status.limit) * 100;
@@ -220,6 +230,27 @@ function LogoGenerator() {
                 Daily limit reached. Resets in {status.resetInHours} hours.
               </p>
             )}
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetLimit}
+                disabled={isLoading}
+                className="text-amber-700 border-amber-300 hover:bg-amber-50"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    Resetting...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Reset Limit (Testing)
+                  </>
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

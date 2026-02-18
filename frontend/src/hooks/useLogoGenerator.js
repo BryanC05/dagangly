@@ -69,6 +69,28 @@ export function useLogoGenerator() {
     }
   }, []);
 
+  // Reset generation limit (testing)
+  const resetLimit = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await api.post('/logo/reset-limit');
+
+      if (response.data.success) {
+        setStatus(response.data.status);
+        return response.data;
+      }
+      throw new Error(response.data?.message || response.data?.error || 'Failed to reset limit');
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to reset limit';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Select a logo as business logo
   const selectLogo = useCallback(async (logoId) => {
     setIsLoading(true);
@@ -174,6 +196,7 @@ export function useLogoGenerator() {
     generateLogo,
     getHistory,
     getStatus,
+    resetLimit,
     selectLogo,
     deleteLogo,
     uploadLogo,

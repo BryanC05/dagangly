@@ -60,11 +60,11 @@ func main() {
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
-			auth.PUT("/profile", middleware.AuthRequired(), authHandler.UpdateProfile)
+			auth.PUT("/profile", middleware.AuthRequired(cfg.JWTSecret), authHandler.UpdateProfile)
 		}
 
 		users := api.Group("/users")
-		users.Use(middleware.AuthRequired())
+		users.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
 			users.GET("/profile", userHandler.GetProfile)
 			users.PUT("/profile", userHandler.UpdateProfile)
@@ -85,15 +85,15 @@ func main() {
 			products.GET("/seller/:sellerId", productHandler.GetProductsBySeller)
 			products.GET("/:id", productHandler.GetProductByID)
 
-			products.POST("/", middleware.AuthRequired(), productHandler.CreateProduct)
-			products.PUT("/:id", middleware.AuthRequired(), productHandler.UpdateProduct)
-			products.DELETE("/:id", middleware.AuthRequired(), productHandler.DeleteProduct)
+			products.POST("/", middleware.AuthRequired(cfg.JWTSecret), productHandler.CreateProduct)
+			products.PUT("/:id", middleware.AuthRequired(cfg.JWTSecret), productHandler.UpdateProduct)
+			products.DELETE("/:id", middleware.AuthRequired(cfg.JWTSecret), productHandler.DeleteProduct)
 
-			products.GET("/my-products", middleware.AuthRequired(), productHandler.GetMyProducts)
+			products.GET("/my-products", middleware.AuthRequired(cfg.JWTSecret), productHandler.GetMyProducts)
 		}
 
 		orders := api.Group("/orders")
-		orders.Use(middleware.AuthRequired())
+		orders.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
 			orders.GET("/my-orders", orderHandler.GetMyOrders)
 			orders.GET("/:id", orderHandler.GetOrderByID)
@@ -106,7 +106,7 @@ func main() {
 		}
 
 		chat := api.Group("/chat")
-		chat.Use(middleware.AuthRequired())
+		chat.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
 			chat.POST("/rooms", chatHandler.CreateChatRoom)
 			chat.POST("/rooms/direct", chatHandler.CreateDirectChatRoom)
@@ -123,16 +123,16 @@ func main() {
 			forum.GET("/", forumHandler.GetThreads)
 			forum.GET("/:id", forumHandler.GetThread)
 
-			forum.POST("/", middleware.AuthRequired(), forumHandler.CreateThread)
-			forum.PUT("/:id", middleware.AuthRequired(), forumHandler.UpdateThread)
-			forum.DELETE("/:id", middleware.AuthRequired(), forumHandler.DeleteThread)
-			forum.POST("/:id/reply", middleware.AuthRequired(), forumHandler.CreateReply)
-			forum.POST("/:id/like", middleware.AuthRequired(), forumHandler.LikeThread)
-			forum.POST("/reply/:id/like", middleware.AuthRequired(), forumHandler.LikeReply)
+			forum.POST("/", middleware.AuthRequired(cfg.JWTSecret), forumHandler.CreateThread)
+			forum.PUT("/:id", middleware.AuthRequired(cfg.JWTSecret), forumHandler.UpdateThread)
+			forum.DELETE("/:id", middleware.AuthRequired(cfg.JWTSecret), forumHandler.DeleteThread)
+			forum.POST("/:id/reply", middleware.AuthRequired(cfg.JWTSecret), forumHandler.CreateReply)
+			forum.POST("/:id/like", middleware.AuthRequired(cfg.JWTSecret), forumHandler.LikeThread)
+			forum.POST("/reply/:id/like", middleware.AuthRequired(cfg.JWTSecret), forumHandler.LikeReply)
 		}
 
 		workflows := api.Group("/workflows")
-		workflows.Use(middleware.AuthRequired())
+		workflows.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
 			workflows.GET("/", workflowHandler.GetWorkflows)
 			workflows.POST("/", workflowHandler.CreateWorkflow)
@@ -143,15 +143,16 @@ func main() {
 		webhooks := api.Group("/webhooks")
 		{
 			webhooks.POST("/n8n/callback", webhookHandler.N8nCallback)
-			webhooks.POST("/test", middleware.AuthRequired(), webhookHandler.TestWebhook)
+			webhooks.POST("/test", middleware.AuthRequired(cfg.JWTSecret), webhookHandler.TestWebhook)
 		}
 
 		logo := api.Group("/logo")
-		logo.Use(middleware.AuthRequired())
+		logo.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
 			logo.POST("/generate", logoHandler.GenerateLogo)
 			logo.GET("/history", logoHandler.GetLogoHistory)
 			logo.GET("/status", logoHandler.GetLogoStatus)
+			logo.POST("/reset-limit", logoHandler.ResetLogoLimit)
 			logo.PUT("/select/:logoId", logoHandler.SelectLogo)
 			logo.DELETE("/:logoId", logoHandler.DeleteLogo)
 			logo.POST("/upload", logoHandler.UploadCustomLogo)

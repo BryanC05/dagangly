@@ -165,19 +165,44 @@ func (h *LogoHandler) GetLogoHistory(c *gin.Context) {
 	now := time.Now()
 	var validLogos []models.GeneratedLogo
 	for _, logo := range user.GeneratedLogos {
-		if logo.ExpiresAt.After(now) {
-			validLogos = append(validLogos, logo)
+		if !logo.ExpiresAt.After(now) {
+			continue
 		}
+		if !isRenderableLogo(logo) {
+			continue
+		}
+		validLogos = append(validLogos, logo)
 	}
 
 	for i, j := 0, len(validLogos)-1; i < j; i, j = i+1, j-1 {
 		validLogos[i], validLogos[j] = validLogos[j], validLogos[i]
 	}
 
+	businessLogo := user.BusinessLogo
+	if businessLogo != nil && !isRenderableLogoURL(*businessLogo) {
+		businessLogo = nil
+	}
+
+	// Keep DB in sync by removing invalid/stale logo references.
+	if len(validLogos) != len(user.GeneratedLogos) || (user.BusinessLogo != nil && businessLogo == nil) {
+		updateSet := bson.M{
+			"generatedLogos": validLogos,
+		}
+		if user.BusinessLogo != nil && businessLogo == nil {
+			updateSet["businessLogo"] = nil
+			if user.HasCustomLogo {
+				updateSet["hasCustomLogo"] = false
+			}
+		}
+		_, _ = usersCollection.UpdateOne(context.Background(), bson.M{"_id": userObjID}, bson.M{
+			"$set": updateSet,
+		})
+	}
+
 	c.JSON(200, gin.H{
 		"success":        true,
 		"logos":          validLogos,
-		"businessLogo":   user.BusinessLogo,
+		"businessLogo":   businessLogo,
 		"hasCustomLogo":  user.HasCustomLogo,
 		"totalGenerated": len(user.GeneratedLogos),
 	})
@@ -213,6 +238,56 @@ func (h *LogoHandler) GetLogoStatus(c *gin.Context) {
 			"limit":        h.DailyLimit,
 			"used":         user.LogoGenerationCount.Count,
 			"remaining":    h.DailyLimit - user.LogoGenerationCount.Count,
+			"resetTime":    tomorrow.Format(time.RFC3339),
+			"resetInHours": int(tomorrow.Sub(now).Hours()),
+		},
+	})
+}
+
+func (h *LogoHandler) ResetLogoLimit(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	now := time.Now()
+	usersCollection := database.GetDB().Collection("users")
+
+	result, err := usersCollection.UpdateOne(context.Background(), bson.M{"_id": userObjID}, bson.M{
+		"$set": bson.M{
+			"logoGenerationCount": bson.M{
+				"count":         0,
+				"lastResetDate": now,
+			},
+		},
+	})
+	if err != nil {
+		c.JSON(500, gin.H{
+			"success": false,
+			"error":   "Failed to reset limit",
+			"message": err.Error(),
+		})
+		return
+	}
+	if result.MatchedCount == 0 {
+		c.JSON(404, gin.H{
+			"success": false,
+			"error":   "User not found",
+			"message": "No user found for reset-limit request",
+		})
+		return
+	}
+
+	tomorrow := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
+	c.JSON(200, gin.H{
+		"success": true,
+		"message": "Logo generation limit reset successfully",
+		"status": gin.H{
+			"limit":        h.DailyLimit,
+			"used":         0,
+			"remaining":    h.DailyLimit,
 			"resetTime":    tomorrow.Format(time.RFC3339),
 			"resetInHours": int(tomorrow.Sub(now).Hours()),
 		},
@@ -383,6 +458,66 @@ func generateUUID() string {
 	b := make([]byte, 16)
 	rand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+func isRenderableLogo(logo models.GeneratedLogo) bool {
+	if isLegacyTemplatePath(logo.URL) || isLegacyTemplatePath(logo.FilePath) {
+		return false
+	}
+
+	if strings.HasPrefix(strings.ToLower(logo.URL), "http://") || strings.HasPrefix(strings.ToLower(logo.URL), "https://") {
+		return true
+	}
+
+	candidatePath := strings.TrimSpace(logo.FilePath)
+	if candidatePath == "" {
+		switch {
+		case strings.HasPrefix(logo.URL, "/uploads/"):
+			candidatePath = strings.TrimPrefix(logo.URL, "/")
+		case strings.HasPrefix(logo.URL, "uploads/"):
+			candidatePath = logo.URL
+		default:
+			return false
+		}
+	}
+
+	candidatePath = filepath.Clean(candidatePath)
+	if !filepath.IsAbs(candidatePath) {
+		candidatePath = filepath.Join(".", candidatePath)
+	}
+
+	info, err := os.Stat(candidatePath)
+	return err == nil && !info.IsDir()
+}
+
+func isRenderableLogoURL(urlValue string) bool {
+	if isLegacyTemplatePath(urlValue) {
+		return false
+	}
+
+	lowerURL := strings.ToLower(strings.TrimSpace(urlValue))
+	if strings.HasPrefix(lowerURL, "http://") || strings.HasPrefix(lowerURL, "https://") {
+		return true
+	}
+
+	if strings.HasPrefix(urlValue, "/uploads/") || strings.HasPrefix(urlValue, "uploads/") {
+		candidatePath := strings.TrimPrefix(urlValue, "/")
+		candidatePath = filepath.Clean(candidatePath)
+		if !filepath.IsAbs(candidatePath) {
+			candidatePath = filepath.Join(".", candidatePath)
+		}
+		info, err := os.Stat(candidatePath)
+		return err == nil && !info.IsDir()
+	}
+
+	return false
+}
+
+func isLegacyTemplatePath(value string) bool {
+	lowerValue := strings.ToLower(value)
+	return strings.Contains(value, "${") ||
+		strings.Contains(lowerValue, "%7b") ||
+		strings.Contains(lowerValue, "%7d")
 }
 
 func generateWithPollinations(prompt, outputPath, apiKey string) error {

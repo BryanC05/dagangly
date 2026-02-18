@@ -2,20 +2,17 @@ package middleware
 
 import (
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret string
-
-func init() {
-	jwtSecret = os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		jwtSecret = "your-secret-key"
+func normalizeJWTSecret(jwtSecret string) string {
+	if strings.TrimSpace(jwtSecret) == "" {
+		return "your-secret-key"
 	}
+	return jwtSecret
 }
 
 type Claims struct {
@@ -25,7 +22,9 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func AuthRequired() gin.HandlerFunc {
+func AuthRequired(jwtSecret string) gin.HandlerFunc {
+	secret := normalizeJWTSecret(jwtSecret)
+
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -43,7 +42,7 @@ func AuthRequired() gin.HandlerFunc {
 
 		claims := &Claims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(jwtSecret), nil
+			return []byte(secret), nil
 		})
 
 		if err != nil || !token.Valid {
