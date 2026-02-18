@@ -1,0 +1,57 @@
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Secrets and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.asc
+*.gpg
+*.kdbx
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+authorized_keys
+known_hosts
+
+# Cloud and platform credentials
+**/.aws/
+**/.azure/
+**/.gcp/
+**/.config/gcloud/
+**/.kube/config
+**/.docker/config.json
+**/.npmrc
+**/.pypirc
+**/.netrc
+
+# Infrastructure secrets and local overrides
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+secrets*.yml
+secrets*.yaml
+secret*.yml
+secret*.yaml
+*.secrets.*
+
+# Sensitive local data and dumps
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+*.dump
+*.bak
+*.backup
+*.old
