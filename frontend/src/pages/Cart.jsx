@@ -33,7 +33,6 @@ function Cart() {
     const [notes, setNotes] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('cash');
     const [deliveryType, setDeliveryType] = useState('delivery');
-    const [isPreorder, setIsPreorder] = useState(false);
     const [preorderTime, setPreorderTime] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -104,8 +103,8 @@ function Cart() {
                 notes,
                 paymentMethod,
                 deliveryType,
-                isPreorder: isPreorder || false,
-                preorderTime: preorderTime ? new Date(preorderTime).toISOString() : null
+                isPreorder: !!preorderTime,
+                preorderTime: preorderTime || null
             };
 
             await api.post('/orders', orderData);
@@ -248,46 +247,34 @@ function Cart() {
                         <Separator />
 
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-base font-semibold flex items-center gap-2">
+                            <div>
+                                <Label className="text-base font-semibold flex items-center gap-2 mb-3">
                                     <Clock className="h-5 w-5" />
-                                    Preorder / Schedule Pickup
+                                    {deliveryType === 'pickup' ? 'When do you want to pick up?' : 'When should we deliver?'}
                                 </Label>
-                                <div 
-                                    className={`px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
-                                        isPreorder 
-                                            ? 'bg-primary text-primary-foreground' 
-                                            : 'bg-secondary text-secondary-foreground'
-                                    }`}
-                                    onClick={() => setIsPreorder(!isPreorder)}
-                                >
-                                    {isPreorder ? 'Enabled' : 'Enable'}
-                                </div>
+                                <Input
+                                    type="time"
+                                    value={preorderTime}
+                                    onChange={(e) => setPreorderTime(e.target.value)}
+                                    className="h-12 text-base"
+                                />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {deliveryType === 'pickup' 
+                                        ? 'Tell the seller when you plan to pick up your order'
+                                        : 'Tell the driver when to deliver your order'
+                                    }
+                                </p>
                             </div>
 
-                            {isPreorder && (
-                                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg space-y-4">
-                                    <p className="text-sm text-amber-800">
-                                        Schedule when you want to pick up or when your food should be ready. 
-                                        The seller will prepare your order in advance.
-                                    </p>
-                                    <div>
-                                        <Label className="text-base mb-2 block">
-                                            {deliveryType === 'pickup' ? 'Pickup Time' : 'Delivery Time'}
-                                        </Label>
-                                        <Input
-                                            type="datetime-local"
-                                            value={preorderTime}
-                                            onChange={(e) => setPreorderTime(e.target.value)}
-                                            className="h-12 text-base"
-                                            min={new Date().toISOString().slice(0, 16)}
-                                        />
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            Select date and time - seller will prepare your order by this time
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
+                            <div>
+                                <Label className="text-base font-semibold mb-2 block">Note for seller (optional)</Label>
+                                <Textarea
+                                    placeholder="Any special requests? e.g., extra spicy, no onions, etc."
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    className="text-base min-h-[80px]"
+                                />
+                            </div>
                         </div>
 
                         {deliveryType === 'delivery' && (
@@ -364,31 +351,10 @@ function Cart() {
                                 </div>
                             ))}
                         </div>
-                        <div className="pt-4">
-                            <Label className="text-base mb-2 block">{t('cart.notes')}</Label>
-                            <Textarea
-                                placeholder={t('cart.notesPlaceholder')}
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                className="text-base min-h-[100px]"
-                            />
-                        </div>
                     </div>
                 );
 
             case 4:
-                const formatPreorderTime = (datetimeStr) => {
-                    if (!datetimeStr) return null;
-                    const date = new Date(datetimeStr);
-                    return date.toLocaleString('id-ID', { 
-                        weekday: 'short', 
-                        day: 'numeric', 
-                        month: 'short', 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                };
-
                 return (
                     <div className="space-y-6">
                         <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -414,16 +380,13 @@ function Cart() {
                                     </div>
                                 </div>
 
-                                {isPreorder && preorderTime && (
+                                {preorderTime && (
                                     <>
                                         <Separator />
                                         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
                                             <p className="text-sm text-amber-800 font-medium flex items-center gap-2">
                                                 <Clock className="h-4 w-4" />
-                                                Preorder - {formatPreorderTime(preorderTime)}
-                                            </p>
-                                            <p className="text-xs text-amber-700 mt-1">
-                                                Seller will prepare your order by this time
+                                                {deliveryType === 'pickup' ? 'Pickup at' : 'Delivery at'}: {preorderTime}
                                             </p>
                                         </div>
                                     </>

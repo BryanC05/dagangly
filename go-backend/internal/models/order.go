@@ -20,12 +20,11 @@ type Order struct {
 	Notes           string             `bson:"notes" json:"notes"`
 
 	// Delivery options
-	DeliveryType string     `bson:"deliveryType" json:"deliveryType"` // "delivery" or "pickup"
-	PickupTime   *time.Time `bson:"pickupTime" json:"pickupTime"`     // For preorder/pickup
+	DeliveryType string `bson:"deliveryType" json:"deliveryType"` // "delivery" or "pickup"
 
 	// Preorder for food
-	IsPreorder   bool       `bson:"isPreorder" json:"isPreorder"`
-	PreorderTime *time.Time `bson:"preorderTime" json:"preorderTime"` // When food should be ready
+	IsPreorder   bool   `bson:"isPreorder" json:"isPreorder"`
+	PreorderTime string `bson:"preorderTime" json:"preorderTime"` // Time like "14:30" when food should be ready
 
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 	UpdatedAt time.Time `bson:"updatedAt" json:"updatedAt"`
