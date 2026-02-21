@@ -188,12 +188,15 @@ export const useCartStore = create(
         
         items.forEach(item => {
           const sellerId = item.product.seller?._id || item.product.seller?.id;
-          const sellerName = item.product.seller?.businessName || item.product.seller?.name || 'Unknown Store';
+          const businessName = item.product.seller?.businessName;
+          const sellerName = item.product.seller?.name;
+          const storeName = businessName && businessName.trim() !== '' ? businessName.trim() : (sellerName || 'Unknown Store');
           
           if (!sellerMap[sellerId]) {
             sellerMap[sellerId] = {
               sellerId,
-              sellerName,
+              sellerName: storeName,
+              sellerRealName: sellerName || 'Unknown',
               items: [],
             };
           }

@@ -415,6 +415,7 @@ function Cart() {
                         {sellerGroups.map((group) => {
                             const isExpanded = expandedSellers[group.sellerId] !== false;
                             const sellerTotal = getSellerTotal(group.sellerId);
+                            const hasStoreName = group.sellerName !== group.sellerRealName && group.sellerRealName !== 'Unknown';
                             
                             return (
                                 <Card key={group.sellerId}>
@@ -429,6 +430,9 @@ function Cart() {
                                                 </div>
                                                 <div>
                                                     <h3 className="font-semibold text-lg">{group.sellerName}</h3>
+                                                    {hasStoreName && (
+                                                        <p className="text-xs text-muted-foreground">by {group.sellerRealName}</p>
+                                                    )}
                                                     <p className="text-sm text-muted-foreground">{group.items.length} items</p>
                                                 </div>
                                             </div>

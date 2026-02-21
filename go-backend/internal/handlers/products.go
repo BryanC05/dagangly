@@ -111,10 +111,38 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 		return
 	}
 
+	usersCollection := database.GetDB().Collection("users")
+	type SellerInfo struct {
+		ID           primitive.ObjectID `json:"_id" bson:"_id"`
+		Name         string             `json:"name" bson:"name"`
+		BusinessName string             `json:"businessName" bson:"businessName"`
+		Phone        string             `json:"phone" bson:"phone"`
+		Location     models.Location    `json:"location" bson:"location"`
+		Rating       float64            `json:"rating" bson:"rating"`
+		IsVerified   bool               `json:"isVerified" bson:"isVerified"`
+	}
+
+	type ProductWithSeller struct {
+		models.Product `bson:",inline"`
+		Seller         SellerInfo `json:"seller" bson:"seller"`
+	}
+
+	var productsWithSellers []ProductWithSeller
+	for _, product := range products {
+		var sellerInfo SellerInfo
+		usersCollection.FindOne(context.Background(), bson.M{"_id": product.Seller}).Decode(&sellerInfo)
+
+		pws := ProductWithSeller{
+			Product: product,
+			Seller:  sellerInfo,
+		}
+		productsWithSellers = append(productsWithSellers, pws)
+	}
+
 	total, _ := collection.CountDocuments(context.Background(), query)
 
 	c.JSON(200, gin.H{
-		"products": products,
+		"products": productsWithSellers,
 		"pagination": gin.H{
 			"page":  page,
 			"limit": limit,
@@ -133,6 +161,7 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	}
 
 	collection := database.GetDB().Collection("products")
+	usersCollection := database.GetDB().Collection("users")
 	var product models.Product
 	err = collection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&product)
 	if err != nil {
@@ -140,7 +169,40 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, product)
+	type SellerInfo struct {
+		ID           primitive.ObjectID `json:"_id" bson:"_id"`
+		Name         string             `json:"name" bson:"name"`
+		BusinessName string             `json:"businessName" bson:"businessName"`
+		Phone        string             `json:"phone" bson:"phone"`
+		Location     models.Location    `json:"location" bson:"location"`
+		Rating       float64            `json:"rating" bson:"rating"`
+		IsVerified   bool               `json:"isVerified" bson:"isVerified"`
+	}
+
+	var sellerInfo SellerInfo
+	usersCollection.FindOne(context.Background(), bson.M{"_id": product.Seller}).Decode(&sellerInfo)
+
+	c.JSON(200, gin.H{
+		"_id":          product.ID,
+		"name":         product.Name,
+		"description":  product.Description,
+		"price":        product.Price,
+		"category":     product.Category,
+		"stock":        product.Stock,
+		"unit":         product.Unit,
+		"images":       product.Images,
+		"tags":         product.Tags,
+		"location":     product.Location,
+		"hasVariants":  product.HasVariants,
+		"variants":     product.Variants,
+		"optionGroups": product.OptionGroups,
+		"rating":       product.Rating,
+		"totalReviews": product.TotalReviews,
+		"isAvailable":  product.IsAvailable,
+		"createdAt":    product.CreatedAt,
+		"updatedAt":    product.UpdatedAt,
+		"seller":       sellerInfo,
+	})
 }
 
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
