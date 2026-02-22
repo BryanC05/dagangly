@@ -8,6 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useDriverStore } from '../../store/driverStore';
 import { useTheme } from '../../theme/ThemeContext';
 import { getImageUrl } from '../../utils/helpers';
 import api from '../../api/api';
@@ -16,10 +17,12 @@ export default function ProfileScreen({ navigation }) {
     const { user, logout, setUser } = useAuthStore();
     const { isDarkMode, toggleTheme, initTheme } = useThemeStore();
     const { t, language, toggleLanguage, initLanguage } = useLanguageStore();
+    const { isDriverMode, stats, initDriverMode, toggleDriverMode } = useDriverStore();
     const { colors } = useTheme();
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [togglingDriver, setTogglingDriver] = useState(false);
     const [form, setForm] = useState({
         name: user?.name || '',
         phone: user?.phone || '',
@@ -29,6 +32,7 @@ export default function ProfileScreen({ navigation }) {
     useEffect(() => {
         initTheme();
         initLanguage();
+        initDriverMode();
     }, []);
 
     useEffect(() => {
@@ -174,6 +178,15 @@ export default function ProfileScreen({ navigation }) {
         ]);
     };
 
+    const handleToggleDriverMode = async () => {
+        setTogglingDriver(true);
+        const result = await toggleDriverMode(!isDriverMode);
+        setTogglingDriver(false);
+        if (!result.success) {
+            Alert.alert(t.error, result.error);
+        }
+    };
+
     const profileImageUri = user?.profileImage
         ? (user.profileImage.startsWith('data:') ? user.profileImage : getImageUrl(user.profileImage))
         : null;
@@ -181,6 +194,7 @@ export default function ProfileScreen({ navigation }) {
     const menuItems = [
         { icon: 'chatbubbles-outline', label: t.messages, onPress: () => navigation.navigate('Messages'), color: '#0ea5e9' },
         { icon: 'receipt-outline', label: t.orderHistory, onPress: () => navigation.navigate('Orders'), color: '#3b82f6' },
+        { icon: 'bicycle-outline', label: t.driverMode || 'Driver Mode', onPress: handleToggleDriverMode, color: '#10b981', isToggle: true, toggleValue: isDriverMode, isLoading: togglingDriver },
         { icon: 'location-outline', label: t.nearbySellers, onPress: () => navigation.navigate('NearbySellers'), color: '#ef4444' },
         { icon: 'color-palette-outline', label: t.logoGenerator, onPress: () => navigation.navigate('LogoGenerator'), color: '#8b5cf6' },
         ...(user?.isSeller ? [{
@@ -288,19 +302,53 @@ export default function ProfileScreen({ navigation }) {
                 )}
             </View>
 
+            {isDriverMode && (
+                <TouchableOpacity 
+                    style={[styles.menuSection, { marginTop: 16 }]}
+                    onPress={() => navigation.getParent()?.navigate('DeliveryTab')}
+                    activeOpacity={0.7}
+                >
+                    <View style={[styles.menuItem, { borderBottomWidth: 0 }]}>
+                        <View style={[styles.menuIcon, { backgroundColor: `${colors.success}15` }]}>
+                            <Ionicons name="bicycle" size={20} color={colors.success} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.menuLabel}>{t.driverStats || 'Driver Stats'}</Text>
+                            <View style={{ flexDirection: 'row', marginTop: 6, gap: 16 }}>
+                                <View>
+                                    <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>{stats.totalDeliveries}</Text>
+                                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>{t.deliveries || 'Deliveries'}</Text>
+                                </View>
+                                <View>
+                                    <Text style={{ fontSize: 16, fontWeight: '700', color: colors.success }}>Rp {(stats.totalEarnings || 0).toLocaleString('id-ID')}</Text>
+                                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>{t.earned || 'Earned'}</Text>
+                                </View>
+                                <View>
+                                    <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>{stats.rating?.toFixed(1) || '5.0'}</Text>
+                                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>{t.rating || 'Rating'}</Text>
+                                </View>
+                            </View>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+                    </View>
+                </TouchableOpacity>
+            )}
+
             <View style={styles.menuSection}>
                 {menuItems.map((item, idx) => (
                     <TouchableOpacity
                         key={idx}
                         style={styles.menuItem}
                         onPress={item.isToggle ? item.onPress : () => item.onPress && item.onPress()}
-                        disabled={item.isToggle}
+                        disabled={item.isToggle && item.isLoading}
                     >
                         <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
                             <Ionicons name={item.icon} size={20} color={item.color} />
                         </View>
                         <Text style={styles.menuLabel}>{item.label}</Text>
-                        {item.isToggle ? (
+                        {item.isLoading ? (
+                            <ActivityIndicator size="small" color={item.color} />
+                        ) : item.isToggle ? (
                             <Switch
                                 value={item.toggleValue}
                                 onValueChange={item.onPress}

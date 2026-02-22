@@ -1,0 +1,17 @@
+{
+  "name": "msme-marketplace-go-backend-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Helper scripts for go-backend data operations",
+  "scripts": {
+    "clear-db": "node clear-db.js",
+    "seed:food": "node seed-food-simulation.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "mongodb": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

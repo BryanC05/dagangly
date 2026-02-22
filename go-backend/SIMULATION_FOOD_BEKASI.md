@@ -4,6 +4,7 @@ Seed script:
 
 ```bash
 cd go-backend
+npm install
 node seed-food-simulation.js
 ```
 
@@ -11,6 +12,7 @@ Database cleanup before reseed (optional):
 
 ```bash
 cd go-backend
+npm install
 node clear-db.js
 ```
 

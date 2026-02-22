@@ -227,6 +227,10 @@ func (c *Client) readPump() {
 			c.handleTyping(msg)
 		case "stop-typing":
 			c.handleStopTyping(msg)
+		case "driver-location":
+			c.handleDriverLocation(msg)
+		case "join-order-tracking":
+			c.handleJoinOrderTracking(msg)
 		}
 	}
 }
@@ -362,6 +366,102 @@ func (c *Client) handleStopTyping(msg Message) {
 		},
 	}
 	c.hub.broadcast <- broadcastMsg
+}
+
+func (c *Client) handleDriverLocation(msg Message) {
+	orderID, ok := msg.Data.(map[string]interface{})["orderId"].(string)
+	if !ok {
+		return
+	}
+
+	lat, latOk := msg.Data.(map[string]interface{})["latitude"].(float64)
+	lng, lngOk := msg.Data.(map[string]interface{})["longitude"].(float64)
+	if !latOk || !lngOk {
+		return
+	}
+
+	orderObjID, err := primitive.ObjectIDFromHex(orderID)
+	if err != nil {
+		return
+	}
+
+	driverObjID, _ := primitive.ObjectIDFromHex(c.userID)
+	ordersCollection := database.GetDB().Collection("orders")
+	var order models.Order
+	err = ordersCollection.FindOne(context.Background(), bson.M{
+		"_id":       orderObjID,
+		"claimedBy": driverObjID,
+	}).Decode(&order)
+	if err != nil {
+		return
+	}
+
+	ordersCollection.UpdateOne(
+		context.Background(),
+		bson.M{"_id": orderObjID},
+		bson.M{
+			"$set": bson.M{
+				"driverLocation": bson.M{
+					"latitude":  lat,
+					"longitude": lng,
+					"timestamp": time.Now(),
+				},
+			},
+		},
+	)
+
+	broadcastMsg := &Message{
+		Type:   "driver-location-update",
+		RoomID: "order-" + orderID,
+		Data: map[string]interface{}{
+			"orderId":   orderID,
+			"latitude":  lat,
+			"longitude": lng,
+			"timestamp": time.Now(),
+		},
+	}
+	c.hub.broadcast <- broadcastMsg
+}
+
+func (c *Client) handleJoinOrderTracking(msg Message) {
+	orderID, ok := msg.Data.(string)
+	if !ok {
+		return
+	}
+
+	orderObjID, err := primitive.ObjectIDFromHex(orderID)
+	if err != nil {
+		return
+	}
+
+	ordersCollection := database.GetDB().Collection("orders")
+	var order models.Order
+	err = ordersCollection.FindOne(context.Background(), bson.M{"_id": orderObjID}).Decode(&order)
+	if err != nil {
+		return
+	}
+
+	if order.Buyer.Hex() != c.userID {
+		return
+	}
+
+	roomID := "order-" + orderID
+	c.hub.JoinRoom(c, roomID)
+
+	if order.DriverLocation != nil {
+		locationMsg := &Message{
+			Type:   "driver-location-update",
+			RoomID: roomID,
+			Data: map[string]interface{}{
+				"orderId":   orderID,
+				"latitude":  order.DriverLocation.Latitude,
+				"longitude": order.DriverLocation.Longitude,
+				"timestamp": order.DriverLocation.Timestamp,
+			},
+		}
+		data, _ := json.Marshal(locationMsg)
+		c.send <- data
+	}
 }
 
 var hub *Hub

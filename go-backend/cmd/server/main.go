@@ -50,6 +50,7 @@ func main() {
 	userHandler := handlers.NewUserHandler()
 	productHandler := handlers.NewProductHandler()
 	orderHandler := handlers.NewOrderHandler()
+	driverHandler := handlers.NewDriverHandler()
 	chatHandler := handlers.NewChatHandler()
 	forumHandler := handlers.NewForumHandler()
 	workflowHandler := handlers.NewWorkflowHandler()
@@ -118,6 +119,30 @@ func main() {
 			orders.POST("/:id/driver/assign", orderHandler.AssignDriver)
 
 			orders.POST("/", orderHandler.CreateOrder)
+		}
+
+		driver := api.Group("/driver")
+		driver.Use(middleware.AuthRequired(cfg.JWTSecret))
+		{
+			driver.POST("/toggle", driverHandler.ToggleDriverMode)
+			driver.GET("/profile", driverHandler.GetDriverProfile)
+			driver.PUT("/profile", driverHandler.UpdateDriverProfile)
+			driver.PUT("/location", driverHandler.UpdateDriverLocation)
+			driver.PUT("/push-token", driverHandler.SavePushToken)
+			driver.GET("/stats", driverHandler.GetDriverStats)
+			driver.GET("/available-orders", driverHandler.GetAvailableOrders)
+			driver.POST("/claim/:id", driverHandler.ClaimOrder)
+			driver.GET("/active-delivery", driverHandler.GetActiveDelivery)
+			driver.POST("/status/:id", driverHandler.UpdateDeliveryStatus)
+			driver.POST("/complete/:id", driverHandler.CompleteDelivery)
+			driver.GET("/history", driverHandler.GetDeliveryHistory)
+			driver.GET("/earnings", driverHandler.GetEarningsHistory)
+		}
+
+		driverRating := api.Group("/driver-rating")
+		driverRating.Use(middleware.AuthRequired(cfg.JWTSecret))
+		{
+			driverRating.POST("/:orderId", driverHandler.RateDriver)
 		}
 
 		chat := api.Group("/chat")

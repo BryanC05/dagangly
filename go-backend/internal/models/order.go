@@ -27,20 +27,40 @@ type Order struct {
 	PreorderTime string `bson:"preorderTime" json:"preorderTime"` // Time like "14:30" when food should be ready
 
 	// Driver tracking for delivery
-	DriverID       *primitive.ObjectID `bson:"driverId,omitempty" json:"driverId,omitempty"`
-	DriverLocation *DriverLocation     `bson:"driverLocation,omitempty" json:"driverLocation,omitempty"`
-	DriverName     string              `bson:"driverName,omitempty" json:"driverName,omitempty"`
-	DriverPhone    string              `bson:"driverPhone,omitempty" json:"driverPhone,omitempty"`
+	DriverID       *primitive.ObjectID  `bson:"driverId,omitempty" json:"driverId,omitempty"`
+	ClaimedBy      *primitive.ObjectID  `bson:"claimedBy,omitempty" json:"claimedBy,omitempty"`
+	DriverLocation *OrderDriverLocation `bson:"driverLocation,omitempty" json:"driverLocation,omitempty"`
+	DriverName     string               `bson:"driverName,omitempty" json:"driverName,omitempty"`
+	DriverPhone    string               `bson:"driverPhone,omitempty" json:"driverPhone,omitempty"`
+
+	// Delivery timing
+	ClaimedAt   *time.Time `bson:"claimedAt,omitempty" json:"claimedAt,omitempty"`
+	PickupAt    *time.Time `bson:"pickupAt,omitempty" json:"pickupAt,omitempty"`
+	DeliveredAt *time.Time `bson:"deliveredAt,omitempty" json:"deliveredAt,omitempty"`
+
+	// Fee calculation
+	DeliveryFee    float64 `bson:"deliveryFee" json:"deliveryFee"`
+	DriverEarnings float64 `bson:"driverEarnings" json:"driverEarnings"`
+
+	// Distance estimation
+	EstimatedDistance float64 `bson:"estimatedDistance" json:"estimatedDistance"` // km
+	EstimatedDuration int     `bson:"estimatedDuration" json:"estimatedDuration"` // minutes
 
 	// Delivery progress tracking
 	DeliveryProgress []DeliveryProgressPoint `bson:"deliveryProgress,omitempty" json:"deliveryProgress,omitempty"`
 	EstimatedArrival *time.Time              `bson:"estimatedArrival,omitempty" json:"estimatedArrival,omitempty"`
 
+	// Delivery proof
+	PickupImage   string `bson:"pickupImage,omitempty" json:"pickupImage,omitempty"`
+	DeliveryImage string `bson:"deliveryImage,omitempty" json:"deliveryImage,omitempty"`
+	DeliveryNotes string `bson:"deliveryNotes,omitempty" json:"deliveryNotes,omitempty"`
+
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 	UpdatedAt time.Time `bson:"updatedAt" json:"updatedAt"`
 }
 
-type DriverLocation struct {
+// DriverLocation in order context
+type OrderDriverLocation struct {
 	Latitude  float64   `bson:"latitude" json:"latitude"`
 	Longitude float64   `bson:"longitude" json:"longitude"`
 	Timestamp time.Time `bson:"timestamp" json:"timestamp"`

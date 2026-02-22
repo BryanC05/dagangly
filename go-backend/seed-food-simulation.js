@@ -260,7 +260,7 @@ function requireDependency(packageName) {
   const candidates = [
     packageName,
     path.join(__dirname, 'node_modules', packageName),
-    path.join(__dirname, '..', 'backend', 'node_modules', packageName),
+    path.join(__dirname, '..', 'node_modules', packageName),
   ];
 
   for (const candidate of candidates) {
@@ -272,7 +272,7 @@ function requireDependency(packageName) {
   }
 
   throw new Error(
-    `Cannot find dependency "${packageName}". Install backend deps with "cd backend && npm install".`
+    `Cannot find dependency "${packageName}". Run "cd go-backend && npm install" first.`
   );
 }
 

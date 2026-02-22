@@ -66,7 +66,7 @@ function SellerProductTracking() {
   };
 
   const formatCurrency = (amount) => {
-    return `₹${(amount || 0).toLocaleString('en-IN')}`;
+    return `Rp ${(amount || 0).toLocaleString('id-ID')}`;
   };
 
   // Filter products based on search term and status

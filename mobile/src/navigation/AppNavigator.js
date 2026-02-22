@@ -6,6 +6,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useCartStore } from '../store/cartStore';
 import { useThemeStore } from '../store/themeStore';
 import { useLanguageStore } from '../store/languageStore';
+import { useDriverStore } from '../store/driverStore';
 
 // Screens
 import HomeScreen from '../screens/home/HomeScreen';
@@ -26,6 +27,7 @@ import BusinessDetailsScreen from '../screens/seller/BusinessDetailsScreen';
 import MapViewScreen from '../screens/location/MapViewScreen';
 import NearbySellersScreen from '../screens/location/NearbySellersScreen';
 import LiveTrackingMap from '../screens/location/LiveTrackingMap';
+import DeliveryHubScreen from '../screens/delivery/DeliveryHubScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -33,6 +35,7 @@ const ProductsStack = createNativeStackNavigator();
 const CartStack = createNativeStackNavigator();
 const AddStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
+const DeliveryStack = createNativeStackNavigator();
 
 // Stack Navigators
 function HomeStackNavigator() {
@@ -166,6 +169,25 @@ function AddStackNavigator() {
                 options={{ headerShown: false }}
             />
         </AddStack.Navigator>
+    );
+}
+
+function DeliveryStackNavigator() {
+    const { colors } = useThemeStore();
+    const { t } = useLanguageStore();
+    return (
+        <DeliveryStack.Navigator
+            screenOptions={{
+                contentStyle: { backgroundColor: colors.background },
+                animation: 'slide_from_right',
+            }}
+        >
+            <DeliveryStack.Screen
+                name="DeliveryHub"
+                component={DeliveryHubScreen}
+                options={{ headerShown: false }}
+            />
+        </DeliveryStack.Navigator>
     );
 }
 
@@ -319,6 +341,17 @@ function CartBadge() {
     );
 }
 
+// Delivery badge component
+function DeliveryBadge() {
+    const { isDriverMode, activeDelivery } = useDriverStore();
+    if (!isDriverMode || !activeDelivery) return null;
+    return (
+        <View style={[badgeStyles.badge, { backgroundColor: '#10b981' }]}>
+            <Text style={badgeStyles.text}>1</Text>
+        </View>
+    );
+}
+
 const badgeStyles = StyleSheet.create({
     badge: {
         position: 'absolute', top: -4, right: -8,
@@ -345,6 +378,8 @@ export default function AppNavigator() {
                         navigation.navigate('HomeTab', { screen: 'Home', params: { reset: true } });
                     } else if (isFocused && route.name === 'CartTab') {
                         navigation.navigate('CartTab', { screen: 'CartMain', params: { reset: true } });
+                    } else if (isFocused && route.name === 'DeliveryTab') {
+                        navigation.navigate('DeliveryTab', { screen: 'DeliveryHub', params: { reset: true } });
                     } else if (isFocused && route.name === 'ProfileTab') {
                         navigation.navigate('ProfileTab', { screen: 'ProfileMain', params: { reset: true } });
                     } else {
@@ -358,6 +393,7 @@ export default function AppNavigator() {
                         case 'HomeTab': iconName = focused ? 'home' : 'home-outline'; break;
                         case 'ProductsTab': iconName = focused ? 'grid' : 'grid-outline'; break;
                         case 'CartTab': iconName = focused ? 'cart' : 'cart-outline'; break;
+                        case 'DeliveryTab': iconName = focused ? 'bicycle' : 'bicycle-outline'; break;
                         case 'AddTab': iconName = focused ? 'add-circle' : 'add-circle-outline'; break;
                         case 'ProfileTab': iconName = focused ? 'person' : 'person-outline'; break;
                         default: iconName = 'ellipse';
@@ -366,6 +402,7 @@ export default function AppNavigator() {
                         <View>
                             <Ionicons name={iconName} size={22} color={color} />
                             {route.name === 'CartTab' && <CartBadge />}
+                            {route.name === 'DeliveryTab' && <DeliveryBadge />}
                         </View>
                     );
                 },
@@ -390,6 +427,7 @@ export default function AppNavigator() {
             <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ tabBarLabel: t.tabHome }} />
             <Tab.Screen name="ProductsTab" component={ProductsStackNavigator} options={{ tabBarLabel: t.tabProducts }} />
             <Tab.Screen name="CartTab" component={CartStackNavigator} options={{ tabBarLabel: t.tabCart }} />
+            <Tab.Screen name="DeliveryTab" component={DeliveryStackNavigator} options={{ tabBarLabel: t.tabDelivery || 'Delivery' }} />
             <Tab.Screen name="AddTab" component={AddStackNavigator} options={{ tabBarLabel: t.tabAdd }} />
             <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: t.tabProfile }} />
         </Tab.Navigator>

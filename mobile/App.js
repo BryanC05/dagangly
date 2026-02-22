@@ -7,6 +7,7 @@ import { useAuthStore } from './src/store/authStore';
 import { useCartStore } from './src/store/cartStore';
 import { useThemeStore } from './src/store/themeStore';
 import { useLanguageStore } from './src/store/languageStore';
+import { useDriverStore } from './src/store/driverStore';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -16,12 +17,14 @@ export default function App() {
   const loadCart = useCartStore((s) => s.loadCart);
   const { isDarkMode, colors, initTheme } = useThemeStore();
   const initLanguage = useLanguageStore((s) => s.initLanguage);
+  const initDriverMode = useDriverStore((s) => s.initDriverMode);
 
   useEffect(() => {
     initializeAuth();
     loadCart();
     initTheme();
     initLanguage();
+    initDriverMode();
   }, []);
 
   // Custom navigation theme to prevent white flashes

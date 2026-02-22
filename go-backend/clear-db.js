@@ -63,7 +63,7 @@ function requireMongoClient() {
   const candidates = [
     'mongodb',
     path.join(__dirname, 'node_modules', 'mongodb'),
-    path.join(__dirname, '..', 'backend', 'node_modules', 'mongodb'),
+    path.join(__dirname, '..', 'node_modules', 'mongodb'),
   ];
 
   for (const candidate of candidates) {
@@ -78,7 +78,7 @@ function requireMongoClient() {
   }
 
   throw new Error(
-    'Cannot find the "mongodb" package. Install it in this repo or run "npm install" in /backend first.'
+    'Cannot find the "mongodb" package. Run "cd go-backend && npm install" first.'
   );
 }
 

@@ -10,10 +10,11 @@ import api from '../../api/api';
 import { getImageUrl, formatPrice, formatDate } from '../../utils/helpers';
 import { PLACEHOLDER_IMAGE } from '../../config';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import DriverRatingModal from '../../components/DriverRatingModal';
 
+const DELIVERY_STATUSES = ['claimed', 'picked_up', 'on_the_way', 'arrived'];
 
-
-export default function OrdersScreen() {
+export default function OrdersScreen({ navigation }) {
     const { colors } = useThemeStore();
     const { t } = useLanguageStore();
     const STATUS_COLORS = {
@@ -21,6 +22,10 @@ export default function OrdersScreen() {
         confirmed: { bg: '#dbeafe', text: '#1e40af', label: t.confirmed },
         preparing: { bg: '#e0e7ff', text: '#3730a3', label: t.preparing },
         ready: { bg: '#e0e7ff', text: '#3730a3', label: t.ready },
+        claimed: { bg: '#fef3c7', text: '#92400e', label: t.claimed || 'Claimed' },
+        picked_up: { bg: '#ddd6fe', text: '#6d28d9', label: t.pickedUp || 'Picked Up' },
+        on_the_way: { bg: '#cffafe', text: '#0e7490', label: t.onTheWay || 'On the Way' },
+        arrived: { bg: '#d1fae5', text: '#065f46', label: t.arrived || 'Arrived' },
         delivered: { bg: '#d1fae5', text: '#065f46', label: t.delivered },
         cancelled: { bg: '#fee2e2', text: '#991b1b', label: t.cancelled },
     };
@@ -28,6 +33,8 @@ export default function OrdersScreen() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [expandedOrders, setExpandedOrders] = useState({});
+    const [ratingModal, setRatingModal] = useState({ visible: false, orderId: null, driverName: null });
+    const [ratedOrders, setRatedOrders] = useState({});
 
     const fetchOrders = useCallback(async () => {
         try {
@@ -114,6 +121,24 @@ export default function OrdersScreen() {
         },
         totalLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' },
         totalValue: { fontSize: 16, fontWeight: '800', color: colors.text },
+        trackBtn: {
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            backgroundColor: colors.primary, paddingVertical: 10, borderRadius: 10,
+            marginTop: 12, gap: 6,
+        },
+        trackBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+        rateBtn: {
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            backgroundColor: colors.success, paddingVertical: 10, borderRadius: 10,
+            marginTop: 8, gap: 6,
+        },
+        rateBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+        ratedBadge: {
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            backgroundColor: colors.success + '20', paddingVertical: 8, borderRadius: 10,
+            marginTop: 8, gap: 4,
+        },
+        ratedText: { color: colors.success, fontSize: 13, fontWeight: '600' },
         empty: { alignItems: 'center', paddingTop: 80 },
         emptyTitle: { fontSize: 16, fontWeight: '600', color: colors.textSecondary, marginTop: 12 },
         emptyText: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
@@ -218,6 +243,42 @@ export default function OrdersScreen() {
                             <Text style={styles.totalLabel}>{t.total}</Text>
                             <Text style={styles.totalValue}>{formatPrice(order.totalAmount)}</Text>
                         </View>
+
+                        {/* Track Delivery Button */}
+                        {DELIVERY_STATUSES.includes(order.status) && order.claimedBy && (
+                            <TouchableOpacity 
+                                style={styles.trackBtn}
+                                onPress={() => navigation.navigate('LiveTracking', { orderId: order._id })}
+                            >
+                                <Ionicons name="location" size={18} color="#fff" />
+                                <Text style={styles.trackBtnText}>{t.trackDelivery || 'Track Delivery'}</Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {/* Rate Driver Button */}
+                        {order.status === 'delivered' && order.claimedBy && !order.driverRating && !ratedOrders[order._id] && (
+                            <TouchableOpacity 
+                                style={styles.rateBtn}
+                                onPress={() => setRatingModal({
+                                    visible: true,
+                                    orderId: order._id,
+                                    driverName: order.driverName,
+                                })}
+                            >
+                                <Ionicons name="star" size={18} color="#fff" />
+                                <Text style={styles.rateBtnText}>{t.rateDriver || 'Rate Driver'}</Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {/* Already Rated Badge */}
+                        {(order.driverRating || ratedOrders[order._id]) && (
+                            <View style={styles.ratedBadge}>
+                                <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+                                <Text style={styles.ratedText}>
+                                    {t.rated || 'Rated'} ⭐ {order.driverRating || ratedOrders[order._id]}
+                                </Text>
+                            </View>
+                        )}
                     </View>
                 )}
             </View>
@@ -239,6 +300,16 @@ export default function OrdersScreen() {
                         <Text style={styles.emptyText}>{t.noOrdersDesc}</Text>
                     </View>
                 }
+            />
+
+            <DriverRatingModal
+                visible={ratingModal.visible}
+                orderId={ratingModal.orderId}
+                driverName={ratingModal.driverName}
+                onClose={() => setRatingModal({ visible: false, orderId: null, driverName: null })}
+                onRated={(rating) => {
+                    setRatedOrders(prev => ({ ...prev, [ratingModal.orderId]: rating }));
+                }}
             />
         </View>
     );
