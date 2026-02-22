@@ -1,5 +1,6 @@
 import * as Location from 'expo-location';
 import { useDriverStore } from '../store/driverStore';
+import { haversineDistanceKm } from '../utils/helpers';
 
 class LocationService {
     static async requestPermissions() {
@@ -88,19 +89,7 @@ class LocationService {
     }
 
     static calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = this.toRad(lat2 - lat1);
-        const dLon = this.toRad(lon2 - lon1);
-        const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
-    }
-
-    static toRad(deg) {
-        return deg * (Math.PI / 180);
+        return haversineDistanceKm({ lat: lat1, lng: lon1 }, { lat: lat2, lng: lon2 });
     }
 
     static formatDistance(km) {

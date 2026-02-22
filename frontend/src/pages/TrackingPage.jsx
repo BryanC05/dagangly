@@ -8,7 +8,6 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import { useAuthStore } from '../store/authStore';
-import { useTranslation } from '../hooks/useTranslation';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -108,7 +107,6 @@ const statusConfig = {
 export default function TrackingPage() {
   const { orderId } = useParams();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [lastUpdated, setLastUpdated] = useState(null);
 
@@ -135,7 +133,7 @@ export default function TrackingPage() {
   });
 
   // Fetch driver location (buyer only)
-  const { data: driverLocation, isLoading: locationLoading } = useQuery({
+  const { data: driverLocation } = useQuery({
     queryKey: ['driverLocation', orderId],
     queryFn: async () => {
       const response = await api.get(`/orders/${orderId}/driver/location`);
@@ -193,7 +191,6 @@ export default function TrackingPage() {
   });
 
   const isSeller = order?.seller?._id === user?.id;
-  const isBuyer = order?.buyer?._id === user?.id;
 
   // Update driver location (seller only)
   const updateLocation = useCallback(async (position) => {

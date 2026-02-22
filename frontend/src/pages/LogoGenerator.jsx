@@ -26,7 +26,7 @@ const getLogoUrl = (url) => {
 function LogoGenerator() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   const [prompt, setPrompt] = useState('');
   const [currentBusinessLogo, setCurrentBusinessLogo] = useState(null);
@@ -62,7 +62,7 @@ function LogoGenerator() {
     const loadData = async () => {
       try {
         const historyData = await getHistory();
-        const statusData = await getStatus();
+        await getStatus();
 
         if (historyData) {
           setCurrentBusinessLogo(historyData.businessLogo);
@@ -93,7 +93,7 @@ function LogoGenerator() {
       await generateLogo(prompt);
       setPrompt('');
       setSuccessMessage('Logo generated successfully!');
-    } catch (err) {
+    } catch {
       // Error is handled by the hook
     }
   };
@@ -106,7 +106,7 @@ function LogoGenerator() {
         setHasCustomLogo(false);
         setSuccessMessage('Logo set as your business logo!');
       }
-    } catch (err) {
+    } catch {
       // Error is handled by the hook
     }
   };
@@ -117,7 +117,7 @@ function LogoGenerator() {
     try {
       await deleteLogo(logoId);
       setSuccessMessage('Logo deleted');
-    } catch (err) {
+    } catch {
       // Error is handled by the hook
     }
   };
@@ -130,7 +130,7 @@ function LogoGenerator() {
         setHasCustomLogo(true);
         setSuccessMessage('Custom logo uploaded successfully!');
       }
-    } catch (err) {
+    } catch {
       // Error is handled by the hook
     }
   };
@@ -147,7 +147,7 @@ function LogoGenerator() {
     try {
       await resetLimit();
       setSuccessMessage('Daily generation limit has been reset');
-    } catch (err) {
+    } catch {
       // Error is handled by the hook
     }
   };
@@ -155,13 +155,6 @@ function LogoGenerator() {
   const getLimitProgress = () => {
     if (!status) return 0;
     return (status.used / status.limit) * 100;
-  };
-
-  const getLimitColor = () => {
-    if (!status) return 'bg-primary';
-    if (status.remaining === 0) return 'bg-destructive';
-    if (status.remaining <= 2) return 'bg-warning';
-    return 'bg-primary';
   };
 
   return (

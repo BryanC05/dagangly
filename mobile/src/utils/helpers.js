@@ -1,4 +1,5 @@
 import { API_HOST, PLACEHOLDER_IMAGE } from '../config';
+import { EARTH_RADIUS_KM } from './constants';
 
 export const getImageUrl = (url) => {
     if (!url) return PLACEHOLDER_IMAGE;
@@ -45,4 +46,27 @@ export const formatRelativeTime = (dateString) => {
 export const truncateText = (text, maxLength = 100) => {
     if (!text || text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
+};
+
+export const haversineDistanceKm = (pointA, pointB) => {
+    if (!pointA || !pointB) return 0;
+    const toRadians = (value) => (value * Math.PI) / 180;
+    const dLat = toRadians(pointB.lat - pointA.lat);
+    const dLng = toRadians(pointB.lng - pointA.lng);
+    const lat1 = toRadians(pointA.lat);
+    const lat2 = toRadians(pointB.lat);
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return EARTH_RADIUS_KM * c;
+};
+
+export const formatDistance = (distanceKm) => {
+    if (distanceKm < 1) {
+        return `${Math.round(distanceKm * 1000)} m`;
+    }
+    return `${distanceKm.toFixed(1)} km`;
 };

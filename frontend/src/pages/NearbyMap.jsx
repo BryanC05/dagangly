@@ -1,52 +1,38 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Store, Search } from 'lucide-react';
+import { MapPin, Store, Search, Navigation, X, Clock, Route } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../utils/api';
 import { useTranslation } from '../hooks/useTranslation';
 import Layout from '@/components/layout/Layout';
+import { Button } from '@/components/ui/button';
+import { DEFAULT_LOCATION, DEFAULT_RADIUS_METERS, GEOLOCATION_TIMEOUT, GEOLOCATION_MAX_AGE, NAVIGATION_UPDATE_INTERVAL } from '../utils/constants';
+import { isValidCoordinates, haversineDistanceKm } from '../utils/helpers';
 import './NearbyMap.css';
 
-const DEFAULT_BEKASI_LOCATION = { lat: -6.2349, lng: 106.9896 };
-
-const isValidCoordinates = (coordinates) =>
-  Array.isArray(coordinates) &&
-  coordinates.length >= 2 &&
-  Number.isFinite(coordinates[0]) &&
-  Number.isFinite(coordinates[1]) &&
-  (coordinates[0] !== 0 || coordinates[1] !== 0);
-
-const haversineDistanceKm = (pointA, pointB) => {
-  if (!pointA || !pointB) return 0;
-  const toRadians = (value) => (value * Math.PI) / 180;
-  const earthRadiusKm = 6371;
-  const dLat = toRadians(pointB.lat - pointA.lat);
-  const dLng = toRadians(pointB.lng - pointA.lng);
-  const lat1 = toRadians(pointA.lat);
-  const lat2 = toRadians(pointB.lat);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return earthRadiusKm * c;
-};
+const DEFAULT_BEKASI_LOCATION = DEFAULT_LOCATION.Bekasi;
 
 function NearbyMap() {
   const [userLocation, setUserLocation] = useState(null);
   const [profileLocation, setProfileLocation] = useState(null);
-  const [radius, setRadius] = useState(25000); // 25km default for better coverage
+  const [radius, setRadius] = useState(DEFAULT_RADIUS_METERS);
   const [searchQuery, setSearchQuery] = useState('');
   const [isUsingDefaultLocation, setIsUsingDefaultLocation] = useState(false);
   const [isUsingProfileLocation, setIsUsingProfileLocation] = useState(false);
   const [mapError, setMapError] = useState(null);
   const [mapReady, setMapReady] = useState(false);
+  const [selectedSeller, setSelectedSeller] = useState(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navigationRoute, setNavigationRoute] = useState(null);
+  const [currentPosition, setCurrentPosition] = useState(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const userMarkerRef = useRef(null);
   const markersLayerRef = useRef(null);
   const radiusCircleRef = useRef(null);
+  const routeLineRef = useRef(null);
+  const navigationMarkerRef = useRef(null);
+  const watchIdRef = useRef(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -112,7 +98,7 @@ function NearbyMap() {
               console.warn('Browser geolocation unavailable, trying profile location:', error);
               resolve(false);
             },
-            { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 }
+            { timeout: GEOLOCATION_TIMEOUT, enableHighAccuracy: true, maximumAge: GEOLOCATION_MAX_AGE }
           );
         });
 
@@ -142,6 +128,36 @@ function NearbyMap() {
     };
   }, []);
 
+  // Cleanup navigation on unmount
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, []);
+
+  const stopNavigation = useCallback(() => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    setIsNavigating(false);
+    setNavigationRoute(null);
+    setSelectedSeller(null);
+    setCurrentPosition(null);
+    
+    if (routeLineRef.current && mapRef.current) {
+      mapRef.current.removeLayer(routeLineRef.current);
+      routeLineRef.current = null;
+    }
+    if (navigationMarkerRef.current && mapRef.current) {
+      mapRef.current.removeLayer(navigationMarkerRef.current);
+      navigationMarkerRef.current = null;
+    }
+  }, []);
+
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -154,7 +170,7 @@ function NearbyMap() {
       (error) => {
         console.warn('Could not refresh GPS location:', error);
       },
-      { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 }
+      { timeout: GEOLOCATION_TIMEOUT, enableHighAccuracy: true, maximumAge: GEOLOCATION_MAX_AGE }
     );
   };
 
@@ -397,16 +413,34 @@ function NearbyMap() {
             const displayName = getSellerDisplayName(seller);
             const subtitle = getSellerSubtitle(seller);
             const [lng, lat] = seller.location.coordinates;
-            const marker = L.marker([lat, lng], { icon: sellerIcon })
-              .bindPopup(`
-                <div style="min-width: 180px;">
-                  <h4 style="margin: 0 0 4px 0;">${displayName}</h4>
-                  <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${subtitle}</p>
-                  <p style="margin: 0 0 8px 0; font-size: 12px; color: #999;">${seller.location.city || ''}</p>
-                  ${seller.rating > 0 ? `<p style="margin: 0 0 8px 0; color: #f59e0b;">⭐ ${seller.rating.toFixed(1)}</p>` : ''}
-                  <button onclick="window.location.href='/store/${sellerId}'" style="width: 100%; padding: 8px 12px; background: #4169E1; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">View Store</button>
-                </div>
-              `);
+            const marker = L.marker([lat, lng], { icon: sellerIcon });
+            
+            marker.on('click', () => {
+              setSelectedSeller(seller);
+            });
+
+            const popupContent = `
+              <div style="min-width: 180px;">
+                <h4 style="margin: 0 0 4px 0;">${displayName}</h4>
+                <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${subtitle}</p>
+                <p style="margin: 0 0 8px 0; font-size: 12px; color: #999;">${seller.location.city || ''}</p>
+                ${seller.rating > 0 ? `<p style="margin: 0 0 8px 0; color: #f59e0b;">⭐ ${seller.rating.toFixed(1)}</p>` : ''}
+                <button id="nav-btn-${sellerId}" style="width: 100%; padding: 8px 12px; background: #22c55e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; margin-bottom: 6px;">🚗 Navigate</button>
+                <button onclick="window.location.href='/store/${sellerId}'" style="width: 100%; padding: 8px 12px; background: #4169E1; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">View Store</button>
+              </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            marker.on('popupopen', () => {
+              const navBtn = document.getElementById(`nav-btn-${sellerId}`);
+              if (navBtn) {
+                navBtn.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  setSelectedSeller(seller);
+                });
+              }
+            });
+            
             markersLayerRef.current.addLayer(marker);
           }
         });
@@ -426,6 +460,160 @@ function NearbyMap() {
 
     addMarkers();
   }, [filteredSellers, userLocation, mapReady]);
+
+  // Handle navigation when seller is selected
+  useEffect(() => {
+    if (!selectedSeller || !userLocation || !mapRef.current) return;
+
+    const originRef = { lat: userLocation.lat, lng: userLocation.lng };
+    const isNavigatingRef = { current: true };
+    
+    const fetchRoute = async () => {
+      try {
+        const [sellerLng, sellerLat] = selectedSeller.location.coordinates;
+        const response = await api.get('/navigation/route', {
+          params: {
+            originLat: originRef.lat,
+            originLng: originRef.lng,
+            destinationLat: sellerLat,
+            destinationLng: sellerLng,
+            profile: 'driving',
+          },
+        });
+        
+        const routeData = response.data;
+        setNavigationRoute(routeData);
+        setIsNavigating(true);
+        
+        // Draw route on map
+        const drawRoute = async () => {
+          const L = await import('leaflet');
+          
+          if (routeLineRef.current) {
+            mapRef.current.removeLayer(routeLineRef.current);
+          }
+          
+          const path = routeData.path.map(p => [p.lat, p.lng]);
+          routeLineRef.current = L.polyline(path, {
+            color: '#22c55e',
+            weight: 5,
+            opacity: 0.8,
+          }).addTo(mapRef.current);
+          
+          // Fit map to show entire route
+          if (path.length > 1) {
+            mapRef.current.fitBounds(routeLineRef.current.getBounds().pad(0.1));
+          }
+        };
+        
+        drawRoute();
+        
+        // Start real-time location tracking
+        if (watchIdRef.current === null && navigator.geolocation) {
+          watchIdRef.current = navigator.geolocation.watchPosition(
+            (position) => {
+              const newPos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              };
+              setCurrentPosition(newPos);
+              setUserLocation(newPos);
+              
+              // Update navigation marker
+              const updateNavigationMarker = async () => {
+                const L = await import('leaflet');
+                
+                if (navigationMarkerRef.current) {
+                  navigationMarkerRef.current.setLatLng([newPos.lat, newPos.lng]);
+                } else {
+                  const navIcon = L.divIcon({
+                    className: 'navigation-marker',
+                    html: `
+                      <div style="
+                        background-color: #22c55e;
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 50%;
+                        border: 3px solid white;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      ">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                        </svg>
+                      </div>
+                    `,
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 18],
+                  });
+                  
+                  navigationMarkerRef.current = L.marker([newPos.lat, newPos.lng], { icon: navIcon })
+                    .addTo(mapRef.current)
+                    .bindPopup('Your Location');
+                }
+              };
+              
+              updateNavigationMarker();
+              
+              // Recalculate route to destination
+              const recalculateRoute = async () => {
+                try {
+                  const newResponse = await api.get('/navigation/route', {
+                    params: {
+                      originLat: newPos.lat,
+                      originLng: newPos.lng,
+                      destinationLat: sellerLat,
+                      destinationLng: sellerLng,
+                      profile: 'driving',
+                    },
+                  });
+                  
+                  const newRouteData = newResponse.data;
+                  setNavigationRoute(newRouteData);
+                  
+                  // Update route line
+                  const L = await import('leaflet');
+                  const newPath = newRouteData.path.map(p => [p.lat, p.lng]);
+                  
+                  if (routeLineRef.current) {
+                    mapRef.current.removeLayer(routeLineRef.current);
+                  }
+                  
+                  routeLineRef.current = L.polyline(newPath, {
+                    color: '#22c55e',
+                    weight: 5,
+                    opacity: 0.8,
+                  }).addTo(mapRef.current);
+                } catch (err) {
+                  console.error('Error recalculating route:', err);
+                }
+              };
+              
+              recalculateRoute();
+            },
+            (error) => {
+              console.warn('Location watch error:', error);
+            },
+            { enableHighAccuracy: true, maximumAge: NAVIGATION_UPDATE_INTERVAL, timeout: NAVIGATION_UPDATE_INTERVAL }
+          );
+        }
+      } catch (err) {
+        console.error('Error fetching route:', err);
+      }
+    };
+    
+    fetchRoute();
+    
+    return () => {
+      isNavigatingRef.current = false;
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, [selectedSeller]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -529,13 +717,12 @@ function NearbyMap() {
                   <div
                     key={sellerId}
                     className="p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => navigate(`/store/${sellerId}`)}
                   >
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3" onClick={() => navigate(`/store/${sellerId}`)}>
                       <div className="bg-primary/10 p-2 rounded-full">
                         <Store size={16} className="text-primary" />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <h4 className="font-medium text-sm">{displayName}</h4>
                         <p className="text-xs text-muted-foreground">{subtitle}</p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -546,6 +733,17 @@ function NearbyMap() {
                           <p className="text-xs text-yellow-500 mt-1">⭐ {seller.rating.toFixed(1)}</p>
                         )}
                       </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSeller(seller);
+                        }}
+                        className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center gap-1 text-xs font-medium"
+                        title="Navigate to store"
+                      >
+                        <Navigation size={14} />
+                        Go
+                      </button>
                     </div>
                   </div>
                   );
@@ -563,6 +761,70 @@ function NearbyMap() {
             </div>
           ) : (
             <div ref={mapContainerRef} className="h-full w-full" />
+          )}
+          
+          {isNavigating && navigationRoute && (
+            <div className="absolute top-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white rounded-lg shadow-lg p-4 z-[1000]">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="bg-green-100 p-2 rounded-full">
+                    <Navigation className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm">Navigating to</h3>
+                    <p className="font-medium text-sm">{getSellerDisplayName(selectedSeller)}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={stopNavigation}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                >
+                  <X className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-4 mb-3">
+                <div className="flex items-center gap-1">
+                  <Route className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium">
+                    {(navigationRoute.distanceMeters / 1000).toFixed(1)} km
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium">
+                    ~{Math.round(navigationRoute.durationSeconds / 60)} min
+                  </span>
+                </div>
+              </div>
+              
+              {currentPosition && selectedSeller && (
+                <p className="text-xs text-gray-500">
+                  📍 Distance remaining: {haversineDistanceKm(currentPosition, { 
+                    lat: selectedSeller.location.coordinates[1], 
+                    lng: selectedSeller.location.coordinates[0] 
+                  }).toFixed(1)} km
+                </p>
+              )}
+              
+              <div className="mt-3 flex gap-2">
+                <Button 
+                  onClick={stopNavigation}
+                  variant="outline" 
+                  className="flex-1"
+                  size="sm"
+                >
+                  Stop Navigation
+                </Button>
+                <Button 
+                  onClick={() => navigate(`/store/${selectedSeller?._id || selectedSeller?.id}`)}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  size="sm"
+                >
+                  View Store
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </div>

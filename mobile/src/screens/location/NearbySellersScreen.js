@@ -10,6 +10,8 @@ import { useLanguageStore } from '../../store/languageStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Map from '../../components/Map';
 import api from '../../api/api';
+import { DEFAULT_LOCATION, DEFAULT_RADIUS_METERS } from '../../utils/constants';
+import { haversineDistanceKm } from '../../utils/helpers';
 
 const { width, height } = Dimensions.get('window');
 const MIN_SHEET_HEIGHT = 70; // Just the drag handle (collapsible to show only handle)
@@ -18,10 +20,10 @@ const HEADER_CONTENT_HEIGHT = 140; // Search box + radius chips + padding
 const DRAG_HANDLE_HEIGHT = 50;
 const BASE_SHEET_HEIGHT = DRAG_HANDLE_HEIGHT + HEADER_CONTENT_HEIGHT;
 const DEFAULT_FALLBACK_LOCATION = {
-    lat: -6.2349,
-    lng: 106.9896,
-    latitude: -6.2349,
-    longitude: 106.9896,
+    lat: DEFAULT_LOCATION.Bekasi.lat,
+    lng: DEFAULT_LOCATION.Bekasi.lng,
+    latitude: DEFAULT_LOCATION.Bekasi.lat,
+    longitude: DEFAULT_LOCATION.Bekasi.lng,
 };
 
 const toNumber = (value) => {
@@ -51,7 +53,7 @@ export default function NearbySellersScreen() {
     const [sellers, setSellers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [radius, setRadius] = useState(25000);
+    const [radius, setRadius] = useState(DEFAULT_RADIUS_METERS);
     const [error, setError] = useState(null);
     const [locationWarning, setLocationWarning] = useState(null);
     const [selectedSeller, setSelectedSeller] = useState(null);
@@ -210,15 +212,8 @@ export default function NearbySellersScreen() {
         if (!location) return null;
         const coords = getSellerCoordinates({ location: sellerLocation });
         if (!coords) return null;
-        const { lat, lng } = coords;
-        const R = 6371;
-        const dLat = (lat - location.lat) * Math.PI / 180;
-        const dLon = (lng - location.lng) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(location.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return (R * c).toFixed(1);
+        const distance = haversineDistanceKm(location, coords);
+        return distance.toFixed(1);
     };
 
     const mapRegion = useMemo(() => {

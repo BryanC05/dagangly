@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, useMapEvents } from 'react-leaflet';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { MapPin, AlertCircle, Navigation } from 'lucide-react';
+import { DEFAULT_LOCATION, EARTH_RADIUS_KM } from '../utils/constants';
+import { haversineDistanceKm } from '../utils/helpers';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -19,20 +21,8 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Haversine formula to calculate distance
-function calculateDistance(lat1, lng1, lat2, lng2) {
-    const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-}
-
-function LocationMarker({ position, setPosition, sellerLocation }) {
-    const map = useMapEvents({
+function LocationMarker({ position, setPosition }) {
+    useMapEvents({
         click(e) {
             setPosition(e.latlng);
         },
@@ -55,15 +45,13 @@ export default function DeliveryMapPicker({
     const [isLoading, setIsLoading] = useState(false);
 
     // Default center (Jakarta)
-    const defaultCenter = sellerLocation || { lat: -6.2088, lng: 106.8456 };
+    const defaultCenter = sellerLocation || DEFAULT_LOCATION.Jakarta;
     
     useEffect(() => {
         if (position && sellerLocation) {
-            const dist = calculateDistance(
-                sellerLocation.lat, 
-                sellerLocation.lng, 
-                position.lat, 
-                position.lng
+            const dist = haversineDistanceKm(
+                sellerLocation, 
+                position
             );
             setDistance(dist);
             
@@ -74,10 +62,12 @@ export default function DeliveryMapPicker({
 
     const fetchAddress = async (lat, lng) => {
         try {
-            // Using OpenStreetMap Nominatim for reverse geocoding
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
             );
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             if (data.display_name) {
                 setAddress(data.display_name);
@@ -164,7 +154,6 @@ export default function DeliveryMapPicker({
                     <LocationMarker 
                         position={position} 
                         setPosition={setPosition}
-                        sellerLocation={sellerLocation}
                     />
                 </MapContainer>
             </div>

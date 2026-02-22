@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Search, Navigation } from 'lucide-react';
+import { DEFAULT_LOCATION, GEOLOCATION_TIMEOUT, GEOLOCATION_MAX_AGE, DEFAULT_MAP_ZOOM } from '../utils/constants';
 import './LocationPicker.css';
 
 function LocationPicker({ onLocationSelect, initialLocation }) {
@@ -61,8 +62,8 @@ function LocationPicker({ onLocationSelect, initialLocation }) {
                         const pos = await new Promise((resolve, reject) => {
                             navigator.geolocation.getCurrentPosition(resolve, reject, {
                                 enableHighAccuracy: true,
-                                timeout: 5000,
-                                maximumAge: 0
+                                timeout: GEOLOCATION_TIMEOUT,
+                                maximumAge: GEOLOCATION_MAX_AGE
                             });
                         });
                         startPos = [pos.coords.latitude, pos.coords.longitude];
@@ -71,18 +72,18 @@ function LocationPicker({ onLocationSelect, initialLocation }) {
                     } catch (err) {
                         console.log('Could not get current location, using default:', err);
                         // Fallback to Bekasi, Indonesia if geolocation fails
-                        startPos = [-6.2349, 106.9896];
+                        startPos = [DEFAULT_LOCATION.Bekasi.lat, DEFAULT_LOCATION.Bekasi.lng];
                         handlePositionChange(startPos[0], startPos[1]);
                     }
                 } else {
                     // Fallback to Bekasi, Indonesia if geolocation not supported
-                    startPos = [-6.2349, 106.9896];
+                    startPos = [DEFAULT_LOCATION.Bekasi.lat, DEFAULT_LOCATION.Bekasi.lng];
                     handlePositionChange(startPos[0], startPos[1]);
                 }
 
                 const map = L.map(container, {
                     center: startPos,
-                    zoom: 13,
+                    zoom: DEFAULT_MAP_ZOOM,
                     scrollWheelZoom: true,
                 });
 
@@ -161,6 +162,9 @@ function LocationPicker({ onLocationSelect, initialLocation }) {
         // Reverse geocoding to get address
         try {
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
 
             const addr = data.address;
@@ -189,6 +193,9 @@ function LocationPicker({ onLocationSelect, initialLocation }) {
         setIsSearching(true);
         try {
             const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             setSearchResults(data);
         } catch (error) {

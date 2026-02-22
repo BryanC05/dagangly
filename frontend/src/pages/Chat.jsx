@@ -29,6 +29,7 @@ function Chat() {
   const { user } = useAuthStore();
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
+  const timeoutRefs = useRef([]);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
   const [activeRoom, setActiveRoom] = useState(null);
@@ -114,12 +115,14 @@ function Chat() {
 
     socketRef.current.on('receive-message', (message) => {
       setSocketMessages(prev => [...prev, message]);
-      setTimeout(scrollToBottom, 100);
+      const timerId = setTimeout(scrollToBottom, 100);
+      timeoutRefs.current.push(timerId);
     });
 
     socketRef.current.on('user-typing', (data) => {
       setTypingUser(data);
-      setTimeout(() => setTypingUser(null), 3000);
+      const timerId = setTimeout(() => setTypingUser(null), 3000);
+      timeoutRefs.current.push(timerId);
     });
 
     socketRef.current.on('new-message-notification', () => {
@@ -127,6 +130,8 @@ function Chat() {
     });
 
     return () => {
+      timeoutRefs.current.forEach(clearTimeout);
+      timeoutRefs.current = [];
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
