@@ -81,9 +81,33 @@ func (h *DriverHandler) ToggleDriverMode(c *gin.Context) {
 		}
 	}
 
+	// If enabling driver mode, try to get location from user's profile
+	if req.IsActive {
+		usersCollection := database.GetDB().Collection("users")
+		var user models.User
+		err := usersCollection.FindOne(context.Background(), bson.M{"_id": userObjID}).Decode(&user)
+		if err == nil && len(user.Location.Coordinates) >= 2 {
+			// Copy user's location to driver
+			driversCollection.UpdateOne(
+				context.Background(),
+				bson.M{"userId": userObjID},
+				bson.M{
+					"$set": bson.M{
+						"currentLocation": bson.M{
+							"latitude":  user.Location.Coordinates[1],
+							"longitude": user.Location.Coordinates[0],
+							"timestamp": time.Now(),
+						},
+					},
+				},
+			)
+		}
+	}
+
 	c.JSON(200, gin.H{
-		"isActive": req.IsActive,
-		"message":  "Driver mode updated successfully",
+		"isActive":    req.IsActive,
+		"isAvailable": req.IsActive,
+		"message":     "Driver mode updated successfully",
 	})
 }
 
@@ -223,7 +247,10 @@ func (h *DriverHandler) GetAvailableOrders(c *gin.Context) {
 		var driver models.Driver
 		err = driversCollection.FindOne(context.Background(), bson.M{"userId": userObjID}).Decode(&driver)
 		if err != nil || driver.CurrentLocation == nil {
-			c.JSON(400, gin.H{"message": "Driver location not available. Please update your location first."})
+			c.JSON(400, gin.H{
+				"message": "Driver location not available. Please update your location in Profile settings.",
+				"code":    "LOCATION_REQUIRED",
+			})
 			return
 		}
 		driverLat = driver.CurrentLocation.Latitude
@@ -262,7 +289,7 @@ func (h *DriverHandler) GetAvailableOrders(c *gin.Context) {
 		// Get seller location
 		var seller models.User
 		err := usersCollection.FindOne(context.Background(), bson.M{"_id": order.Seller}).Decode(&seller)
-		if err != nil || seller.Location.Coordinates == nil {
+		if err != nil || seller.Location.Coordinates == nil || len(seller.Location.Coordinates) < 2 {
 			continue
 		}
 
@@ -306,6 +333,15 @@ func (h *DriverHandler) GetAvailableOrders(c *gin.Context) {
 			"deliveryFee":     deliveryFee,
 			"driverEarnings":  driverEarnings,
 		})
+	}
+
+	if len(availableOrders) == 0 {
+		c.JSON(200, gin.H{
+			"orders":   []interface{}{},
+			"message":  "No orders available within your radius. Check back later!",
+			"location": gin.H{"lat": driverLat, "lng": driverLng},
+		})
+		return
 	}
 
 	c.JSON(200, availableOrders)
