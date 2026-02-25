@@ -247,23 +247,21 @@ const makeStyles = (colors) => StyleSheet.create({
         color: colors.primary,
     },
     filterContainer: {
-        maxHeight: 52,
         backgroundColor: colors.card,
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
+        paddingVertical: 10,
     },
     filterContent: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        gap: 8,
+        paddingHorizontal: 16,
     },
     filterTab: {
         paddingHorizontal: 16,
-        paddingVertical: 7,
+        paddingVertical: 8,
         borderRadius: 20,
         borderWidth: 1,
         borderColor: colors.border,
-        marginRight: 8,
+        marginRight: 10,
     },
     filterActive: {
         backgroundColor: colors.primary,
