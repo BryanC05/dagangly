@@ -136,6 +136,7 @@ class NotificationService {
     }
 
     async scheduleLocalNotification(title, body, data = {}, seconds = 1) {
+        console.log('🔔 [LocalNotification] Triggering locally:', title, body);
         if (!notificationHandlerSet) {
             console.log('Notifications not available');
             return;
@@ -147,13 +148,14 @@ class NotificationService {
                     body,
                     data,
                     sound: true,
-                    priority: Notifications.AndroidNotificationPriority.MAX,
+                    priority: 'max',
                     channelId: 'high_importance_channel',
                 },
-                trigger: null, // null fires immediately instead of requiring Android Exact Alarm permissions
+                trigger: { seconds: seconds || 1 },
             });
+            console.log('🔔 [LocalNotification] Scheduled successfully');
         } catch (error) {
-            console.log('Schedule notification failed:', error.message);
+            console.error('🔔 [LocalNotification] Schedule notification failed:', error);
         }
     }
 
