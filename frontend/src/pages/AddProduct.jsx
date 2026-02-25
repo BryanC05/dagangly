@@ -64,6 +64,8 @@ function AddProduct() {
     unit: 'pieces',
   });
 
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
   // Get seller's current location on component mount
   useEffect(() => {
     if (locationInitializedRef.current) return;
@@ -224,6 +226,27 @@ function AddProduct() {
           console.error('Failed to cleanup uploaded images:', cleanupErr);
         }
       }
+    }
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!formData.name) {
+      alert("Please enter a product name first.");
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    try {
+      const response = await api.post('/ai/generate-description', {
+        name: formData.name,
+        keywords: tags.join(', ')
+      });
+      setFormData(prev => ({ ...prev, description: response.data.description }));
+    } catch (err) {
+      console.error("AI Generation failed:", err);
+      alert(err.response?.data?.error || "Failed to generate AI description. Please try again.");
+    } finally {
+      setIsGeneratingAI(false);
     }
   };
 
@@ -396,15 +419,30 @@ function AddProduct() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="description" className="block text-sm font-medium mb-1">Description *</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label htmlFor="description" className="block text-sm font-medium">Description *</label>
+                    <button
+                      type="button"
+                      onClick={handleGenerateDescription}
+                      disabled={isGeneratingAI || !formData.name}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-purple-700 bg-purple-100 border border-purple-200 rounded-md hover:bg-purple-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800"
+                    >
+                      {isGeneratingAI ? (
+                        <div className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                      ) : (
+                        <Sparkles size={14} className="text-purple-600 dark:text-purple-400" />
+                      )}
+                      {isGeneratingAI ? 'Generating...' : 'Enhance with AI'}
+                    </button>
+                  </div>
                   <textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     required
-                    rows="4"
-                    placeholder="Describe your product..."
-                    className="w-full p-2 border rounded-md bg-background text-foreground resize-y"
+                    rows="6"
+                    placeholder="Describe your product... (Tip: Add a product name and tags first, then use AI to write this!)"
+                    className="w-full p-2 border rounded-md bg-background text-foreground resize-y focus:ring-2 focus:ring-purple-500/20"
                   />
                 </div>
 

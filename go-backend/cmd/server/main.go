@@ -277,6 +277,14 @@ func main() {
 			disputes.GET("/", reportHandler.GetMyDisputes)
 			disputes.PUT("/:id/resolve", reportHandler.ResolveDispute)
 		}
+
+		// AI Features
+		aiHandler := handlers.NewAIHandler()
+		ai := api.Group("/ai")
+		ai.Use(middleware.AuthRequired(cfg.JWTSecret))
+		{
+			ai.POST("/generate-description", aiHandler.GenerateDescription)
+		}
 	}
 
 	os.MkdirAll("./uploads/logos", 0755)
