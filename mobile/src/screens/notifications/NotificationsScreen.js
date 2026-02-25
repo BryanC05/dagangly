@@ -84,7 +84,13 @@ export default function NotificationsScreen({ navigation }) {
             // Small delay to let WebSocket deliver it
             setTimeout(() => fetchNotifications(), 500);
         } catch (err) {
-            console.error('Failed to send test notification:', err);
+            console.error('🔴 Failed to send test notification:', err.message);
+            if (err.response) {
+                console.error('🔴 Response data:', err.response.data);
+                console.error('🔴 Response status:', err.response.status);
+            } else if (err.request) {
+                console.error('🔴 No response received. Request details:', err.request._response);
+            }
         } finally {
             setSendingTest(false);
         }
