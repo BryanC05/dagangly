@@ -247,17 +247,17 @@ const makeStyles = (colors) => StyleSheet.create({
         color: colors.primary,
     },
     filterContainer: {
-        flexGrow: 0,
+        maxHeight: 50,
         backgroundColor: colors.card,
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
-        paddingVertical: 10,
+        paddingBottom: 8,
+        paddingTop: 8,
     },
     filterContent: {
         paddingHorizontal: 16,
     },
     filterTab: {
-        alignSelf: 'flex-start',
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
