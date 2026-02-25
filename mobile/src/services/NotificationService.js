@@ -1,17 +1,24 @@
 import React from 'react';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../api/api';
 
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-    }),
-});
+let notificationHandlerSet = false;
+
+try {
+    Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: true,
+        }),
+    });
+    notificationHandlerSet = true;
+} catch (error) {
+    console.log('Notification handler setup failed:', error.message);
+}
 
 class NotificationService {
     constructor() {
@@ -23,42 +30,51 @@ class NotificationService {
     async registerForPushNotifications() {
         let token;
 
-        if (Platform.OS === 'android') {
-            await Notifications.setNotificationChannelAsync('default', {
-                name: 'default',
-                importance: Notifications.AndroidImportance.MAX,
-                vibrationPattern: [0, 250, 250, 250],
-                lightColor: '#3b82f6',
-            });
+        if (!notificationHandlerSet) {
+            console.log('Notifications not supported in this environment');
+            return null;
         }
 
-        if (Device.isDevice) {
-            const { status: existingStatus } = await Notifications.getPermissionsAsync();
-            let finalStatus = existingStatus;
-
-            if (existingStatus !== 'granted') {
-                const { status } = await Notifications.requestPermissionsAsync();
-                finalStatus = status;
-            }
-
-            if (finalStatus !== 'granted') {
-                console.log('Push notification permission not granted');
-                return null;
-            }
-
-            try {
-                const tokenData = await Notifications.getExpoPushTokenAsync({
-                    projectId: 'your-project-id',
+        try {
+            if (Platform.OS === 'android') {
+                await Notifications.setNotificationChannelAsync('default', {
+                    name: 'default',
+                    importance: Notifications.AndroidImportance.MAX,
+                    vibrationPattern: [0, 250, 250, 250],
+                    lightColor: '#3b82f6',
                 });
-                token = tokenData.data;
-                this.expoPushToken = token;
-
-                await this.saveTokenToServer(token);
-            } catch (error) {
-                console.error('Error getting push token:', error);
             }
-        } else {
-            console.log('Must use physical device for Push Notifications');
+
+            if (Device.isDevice) {
+                const { status: existingStatus } = await Notifications.getPermissionsAsync();
+                let finalStatus = existingStatus;
+
+                if (existingStatus !== 'granted') {
+                    const { status } = await Notifications.requestPermissionsAsync();
+                    finalStatus = status;
+                }
+
+                if (finalStatus !== 'granted') {
+                    console.log('Push notification permission not granted');
+                    return null;
+                }
+
+                try {
+                    const tokenData = await Notifications.getExpoPushTokenAsync({
+                        projectId: 'umkm-marketplace-app',
+                    });
+                    token = tokenData.data;
+                    this.expoPushToken = token;
+
+                    await this.saveTokenToServer(token);
+                } catch (error) {
+                    console.error('Error getting push token:', error.message);
+                }
+            } else {
+                console.log('Must use physical device for Push Notifications');
+            }
+        } catch (error) {
+            console.log('Push notification registration failed:', error.message);
         }
 
         return token;
@@ -81,19 +97,25 @@ class NotificationService {
     }
 
     setupNotificationListeners(onNotification, onResponse) {
-        this.notificationListener = Notifications.addNotificationReceivedListener(notification => {
-            console.log('Notification received:', notification);
-            if (onNotification) {
-                onNotification(notification);
-            }
-        });
+        if (!notificationHandlerSet) return () => {};
 
-        this.responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-            console.log('Notification response:', response);
-            if (onResponse) {
-                onResponse(response);
-            }
-        });
+        try {
+            this.notificationListener = Notifications.addNotificationReceivedListener(notification => {
+                console.log('Notification received:', notification);
+                if (onNotification) {
+                    onNotification(notification);
+                }
+            });
+
+            this.responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+                console.log('Notification response:', response);
+                if (onResponse) {
+                    onResponse(response);
+                }
+            });
+        } catch (error) {
+            console.log('Setup notification listeners failed:', error.message);
+        }
 
         return () => {
             if (this.notificationListener) {
@@ -106,15 +128,23 @@ class NotificationService {
     }
 
     async scheduleLocalNotification(title, body, data = {}, seconds = 1) {
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title,
-                body,
-                data,
-                sound: true,
-            },
-            trigger: { seconds },
-        });
+        if (!notificationHandlerSet) {
+            console.log('Notifications not available');
+            return;
+        }
+        try {
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title,
+                    body,
+                    data,
+                    sound: true,
+                },
+                trigger: { seconds },
+            });
+        } catch (error) {
+            console.log('Schedule notification failed:', error.message);
+        }
     }
 
     async sendNewOrderNotificationToDrivers(orderData, nearbyDriverTokens) {
@@ -148,12 +178,22 @@ class NotificationService {
     }
 
     async clearAllNotifications() {
-        await Notifications.cancelAllScheduledNotificationsAsync();
-        await Notifications.dismissAllNotificationsAsync();
+        if (!notificationHandlerSet) return;
+        try {
+            await Notifications.cancelAllScheduledNotificationsAsync();
+            await Notifications.dismissAllNotificationsAsync();
+        } catch (error) {
+            console.log('Clear notifications failed:', error.message);
+        }
     }
 
     async setBadgeCount(count) {
-        await Notifications.setBadgeCountAsync(count);
+        if (!notificationHandlerSet) return;
+        try {
+            await Notifications.setBadgeCountAsync(count);
+        } catch (error) {
+            console.log('Set badge count failed:', error.message);
+        }
     }
 }
 
@@ -165,9 +205,15 @@ export function usePushNotifications() {
     const [notification, setNotification] = React.useState(null);
 
     React.useEffect(() => {
+        if (!notificationHandlerSet) return;
+
         const register = async () => {
-            const pushToken = await notificationService.registerForPushNotifications();
-            setToken(pushToken);
+            try {
+                const pushToken = await notificationService.registerForPushNotifications();
+                setToken(pushToken);
+            } catch (error) {
+                console.log('Push registration error:', error.message);
+            }
         };
 
         register();
