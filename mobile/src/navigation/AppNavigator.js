@@ -413,11 +413,15 @@ function NotificationListener() {
             const ws = new WebSocket(`${wsProtocol}://${wsHost}/ws?token=${token}`);
             wsRef.current = ws;
 
+            ws.onopen = () => console.log('🟢 [WebSocket] Connected successfully');
+
             ws.onmessage = (event) => {
+                console.log('🔵 [WebSocket] Message received:', event.data);
                 try {
                     const message = JSON.parse(event.data);
                     if (message.type === 'notification' && message.data) {
                         addNotification(message.data);
+                        console.log('🔵 [WebSocket] Triggering local notification...');
                         // Also trigger a local push notification
                         notificationService.scheduleLocalNotification(
                             message.data.title,
@@ -427,17 +431,21 @@ function NotificationListener() {
                         );
                     }
                 } catch (e) {
-                    // ignore
+                    console.error('🔴 [WebSocket] Parse error:', e);
                 }
             };
 
             ws.onclose = () => {
+                console.log('🟡 [WebSocket] Connection closed. Reconnecting in 5s...');
                 reconnectRef.current = setTimeout(() => {
                     if (isAuthenticated && token) connect();
                 }, 5000);
             };
 
-            ws.onerror = () => ws.close();
+            ws.onerror = (err) => {
+                console.error('🔴 [WebSocket] Error:', err);
+                ws.close();
+            };
         }
 
         connect();
