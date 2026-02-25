@@ -39,8 +39,8 @@ class NotificationService {
 
         try {
             if (Platform.OS === 'android') {
-                await Notifications.setNotificationChannelAsync('default', {
-                    name: 'default',
+                await Notifications.setNotificationChannelAsync('high_importance_channel', {
+                    name: 'High Importance Notifications',
                     importance: Notifications.AndroidImportance.MAX,
                     vibrationPattern: [0, 250, 250, 250],
                     lightColor: '#3b82f6',
@@ -148,7 +148,7 @@ class NotificationService {
                     data,
                     sound: true,
                     priority: Notifications.AndroidNotificationPriority.MAX,
-                    channelId: 'default',
+                    channelId: 'high_importance_channel',
                 },
                 trigger: null, // null fires immediately instead of requiring Android Exact Alarm permissions
             });
