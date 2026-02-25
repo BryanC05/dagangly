@@ -151,7 +151,10 @@ class NotificationService {
                     priority: 'max',
                     channelId: 'high_importance_channel',
                 },
-                trigger: { seconds: seconds || 1 },
+                trigger: {
+                    seconds: seconds || 1,
+                    channelId: 'high_importance_channel'
+                },
             });
             console.log('🔔 [LocalNotification] Scheduled successfully');
         } catch (error) {
