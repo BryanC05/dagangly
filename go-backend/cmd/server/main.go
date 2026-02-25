@@ -229,6 +229,8 @@ func main() {
 			notifications.GET("/unread-count", notificationHandler.GetUnreadCount)
 			notifications.PUT("/:id/read", notificationHandler.MarkAsRead)
 			notifications.PUT("/read-all", notificationHandler.MarkAllRead)
+			notifications.DELETE("/:id", notificationHandler.Delete)
+			notifications.DELETE("/delete-all", notificationHandler.DeleteAll)
 			notifications.POST("/test", notificationHandler.SendTestNotification)
 		}
 

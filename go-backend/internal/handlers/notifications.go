@@ -136,6 +136,61 @@ func (h *NotificationHandler) MarkAllRead(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "All notifications marked as read"})
 }
 
+// Delete removes a single notification
+func (h *NotificationHandler) Delete(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	notifID, err := primitive.ObjectIDFromHex(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid notification ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("notifications")
+	result, err := collection.DeleteOne(
+		context.Background(),
+		bson.M{"_id": notifID, "userId": userObjID},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete notification"})
+		return
+	}
+
+	if result.DeletedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Notification not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Notification deleted"})
+}
+
+// DeleteAll removes all of the user's notifications
+func (h *NotificationHandler) DeleteAll(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("notifications")
+	_, err = collection.DeleteMany(
+		context.Background(),
+		bson.M{"userId": userObjID},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete notifications"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "All notifications deleted"})
+}
+
 // SendTestNotification sends a test notification to the current user (for testing)
 func (h *NotificationHandler) SendTestNotification(c *gin.Context) {
 	userID := c.GetString("userID")
