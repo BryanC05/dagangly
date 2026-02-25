@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import api from '../api/api';
 
 let notificationHandlerSet = false;
@@ -59,16 +60,22 @@ class NotificationService {
                     return null;
                 }
 
-                try {
-                    const tokenData = await Notifications.getExpoPushTokenAsync({
-                        projectId: 'umkm-marketplace-app',
-                    });
-                    token = tokenData.data;
-                    this.expoPushToken = token;
+                // Skip remote push token fetching inside Expo Go as SDK 53 removed support
+                if (Constants.appOwnership !== 'expo') {
+                    try {
+                        const tokenData = await Notifications.getExpoPushTokenAsync({
+                            // Only pass projectId if you have a valid UUID from EAS Config
+                            projectId: Constants?.expoConfig?.extra?.eas?.projectId,
+                        });
+                        token = tokenData.data;
+                        this.expoPushToken = token;
 
-                    await this.saveTokenToServer(token);
-                } catch (error) {
-                    console.error('Error getting push token:', error.message);
+                        await this.saveTokenToServer(token);
+                    } catch (error) {
+                        console.log('Skipped fetching push token:', error.message);
+                    }
+                } else {
+                    console.log('Skipping remote push token fetch for Expo Go');
                 }
             } else {
                 console.log('Must use physical device for Push Notifications');
@@ -97,7 +104,7 @@ class NotificationService {
     }
 
     setupNotificationListeners(onNotification, onResponse) {
-        if (!notificationHandlerSet) return () => {};
+        if (!notificationHandlerSet) return () => { };
 
         try {
             this.notificationListener = Notifications.addNotificationReceivedListener(notification => {
@@ -140,7 +147,7 @@ class NotificationService {
                     data,
                     sound: true,
                 },
-                trigger: { seconds },
+                trigger: null, // null fires immediately instead of requiring Android Exact Alarm permissions
             });
         } catch (error) {
             console.log('Schedule notification failed:', error.message);
