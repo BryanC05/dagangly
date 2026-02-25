@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { AppState } from 'react-native';
 import io from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
@@ -29,13 +30,23 @@ class WebSocketService {
 
             this.socket.on('connect', () => {
                 this.connected = true;
-                console.log('WebSocket connected');
+                console.log('Socket.IO connected');
+
+                // Keep-alive heartbeat loop
+                if (this.pingInterval) clearInterval(this.pingInterval);
+                this.pingInterval = setInterval(() => {
+                    if (this.socket?.connected) {
+                        this.socket.emit('ping', { timestamp: Date.now() });
+                    }
+                }, 25000);
+
                 resolve(this.socket);
             });
 
             this.socket.on('disconnect', () => {
                 this.connected = false;
-                console.log('WebSocket disconnected');
+                if (this.pingInterval) clearInterval(this.pingInterval);
+                console.log('Socket.IO disconnected');
             });
 
             this.socket.on('connect_error', (error) => {
@@ -62,6 +73,10 @@ class WebSocketService {
     }
 
     disconnect() {
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+        }
         if (this.socket) {
             this.socket.disconnect();
             this.socket = null;
@@ -125,6 +140,19 @@ export function useWebSocket() {
     const disconnect = useCallback(() => {
         wsService.disconnect();
     }, []);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextAppState => {
+            if (nextAppState === 'active' && !wsService.connected) {
+                console.log('🔄 [Socket.IO] App awakened, forcing reconnect...');
+                connect();
+            }
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, [connect]);
 
     return {
         connect,

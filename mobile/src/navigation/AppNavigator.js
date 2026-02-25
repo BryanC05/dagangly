@@ -2,7 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, StyleSheet } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    KeyboardAvoidingView,
+    Platform,
+    AppState,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCartStore } from '../store/cartStore';
 import { useThemeStore } from '../store/themeStore';
@@ -398,6 +405,7 @@ function NotificationListener() {
     const { addNotification, fetchUnreadCount } = useNotificationStore();
     const wsRef = useRef(null);
     const reconnectRef = useRef(null);
+    const pingRef = useRef(null);
 
     // Request permissions and setup listeners for push/local notifications
     usePushNotifications();
@@ -413,12 +421,24 @@ function NotificationListener() {
             const ws = new WebSocket(`${wsProtocol}://${wsHost}/ws?token=${token}`);
             wsRef.current = ws;
 
-            ws.onopen = () => console.log('🟢 [WebSocket] Connected successfully');
+            ws.onopen = () => {
+                console.log('🟢 [WebSocket] Connected successfully');
+                // Start ping heartbeat to keep reverse-proxy tunnels hot
+                pingRef.current = setInterval(() => {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ type: 'ping' }));
+                    }
+                }, 30000);
+            };
 
             ws.onmessage = (event) => {
-                console.log('🔵 [WebSocket] Message received:', event.data);
                 try {
                     const message = JSON.parse(event.data);
+                    // Silently ignore pong responses from server if they exist to reduce log noise
+                    if (message.type === 'pong' || message.type === 'ping') return;
+
+                    console.log('🔵 [WebSocket] Message received:', event.data);
+
                     if (message.type === 'notification' && message.data) {
                         addNotification(message.data);
                         console.log('🔵 [WebSocket] Triggering local notification...');
@@ -436,28 +456,48 @@ function NotificationListener() {
             };
 
             ws.onclose = () => {
-                console.log('🟡 [WebSocket] Connection closed. Reconnecting in 5s...');
-                reconnectRef.current = setTimeout(() => {
-                    if (isAuthenticated && token) connect();
-                }, 5000);
+                clearInterval(pingRef.current);
+                if (wsRef.current === ws) {
+                    console.log('🟡 [WebSocket] Connection closed. Reconnecting in 5s...');
+                    reconnectRef.current = setTimeout(() => {
+                        if (isAuthenticated && token) connect();
+                    }, 5000);
+                }
             };
 
             ws.onerror = (err) => {
                 console.error('🔴 [WebSocket] Error:', err);
-                ws.close();
+                if (wsRef.current === ws) {
+                    ws.close();
+                }
             };
         }
 
         connect();
 
+        // Handle App going to background / foreground
+        const appStateSubscription = AppState.addEventListener('change', nextAppState => {
+            if (nextAppState === 'active') {
+                // When coming back to the foreground, aggressively ensure we are connected
+                if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED || wsRef.current.readyState === WebSocket.CLOSING) {
+                    console.log('🔄 [WebSocket] App returned to foreground, forcing reconnect...');
+                    clearInterval(pingRef.current);
+                    clearTimeout(reconnectRef.current);
+                    connect();
+                }
+            }
+        });
+
         return () => {
-            if (reconnectRef.current) clearTimeout(reconnectRef.current);
+            appStateSubscription.remove();
+            clearInterval(pingRef.current);
+            clearTimeout(reconnectRef.current);
             if (wsRef.current) {
                 wsRef.current.close();
                 wsRef.current = null;
             }
         };
-    }, [isAuthenticated, token]);
+    }, [isAuthenticated, token, addNotification, fetchUnreadCount]);
 
     return null;
 }
