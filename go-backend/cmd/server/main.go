@@ -233,7 +233,7 @@ func main() {
 		}
 
 		// Reviews - public read, authenticated write
-		api.GET("/products/:productId/reviews", reviewHandler.GetProductReviews)
+		api.GET("/products/:id/reviews", reviewHandler.GetProductReviews)
 		reviews := api.Group("/reviews")
 		reviews.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{

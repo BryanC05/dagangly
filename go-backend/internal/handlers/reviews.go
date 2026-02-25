@@ -103,7 +103,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 
 // GetProductReviews returns reviews for a product
 func (h *ReviewHandler) GetProductReviews(c *gin.Context) {
-	productID := c.Param("productId")
+	productID := c.Param("id")
 	productObjID, err := primitive.ObjectIDFromHex(productID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
