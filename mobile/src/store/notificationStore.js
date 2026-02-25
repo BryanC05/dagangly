@@ -55,4 +55,33 @@ export const useNotificationStore = create((set, get) => ({
             unreadCount: state.unreadCount + 1,
         }));
     },
+
+    deleteNotification: async (id) => {
+        try {
+            await api.delete(`/notifications/${id}`);
+            set((state) => {
+                const notif = state.notifications.find((n) => n._id === id);
+                return {
+                    notifications: state.notifications.filter((n) => n._id !== id),
+                    unreadCount: notif && !notif.isRead
+                        ? Math.max(0, state.unreadCount - 1)
+                        : state.unreadCount,
+                };
+            });
+        } catch (err) {
+            console.error('Failed to delete notification:', err);
+        }
+    },
+
+    deleteAllNotifications: async () => {
+        try {
+            await api.delete('/notifications/delete-all');
+            set({
+                notifications: [],
+                unreadCount: 0,
+            });
+        } catch (err) {
+            console.error('Failed to delete all notifications:', err);
+        }
+    },
 }));

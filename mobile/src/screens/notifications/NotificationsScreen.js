@@ -8,6 +8,7 @@ import {
     RefreshControl,
     ScrollView,
     ActivityIndicator,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -65,6 +66,8 @@ export default function NotificationsScreen({ navigation }) {
         fetchNotifications,
         markAsRead,
         markAllRead,
+        deleteNotification,
+        deleteAllNotifications,
     } = useNotificationStore();
 
     useEffect(() => {
@@ -115,6 +118,28 @@ export default function NotificationsScreen({ navigation }) {
         }
     };
 
+    const confirmDelete = (id) => {
+        Alert.alert(
+            'Delete Notification',
+            'Are you sure you want to delete this notification?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: () => deleteNotification(id) }
+            ]
+        );
+    };
+
+    const confirmDeleteAll = () => {
+        Alert.alert(
+            'Clear All Notifications',
+            'Are you sure you want to delete all your notifications? This cannot be undone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Clear All', style: 'destructive', onPress: deleteAllNotifications }
+            ]
+        );
+    };
+
     const styles = makeStyles(colors);
 
     const renderItem = ({ item: notif }) => {
@@ -123,6 +148,8 @@ export default function NotificationsScreen({ navigation }) {
             <TouchableOpacity
                 style={[styles.card, !notif.isRead && styles.cardUnread]}
                 onPress={() => handlePress(notif)}
+                onLongPress={() => confirmDelete(notif._id)}
+                delayLongPress={500}
                 activeOpacity={0.7}
             >
                 <View style={[styles.iconCircle, { backgroundColor: icon.bg }]}>
@@ -146,11 +173,19 @@ export default function NotificationsScreen({ navigation }) {
                     <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Notifications</Text>
-                {unreadCount > 0 && (
-                    <TouchableOpacity onPress={markAllRead} style={styles.markAllBtn}>
-                        <Text style={styles.markAllText}>Read all</Text>
-                    </TouchableOpacity>
-                )}
+
+                <View style={styles.headerActions}>
+                    {unreadCount > 0 && (
+                        <TouchableOpacity onPress={markAllRead} style={styles.markAllBtn}>
+                            <Text style={styles.markAllText}>Read all</Text>
+                        </TouchableOpacity>
+                    )}
+                    {notifications.length > 0 && (
+                        <TouchableOpacity onPress={confirmDeleteAll} style={styles.deleteAllBtn}>
+                            <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
 
             {/* Filter tabs */}
@@ -247,6 +282,14 @@ const makeStyles = (colors) => StyleSheet.create({
         fontSize: 13,
         fontWeight: '600',
         color: colors.primary,
+    },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    deleteAllBtn: {
+        padding: 6,
     },
     filterWrapper: {
         backgroundColor: colors.card,
