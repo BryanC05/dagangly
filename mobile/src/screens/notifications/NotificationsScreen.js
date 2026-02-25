@@ -255,9 +255,9 @@ const makeStyles = (colors) => StyleSheet.create({
     },
     filterContent: {
         paddingHorizontal: 16,
-        alignItems: 'center',
     },
     filterTab: {
+        alignSelf: 'flex-start',
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
