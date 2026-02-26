@@ -69,6 +69,44 @@ export default function AdminMembershipScreen() {
 
     if (loading) return <LoadingSpinner />;
 
+    const styles = StyleSheet.create({
+        container: { flex: 1, backgroundColor: colors.background },
+        header: { padding: 20, backgroundColor: colors.card },
+        title: { fontSize: 24, fontWeight: '800', color: colors.text },
+        subtitle: { fontSize: 14, color: colors.textSecondary, marginTop: 4 },
+        list: { padding: 16 },
+        card: {
+            backgroundColor: colors.card,
+            borderRadius: 16, padding: 16, marginBottom: 12,
+            shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+        },
+        cardHeader: { flexDirection: 'row', gap: 12, marginBottom: 12 },
+        avatar: {
+            width: 48, height: 48, borderRadius: 24,
+            backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center',
+        },
+        info: { flex: 1 },
+        name: { fontSize: 16, fontWeight: '600', color: colors.text },
+        email: { fontSize: 14, color: colors.textSecondary },
+        business: { fontSize: 14, color: colors.textSecondary, fontStyle: 'italic' },
+        date: { fontSize: 12, color: colors.textTertiary, marginTop: 4 },
+        actions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+        viewProofBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
+        viewProofText: { color: '#3b82f6', fontSize: 14 },
+        actionBtns: { flexDirection: 'row', gap: 8 },
+        rejectBtn: {
+            width: 36, height: 36, borderRadius: 18,
+            backgroundColor: '#fee2e2', justifyContent: 'center', alignItems: 'center',
+        },
+        approveBtn: {
+            width: 36, height: 36, borderRadius: 18,
+            backgroundColor: '#22c55e', justifyContent: 'center', alignItems: 'center',
+        },
+        empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
+        emptyText: { fontSize: 16, color: '#9ca3af', marginTop: 12 },
+    });
+
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -89,7 +127,7 @@ export default function AdminMembershipScreen() {
 
             <View style={styles.actions}>
                 {item.paymentProof && (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.viewProofBtn}
                         onPress={() => {
                             Alert.alert('Payment Proof', '', [
@@ -102,13 +140,13 @@ export default function AdminMembershipScreen() {
                     </TouchableOpacity>
                 )}
                 <View style={styles.actionBtns}>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.rejectBtn}
                         onPress={() => handleReject(item._id)}
                     >
                         <Ionicons name="close" size={18} color="#ef4444" />
                     </TouchableOpacity>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.approveBtn}
                         onPress={() => handleApprove(item._id)}
                     >
@@ -147,63 +185,3 @@ export default function AdminMembershipScreen() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { padding: 20, backgroundColor: colors.card },
-    title: { fontSize: 24, fontWeight: '800', color: colors.text },
-    subtitle: { fontSize: 14, color: colors.textSecondary, marginTop: 4 },
-    list: { padding: 16 },
-    card: {
-        backgroundColor: colors.card,
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    cardHeader: { flexDirection: 'row', gap: 12, marginBottom: 12 },
-    avatar: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: colors.primaryLight,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    info: { flex: 1 },
-    name: { fontSize: 16, fontWeight: '600', color: colors.text },
-    email: { fontSize: 14, color: colors.textSecondary },
-    business: { fontSize: 14, color: colors.textSecondary, fontStyle: 'italic' },
-    date: { fontSize: 12, color: colors.textTertiary, marginTop: 4 },
-    actions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    viewProofBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        padding: 8,
-    },
-    viewProofText: { color: '#3b82f6', fontSize: 14 },
-    actionBtns: { flexDirection: 'row', gap: 8 },
-    rejectBtn: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#fee2e2',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    approveBtn: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#22c55e',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
-    emptyText: { fontSize: 16, color: '#9ca3af', marginTop: 12 },
-});

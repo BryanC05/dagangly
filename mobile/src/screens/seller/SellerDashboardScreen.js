@@ -16,7 +16,7 @@ export default function SellerDashboardScreen({ navigation }) {
     const [stats, setStats] = useState({ products: 0, orders: 0, revenue: 0, pending: 0 });
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    
+
     // Membership state
     const [membership, setMembership] = useState(null);
     const [membershipLoading, setMembershipLoading] = useState(true);
@@ -127,6 +127,65 @@ export default function SellerDashboardScreen({ navigation }) {
 
     if (loading) return <LoadingSpinner />;
 
+    const styles = StyleSheet.create({
+        container: { flex: 1, backgroundColor: colors.background },
+        header: { padding: 20, backgroundColor: colors.card, paddingBottom: 20 },
+        title: { fontSize: 24, fontWeight: '800', color: colors.text },
+        subtitle: { fontSize: 16, color: colors.textSecondary, marginTop: 4 },
+        statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, padding: 16 },
+        statCard: {
+            width: '48%', backgroundColor: colors.card, borderRadius: 16, padding: 16,
+            shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+        },
+        iconBg: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+        statValue: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 2 },
+        statLabel: { fontSize: 12, color: colors.textSecondary },
+        actions: { padding: 16 },
+        sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 12 },
+        actionBtn: {
+            flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card,
+            padding: 16, borderRadius: 16, marginBottom: 12, gap: 14,
+            shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+        },
+        actionIcon: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+        actionTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+        actionDesc: { fontSize: 13, color: colors.textSecondary },
+        membershipCard: {
+            margin: 16, marginTop: 0, backgroundColor: colors.card,
+            borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.border,
+        },
+        membershipHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+        membershipTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+        membershipTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
+        activeBadge: { backgroundColor: colors.successLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+        activeBadgeText: { color: colors.success, fontSize: 12, fontWeight: '600' },
+        pendingBadge: { backgroundColor: colors.warningLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+        pendingBadgeText: { color: colors.warning, fontSize: 12, fontWeight: '600' },
+        membershipInfo: {},
+        membershipText: { fontSize: 14, color: '#6b7280', marginBottom: 4 },
+        membershipSubtext: { fontSize: 13, color: '#16a34a', marginTop: 4 },
+        membershipBenefits: { fontSize: 13, color: '#6b7280', lineHeight: 20, marginTop: 8 },
+        upgradeBtn: { backgroundColor: colors.primary, paddingVertical: 12, borderRadius: 10, alignItems: 'center', marginTop: 12 },
+        upgradeBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+        modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+        modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: '80%' },
+        modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+        modalTitle: { fontSize: 20, fontWeight: '700', color: colors.text },
+        paymentInfo: { backgroundColor: colors.warningLight, padding: 16, borderRadius: 12, marginBottom: 16 },
+        paymentLabel: { fontSize: 12, color: colors.warning },
+        paymentValue: { fontSize: 18, fontWeight: '700', color: colors.text, marginVertical: 4 },
+        paymentAmount: { fontSize: 16, fontWeight: '700', color: colors.text, marginTop: 8 },
+        imagePickerBtn: { borderWidth: 2, borderStyle: 'dashed', borderColor: '#d1d5db', borderRadius: 12, overflow: 'hidden', marginBottom: 16 },
+        imagePickerPlaceholder: { padding: 40, alignItems: 'center' },
+        imagePickerText: { marginTop: 8, color: colors.textSecondary, fontSize: 14 },
+        previewImage: { width: '100%', height: 200, resizeMode: 'cover' },
+        submitBtn: { backgroundColor: colors.primary, paddingVertical: 14, borderRadius: 10, alignItems: 'center' },
+        submitBtnDisabled: { backgroundColor: colors.textTertiary },
+        submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+    });
+
     return (
         <ScrollView
             style={styles.container}
@@ -141,10 +200,10 @@ export default function SellerDashboardScreen({ navigation }) {
             <View style={styles.membershipCard}>
                 <View style={styles.membershipHeader}>
                     <View style={styles.membershipTitleRow}>
-                        <Ionicons 
-                            name={membership?.isMember ? "star" : "star-outline"} 
-                            size={24} 
-                            color={membership?.isMember ? "#f59e0b" : "#9ca3af"} 
+                        <Ionicons
+                            name={membership?.isMember ? "star" : "star-outline"}
+                            size={24}
+                            color={membership?.isMember ? "#f59e0b" : "#9ca3af"}
                         />
                         <Text style={styles.membershipTitle}>
                             {membership?.isMember ? 'Premium Member' : 'Upgrade to Premium'}
@@ -180,7 +239,7 @@ export default function SellerDashboardScreen({ navigation }) {
                             ✓ Priority search results{'\n'}
                             ✓ Verified badge
                         </Text>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={styles.upgradeBtn}
                             onPress={() => setShowPaymentModal(true)}
                         >
@@ -219,7 +278,7 @@ export default function SellerDashboardScreen({ navigation }) {
                             )}
                         </TouchableOpacity>
 
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={[styles.submitBtn, uploading && styles.submitBtnDisabled]}
                             onPress={submitPayment}
                             disabled={uploading}
@@ -297,196 +356,3 @@ export default function SellerDashboardScreen({ navigation }) {
         </ScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { padding: 20, backgroundColor: colors.card, paddingBottom: 20 },
-    title: { fontSize: 24, fontWeight: '800', color: colors.text },
-    subtitle: { fontSize: 16, color: colors.textSecondary, marginTop: 4 },
-    statsGrid: {
-        flexDirection: 'row', flexWrap: 'wrap', gap: 12, padding: 16,
-    },
-    statCard: {
-        width: '48%', backgroundColor: colors.card, borderRadius: 16, padding: 16,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
-    },
-    iconBg: {
-        width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center',
-        marginBottom: 12
-    },
-    statValue: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 2 },
-    statLabel: { fontSize: 12, color: colors.textSecondary },
-    actions: { padding: 16 },
-    sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 12 },
-    actionBtn: {
-        flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card,
-        padding: 16, borderRadius: 16, marginBottom: 12, gap: 14,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
-    },
-    actionIcon: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
-    actionTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
-    actionDesc: { fontSize: 13, color: colors.textSecondary },
-    
-    // Membership styles
-    membershipCard: {
-        margin: 16,
-        marginTop: 0,
-        backgroundColor: colors.card,
-        borderRadius: 16,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    membershipHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    membershipTitleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    membershipTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    activeBadge: {
-        backgroundColor: colors.successLight,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
-    },
-    activeBadgeText: {
-        color: colors.success,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    pendingBadge: {
-        backgroundColor: colors.warningLight,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
-    },
-    pendingBadgeText: {
-        color: colors.warning,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    membershipInfo: {},
-    membershipText: {
-        fontSize: 14,
-        color: '#6b7280',
-        marginBottom: 4,
-    },
-    membershipSubtext: {
-        fontSize: 13,
-        color: '#16a34a',
-        marginTop: 4,
-    },
-    membershipBenefits: {
-        fontSize: 13,
-        color: '#6b7280',
-        lineHeight: 20,
-        marginTop: 8,
-    },
-    upgradeBtn: {
-        backgroundColor: colors.primary,
-        paddingVertical: 12,
-        borderRadius: 10,
-        alignItems: 'center',
-        marginTop: 12,
-    },
-    upgradeBtnText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    
-    // Modal styles
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'flex-end',
-    },
-    modalContent: {
-        backgroundColor: '#fff',
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        padding: 20,
-        maxHeight: '80%',
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    paymentInfo: {
-        backgroundColor: colors.warningLight,
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 16,
-    },
-    paymentLabel: {
-        fontSize: 12,
-        color: colors.warning,
-    },
-    paymentValue: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.text,
-        marginVertical: 4,
-    },
-    paymentAmount: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-        marginTop: 8,
-    },
-    imagePickerBtn: {
-        borderWidth: 2,
-        borderStyle: 'dashed',
-        borderColor: '#d1d5db',
-        borderRadius: 12,
-        overflow: 'hidden',
-        marginBottom: 16,
-    },
-    imagePickerPlaceholder: {
-        padding: 40,
-        alignItems: 'center',
-    },
-    imagePickerText: {
-        marginTop: 8,
-        color: colors.textSecondary,
-        fontSize: 14,
-    },
-    previewImage: {
-        width: '100%',
-        height: 200,
-        resizeMode: 'cover',
-    },
-    submitBtn: {
-        backgroundColor: colors.primary,
-        paddingVertical: 14,
-        borderRadius: 10,
-        alignItems: 'center',
-    },
-    submitBtnDisabled: {
-        backgroundColor: colors.textTertiary,
-    },
-    submitBtnText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-});

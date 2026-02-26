@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { StatusBar, ActivityIndicator, View, StyleSheet } from 'react-native';
-import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAuthStore } from './src/store/authStore';
@@ -15,9 +15,22 @@ import AppNavigator from './src/navigation/AppNavigator';
 export default function App() {
   const { isAuthenticated, isLoading, initializeAuth } = useAuthStore();
   const loadCart = useCartStore((s) => s.loadCart);
-  const { isDarkMode, colors, initTheme } = useThemeStore();
+  const themeStore = useThemeStore();
+  const isDarkMode = themeStore.isDarkMode;
+  const colors = themeStore.colors;
+  const isThemeReady = themeStore.isReady;
+  const initTheme = themeStore.initTheme;
   const initLanguage = useLanguageStore((s) => s.initLanguage);
   const initDriverMode = useDriverStore((s) => s.initDriverMode);
+
+  const safeColors = colors || {
+    background: '#f8fafc',
+    card: '#ffffff',
+    text: '#0f172a',
+    textSecondary: '#64748b',
+    border: '#e2e8f0',
+    primary: '#3b82f6',
+  };
 
   useEffect(() => {
     initializeAuth();
@@ -28,44 +41,34 @@ export default function App() {
   }, []);
 
   // Custom navigation theme to prevent white flashes
-  const navigationTheme = isDarkMode ? {
-    ...DarkTheme,
+  const navigationTheme = {
+    dark: isDarkMode,
     colors: {
-      ...DarkTheme.colors,
-      background: colors.background,
-      card: colors.card,
-      text: colors.text,
-      border: colors.border,
-      primary: colors.primary,
-    },
-  } : {
-    ...DefaultTheme,
-    colors: {
-      ...DefaultTheme.colors,
-      background: colors.background,
-      card: colors.card,
-      text: colors.text,
-      border: colors.border,
-      primary: colors.primary,
+      primary: safeColors.primary,
+      background: safeColors.background,
+      card: safeColors.card,
+      text: safeColors.text,
+      border: safeColors.border,
+      notification: safeColors.primary,
     },
   };
 
-  if (isLoading) {
+  if (isLoading || !isThemeReady) {
     return (
-      <View style={[styles.loading, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={[styles.loading, { backgroundColor: safeColors.background }]}>
+        <ActivityIndicator size="large" color={safeColors.primary} />
       </View>
     );
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
-      <SafeAreaProvider style={{ backgroundColor: colors.background }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: safeColors.background }}>
+      <SafeAreaProvider style={{ backgroundColor: safeColors.background }}>
         <ThemeProvider>
           <NavigationContainer theme={navigationTheme}>
             <StatusBar
               barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-              backgroundColor={colors.card}
+              backgroundColor={safeColors.card}
             />
             {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
           </NavigationContainer>

@@ -62,6 +62,52 @@ export default function ThreadDetailScreen({ route }) {
 
     const isLiked = thread.likes?.includes(user?.id);
 
+    const styles = StyleSheet.create({
+        container: { flex: 1, backgroundColor: '#f8fafc' },
+        list: { paddingBottom: 8 },
+        threadContent: { padding: 20 },
+        authorRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 12 },
+        avatar: {
+            width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary,
+            justifyContent: 'center', alignItems: 'center',
+        },
+        avatarText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+        authorName: { fontSize: 14, fontWeight: '700', color: colors.text },
+        date: { fontSize: 12, color: colors.textTertiary, marginTop: 1 },
+        title: { fontSize: 20, fontWeight: '800', color: colors.text, lineHeight: 26, marginBottom: 10 },
+        body: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, marginBottom: 16 },
+        actions: { flexDirection: 'row', gap: 20, marginBottom: 16 },
+        actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+        actionText: { fontSize: 13, color: colors.textTertiary, fontWeight: '500' },
+        divider: { height: 1, backgroundColor: colors.border, marginBottom: 16 },
+        repliesTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+        replyCard: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 12 },
+        replyAvatar: {
+            width: 32, height: 32, borderRadius: 16, backgroundColor: colors.input,
+            justifyContent: 'center', alignItems: 'center', marginRight: 10, marginTop: 2,
+        },
+        replyAvatarText: { color: colors.textSecondary, fontWeight: '700', fontSize: 13 },
+        replyContent: { flex: 1 },
+        replyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+        replyAuthor: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+        replyDate: { fontSize: 11, color: colors.textTertiary },
+        replyText: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+        noReplies: { textAlign: 'center', color: colors.textTertiary, fontSize: 14, padding: 20 },
+        inputBar: {
+            flexDirection: 'row', alignItems: 'flex-end', padding: 12, paddingBottom: 28,
+            backgroundColor: colors.card, borderTopWidth: 1, borderColor: colors.border, gap: 10,
+        },
+        textInput: {
+            flex: 1, backgroundColor: colors.input, borderRadius: 20, paddingHorizontal: 16,
+            paddingVertical: 10, fontSize: 14, color: colors.text, maxHeight: 80,
+        },
+        sendBtn: {
+            width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary,
+            justifyContent: 'center', alignItems: 'center',
+        },
+        sendBtnDisabled: { backgroundColor: colors.textTertiary },
+    });
+
     const renderHeader = () => (
         <View style={styles.threadContent}>
             <View style={styles.authorRow}>
@@ -143,49 +189,3 @@ export default function ThreadDetailScreen({ route }) {
         </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f8fafc' },
-    list: { paddingBottom: 8 },
-    threadContent: { padding: 20 },
-    authorRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 12 },
-    avatar: {
-        width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary,
-        justifyContent: 'center', alignItems: 'center',
-    },
-    avatarText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-    authorName: { fontSize: 14, fontWeight: '700', color: colors.text },
-    date: { fontSize: 12, color: colors.textTertiary, marginTop: 1 },
-    title: { fontSize: 20, fontWeight: '800', color: colors.text, lineHeight: 26, marginBottom: 10 },
-    body: { fontSize: 15, color: colors.textSecondary, lineHeight: 24, marginBottom: 16 },
-    actions: { flexDirection: 'row', gap: 20, marginBottom: 16 },
-    actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    actionText: { fontSize: 13, color: colors.textTertiary, fontWeight: '500' },
-    divider: { height: 1, backgroundColor: colors.border, marginBottom: 16 },
-    repliesTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
-    replyCard: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 12 },
-    replyAvatar: {
-        width: 32, height: 32, borderRadius: 16, backgroundColor: colors.input,
-        justifyContent: 'center', alignItems: 'center', marginRight: 10, marginTop: 2,
-    },
-    replyAvatarText: { color: colors.textSecondary, fontWeight: '700', fontSize: 13 },
-    replyContent: { flex: 1 },
-    replyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-    replyAuthor: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    replyDate: { fontSize: 11, color: colors.textTertiary },
-    replyText: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
-    noReplies: { textAlign: 'center', color: colors.textTertiary, fontSize: 14, padding: 20 },
-    inputBar: {
-        flexDirection: 'row', alignItems: 'flex-end', padding: 12, paddingBottom: 28,
-        backgroundColor: colors.card, borderTopWidth: 1, borderColor: colors.border, gap: 10,
-    },
-    textInput: {
-        flex: 1, backgroundColor: colors.input, borderRadius: 20, paddingHorizontal: 16,
-        paddingVertical: 10, fontSize: 14, color: colors.text, maxHeight: 80,
-    },
-    sendBtn: {
-        width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary,
-        justifyContent: 'center', alignItems: 'center',
-    },
-    sendBtnDisabled: { backgroundColor: colors.textTertiary },
-});

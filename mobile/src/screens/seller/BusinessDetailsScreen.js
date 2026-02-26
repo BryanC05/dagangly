@@ -42,6 +42,67 @@ export default function BusinessDetailsScreen() {
 
     if (loading) return <BusinessDetailSkeleton />;
 
+    const styles = StyleSheet.create({
+        container: { flex: 1, backgroundColor: '#f8fafc' },
+        header: {
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+            paddingHorizontal: 16, paddingTop: 50, paddingBottom: 16,
+            backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e7eb',
+        },
+        backBtn: {
+            width: 40, height: 40, borderRadius: 20, backgroundColor: '#f3f4f6',
+            justifyContent: 'center', alignItems: 'center',
+        },
+        shareBtn: {
+            width: 40, height: 40, borderRadius: 20, backgroundColor: colors.input,
+            justifyContent: 'center', alignItems: 'center',
+        },
+        headerTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: colors.text, textAlign: 'center' },
+        errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+        errorText: { fontSize: 16, color: colors.textSecondary },
+        businessHeader: { alignItems: 'center', padding: 24, backgroundColor: colors.card, marginBottom: 8 },
+        businessImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 12 },
+        businessImagePlaceholder: {
+            width: 100, height: 100, borderRadius: 50, backgroundColor: colors.input,
+            justifyContent: 'center', alignItems: 'center', marginBottom: 12,
+        },
+        businessName: { fontSize: 22, fontWeight: '800', color: colors.text, marginBottom: 8, textAlign: 'center' },
+        badges: { flexDirection: 'row', gap: 8 },
+        badge: { paddingHorizontal: 12, paddingVertical: 4, backgroundColor: colors.input, borderRadius: 12 },
+        badgeText: { fontSize: 12, color: colors.textSecondary, fontWeight: '500' },
+        verifiedBadge: { backgroundColor: colors.success, flexDirection: 'row', alignItems: 'center', gap: 4 },
+        verifiedText: { fontSize: 12, color: '#fff', fontWeight: '600' },
+        locationCard: {
+            flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, padding: 16,
+            marginHorizontal: 16, marginBottom: 8, borderRadius: 12,
+        },
+        locationIcon: {
+            width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryLight,
+            justifyContent: 'center', alignItems: 'center', marginRight: 12,
+        },
+        locationInfo: { flex: 1 },
+        locationAddress: { fontSize: 14, color: colors.textSecondary },
+        locationHint: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
+        tabs: { flexDirection: 'row', paddingHorizontal: 16, marginBottom: 16 },
+        tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: colors.border },
+        tabActive: { borderBottomColor: colors.primary },
+        tabText: { fontSize: 14, fontWeight: '600', color: colors.textTertiary },
+        tabTextActive: { color: colors.primary },
+        productsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12 },
+        productWrapper: { width: '50%', padding: 4 },
+        productCard: { backgroundColor: colors.card, borderRadius: 12, overflow: 'hidden' },
+        productImage: { width: '100%', height: 120, backgroundColor: colors.input },
+        productInfo: { padding: 10 },
+        productName: { fontSize: 13, fontWeight: '600', color: colors.text, height: 36 },
+        productPrice: { fontSize: 14, fontWeight: '700', color: colors.primary, marginTop: 4 },
+        emptyProducts: { alignItems: 'center', paddingVertical: 40 },
+        emptyText: { fontSize: 14, color: colors.textTertiary, marginTop: 8 },
+        infoSection: { padding: 16 },
+        infoItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, padding: 16, borderRadius: 12, marginBottom: 8 },
+        infoLabel: { fontSize: 14, color: colors.textSecondary, marginLeft: 12, marginRight: 4 },
+        infoValue: { fontSize: 14, fontWeight: '600', color: colors.text, flex: 1 },
+    });
+
     if (!seller) {
         return (
             <View style={styles.container}>
@@ -93,11 +154,11 @@ export default function BusinessDetailsScreen() {
             Alert.alert('Error', 'Store location not available');
             return;
         }
-        
+
         const [lng, lat] = seller.location.coordinates;
         const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=16`;
         const shareText = `Check out ${seller.businessName || seller.name}!\n${mapUrl}`;
-        
+
         Alert.alert(
             'Share Store Location',
             shareText,
@@ -242,78 +303,3 @@ export default function BusinessDetailsScreen() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f8fafc' },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingTop: 50,
-        paddingBottom: 16,
-        backgroundColor: '#fff',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e5e7eb',
-    },
-    backBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#f3f4f6',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    shareBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.input,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    headerTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: colors.text, textAlign: 'center' },
-    errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    errorText: { fontSize: 16, color: colors.textSecondary },
-    businessHeader: { alignItems: 'center', padding: 24, backgroundColor: colors.card, marginBottom: 8 },
-    businessImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 12 },
-    businessImagePlaceholder: {
-        width: 100, height: 100, borderRadius: 50, backgroundColor: colors.input,
-        justifyContent: 'center', alignItems: 'center', marginBottom: 12,
-    },
-    businessName: { fontSize: 22, fontWeight: '800', color: colors.text, marginBottom: 8, textAlign: 'center' },
-    badges: { flexDirection: 'row', gap: 8 },
-    badge: { paddingHorizontal: 12, paddingVertical: 4, backgroundColor: colors.input, borderRadius: 12 },
-    badgeText: { fontSize: 12, color: colors.textSecondary, fontWeight: '500' },
-    verifiedBadge: { backgroundColor: colors.success, flexDirection: 'row', alignItems: 'center', gap: 4 },
-    verifiedText: { fontSize: 12, color: '#fff', fontWeight: '600' },
-    locationCard: {
-        flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, padding: 16,
-        marginHorizontal: 16, marginBottom: 8, borderRadius: 12,
-    },
-    locationIcon: {
-        width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryLight,
-        justifyContent: 'center', alignItems: 'center', marginRight: 12,
-    },
-    locationInfo: { flex: 1 },
-    locationAddress: { fontSize: 14, color: colors.textSecondary },
-    locationHint: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
-    tabs: { flexDirection: 'row', paddingHorizontal: 16, marginBottom: 16 },
-    tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: colors.border },
-    tabActive: { borderBottomColor: colors.primary },
-    tabText: { fontSize: 14, fontWeight: '600', color: colors.textTertiary },
-    tabTextActive: { color: colors.primary },
-    productsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12 },
-    productWrapper: { width: '50%', padding: 4 },
-    productCard: { backgroundColor: colors.card, borderRadius: 12, overflow: 'hidden' },
-    productImage: { width: '100%', height: 120, backgroundColor: colors.input },
-    productInfo: { padding: 10 },
-    productName: { fontSize: 13, fontWeight: '600', color: colors.text, height: 36 },
-    productPrice: { fontSize: 14, fontWeight: '700', color: colors.primary, marginTop: 4 },
-    emptyProducts: { alignItems: 'center', paddingVertical: 40 },
-    emptyText: { fontSize: 14, color: colors.textTertiary, marginTop: 8 },
-    infoSection: { padding: 16 },
-    infoItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, padding: 16, borderRadius: 12, marginBottom: 8 },
-    infoLabel: { fontSize: 14, color: colors.textSecondary, marginLeft: 12, marginRight: 4 },
-    infoValue: { fontSize: 14, fontWeight: '600', color: colors.text, flex: 1 },
-});

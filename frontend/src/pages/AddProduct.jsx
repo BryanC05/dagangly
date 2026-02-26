@@ -22,8 +22,8 @@ const MAX_IMAGES = 4;
 const MAX_IMAGE_SIZE_MB = 5;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const DEFAULT_SELLER_LOCATION = {
-  coordinates: [106.9896, -6.2349],
-  address: 'Default Location',
+  coordinates: [107.0782, -6.2567],
+  address: 'Binus University Bekasi',
   city: 'Bekasi',
   state: 'West Java',
 };

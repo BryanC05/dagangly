@@ -45,6 +45,39 @@ export default function MessagesScreen({ navigation }) {
 
     if (loading) return <MessagesScreenSkeleton />;
 
+    const styles = StyleSheet.create({
+        container: { flex: 1, backgroundColor: '#f8fafc' },
+        list: { paddingBottom: 20 },
+        roomCard: {
+            flexDirection: 'row', alignItems: 'center', padding: 16,
+            backgroundColor: '#fff', borderBottomWidth: 1, borderColor: '#f3f4f6',
+        },
+        avatar: {
+            width: 48, height: 48, borderRadius: 24, backgroundColor: '#3b82f6',
+            justifyContent: 'center', alignItems: 'center', marginRight: 12,
+        },
+        avatarText: { color: '#fff', fontWeight: '700', fontSize: 18 },
+        roomInfo: { flex: 1 },
+        roomHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+        roomName: { fontSize: 15, fontWeight: '600', color: colors.text, flex: 1, marginRight: 8 },
+        roomTime: { fontSize: 11, color: colors.textTertiary },
+        lastMessage: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+        productTag: {
+            flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4,
+            backgroundColor: colors.input, paddingHorizontal: 8, paddingVertical: 3,
+            borderRadius: 8, alignSelf: 'flex-start',
+        },
+        productTagText: { fontSize: 10, color: colors.textSecondary },
+        unreadBadge: {
+            width: 22, height: 22, borderRadius: 11, backgroundColor: colors.primary,
+            justifyContent: 'center', alignItems: 'center', marginLeft: 8,
+        },
+        unreadText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+        empty: { alignItems: 'center', paddingTop: 80 },
+        emptyTitle: { fontSize: 16, fontWeight: '600', color: '#6b7280', marginTop: 12 },
+        emptyText: { fontSize: 13, color: '#9ca3af', marginTop: 4, textAlign: 'center', paddingHorizontal: 32 },
+    });
+
     const renderRoom = ({ item: room }) => {
         const other = getOtherParticipant(room);
         const lastMessage = room.lastMessage;
@@ -104,36 +137,3 @@ export default function MessagesScreen({ navigation }) {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f8fafc' },
-    list: { paddingBottom: 20 },
-    roomCard: {
-        flexDirection: 'row', alignItems: 'center', padding: 16,
-        backgroundColor: '#fff', borderBottomWidth: 1, borderColor: '#f3f4f6',
-    },
-    avatar: {
-        width: 48, height: 48, borderRadius: 24, backgroundColor: '#3b82f6',
-        justifyContent: 'center', alignItems: 'center', marginRight: 12,
-    },
-    avatarText: { color: '#fff', fontWeight: '700', fontSize: 18 },
-    roomInfo: { flex: 1 },
-    roomHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-    roomName: { fontSize: 15, fontWeight: '600', color: colors.text, flex: 1, marginRight: 8 },
-    roomTime: { fontSize: 11, color: colors.textTertiary },
-    lastMessage: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-    productTag: {
-        flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4,
-        backgroundColor: colors.input, paddingHorizontal: 8, paddingVertical: 3,
-        borderRadius: 8, alignSelf: 'flex-start',
-    },
-    productTagText: { fontSize: 10, color: colors.textSecondary },
-    unreadBadge: {
-        width: 22, height: 22, borderRadius: 11, backgroundColor: colors.primary,
-        justifyContent: 'center', alignItems: 'center', marginLeft: 8,
-    },
-    unreadText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-    empty: { alignItems: 'center', paddingTop: 80 },
-    emptyTitle: { fontSize: 16, fontWeight: '600', color: '#6b7280', marginTop: 12 },
-    emptyText: { fontSize: 13, color: '#9ca3af', marginTop: 4, textAlign: 'center', paddingHorizontal: 32 },
-});

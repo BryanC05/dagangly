@@ -53,22 +53,29 @@ const darkColors = {
 export const useThemeStore = create((set, get) => ({
     isDarkMode: false,
     colors: lightColors,
+    isReady: false,
 
     initTheme: async () => {
         try {
             const savedTheme = await AsyncStorage.getItem('theme');
             if (savedTheme === 'dark') {
-                set({ isDarkMode: true, colors: darkColors });
+                set({ isDarkMode: true, colors: darkColors, isReady: true });
+            } else if (savedTheme === 'light') {
+                set({ isDarkMode: false, colors: lightColors, isReady: true });
             } else if (savedTheme === null) {
-                // First launch: sync with system theme
                 const systemScheme = Appearance.getColorScheme();
                 if (systemScheme === 'dark') {
-                    set({ isDarkMode: true, colors: darkColors });
+                    set({ isDarkMode: true, colors: darkColors, isReady: true });
                     await AsyncStorage.setItem('theme', 'dark');
+                } else {
+                    set({ isReady: true });
                 }
+            } else {
+                set({ isReady: true });
             }
         } catch (error) {
             console.error('Failed to load theme:', error);
+            set({ isReady: true });
         }
     },
 
