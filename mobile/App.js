@@ -51,6 +51,12 @@ export default function App() {
       border: safeColors.border,
       notification: safeColors.primary,
     },
+    fonts: {
+      regular: { fontFamily: 'System', fontWeight: '400' },
+      medium: { fontFamily: 'System', fontWeight: '500' },
+      bold: { fontFamily: 'System', fontWeight: '700' },
+      heavy: { fontFamily: 'System', fontWeight: '900' },
+    },
   };
 
   if (isLoading || !isThemeReady) {
