@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
     Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform
@@ -36,7 +36,7 @@ const MAX_IMAGES = 4;
 export default function AddProductScreen({ navigation }) {
     const { colors, isDarkMode } = useThemeStore();
     const { t, language } = useLanguageStore();
-    
+
     const categories = language === 'id' ? CATEGORIES_ID : CATEGORIES_EN;
     const units = language === 'id' ? UNITS_ID : UNITS_EN;
     const [form, setForm] = useState({
@@ -183,6 +183,8 @@ export default function AddProductScreen({ navigation }) {
         sublabel: { color: colors.textSecondary },
     };
 
+    const styles = useMemo(() => createStyles(colors, isDarkMode), [colors, isDarkMode]);
+
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
@@ -216,7 +218,7 @@ export default function AddProductScreen({ navigation }) {
                                         style={styles.removeImageBtn}
                                         onPress={() => removeImage(index)}
                                     >
-                                        <Ionicons name="close-circle" size={24} color="#ef4444" />
+                                        <Ionicons name="close-circle" size={24} color={colors.danger} />
                                     </TouchableOpacity>
                                 </View>
                             ))}
@@ -256,10 +258,10 @@ export default function AddProductScreen({ navigation }) {
                                     disabled={isGeneratingAI}
                                 >
                                     {isGeneratingAI ? (
-                                        <ActivityIndicator size="small" color="#fff" />
+                                        <ActivityIndicator size="small" color={colors.card} />
                                     ) : (
                                         <>
-                                            <Ionicons name="sparkles" size={14} color="#fff" />
+                                            <Ionicons name="sparkles" size={14} color={colors.card} />
                                             <Text style={styles.aiBtnText}>AI Generate</Text>
                                         </>
                                     )}
@@ -412,7 +414,7 @@ export default function AddProductScreen({ navigation }) {
                                             }}
                                         />
                                         <TouchableOpacity onPress={() => setVariants(variants.filter((_, i) => i !== idx))}>
-                                            <Ionicons name="close-circle" size={22} color="#ef4444" />
+                                            <Ionicons name="close-circle" size={22} color={colors.danger} />
                                         </TouchableOpacity>
                                     </View>
                                 ))}
@@ -447,7 +449,7 @@ export default function AddProductScreen({ navigation }) {
                                         }}
                                     />
                                     <TouchableOpacity onPress={() => setOptionGroups(optionGroups.filter((_, i) => i !== gi))}>
-                                        <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                                        <Ionicons name="trash-outline" size={20} color={colors.danger} />
                                     </TouchableOpacity>
                                 </View>
                                 <View style={{ flexDirection: 'row', gap: 16, marginBottom: 10 }}>
@@ -490,7 +492,7 @@ export default function AddProductScreen({ navigation }) {
                                         <TouchableOpacity onPress={() => {
                                             const ng = [...optionGroups]; ng[gi].options = ng[gi].options.filter((_, i) => i !== oi); setOptionGroups(ng);
                                         }}>
-                                            <Ionicons name="close-circle" size={20} color="#ef4444" />
+                                            <Ionicons name="close-circle" size={20} color={colors.danger} />
                                         </TouchableOpacity>
                                     </View>
                                 ))}
@@ -536,7 +538,7 @@ export default function AddProductScreen({ navigation }) {
                                 style={[styles.tagAddBtn, { backgroundColor: colors.primary }]}
                                 onPress={addTag}
                             >
-                                <Ionicons name="add" size={22} color="#fff" />
+                                <Ionicons name="add" size={22} color={colors.card} />
                             </TouchableOpacity>
                         </View>
 
@@ -608,7 +610,7 @@ export default function AddProductScreen({ navigation }) {
                             <ActivityIndicator color="#fff" />
                         ) : (
                             <View style={styles.submitInner}>
-                                <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                                <Ionicons name="checkmark-circle" size={20} color={colors.card} />
                                 <Text style={styles.submitText}>Create Product</Text>
                             </View>
                         )}
@@ -621,7 +623,7 @@ export default function AddProductScreen({ navigation }) {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors, isDarkMode) => StyleSheet.create({
     container: { flex: 1 },
     header: {
         flexDirection: 'row',
@@ -644,8 +646,8 @@ const styles = StyleSheet.create({
     // Sections
     section: {
         borderRadius: 16, padding: 18,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+        shadowColor: isDarkMode ? '#000' : '#e2e8f0', shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: isDarkMode ? 0.3 : 0.8, shadowRadius: 4, elevation: 2,
     },
     sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 2 },
     sectionSubtitle: { fontSize: 13, marginBottom: 14 },
@@ -660,7 +662,7 @@ const styles = StyleSheet.create({
     imagePreview: { width: '100%', height: '100%' },
     removeImageBtn: {
         position: 'absolute', top: -2, right: -2,
-        backgroundColor: '#fff', borderRadius: 12,
+        backgroundColor: colors.card, borderRadius: 12,
     },
     addImageBtn: {
         width: 90, height: 90, borderRadius: 12,
@@ -681,7 +683,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row', alignItems: 'center', gap: 4,
         paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8,
     },
-    aiBtnText: { color: '#fff', fontSize: 11, fontWeight: '600' },
+    aiBtnText: { color: colors.card, fontSize: 11, fontWeight: '600' },
     row: { flexDirection: 'row', gap: 12 },
 
     // Chips (category + unit)
@@ -730,5 +732,5 @@ const styles = StyleSheet.create({
     },
     submitInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     disabledBtn: { opacity: 0.6 },
-    submitText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+    submitText: { color: colors.card, fontSize: 16, fontWeight: '700' },
 });

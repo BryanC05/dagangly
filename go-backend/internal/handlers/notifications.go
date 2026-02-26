@@ -19,6 +19,8 @@ import (
 
 type NotificationHandler struct{}
 
+const notificationDBTimeout = 8 * time.Second
+
 func NewNotificationHandler() *NotificationHandler {
 	return &NotificationHandler{}
 }
@@ -37,15 +39,18 @@ func (h *NotificationHandler) GetNotifications(c *gin.Context) {
 		SetSort(bson.D{{Key: "createdAt", Value: -1}}).
 		SetLimit(50)
 
-	cursor, err := collection.Find(context.Background(), bson.M{"userId": userObjID}, opts)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), notificationDBTimeout)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{"userId": userObjID}, opts)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch notifications"})
 		return
 	}
-	defer cursor.Close(context.Background())
+	defer cursor.Close(ctx)
 
 	var notifications []models.Notification
-	if err := cursor.All(context.Background(), &notifications); err != nil {
+	if err := cursor.All(ctx, &notifications); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode notifications"})
 		return
 	}
@@ -67,7 +72,10 @@ func (h *NotificationHandler) GetUnreadCount(c *gin.Context) {
 	}
 
 	collection := database.GetDB().Collection("notifications")
-	count, err := collection.CountDocuments(context.Background(), bson.M{
+	ctx, cancel := context.WithTimeout(c.Request.Context(), notificationDBTimeout)
+	defer cancel()
+
+	count, err := collection.CountDocuments(ctx, bson.M{
 		"userId": userObjID,
 		"isRead": false,
 	})
@@ -95,8 +103,11 @@ func (h *NotificationHandler) MarkAsRead(c *gin.Context) {
 	}
 
 	collection := database.GetDB().Collection("notifications")
+	ctx, cancel := context.WithTimeout(c.Request.Context(), notificationDBTimeout)
+	defer cancel()
+
 	result, err := collection.UpdateOne(
-		context.Background(),
+		ctx,
 		bson.M{"_id": notifID, "userId": userObjID},
 		bson.M{"$set": bson.M{"isRead": true}},
 	)
@@ -123,8 +134,11 @@ func (h *NotificationHandler) MarkAllRead(c *gin.Context) {
 	}
 
 	collection := database.GetDB().Collection("notifications")
+	ctx, cancel := context.WithTimeout(c.Request.Context(), notificationDBTimeout)
+	defer cancel()
+
 	_, err = collection.UpdateMany(
-		context.Background(),
+		ctx,
 		bson.M{"userId": userObjID, "isRead": false},
 		bson.M{"$set": bson.M{"isRead": true}},
 	)
@@ -152,8 +166,11 @@ func (h *NotificationHandler) Delete(c *gin.Context) {
 	}
 
 	collection := database.GetDB().Collection("notifications")
+	ctx, cancel := context.WithTimeout(c.Request.Context(), notificationDBTimeout)
+	defer cancel()
+
 	result, err := collection.DeleteOne(
-		context.Background(),
+		ctx,
 		bson.M{"_id": notifID, "userId": userObjID},
 	)
 	if err != nil {
@@ -179,8 +196,11 @@ func (h *NotificationHandler) DeleteAll(c *gin.Context) {
 	}
 
 	collection := database.GetDB().Collection("notifications")
+	ctx, cancel := context.WithTimeout(c.Request.Context(), notificationDBTimeout)
+	defer cancel()
+
 	_, err = collection.DeleteMany(
-		context.Background(),
+		ctx,
 		bson.M{"userId": userObjID},
 	)
 	if err != nil {
@@ -200,12 +220,14 @@ func (h *NotificationHandler) SendTestNotification(c *gin.Context) {
 		return
 	}
 
-	CreateAndSend(userObjID, "system", "Test Notification 🔔",
+	log.Printf("Queueing test notification for user: %s", userID)
+	go CreateAndSend(userObjID, "system", "Test Notification 🔔",
 		"This is a test notification! If you see this, notifications are working correctly.",
 		map[string]interface{}{"test": true},
 	)
+	log.Printf("Test notification queued for user: %s", userID)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Test notification sent"})
+	c.JSON(http.StatusOK, gin.H{"message": "Test notification queued"})
 }
 
 // CreateAndSend creates a notification in DB and pushes it via WebSocket
@@ -221,13 +243,21 @@ func CreateAndSend(userID primitive.ObjectID, notifType, title, message string, 
 	}
 
 	collection := database.GetDB().Collection("notifications")
-	result, err := collection.InsertOne(context.Background(), notification)
+	ctx, cancel := context.WithTimeout(context.Background(), notificationDBTimeout)
+	defer cancel()
+
+	result, err := collection.InsertOne(ctx, notification)
 	if err != nil {
 		log.Printf("Failed to create notification: %v", err)
 		return
 	}
 
-	notification.ID = result.InsertedID.(primitive.ObjectID)
+	insertedID, ok := result.InsertedID.(primitive.ObjectID)
+	if !ok {
+		log.Printf("Failed to parse inserted notification ID for user %s", userID.Hex())
+		return
+	}
+	notification.ID = insertedID
 
 	// Push via WebSocket
 	hub := websocket.GetHub()

@@ -9,7 +9,7 @@ import { useDriverStore } from '../../store/driverStore';
 import { useTheme } from '../../theme/ThemeContext';
 
 function StatCard({ label, value, icon, color }) {
-    const { colors } = useTheme();
+    const { colors, isDarkMode } = useTheme();
     const { t } = useLanguageStore();
 
     const styles = useMemo(() => StyleSheet.create({
@@ -20,9 +20,9 @@ function StatCard({ label, value, icon, color }) {
             padding: 14,
             marginHorizontal: 4,
             alignItems: 'center',
-            shadowColor: '#000',
+            shadowColor: isDarkMode ? '#000' : '#e2e8f0',
             shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.05,
+            shadowOpacity: isDarkMode ? 0.3 : 0.8,
             shadowRadius: 4,
             elevation: 2,
         },
@@ -46,7 +46,7 @@ function StatCard({ label, value, icon, color }) {
             color: colors.textSecondary,
             textAlign: 'center',
         },
-    }), [colors, color]);
+    }), [colors, color, isDarkMode]);
 
     return (
         <View style={styles.card}>
@@ -163,7 +163,7 @@ export default function EarningsScreen() {
         mainValue: {
             fontSize: 36,
             fontWeight: '800',
-            color: '#fff',
+            color: colors.card,
         },
         statsRow: {
             flexDirection: 'row',
@@ -189,14 +189,14 @@ export default function EarningsScreen() {
             backgroundColor: colors.primary,
         },
         periodTabInactive: {
-            backgroundColor: isDarkMode ? '#374151' : '#e5e7eb',
+            backgroundColor: colors.input,
         },
         periodTabText: {
             fontSize: 13,
             fontWeight: '600',
         },
         periodTabTextActive: {
-            color: '#fff',
+            color: colors.card,
         },
         periodTabTextInactive: {
             color: colors.textSecondary,
@@ -246,38 +246,38 @@ export default function EarningsScreen() {
             </View>
 
             <View style={styles.statsRow}>
-                <StatCard 
+                <StatCard
                     label={t.today || 'Today'}
                     value={formatCurrency(stats.todayEarnings)}
                     icon="today"
                     color={colors.primary}
                 />
-                <StatCard 
+                <StatCard
                     label={t.thisWeek || 'Week'}
                     value={formatCurrency(stats.weekEarnings)}
                     icon="calendar"
-                    color="#8b5cf6"
+                    color={colors.textSecondary}
                 />
-                <StatCard 
+                <StatCard
                     label={t.thisMonth || 'Month'}
                     value={formatCurrency(stats.monthEarnings)}
                     icon="stats-chart"
-                    color="#f59e0b"
+                    color={colors.warning}
                 />
             </View>
 
             <View style={styles.statsRow}>
-                <StatCard 
+                <StatCard
                     label={t.deliveries || 'Deliveries'}
                     value={stats.totalDeliveries?.toString() || '0'}
                     icon="bicycle"
                     color={colors.success}
                 />
-                <StatCard 
+                <StatCard
                     label={t.rating || 'Rating'}
                     value={stats.rating?.toFixed(1) || '5.0'}
                     icon="star"
-                    color="#f59e0b"
+                    color={colors.warning}
                 />
             </View>
 
@@ -285,7 +285,7 @@ export default function EarningsScreen() {
 
             <View style={styles.periodTabs}>
                 {periods.map(p => (
-                    <View 
+                    <View
                         key={p.key}
                         style={[
                             styles.periodTab,
@@ -296,7 +296,7 @@ export default function EarningsScreen() {
                             fetchEarnings(p.key);
                         }}
                     >
-                        <Text 
+                        <Text
                             style={[
                                 styles.periodTabText,
                                 period === p.key ? styles.periodTabTextActive : styles.periodTabTextInactive

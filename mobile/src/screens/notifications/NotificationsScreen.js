@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNotificationStore } from '../../store/notificationStore';
 import { useThemeStore } from '../../store/themeStore';
 import api from '../../api/api';
+import LoadingSkeleton from '../../components/LoadingSkeleton';
 
 const FILTERS = [
     { key: 'all', label: 'All' },
@@ -23,6 +24,8 @@ const FILTERS = [
     { key: 'payments', label: 'Payments', types: ['payment_update'] },
     { key: 'delivery', label: 'Delivery', types: ['delivery_update'] },
 ];
+
+const NOTIFICATION_ACTION_TIMEOUT_MS = 25000;
 
 function formatTimeAgo(dateStr) {
     const date = new Date(dateStr);
@@ -59,10 +62,12 @@ export default function NotificationsScreen({ navigation }) {
     const { colors } = useThemeStore();
     const [activeFilter, setActiveFilter] = useState('all');
     const [refreshing, setRefreshing] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [sendingTest, setSendingTest] = useState(false);
     const {
         notifications,
         unreadCount,
+        lastError,
         fetchNotifications,
         markAsRead,
         markAllRead,
@@ -71,23 +76,49 @@ export default function NotificationsScreen({ navigation }) {
     } = useNotificationStore();
 
     useEffect(() => {
-        fetchNotifications();
+        const load = async () => {
+            setLoading(true);
+            const result = await fetchNotifications();
+            setLoading(false);
+            if (!result?.success && result?.error) {
+                Alert.alert('Notifications Unavailable', result.error);
+            }
+        };
+        load();
     }, []);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        await fetchNotifications();
+        const result = await fetchNotifications();
         setRefreshing(false);
+        if (!result?.success && result?.error) {
+            Alert.alert('Refresh Failed', result.error);
+        }
     }, [fetchNotifications]);
 
     const sendTestNotification = async () => {
         setSendingTest(true);
         try {
-            await api.post('/notifications/test');
+            await api.post(
+                '/notifications/test',
+                null,
+                {
+                    timeout: NOTIFICATION_ACTION_TIMEOUT_MS,
+                    _skipRetry: true,
+                    _suppressGlobalErrors: true,
+                }
+            );
             // Small delay to let WebSocket deliver it
             setTimeout(() => fetchNotifications(), 500);
         } catch (err) {
             console.error('🔴 Failed to send test notification:', err.message);
+            const isTimeout = err?.code === 'ECONNABORTED';
+            Alert.alert(
+                'Test Notification Failed',
+                isTimeout
+                    ? 'Request timed out. Please try again.'
+                    : (err?.response?.data?.error || err?.response?.data?.message || 'Could not send test notification.')
+            );
             if (err.response) {
                 console.error('🔴 Response data:', err.response.data);
                 console.error('🔴 Response status:', err.response.status);
@@ -228,10 +259,15 @@ export default function NotificationsScreen({ navigation }) {
             </TouchableOpacity>
 
             {/* List */}
-            {filtered.length === 0 ? (
+            {loading ? (
+                <View style={{ flex: 1 }}>
+                    <LoadingSkeleton variant="notifications" />
+                </View>
+            ) : filtered.length === 0 ? (
                 <View style={styles.empty}>
                     <Ionicons name="notifications-off-outline" size={56} color={colors.textSecondary} style={{ opacity: 0.4 }} />
                     <Text style={styles.emptyText}>No notifications</Text>
+                    {lastError ? <Text style={styles.errorText}>{lastError}</Text> : null}
                 </View>
             ) : (
                 <FlatList
@@ -390,6 +426,12 @@ const makeStyles = (colors) => StyleSheet.create({
         fontSize: 16,
         color: colors.textSecondary,
         marginTop: 12,
+    },
+    errorText: {
+        marginTop: 8,
+        fontSize: 13,
+        color: colors.danger,
+        textAlign: 'center',
     },
     testBtn: {
         flexDirection: 'row',

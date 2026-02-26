@@ -32,7 +32,9 @@ func Connect(uri, dbName string) error {
 
 	DB = client.Database(dbName)
 
-	createIndexes(ctx)
+	indexCtx, indexCancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer indexCancel()
+	createIndexes(indexCtx)
 
 	fmt.Println("✅ Connected to MongoDB")
 	return nil
@@ -66,6 +68,25 @@ func createIndexes(ctx context.Context) {
 		fmt.Printf("Warning: failed to create index on products.seller,createdAt: %v\n", err)
 	} else {
 		fmt.Println("✅ Created index on products.seller,createdAt")
+	}
+
+	notifications := DB.Collection("notifications")
+	_, err = notifications.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on notifications.userId,createdAt: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on notifications.userId,createdAt")
+	}
+
+	_, err = notifications.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "userId", Value: 1}, {Key: "isRead", Value: 1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on notifications.userId,isRead: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on notifications.userId,isRead")
 	}
 }
 
