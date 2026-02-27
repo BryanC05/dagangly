@@ -468,17 +468,33 @@ function NotificationListener() {
                         console.log('🔵 [WebSocket] Message received:', event.data);
 
                         if (message.type === 'notification' && message.data) {
-                            addNotification(message.data);
-
+                            // Handle both camelCase and PascalCase from backend
                             const title = message.data.title || message.data.Title || 'New Notification';
                             const body = message.data.message || message.data.Message || message.data.body || 'You have a new notification';
+                            const notifType = message.data.type || message.data.Type || 'notification';
 
-                            notificationService.scheduleLocalNotification(
-                                title,
-                                body,
-                                message.data.data || message.data.Data || {},
-                                1
-                            ).catch((err) => console.error('Notification error:', err));
+                            console.log('🔔 [Notification] Received:', notifType, title, body);
+
+                            // Add to store first (this updates the UI)
+                            addNotification(message.data);
+
+                            // Then show popup notification
+                            notificationService.initialize()
+                                .then(() => {
+                                    console.log('🔔 [Notification] Service initialized, scheduling...');
+                                    return notificationService.scheduleLocalNotification(
+                                        title,
+                                        body,
+                                        message.data.data || message.data.Data || { type: notifType },
+                                        1
+                                    );
+                                })
+                                .then(() => {
+                                    console.log('🔔 [Notification] Scheduled successfully');
+                                })
+                                .catch((err) => {
+                                    console.error('🔔 [Notification] Failed:', err.message);
+                                });
                         }
                     } catch (e) {
                         console.error('🔴 [WebSocket] Parse error:', e);

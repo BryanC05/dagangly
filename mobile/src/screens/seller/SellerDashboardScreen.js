@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Alert, Modal, Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -40,6 +40,11 @@ export default function SellerDashboardScreen({ navigation }) {
     }, [fetchMembership]);
 
     const fetchStats = useCallback(async () => {
+        if (!user?._id) {
+            setLoading(false);
+            return;
+        }
+        
         try {
             // Fetch products count
             const productsRes = await api.get(`/products/seller/${user._id}`);
@@ -68,10 +73,12 @@ export default function SellerDashboardScreen({ navigation }) {
             });
         } catch (error) {
             console.error('Failed to fetch seller stats:', error);
+            // Reset stats on error so UI shows 0
+            setStats({ products: 0, orders: 0, revenue: 0, pending: 0 });
         } finally {
             setLoading(false);
         }
-    }, [user._id]);
+    }, [user?._id]);
 
     useEffect(() => {
         fetchStats();
@@ -124,8 +131,6 @@ export default function SellerDashboardScreen({ navigation }) {
             setUploading(false);
         }
     };
-
-    if (loading) return <LoadingSpinner />;
 
     const styles = useMemo(() => StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background },
@@ -185,6 +190,8 @@ export default function SellerDashboardScreen({ navigation }) {
         submitBtnDisabled: { backgroundColor: colors.textTertiary },
         submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
     }), [colors, isDarkMode]);
+
+    if (loading) return <LoadingSpinner />;
 
     return (
         <ScrollView

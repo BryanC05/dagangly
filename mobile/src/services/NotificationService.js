@@ -198,6 +198,7 @@ class NotificationService {
         }
 
         try {
+            // Use null trigger for immediate delivery
             await Notifications.scheduleNotificationAsync({
                 content: {
                     title,
@@ -207,9 +208,7 @@ class NotificationService {
                     priority: Platform.OS === 'android' ? Notifications.AndroidNotificationPriority.MAX : undefined,
                     ...(Platform.OS === 'android' && { channelId: 'high_importance_channel' }),
                 },
-                trigger: {
-                    seconds: seconds || 1,
-                },
+                trigger: null, // Immediate delivery
             });
             console.log('🔔 [LocalNotification] Scheduled successfully');
         } catch (error) {
