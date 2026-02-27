@@ -127,7 +127,7 @@ export default function SellerDashboardScreen({ navigation }) {
 
     if (loading) return <LoadingSpinner />;
 
-    const styles = StyleSheet.create({
+    const styles = useMemo(() => StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background },
         header: { padding: 20, backgroundColor: colors.card, paddingBottom: 20 },
         title: { fontSize: 24, fontWeight: '800', color: colors.text },
@@ -135,8 +135,8 @@ export default function SellerDashboardScreen({ navigation }) {
         statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, padding: 16 },
         statCard: {
             width: '48%', backgroundColor: colors.card, borderRadius: 16, padding: 16,
-            shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+            shadowColor: isDarkMode ? '#000' : '#e2e8f0', shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: isDarkMode ? 0.3 : 0.8, shadowRadius: 4, elevation: 2,
         },
         iconBg: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
         statValue: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 2 },
@@ -146,8 +146,8 @@ export default function SellerDashboardScreen({ navigation }) {
         actionBtn: {
             flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card,
             padding: 16, borderRadius: 16, marginBottom: 12, gap: 14,
-            shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+            shadowColor: isDarkMode ? '#000' : '#e2e8f0', shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: isDarkMode ? 0.3 : 0.8, shadowRadius: 4, elevation: 2,
         },
         actionIcon: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
         actionTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
@@ -164,27 +164,27 @@ export default function SellerDashboardScreen({ navigation }) {
         pendingBadge: { backgroundColor: colors.warningLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
         pendingBadgeText: { color: colors.warning, fontSize: 12, fontWeight: '600' },
         membershipInfo: {},
-        membershipText: { fontSize: 14, color: '#6b7280', marginBottom: 4 },
-        membershipSubtext: { fontSize: 13, color: '#16a34a', marginTop: 4 },
-        membershipBenefits: { fontSize: 13, color: '#6b7280', lineHeight: 20, marginTop: 8 },
+        membershipText: { fontSize: 14, color: colors.textSecondary, marginBottom: 4 },
+        membershipSubtext: { fontSize: 13, color: colors.success, marginTop: 4 },
+        membershipBenefits: { fontSize: 13, color: colors.textSecondary, lineHeight: 20, marginTop: 8 },
         upgradeBtn: { backgroundColor: colors.primary, paddingVertical: 12, borderRadius: 10, alignItems: 'center', marginTop: 12 },
         upgradeBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
         modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-        modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: '80%' },
+        modalContent: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: '80%' },
         modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
         modalTitle: { fontSize: 20, fontWeight: '700', color: colors.text },
         paymentInfo: { backgroundColor: colors.warningLight, padding: 16, borderRadius: 12, marginBottom: 16 },
         paymentLabel: { fontSize: 12, color: colors.warning },
         paymentValue: { fontSize: 18, fontWeight: '700', color: colors.text, marginVertical: 4 },
         paymentAmount: { fontSize: 16, fontWeight: '700', color: colors.text, marginTop: 8 },
-        imagePickerBtn: { borderWidth: 2, borderStyle: 'dashed', borderColor: '#d1d5db', borderRadius: 12, overflow: 'hidden', marginBottom: 16 },
+        imagePickerBtn: { borderWidth: 2, borderStyle: 'dashed', borderColor: colors.border, borderRadius: 12, overflow: 'hidden', marginBottom: 16 },
         imagePickerPlaceholder: { padding: 40, alignItems: 'center' },
         imagePickerText: { marginTop: 8, color: colors.textSecondary, fontSize: 14 },
         previewImage: { width: '100%', height: 200, resizeMode: 'cover' },
         submitBtn: { backgroundColor: colors.primary, paddingVertical: 14, borderRadius: 10, alignItems: 'center' },
         submitBtnDisabled: { backgroundColor: colors.textTertiary },
         submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-    });
+    }), [colors, isDarkMode]);
 
     return (
         <ScrollView
@@ -203,7 +203,7 @@ export default function SellerDashboardScreen({ navigation }) {
                         <Ionicons
                             name={membership?.isMember ? "star" : "star-outline"}
                             size={24}
-                            color={membership?.isMember ? "#f59e0b" : "#9ca3af"}
+                            color={membership?.isMember ? colors.warning : colors.textTertiary}
                         />
                         <Text style={styles.membershipTitle}>
                             {membership?.isMember ? 'Premium Member' : 'Upgrade to Premium'}
@@ -256,7 +256,7 @@ export default function SellerDashboardScreen({ navigation }) {
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Submit Payment</Text>
                             <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
-                                <Ionicons name="close" size={24} color="#6b7280" />
+                                <Ionicons name="close" size={24} color={colors.textSecondary} />
                             </TouchableOpacity>
                         </View>
 
@@ -272,7 +272,7 @@ export default function SellerDashboardScreen({ navigation }) {
                                 <Image source={{ uri: paymentImage.uri }} style={styles.previewImage} />
                             ) : (
                                 <View style={styles.imagePickerPlaceholder}>
-                                    <Ionicons name="camera" size={32} color="#9ca3af" />
+                                    <Ionicons name="camera" size={32} color={colors.textTertiary} />
                                     <Text style={styles.imagePickerText}>Select Payment Proof</Text>
                                 </View>
                             )}
@@ -301,21 +301,21 @@ export default function SellerDashboardScreen({ navigation }) {
                 </View>
                 <View style={styles.statCard}>
                     <View style={[styles.iconBg, { backgroundColor: colors.successLight }]}>
-                        <Ionicons name="cash" size={24} color="#16a34a" />
+                        <Ionicons name="cash" size={24} color={colors.success} />
                     </View>
                     <Text style={styles.statValue}>{formatPrice(stats.revenue)}</Text>
                     <Text style={styles.statLabel}>Revenue</Text>
                 </View>
                 <View style={styles.statCard}>
-                    <View style={[styles.iconBg, { backgroundColor: '#fff7ed' }]}>
-                        <Ionicons name="receipt" size={24} color="#f97316" />
+                    <View style={[styles.iconBg, { backgroundColor: colors.warningLight }]}>
+                        <Ionicons name="receipt" size={24} color={colors.warning} />
                     </View>
                     <Text style={styles.statValue}>{stats.orders}</Text>
                     <Text style={styles.statLabel}>Total Orders</Text>
                 </View>
                 <View style={styles.statCard}>
-                    <View style={[styles.iconBg, { backgroundColor: '#fef2f2' }]}>
-                        <Ionicons name="time" size={24} color="#ef4444" />
+                    <View style={[styles.iconBg, { backgroundColor: colors.dangerLight }]}>
+                        <Ionicons name="time" size={24} color={colors.danger} />
                     </View>
                     <Text style={styles.statValue}>{stats.pending}</Text>
                     <Text style={styles.statLabel}>{t.pending}</Text>
@@ -329,28 +329,28 @@ export default function SellerDashboardScreen({ navigation }) {
                     style={styles.actionBtn}
                     onPress={() => navigation.navigate('AddProduct')}
                 >
-                    <View style={[styles.actionIcon, { backgroundColor: '#2563eb' }]}>
+                    <View style={[styles.actionIcon, { backgroundColor: colors.primary }]}>
                         <Ionicons name="add" size={24} color="#fff" />
                     </View>
                     <View>
                         <Text style={styles.actionTitle}>{t.addNewProduct}</Text>
                         <Text style={styles.actionDesc}>List a new item for sale</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#9ca3af" style={{ marginLeft: 'auto' }} />
+                    <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} style={{ marginLeft: 'auto' }} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.actionBtn}
                     onPress={() => navigation.navigate('MyProducts')}
                 >
-                    <View style={[styles.actionIcon, { backgroundColor: '#4f46e5' }]}>
+                    <View style={[styles.actionIcon, { backgroundColor: isDarkMode ? '#4f46e5' : '#4338ca' }]}>
                         <Ionicons name="list" size={24} color="#fff" />
                     </View>
                     <View>
                         <Text style={styles.actionTitle}>{t.manageProducts}</Text>
                         <Text style={styles.actionDesc}>Edit stock and prices</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#9ca3af" style={{ marginLeft: 'auto' }} />
+                    <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} style={{ marginLeft: 'auto' }} />
                 </TouchableOpacity>
             </View>
         </ScrollView>

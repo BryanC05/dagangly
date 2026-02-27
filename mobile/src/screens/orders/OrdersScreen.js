@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    RefreshControl, Image, Alert,
+    RefreshControl, Image, Alert, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeStore } from '../../store/themeStore';
@@ -30,11 +30,147 @@ export default function OrdersScreen({ navigation }) {
         arrived: { bg: '#d1fae5', text: '#065f46', label: t.arrived || 'Arrived' },
         delivered: { bg: '#d1fae5', text: '#065f46', label: t.delivered },
         cancelled: { bg: '#fee2e2', text: '#991b1b', label: t.cancelled },
+        completed: { bg: '#d1fae5', text: '#065f46', label: t.orderCompleted || 'Order is Completed' },
         // Scheduled delivery statuses
         pending_seller_review: { bg: '#fef3c7', text: '#92400e', label: t.waitingForSeller || 'Waiting for Seller' },
         seller_accepted: { bg: '#dbeafe', text: '#1e40af', label: t.awaitingConfirmation || 'Awaiting Confirmation' },
         seller_declined: { bg: '#fee2e2', text: '#991b1b', label: t.requestDeclined || 'Request Declined' },
         awaiting_buyer_confirm: { bg: '#fef3c7', text: '#92400e', label: t.reviewRequired || 'Review Required' },
+    };
+
+    // Helper function to get status config with dynamic labels for pickup orders
+    const getStatusConfig = (order, user) => {
+        const isPickup = order.deliveryType === 'pickup';
+        const isBuyer = order.buyer?._id === user?._id || order.buyer === user?._id;
+        const displayStatus = order.requestStatus || order.status;
+        const config = STATUS_COLORS[displayStatus] || STATUS_COLORS.pending;
+        
+        if (order.status === 'delivered') {
+            const label = isPickup ? (t.pickedUp || 'Picked Up') : (t.delivered || 'Delivered');
+            // Show "Order is Completed" to buyer when pickup order is delivered
+            const displayLabel = (isBuyer && isPickup) ? (t.orderCompleted || 'Order is Completed') : label;
+            return { ...config, label: displayLabel };
+        }
+        
+        return config;
+    };
+
+    // Creator email for fraud reports
+    const CREATOR_EMAIL = 'admin@umkm-marketplace.com';
+
+    // Fraud report handler
+    const handleFraudReport = async (order) => {
+        const isBuyer = order.buyer?._id === user?._id || order.buyer === user?._id;
+        const userRole = isBuyer ? 'Buyer' : 'Seller';
+        
+        Alert.alert(
+            t.reportFraudOrIssue || 'Report Fraud/Issue',
+            t.chooseReportType || 'Choose the type of report you want to submit',
+            [
+                {
+                    text: t.reportFraud || 'Report Fraud/Scam',
+                    onPress: () => submitFraudReport(order, userRole),
+                    style: 'destructive'
+                },
+                {
+                    text: t.reportIssue || 'Report General Issue',
+                    onPress: () => submitGeneralIssue(order)
+                },
+                {
+                    text: t.cancel || 'Cancel',
+                    style: 'cancel'
+                }
+            ]
+        );
+    };
+
+    const submitFraudReport = async (order, userRole) => {
+        Alert.prompt(
+            t.fraudReportDetails || 'Fraud Report Details',
+            t.describeFraudActivity || 'Please describe the fraudulent activity in detail:',
+            async (fraudDetails) => {
+                if (!fraudDetails) return;
+                
+                const reportData = {
+                    orderId: order._id,
+                    reportType: 'FRAUD_REPORT',
+                    reporterId: user?._id,
+                    reporterRole: userRole,
+                    reporterName: user?.name || user?.businessName,
+                    reporterEmail: user?.email,
+                    fraudDetails,
+                    orderDetails: {
+                        orderDate: order.createdAt,
+                        amount: order.totalAmount,
+                        products: order.products?.map(p => p.product?.name || p.name).join(', '),
+                        otherParty: userRole === 'Buyer'
+                            ? (order.seller?.businessName || order.seller?.name)
+                            : (order.buyer?.name || order.buyer?.email),
+                    },
+                    toEmail: CREATOR_EMAIL,
+                };
+                
+                try {
+                    await api.post('/reports/fraud', reportData);
+                    Alert.alert(
+                        t.success || 'Success',
+                        t.fraudReportSubmitted || 'Fraud report submitted! The creator has been notified and will investigate this matter.'
+                    );
+                } catch (err) {
+                    // Fallback: open email client
+                    const subject = encodeURIComponent(`FRAUD REPORT - Order #${order._id.slice(-8).toUpperCase()}`);
+                    const body = encodeURIComponent(
+                        `FRAUD REPORT\n\n` +
+                        `Order ID: ${order._id}\n` +
+                        `Reporter: ${userRole} - ${user?.name || user?.businessName}\n` +
+                        `Reporter Email: ${user?.email}\n\n` +
+                        `Fraud Details:\n${fraudDetails}\n\n` +
+                        `Order Amount: Rp ${order.totalAmount?.toLocaleString('id-ID')}\n` +
+                        `Products: ${order.products?.map(p => p.product?.name || p.name).join(', ')}`
+                    );
+                    
+                    // For mobile, we'll show the email content in an alert
+                    Alert.alert(
+                        t.emailFallback || 'Email Fallback',
+                        t.copyAndSendEmail || 'Please copy this information and send it via email:',
+                        [
+                            {
+                                text: t.ok || 'OK',
+                                onPress: () => {
+                                    // Try to open email app
+                                    const mailtoUrl = `mailto:${CREATOR_EMAIL}?subject=${subject}&body=${body}`;
+                                    Linking.canOpenURL(mailtoUrl).then(supported => {
+                                        if (supported) {
+                                            Linking.openURL(mailtoUrl);
+                                        } else {
+                                            Alert.alert(t.error || 'Error', t.emailAppNotFound || 'No email app found. Please send manually.');
+                                        }
+                                    });
+                                }
+                            }
+                        ]
+                    );
+                }
+            },
+            'plain-text'
+        );
+    };
+
+    const submitGeneralIssue = async (order) => {
+        Alert.prompt(
+            t.describeIssue || 'Describe the Issue',
+            t.whatIsTheProblem || 'What is the problem with your order?',
+            async (reason) => {
+                if (!reason) return;
+                try {
+                    await api.post('/disputes/', { orderId: order._id, reason, details: reason });
+                    Alert.alert(t.success || 'Success', t.disputeSubmitted || 'Dispute submitted! We will review it shortly.');
+                } catch (err) {
+                    Alert.alert(t.error || 'Error', err.response?.data?.error || t.failedSubmitDispute || 'Failed to submit dispute');
+                }
+            },
+            'plain-text'
+        );
     };
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -223,6 +359,12 @@ export default function OrdersScreen({ navigation }) {
             marginTop: 8, gap: 4,
         },
         ratedText: { color: colors.success, fontSize: 13, fontWeight: '600' },
+        fraudReportBtn: {
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+            backgroundColor: '#fee2e2', paddingVertical: 10, borderRadius: 10,
+            marginTop: 8, gap: 6, borderWidth: 1, borderColor: '#ef4444',
+        },
+        fraudReportBtnText: { color: '#dc2626', fontSize: 14, fontWeight: '600' },
         // Preorder special styles
         preorderCard: {
             backgroundColor: '#fef3c7',
@@ -294,11 +436,11 @@ export default function OrdersScreen({ navigation }) {
     };
 
     const renderOrder = ({ item: order }) => {
-        const displayStatus = order.requestStatus || order.status;
-        const statusInfo = STATUS_COLORS[displayStatus] || STATUS_COLORS.pending;
+        const statusInfo = getStatusConfig(order, user);
         const isPickup = order.deliveryType === 'pickup';
         const isExpanded = !!expandedOrders[order._id];
         const orderIdShort = order._id.slice(-8).toUpperCase();
+        const displayStatus = order.requestStatus || order.status;
         
         // Check if this is a scheduled delivery with a future date
         const isScheduled = order.isPreorder && order.deliveryDate;
@@ -695,6 +837,21 @@ export default function OrdersScreen({ navigation }) {
                                     {t.rated || 'Rated'} ⭐ {order.driverRating || ratedOrders[order._id]}
                                 </Text>
                             </View>
+                        )}
+
+                        {/* Fraud/Issue Report Button - Available to both buyer and seller */}
+                        {(() => {
+                            const isBuyer = order.buyer?._id === user?._id || order.buyer === user?._id;
+                            const isSeller = order.seller?._id === user?._id || order.seller === user?._id;
+                            return (isBuyer || isSeller);
+                        })() && (
+                            <TouchableOpacity
+                                style={styles.fraudReportBtn}
+                                onPress={() => handleFraudReport(order)}
+                            >
+                                <Ionicons name="flag" size={18} color="#dc2626" />
+                                <Text style={styles.fraudReportBtnText}>{t.reportFraudIssue || 'Report Fraud/Issue'}</Text>
+                            </TouchableOpacity>
                         )}
                     </View>
                 )}
