@@ -74,11 +74,7 @@ export default function OrdersScreen({ navigation }) {
         const sellerId = order.seller?._id || order.seller;
         return sellerId === user?._id;
     };
-
-    const isBuyer = (order) => {
-        const buyerId = order.buyer?._id || order.buyer;
-        return buyerId === user?._id;
-    };
+    // isBuyer function removed - no longer needed for UI
 
     const getNextStatus = (currentStatus) => {
         const currentIndex = STATUS_FLOW.indexOf(currentStatus);
@@ -153,24 +149,14 @@ export default function OrdersScreen({ navigation }) {
                     </View>
                 </View>
 
-                {/* Show role badge */}
-                <View style={{ flexDirection: 'row', gap: 6, marginBottom: 10 }}>
-                    {isSeller(order) && (
-                        <View style={{ backgroundColor: '#dbeafe', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 }}>
-                            <Text style={{ fontSize: 10, color: '#1e40af', fontWeight: '600' }}>Seller</Text>
-                        </View>
-                    )}
-                    {isBuyer(order) && (
-                        <View style={{ backgroundColor: '#d1fae5', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 }}>
-                            <Text style={{ fontSize: 10, color: '#065f46', fontWeight: '600' }}>Buyer</Text>
-                        </View>
-                    )}
-                    {isPickup && (
+                {/* Account status badges removed - all users are equal */}
+                {isPickup && (
+                    <View style={{ flexDirection: 'row', gap: 6, marginBottom: 10 }}>
                         <View style={{ backgroundColor: '#fef3c7', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 }}>
                             <Text style={{ fontSize: 10, color: '#92400e', fontWeight: '600' }}>Pickup</Text>
                         </View>
-                    )}
-                </View>
+                    </View>
+                )}
                 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors?.border }}>
                     <Text style={{ fontSize: 13, color: colors?.textSecondary }}>Total</Text>
@@ -320,14 +306,7 @@ export default function OrdersScreen({ navigation }) {
                             </TouchableOpacity>
                         )}
 
-                        {/* Show seller/buyer info */}
-                        {!canUpdate && (
-                            <View style={{ marginTop: 20, padding: 12, backgroundColor: colors?.background, borderRadius: 8 }}>
-                                <Text style={{ fontSize: 13, color: colors?.textSecondary, textAlign: 'center' }}>
-                                    {isSeller(order) ? 'You are the seller of this order' : 'You are the buyer of this order'}
-                                </Text>
-                            </View>
-                        )}
+                        {/* Account role info removed - all users are equal */}
                     </View>
                 </View>
             </Modal>

@@ -16,6 +16,8 @@ type User struct {
 	AutomationEnabled     bool                  `bson:"automationEnabled" json:"automationEnabled"`
 	BusinessName          *string               `bson:"businessName" json:"businessName"`
 	BusinessType          string                `bson:"businessType" json:"businessType"`
+	BusinessID            *primitive.ObjectID   `bson:"businessId,omitempty" json:"businessId"` // Reference to registered business
+	Business              *BusinessResponse     `bson:"-,omitempty" json:"business,omitempty"`  // Populated business data
 	Location              Location              `bson:"location" json:"location"`
 	IsVerified            bool                  `bson:"isVerified" json:"isVerified"`
 	ProfileImage          *string               `bson:"profileImage" json:"profileImage"`

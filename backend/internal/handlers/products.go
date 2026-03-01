@@ -6,12 +6,14 @@ import (
 	"strconv"
 	"time"
 
+	"msme-marketplace/internal/database"
+	"msme-marketplace/internal/models"
+	"msme-marketplace/internal/utils"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"msme-marketplace/internal/database"
-	"msme-marketplace/internal/models"
 )
 
 type ProductHandler struct {
@@ -120,6 +122,8 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 	}
 
 	usersCollection := database.GetDB().Collection("users")
+	businessCollection := database.GetDB().Collection("businesses")
+
 	type SellerInfo struct {
 		ID           primitive.ObjectID `json:"_id" bson:"_id"`
 		Name         string             `json:"name" bson:"name"`
@@ -128,11 +132,13 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 		Location     models.Location    `json:"location" bson:"location"`
 		Rating       float64            `json:"rating" bson:"rating"`
 		IsVerified   bool               `json:"isVerified" bson:"isVerified"`
+		ProfileImage *string            `json:"profileImage" bson:"profileImage"`
 	}
 
 	type ProductWithSeller struct {
 		models.Product `bson:",inline"`
-		Seller         SellerInfo `json:"seller" bson:"seller"`
+		Seller         SellerInfo               `json:"seller" bson:"seller"`
+		Business       *models.BusinessResponse `json:"business,omitempty" bson:"business,omitempty"`
 	}
 
 	var productsWithSellers []ProductWithSeller
@@ -140,9 +146,51 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 		var sellerInfo SellerInfo
 		usersCollection.FindOne(context.Background(), bson.M{"_id": product.Seller}).Decode(&sellerInfo)
 
+		// Fetch business info if product has a business association
+		var businessResponse *models.BusinessResponse
+		if product.BusinessID != nil {
+			var business models.Business
+			err := businessCollection.FindOne(context.Background(), bson.M{"_id": *product.BusinessID}).Decode(&business)
+			if err == nil {
+				// Resolve logo with owner's profile image
+				var logoPtr string
+				if business.Logo != nil {
+					logoPtr = *business.Logo
+				}
+				var profileImage string
+				if sellerInfo.ProfileImage != nil {
+					profileImage = *sellerInfo.ProfileImage
+				}
+				logoInfo := utils.ResolveBusinessLogo(logoPtr, profileImage, business.Name)
+
+				resp := models.BusinessResponse{
+					ID:           business.ID.Hex(),
+					Name:         business.Name,
+					Description:  business.Description,
+					Logo:         business.Logo,
+					LogoInfo:     models.LogoInfo{URL: logoInfo.URL, Source: string(logoInfo.Source)},
+					Email:        business.Email,
+					Phone:        business.Phone,
+					Website:      business.Website,
+					BusinessType: business.BusinessType,
+					Address:      business.Address,
+					City:         business.City,
+					State:        business.State,
+					IsVerified:   business.IsVerified,
+					IsActive:     business.IsActive,
+					Instagram:    business.Instagram,
+					Facebook:     business.Facebook,
+					TikTok:       business.TikTok,
+					CreatedAt:    business.CreatedAt,
+				}
+				businessResponse = &resp
+			}
+		}
+
 		pws := ProductWithSeller{
-			Product: product,
-			Seller:  sellerInfo,
+			Product:  product,
+			Seller:   sellerInfo,
+			Business: businessResponse,
 		}
 		productsWithSellers = append(productsWithSellers, pws)
 	}
@@ -185,10 +233,53 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 		Location     models.Location    `json:"location" bson:"location"`
 		Rating       float64            `json:"rating" bson:"rating"`
 		IsVerified   bool               `json:"isVerified" bson:"isVerified"`
+		ProfileImage *string            `json:"profileImage" bson:"profileImage"`
 	}
 
 	var sellerInfo SellerInfo
 	usersCollection.FindOne(context.Background(), bson.M{"_id": product.Seller}).Decode(&sellerInfo)
+
+	// Fetch business info if product has a business association
+	var businessResponse *models.BusinessResponse
+	if product.BusinessID != nil {
+		businessCollection := database.GetDB().Collection("businesses")
+		var business models.Business
+		err := businessCollection.FindOne(context.Background(), bson.M{"_id": *product.BusinessID}).Decode(&business)
+		if err == nil {
+			// Resolve logo with owner's profile image
+			var logoPtr string
+			if business.Logo != nil {
+				logoPtr = *business.Logo
+			}
+			var profileImage string
+			if sellerInfo.ProfileImage != nil {
+				profileImage = *sellerInfo.ProfileImage
+			}
+			logoInfo := utils.ResolveBusinessLogo(logoPtr, profileImage, business.Name)
+
+			resp := models.BusinessResponse{
+				ID:           business.ID.Hex(),
+				Name:         business.Name,
+				Description:  business.Description,
+				Logo:         business.Logo,
+				LogoInfo:     models.LogoInfo{URL: logoInfo.URL, Source: string(logoInfo.Source)},
+				Email:        business.Email,
+				Phone:        business.Phone,
+				Website:      business.Website,
+				BusinessType: business.BusinessType,
+				Address:      business.Address,
+				City:         business.City,
+				State:        business.State,
+				IsVerified:   business.IsVerified,
+				IsActive:     business.IsActive,
+				Instagram:    business.Instagram,
+				Facebook:     business.Facebook,
+				TikTok:       business.TikTok,
+				CreatedAt:    business.CreatedAt,
+			}
+			businessResponse = &resp
+		}
+	}
 
 	c.JSON(200, gin.H{
 		"_id":          product.ID,
@@ -210,6 +301,7 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 		"createdAt":    product.CreatedAt,
 		"updatedAt":    product.UpdatedAt,
 		"seller":       sellerInfo,
+		"business":     businessResponse,
 	})
 }
 
@@ -319,6 +411,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		Unit:         unit,
 		Images:       req.Images,
 		Seller:       userObjID,
+		BusinessID:   user.BusinessID, // Attach business if user has one
 		Location:     productLocation,
 		Tags:         req.Tags,
 		HasVariants:  req.HasVariants,

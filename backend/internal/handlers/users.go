@@ -9,12 +9,14 @@ import (
 	"strconv"
 	"time"
 
+	"msme-marketplace/internal/database"
+	"msme-marketplace/internal/models"
+	"msme-marketplace/internal/utils"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"msme-marketplace/internal/database"
-	"msme-marketplace/internal/models"
 )
 
 type UserHandler struct{}
@@ -45,6 +47,47 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	if err != nil {
 		c.JSON(404, gin.H{"message": "User not found"})
 		return
+	}
+
+	// Populate business data if user has a business
+	if user.BusinessID != nil {
+		businessCollection := database.GetDB().Collection("businesses")
+		var business models.Business
+		err := businessCollection.FindOne(context.Background(), bson.M{"_id": *user.BusinessID}).Decode(&business)
+		if err == nil {
+			// Resolve logo using profile image or generate monogram
+			var logoPtr string
+			if business.Logo != nil {
+				logoPtr = *business.Logo
+			}
+			var profileImage string
+			if user.ProfileImage != nil {
+				profileImage = *user.ProfileImage
+			}
+			logoInfo := utils.ResolveBusinessLogo(logoPtr, profileImage, business.Name)
+
+			resp := models.BusinessResponse{
+				ID:           business.ID.Hex(),
+				Name:         business.Name,
+				Description:  business.Description,
+				Logo:         business.Logo,
+				LogoInfo:     models.LogoInfo{URL: logoInfo.URL, Source: string(logoInfo.Source)},
+				Email:        business.Email,
+				Phone:        business.Phone,
+				Website:      business.Website,
+				BusinessType: business.BusinessType,
+				Address:      business.Address,
+				City:         business.City,
+				State:        business.State,
+				IsVerified:   business.IsVerified,
+				IsActive:     business.IsActive,
+				Instagram:    business.Instagram,
+				Facebook:     business.Facebook,
+				TikTok:       business.TikTok,
+				CreatedAt:    business.CreatedAt,
+			}
+			user.Business = &resp
+		}
 	}
 
 	c.JSON(200, user)
@@ -88,6 +131,27 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	if err != nil {
 		c.JSON(500, gin.H{"message": "Failed to get updated user"})
 		return
+	}
+
+	// If profile image was updated and user has a business, sync to business
+	if profileImage, ok := updates["profileImage"]; ok && user.BusinessID != nil {
+		businessCollection := database.GetDB().Collection("businesses")
+		// Only update business logo if business doesn't have a custom logo
+		var business models.Business
+		err := businessCollection.FindOne(context.Background(), bson.M{"_id": *user.BusinessID}).Decode(&business)
+		if err == nil && business.Logo == nil {
+			// Use profile image as business logo (sync)
+			_, _ = businessCollection.UpdateOne(
+				context.Background(),
+				bson.M{"_id": *user.BusinessID},
+				bson.M{
+					"$set": bson.M{
+						"logo":      profileImage,
+						"updatedAt": time.Now(),
+					},
+				},
+			)
+		}
 	}
 
 	c.JSON(200, user)

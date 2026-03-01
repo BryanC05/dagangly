@@ -235,6 +235,9 @@ export default {
     logoSelected: 'Logo ditetapkan sebagai logo usaha!',
     deleteLogo: 'Hapus Logo',
     deleteLogoConfirm: 'Apakah Anda yakin ingin menghapus logo ini?',
+    businessRequired: 'Registrasi Usaha Diperlukan',
+    businessRequiredLogo: 'Anda perlu mendaftarkan usaha Anda terlebih dahulu sebelum dapat membuat logo.',
+    registerBusiness: 'Daftarkan Usaha',
 
     // Nearby Sellers
     nearbySellersTitle: 'Penjual Terdekat',

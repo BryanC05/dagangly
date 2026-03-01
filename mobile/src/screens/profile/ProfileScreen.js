@@ -13,6 +13,7 @@ import { useDriverStore } from '../../store/driverStore';
 import { useNotificationStore } from '../../store/notificationStore';
 import { useTheme } from '../../theme/ThemeContext';
 import { getImageUrl } from '../../utils/helpers';
+import BusinessSection from '../../components/business/BusinessSection';
 import api from '../../api/api';
 
 export default function ProfileScreen({ navigation }) {
@@ -78,11 +79,7 @@ export default function ProfileScreen({ navigation }) {
         profileName: { fontSize: 20, fontWeight: '800', color: colors.text, marginBottom: 4 },
         profileEmail: { fontSize: 14, color: colors.textSecondary, marginBottom: 2 },
         profilePhone: { fontSize: 13, color: colors.textSecondary, marginBottom: 8 },
-        sellerBadge: {
-            flexDirection: 'row', alignItems: 'center', gap: 4,
-            backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, marginBottom: 4,
-        },
-        sellerBadgeText: { fontSize: 12, color: colors.success, fontWeight: '600' },
+        // sellerBadge styles removed - account status badges no longer shown
         businessName: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
         editBtn: {
             flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14,
@@ -255,11 +252,7 @@ export default function ProfileScreen({ navigation }) {
                         {user?.phone ? (
                             <Text style={styles.profilePhone}>{user.phone}</Text>
                         ) : null}
-                        {/* All users are now sellers - show badge always */}
-                        <View style={styles.sellerBadge}>
-                            <Ionicons name="storefront" size={12} color={colors.success} />
-                            <Text style={styles.sellerBadgeText}>{t.seller || 'Seller'}</Text>
-                        </View>
+                        {/* Account status badges removed - all users are equal */}
                         {user?.businessName && (
                             <Text style={styles.businessName}>{user.businessName}</Text>
                         )}
@@ -309,6 +302,9 @@ export default function ProfileScreen({ navigation }) {
                     </View>
                 )}
             </View>
+
+            {/* Business Section - Manage business registration and logo */}
+            <BusinessSection navigation={navigation} />
 
             {isDriverMode && (
                 <TouchableOpacity

@@ -189,9 +189,19 @@ export default function ProductCard({ product, onPress }) {
                 )}
             </View>
             <View style={dynamicStyles.content}>
-                <Text style={dynamicStyles.sellerName} numberOfLines={1}>
-                    {product.seller?.name || product.seller?.location?.city || 'UMKM'}
-                </Text>
+                {/* Business Info with Logo */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                    {product.business?.logoInfo?.url && (
+                        <Image
+                            source={{ uri: product.business.logoInfo.url }}
+                            style={{ width: 16, height: 16, borderRadius: 8, marginRight: 6, borderWidth: 1, borderColor: colors.border }}
+                            resizeMode="cover"
+                        />
+                    )}
+                    <Text style={dynamicStyles.sellerName} numberOfLines={1}>
+                        {product.business?.name || product.seller?.name || product.seller?.location?.city || 'UMKM'}
+                    </Text>
+                </View>
                 <Text style={dynamicStyles.name} numberOfLines={2}>
                     {product.name}
                 </Text>

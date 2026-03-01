@@ -52,13 +52,63 @@ export default function LogoGeneratorScreen({ navigation }) {
     const [status, setStatus] = useState({ remaining: 5, limit: 5, resetTime: null });
     const [countdown, setCountdown] = useState('');
     const [selectedLogo, setSelectedLogo] = useState(null);
+    const [hasBusiness, setHasBusiness] = useState(null);
     const timerRef = useRef(null);
 
+    // Check if user has a business
     useEffect(() => {
-        fetchLogoHistory();
-        fetchStatus();
-        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+        const checkBusiness = async () => {
+            try {
+                const response = await api.get('/business');
+                if (response.data.success && response.data.business) {
+                    setHasBusiness(true);
+                } else {
+                    setHasBusiness(false);
+                }
+            } catch (error) {
+                // If 404 or no business, user needs to register
+                if (error.response?.status === 404) {
+                    setHasBusiness(false);
+                } else {
+                    console.error('Error checking business:', error);
+                    setHasBusiness(false);
+                }
+            }
+        };
+        checkBusiness();
     }, []);
+
+    // Show business required alert
+    useEffect(() => {
+        if (hasBusiness === false) {
+            Alert.alert(
+                t.businessRequired,
+                t.businessRequiredLogo,
+                [
+                    {
+                        text: t.cancel,
+                        style: 'cancel',
+                        onPress: () => navigation.goBack()
+                    },
+                    {
+                        text: t.registerBusiness,
+                        onPress: () => {
+                            navigation.navigate('Profile');
+                            // Navigate to business section in profile
+                        }
+                    }
+                ]
+            );
+        }
+    }, [hasBusiness, t, navigation]);
+
+    useEffect(() => {
+        if (hasBusiness) {
+            fetchLogoHistory();
+            fetchStatus();
+        }
+        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }, [hasBusiness]);
 
     // Countdown timer
     useEffect(() => {
@@ -117,8 +167,29 @@ export default function LogoGeneratorScreen({ navigation }) {
             }
         } catch (error) {
             console.error('Logo generation error:', error);
-            const message = error.response?.data?.message || error.message || 'Failed to generate logo';
-            Alert.alert(t.error, message);
+            const statusCode = error.response?.status;
+            const errorData = error.response?.data;
+            
+            // Handle business prerequisite error
+            if (statusCode === 403 && errorData?.requiredAction === 'create_business') {
+                Alert.alert(
+                    t.businessRequired,
+                    t.businessRequiredLogo,
+                    [
+                        {
+                            text: t.cancel,
+                            style: 'cancel'
+                        },
+                        {
+                            text: t.registerBusiness,
+                            onPress: () => navigation.navigate('Profile')
+                        }
+                    ]
+                );
+            } else {
+                const message = errorData?.message || error.message || 'Failed to generate logo';
+                Alert.alert(t.error, message);
+            }
         } finally {
             setLoading(false);
         }
@@ -322,6 +393,47 @@ export default function LogoGeneratorScreen({ navigation }) {
     };
 
     const usedPercent = status.limit > 0 ? ((status.limit - status.remaining) / status.limit) * 100 : 0;
+
+    // Show loading while checking business
+    if (hasBusiness === null) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text style={{ marginTop: 16, color: colors.textSecondary }}>{t.loading}</Text>
+            </View>
+        );
+    }
+
+    // Show business required banner if no business
+    if (hasBusiness === false) {
+        return (
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Logo Generator</Text>
+                    <View style={{ width: 40 }} />
+                </View>
+                <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 32 }]}>
+                    <Ionicons name="business-outline" size={64} color={colors.primary} style={{ marginBottom: 16 }} />
+                    <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text, textAlign: 'center', marginBottom: 12 }}>
+                        {t.businessRequired}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 24 }}>
+                        {t.businessRequiredLogo}
+                    </Text>
+                    <TouchableOpacity
+                        style={[styles.generateBtn, { paddingHorizontal: 32 }]}
+                        onPress={() => navigation.navigate('Profile')}
+                    >
+                        <Ionicons name="business" size={20} color="#fff" />
+                        <Text style={styles.generateBtnText}>{t.registerBusiness}</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>

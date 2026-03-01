@@ -14,11 +14,12 @@ import (
 	"strings"
 	"time"
 
+	"msme-marketplace/internal/database"
+	"msme-marketplace/internal/models"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"msme-marketplace/internal/database"
-	"msme-marketplace/internal/models"
 )
 
 type LogoHandler struct {
@@ -56,6 +57,17 @@ func (h *LogoHandler) GenerateLogo(c *gin.Context) {
 	err = usersCollection.FindOne(context.Background(), bson.M{"_id": userObjID}).Decode(&user)
 	if err != nil {
 		c.JSON(404, gin.H{"message": "User not found"})
+		return
+	}
+
+	// Check if user has a registered business
+	if user.BusinessID == nil {
+		c.JSON(403, gin.H{
+			"success":        false,
+			"error":          "Business registration required",
+			"message":        "Please register your business before generating logos. Go to Profile > Business Settings to register.",
+			"requiredAction": "business_registration",
+		})
 		return
 	}
 
@@ -412,6 +424,25 @@ func (h *LogoHandler) UploadCustomLogo(c *gin.Context) {
 		return
 	}
 
+	// Check if user has a registered business
+	usersCollection := database.GetDB().Collection("users")
+	var user models.User
+	err = usersCollection.FindOne(context.Background(), bson.M{"_id": userObjID}).Decode(&user)
+	if err != nil {
+		c.JSON(404, gin.H{"message": "User not found"})
+		return
+	}
+
+	if user.BusinessID == nil {
+		c.JSON(403, gin.H{
+			"success":        false,
+			"error":          "Business registration required",
+			"message":        "Please register your business before uploading logos. Go to Profile > Business Settings to register.",
+			"requiredAction": "business_registration",
+		})
+		return
+	}
+
 	file, err := c.FormFile("logo")
 	if err != nil {
 		c.JSON(400, gin.H{"message": "No file uploaded"})
@@ -435,22 +466,32 @@ func (h *LogoHandler) UploadCustomLogo(c *gin.Context) {
 		return
 	}
 
-	usersCollection := database.GetDB().Collection("users")
-	_, err = usersCollection.UpdateOne(context.Background(), bson.M{"_id": userObjID}, bson.M{
+	// Update the business logo instead of user
+	businessCollection := database.GetDB().Collection("businesses")
+	logoURL := "/uploads/logos/" + filename
+	_, err = businessCollection.UpdateOne(context.Background(), bson.M{"_id": user.BusinessID}, bson.M{
 		"$set": bson.M{
-			"businessLogo":  "/uploads/logos/" + filename,
-			"hasCustomLogo": true,
+			"logo":      logoURL,
+			"updatedAt": time.Now(),
 		},
 	})
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to update user"})
+		c.JSON(500, gin.H{"message": "Failed to update business logo"})
 		return
 	}
+
+	// Also update user's business logo for backward compatibility
+	_, _ = usersCollection.UpdateOne(context.Background(), bson.M{"_id": userObjID}, bson.M{
+		"$set": bson.M{
+			"businessLogo":  logoURL,
+			"hasCustomLogo": true,
+		},
+	})
 
 	c.JSON(200, gin.H{
 		"success":      true,
 		"message":      "Logo uploaded successfully",
-		"businessLogo": "/uploads/logos/" + filename,
+		"businessLogo": logoURL,
 	})
 }
 

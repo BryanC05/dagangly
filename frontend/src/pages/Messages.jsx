@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Search, Phone, Video, MoreVertical, Check, CheckCheck } from "lucide-react";
 import { useState } from "react";
@@ -149,11 +148,7 @@ const Messages = () => {
                                             <div className="flex items-center justify-between gap-2">
                                                 <span className="font-medium truncate flex items-center gap-1">
                                                     {conv.user.name}
-                                                    {conv.user.isSeller && (
-                                                        <Badge variant="secondary" className="text-[10px] px-1">
-                                                            Seller
-                                                        </Badge>
-                                                    )}
+                                                    {/* Account status badges removed */}
                                                 </span>
                                                 <span className="text-xs text-muted-foreground shrink-0">
                                                     {conv.timestamp}
@@ -197,11 +192,7 @@ const Messages = () => {
                                     <div>
                                         <h3 className="font-semibold flex items-center gap-2">
                                             {selectedConversation.user.name}
-                                            {selectedConversation.user.isSeller && (
-                                                <Badge variant="secondary" className="text-xs">
-                                                    Seller
-                                                </Badge>
-                                            )}
+                                            {/* Account status badges removed */}
                                         </h3>
                                         <p className="text-xs text-muted-foreground">
                                             {selectedConversation.user.isOnline ? (

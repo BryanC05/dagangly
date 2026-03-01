@@ -249,11 +249,23 @@ function ProductDetail() {
 
           {/* Product Info */}
           <div className="space-y-6">
-            {/* Seller Name */}
-            <div>
-              <Link to={sellerId ? `/store/${sellerId}` : '#'} className="text-primary hover:underline text-sm">
-                {seller?.businessName || seller?.name || 'Toko'}
-              </Link>
+            {/* Seller Info with Business Logo */}
+            <div className="flex items-center gap-3">
+              {product.business?.logoInfo?.url && (
+                <img
+                  src={product.business.logoInfo.url}
+                  alt={product.business.name}
+                  className="w-10 h-10 rounded-full object-cover border border-border"
+                />
+              )}
+              <div>
+                <Link to={sellerId ? `/store/${sellerId}` : '#'} className="text-primary hover:underline text-sm font-medium">
+                  {product.business?.name || seller?.businessName || seller?.name || 'Toko'}
+                </Link>
+                {product.business?.isVerified && (
+                  <span className="ml-2 text-xs text-green-600 font-medium">Verified</span>
+                )}
+              </div>
             </div>
 
             {/* Product Title */}

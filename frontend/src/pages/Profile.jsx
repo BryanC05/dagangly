@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import ProductCard from "@/components/products/ProductCard";
 import LocationPicker from "@/components/LocationPicker";
+import BusinessSection from "@/components/business/BusinessSection";
 import {
   MapPin,
   Star,
@@ -39,7 +40,6 @@ import {
   Mail,
   Save,
   X,
-  Shield,
   Map,
   Clock,
   Truck,
@@ -237,7 +237,7 @@ const Profile = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
-  const isSellerUser = profile?.role === 'seller' || profile?.isSeller;
+  const isSellerUser = true; // All users are treated equally - no buyer/seller distinction in UI
   const [myProducts, setMyProducts] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -598,20 +598,12 @@ const Profile = () => {
                     {profile.name?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
+                  <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                     <h1 className="text-2xl font-bold">
-                      {isSellerUser
-                        ? profile.businessName || profile.name
-                        : profile.name}
+                      {profile.businessName || profile.name}
                     </h1>
-                    {isSellerUser && profile.isVerified && (
-                      <Badge className="w-fit gap-1">
-                        <Shield className="h-3 w-3" />
-                        {t('profile.verifiedSeller')}
-                      </Badge>
-                    )}
-                    {/* No more buyer badge - all users are sellers now */}
+                    {/* Account status badges removed - all users are equal */}
                   </div>
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
                     <span className="flex items-center gap-1">
@@ -630,7 +622,7 @@ const Profile = () => {
                         {profile.location.city}, {profile.location.state}
                       </span>
                     )}
-                    {isSellerUser && profile.rating > 0 && (
+                    {profile.rating > 0 && (
                       <span className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-warning text-warning" />
                         {profile.rating.toFixed(1)} {t('profile.rating')}
@@ -656,73 +648,10 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Business Logo Section */}
-        {isSellerUser && (
-          <Card className="mb-8">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <ImageIcon className="h-5 w-5" />
-                    {t('profile.businessLogo')}
-                  </CardTitle>
-                  <CardDescription>
-                    {t('profile.logoDesc')}
-                  </CardDescription>
-                </div>
-                <Link to="/logo-generator">
-                  <Button variant="outline" className="gap-2">
-                    <Sparkles className="h-4 w-4" />
-                    {profile.businessLogo ? t('profile.changeLogo') : t('profile.createLogo')}
-                  </Button>
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {profile.businessLogo ? (
-                <div className="flex items-center gap-6">
-                  <div className="relative">
-                    <img
-                      src={getAssetUrl(profile.businessLogo)}
-                      alt="Business Logo"
-                      className="w-32 h-32 object-contain border rounded-lg bg-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      {profile.hasCustomLogo
-                        ? t('profile.customLogo')
-                        : t('profile.aiLogo')}
-                    </p>
-                    <div className="flex gap-2">
-                      <Link to="/logo-generator">
-                        <Button variant="outline" size="sm">
-                          {t('profile.manageLogo')}
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground mb-2">
-                    You don't have a business logo yet
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Create a professional logo using AI or upload your own
-                  </p>
-                  <Link to="/logo-generator">
-                    <Button className="gap-2">
-                      <Sparkles className="h-4 w-4" />
-                      {t('profile.createLogo')}
-                    </Button>
-                  </Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+        {/* Business Management Section - Available to all users */}
+        <div className="mb-8">
+          <BusinessSection />
+        </div>
 
         {/* Tabs */}
         <Tabs defaultValue={isSellerUser ? "products" : "orders"}>

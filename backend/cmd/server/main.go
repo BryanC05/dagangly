@@ -56,6 +56,7 @@ func main() {
 	forumHandler := handlers.NewForumHandler()
 	workflowHandler := handlers.NewWorkflowHandler()
 	logoHandler := handlers.NewLogoHandler()
+	businessHandler := handlers.NewBusinessHandler()
 	navigationHandler := handlers.NewNavigationHandler()
 	webhookHandler := handlers.NewWebhookHandler()
 	productImageHandler := handlers.NewProductImageHandler(cfg)
@@ -223,6 +224,19 @@ func main() {
 			logo.POST("/upload", logoHandler.UploadCustomLogo)
 		}
 
+		// Business routes
+		business := api.Group("/business")
+		business.Use(middleware.AuthRequired(cfg.JWTSecret))
+		{
+			business.GET("/my", businessHandler.GetMyBusiness)
+			business.POST("/", businessHandler.CreateBusiness)
+			business.PUT("/", businessHandler.UpdateBusiness)
+			business.PUT("/logo", businessHandler.UpdateBusinessLogo)
+			business.DELETE("/", businessHandler.DeleteBusiness)
+		}
+		// Public business endpoint
+		api.GET("/business/:id", businessHandler.GetBusinessByID)
+
 		notifications := api.Group("/notifications")
 		notifications.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
@@ -288,6 +302,9 @@ func main() {
 			ai.POST("/generate-description", aiHandler.GenerateDescription)
 		}
 	}
+
+	// Ensure database indexes
+	businessHandler.EnsureIndexes()
 
 	os.MkdirAll("./uploads/logos", 0755)
 	os.MkdirAll("./uploads/products", 0755)

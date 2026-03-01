@@ -79,10 +79,21 @@ const ProductCard = ({ product }) => {
                 </div>
                 
                 <CardContent className="p-3">
-                    {/* Seller Name */}
-                    {sellerName && (
-                        <p className="text-xs text-gray-500 mb-1">{sellerName}</p>
-                    )}
+                    {/* Seller Info with Business Logo */}
+                    <div className="flex items-center gap-2 mb-2">
+                        {product.business?.logoInfo?.url && (
+                            <img
+                                src={product.business.logoInfo.url}
+                                alt={product.business.name}
+                                className="w-5 h-5 rounded-full object-cover border border-border"
+                            />
+                        )}
+                        {sellerName && (
+                            <p className="text-xs text-gray-500">
+                                {product.business?.name || sellerName}
+                            </p>
+                        )}
+                    </div>
                     
                     {/* Product Name */}
                     <h3 className="font-medium text-sm text-card-foreground line-clamp-2 mb-2 min-h-[40px]">

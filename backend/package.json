@@ -5,10 +5,12 @@
   "description": "Helper scripts for backend data operations",
   "scripts": {
     "clear-db": "node clear-db.js",
-    "seed:food": "node seed-food-simulation.js"
+    "seed:food": "node seed-food-simulation.js",
+    "seed:business": "node seed-business-simulation.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "dotenv": "^17.3.1",
     "mongodb": "^7.0.0"
   },
   "engines": {

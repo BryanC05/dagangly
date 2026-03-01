@@ -120,11 +120,11 @@ export default function BusinessDetailsScreen() {
         );
     }
 
-    const businessTypeLabel = seller.isSeller ? ({
+    const businessTypeLabel = ({
         micro: 'Micro Enterprise',
         small: 'Small Enterprise',
         medium: 'Medium Enterprise',
-    }[seller.businessType] || 'Seller') : 'User';
+    }[seller.businessType] || 'Seller');
 
     const renderProduct = ({ item }) => (
         <TouchableOpacity
@@ -187,7 +187,7 @@ export default function BusinessDetailsScreen() {
                         <Image source={{ uri: getImageUrl(seller.profileImage) }} style={styles.businessImage} />
                     ) : (
                         <View style={styles.businessImagePlaceholder}>
-                            <Ionicons name={seller.isSeller ? "storefront" : "person"} size={40} color="#9ca3af" />
+                            <Ionicons name="storefront" size={40} color="#9ca3af" />
                         </View>
                     )}
                     <Text style={styles.businessName}>{seller.businessName || seller.name}</Text>
@@ -195,12 +195,7 @@ export default function BusinessDetailsScreen() {
                         <View style={styles.badge}>
                             <Text style={styles.badgeText}>{businessTypeLabel}</Text>
                         </View>
-                        {seller.isVerified && (
-                            <View style={[styles.badge, styles.verifiedBadge]}>
-                                <Ionicons name="checkmark-circle" size={12} color="#fff" />
-                                <Text style={styles.verifiedText}>Verified</Text>
-                            </View>
-                        )}
+                        {/* Account status badges removed - all users are equal */}
                     </View>
                 </View>
 

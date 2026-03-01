@@ -479,28 +479,33 @@ export default function ProductDetailScreen({ route }) {
                         </View>
                     )}
 
-                    {/* Seller Info */}
+                    {/* Seller/Business Info */}
                     <TouchableOpacity
                         style={styles.sellerCard}
                         onPress={() => product.seller?._id && navigation.navigate('BusinessDetails', { sellerId: product.seller._id })}
                     >
                         <View style={styles.sellerAvatar}>
-                            <Ionicons name="storefront" size={20} color={colors.primary} />
+                            {product.business?.logoInfo?.url ? (
+                                <Image
+                                    source={{ uri: product.business.logoInfo.url }}
+                                    style={{ width: 44, height: 44, borderRadius: 22 }}
+                                    resizeMode="cover"
+                                />
+                            ) : (
+                                <Ionicons name="storefront" size={20} color={colors.primary} />
+                            )}
                         </View>
                         <View style={{ flex: 1 }}>
                             <Text style={styles.sellerName}>
-                                {product.seller?.businessName || product.seller?.name}
+                                {product.business?.name || product.seller?.businessName || product.seller?.name}
                             </Text>
-                            {product.seller?.isVerified && (
-                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#d1fae5', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, marginTop: 2 }}>
-                                    <Ionicons name="shield-checkmark" size={10} color="#16a34a" />
-                                    <Text style={{ fontSize: 10, color: '#16a34a', fontWeight: '600' }}>Verified</Text>
-                                </View>
+                            {product.business?.isVerified && (
+                                <Text style={{ fontSize: 11, color: '#16a34a', marginTop: 2 }}>Verified</Text>
                             )}
                             <View style={styles.sellerMeta}>
                                 <Ionicons name="location-outline" size={12} color="#9ca3af" />
                                 <Text style={styles.sellerLocation}>
-                                    {product.seller?.location?.city || 'Indonesia'}
+                                    {product.business?.city || product.seller?.location?.city || 'Indonesia'}
                                 </Text>
                             </View>
                         </View>
