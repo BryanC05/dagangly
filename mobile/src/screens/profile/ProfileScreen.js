@@ -20,6 +20,12 @@ export default function ProfileScreen({ navigation }) {
     const { isDarkMode, toggleTheme, initTheme } = useThemeStore();
     const { toggleLanguage, initLanguage } = useLanguageStore();
     const { t, language } = useTranslation();
+
+    // Debug: log when toggleLanguage is called
+    const handleToggleLanguage = () => {
+        console.log('Toggle language pressed, current language:', language);
+        toggleLanguage();
+    };
     const { isDriverMode, stats, initDriverMode, toggleDriverMode } = useDriverStore();
     const unreadNotifCount = useNotificationStore((s) => s.unreadCount);
     const { colors } = useTheme();
@@ -213,7 +219,7 @@ export default function ProfileScreen({ navigation }) {
         { icon: 'shield-checkmark-outline', label: t.membershipApprovals || 'Membership Approvals', onPress: () => navigation.navigate('AdminMembership'), color: '#f59e0b' },
         {
             icon: 'globe-outline', label: t.language || 'Language',
-            onPress: toggleLanguage, color: '#f59e0b', isToggle: true, toggleValue: language === 'id',
+            onPress: handleToggleLanguage, color: '#f59e0b', isToggle: true, toggleValue: language === 'id',
         },
         {
             icon: isDarkMode ? 'moon' : 'moon-outline', label: t.darkMode || 'Dark Mode',
