@@ -719,6 +719,7 @@ export default function AppNavigator() {
                         flex: 1,
                         justifyContent: 'center',
                         alignItems: 'center',
+                        paddingHorizontal: 0,
                     },
                     tabBarLabelStyle: {
                         fontSize: 11,
@@ -730,24 +731,27 @@ export default function AppNavigator() {
             >
                 <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ tabBarLabel: t.tabHome }} />
                 <Tab.Screen name="ProductsTab" component={ProductsStackNavigator} options={{ tabBarLabel: t.tabProducts }} />
+                {/* Spacer for center alignment - creates space in middle */}
+                <Tab.Screen
+                    name="Spacer"
+                    component={View}
+                    options={{
+                        tabBarLabel: '',
+                        tabBarIcon: () => null,
+                        tabBarButton: () => <View style={{ flex: 1, minWidth: 60 }} />,
+                    }}
+                />
+                <Tab.Screen name="AddTab" component={AddStackNavigator} options={{ tabBarLabel: t.tabAdd }} />
+                <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: t.tabProfile }} />
+                {/* Hidden CartTab - not shown in tab bar */}
                 <Tab.Screen
                     name="CartTab"
                     component={CartStackNavigator}
                     options={{
                         tabBarLabel: t.tabCart,
-                        tabBarButton: () => null, // Hide from tab bar but keep navigable
+                        tabBarButton: () => null,
                     }}
                 />
-                {/* Spacer for centering */}
-                <Tab.Screen
-                    name="Spacer"
-                    component={View}
-                    options={{
-                        tabBarButton: () => <View style={{ flex: 1 }} />,
-                    }}
-                />
-                <Tab.Screen name="AddTab" component={AddStackNavigator} options={{ tabBarLabel: t.tabAdd }} />
-                <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: t.tabProfile }} />
             </Tab.Navigator>
             {/* Global background: floating food icons + particle bursts */}
             <BackgroundEffect />

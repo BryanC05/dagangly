@@ -8,6 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useTranslation } from '../../hooks/useTranslation';
 import { useDriverStore } from '../../store/driverStore';
 import { useNotificationStore } from '../../store/notificationStore';
 import { useTheme } from '../../theme/ThemeContext';
@@ -17,22 +18,17 @@ import api from '../../api/api';
 export default function ProfileScreen({ navigation }) {
     const { user, logout, setUser } = useAuthStore();
     const { isDarkMode, toggleTheme, initTheme } = useThemeStore();
-    const language = useLanguageStore((s) => s.language);
-    const { t, toggleLanguage, initLanguage } = useLanguageStore();
+    const { toggleLanguage, initLanguage } = useLanguageStore();
+    const { t, language } = useTranslation();
     const { isDriverMode, stats, initDriverMode, toggleDriverMode } = useDriverStore();
     const unreadNotifCount = useNotificationStore((s) => s.unreadCount);
     const { colors } = useTheme();
-    const [, setForceUpdate] = useState(0);
 
     useEffect(() => {
         initTheme();
         initLanguage();
         initDriverMode();
     }, []);
-
-    useEffect(() => {
-        setForceUpdate(n => n + 1);
-    }, [language]);
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
@@ -223,7 +219,7 @@ export default function ProfileScreen({ navigation }) {
             icon: isDarkMode ? 'moon' : 'moon-outline', label: t.darkMode || 'Dark Mode',
             onPress: toggleTheme, color: '#6366f1', isToggle: true, toggleValue: isDarkMode,
         },
-    ], [t, navigation, unreadNotifCount, language, isDarkMode]);
+    ], [t, navigation, unreadNotifCount, isDarkMode]);
 
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
