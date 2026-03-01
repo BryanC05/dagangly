@@ -747,7 +747,7 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     submitBtn: {
         height: 52, borderRadius: 14,
         justifyContent: 'center', alignItems: 'center', marginTop: 4,
-        shadowColor: '#06b6d4', shadowOffset: { width: 0, height: 4 },
+        shadowColor: '#14b8a6', shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
     },
     submitInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },

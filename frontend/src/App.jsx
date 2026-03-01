@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Home from './pages/Home';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Home from './pages/new-ui/Index';
+import Products from './pages/new-ui/Products';
+import ProductDetail from './pages/new-ui/ProductDetail';
+import Login from './pages/new-ui/Login';
+import Register from './pages/new-ui/Register';
 import SellerDashboard from './pages/SellerDashboard';
 import AddProduct from './pages/AddProduct';
 import SellerProductTracking from './pages/SellerProductTracking';
@@ -29,12 +29,12 @@ import TrackingPage from './pages/TrackingPage';
 import AdminMembership from './pages/AdminMembership';
 import Notifications from './pages/Notifications';
 import Invoice from './pages/Invoice';
+import NotFound from './pages/new-ui/NotFound';
 import ScrollToTop from './components/ScrollToTop';
-import OnboardingTour from './components/ui/OnboardingTour';
-import InteractiveBackground from './components/InteractiveBackground';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import { useLanguageStore } from './store/languageStore';
+import Layout from './components/layout/Layout';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,45 +65,40 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <InteractiveBackground />
         <ScrollToTop />
-        <OnboardingTour />
         <div className="min-h-screen bg-background text-foreground font-sans antialiased">
-          {/* Navbar removed from here as it's included in Layout component used by pages */}
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/nearby" element={<NearbyMap />} />
-            <Route path="/store/:id" element={<SellerStore />} />
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/nearby" element={<NearbyMap />} />
+              <Route path="/store/:id" element={<SellerStore />} />
+              <Route path="/seller/dashboard" element={<SellerDashboard />} />
+              <Route path="/seller/add-product" element={<AddProduct />} />
+              <Route path="/add-product" element={<Navigate to="/seller/add-product" replace />} />
+              <Route path="/seller/product-tracking" element={<SellerProductTracking />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/sell" element={<Sell />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/forums" element={<Forums />} />
+              <Route path="/forum" element={<Forum />} />
+              <Route path="/forum/new" element={<NewThread />} />
+              <Route path="/forum/:id/edit" element={<EditThread />} />
+              <Route path="/forum/:id" element={<ThreadDetail />} />
+              <Route path="/saved-products" element={<SavedProducts />} />
+              <Route path="/automation" element={<Automation />} />
+              <Route path="/logo-generator" element={<LogoGenerator />} />
+              <Route path="/admin/membership" element={<AdminMembership />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/invoice/:orderId" element={<Invoice />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/seller/dashboard" element={<SellerDashboard />} />
-            <Route path="/seller/add-product" element={<AddProduct />} />
-            <Route path="/add-product" element={<Navigate to="/seller/add-product" replace />} />
-            <Route path="/seller/product-tracking" element={<SellerProductTracking />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/chat" element={<Chat />} />
-            {/* New Routes */}
-            <Route path="/sell" element={<Sell />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/forums" element={<Forums />} />
-            {/* Old Forum routes kept purely for backward compat or if needed, but Forums is the new page */}
-            <Route path="/forum" element={<Forum />} />
-            <Route path="/forum/new" element={<NewThread />} />
-            <Route path="/forum/:id/edit" element={<EditThread />} />
-            <Route path="/forum/:id" element={<ThreadDetail />} />
-            <Route path="/saved-products" element={<SavedProducts />} />
-            <Route path="/automation" element={<Automation />} />
-            <Route path="/logo-generator" element={<LogoGenerator />} />
-            {/* Delivery disabled: <Route path="/tracking/:orderId" element={<TrackingPage />} /> */}
-            <Route path="/admin/membership" element={<AdminMembership />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/invoice/:orderId" element={<Invoice />} />
-
-            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </Router>

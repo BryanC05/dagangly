@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit2, Trash2, Package, TrendingUp, DollarSign, ShoppingBag, Save, X, AlertTriangle, Map, BarChart3, Crown, CreditCard, CheckCircle, Clock } from 'lucide-react';
+import { Plus, Edit2, Trash2, Package, TrendingUp, DollarSign, ShoppingBag, Save, X, AlertTriangle, BarChart3, Crown, CreditCard, CheckCircle, Clock, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
-import Layout from '@/components/layout/Layout';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import './SellerDashboard.css';
 import AnalyticsSection from '@/components/AnalyticsSection';
 import PromoManager from '@/components/PromoManager';
 
@@ -47,7 +45,7 @@ function SellerDashboard() {
   });
 
   // Membership query
-  const { data: membership, isLoading: membershipLoading, refetch: refetchMembership } = useQuery({
+  const { data: membership, refetch: refetchMembership } = useQuery({
     queryKey: ['membership'],
     queryFn: async () => {
       const response = await api.get('/users/membership/status');
@@ -57,7 +55,6 @@ function SellerDashboard() {
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [paymentFile, setPaymentFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
 
   const uploadPaymentMutation = useMutation({
     mutationFn: async (formData) => {
@@ -138,15 +135,15 @@ function SellerDashboard() {
 
   if (!user) {
     return (
-      <Layout>
+      <>
         <div className="access-denied container py-12 text-center">
           <h2 className="text-2xl font-bold mb-4">{t('seller.pleaseLogin')}</h2>
           <p className="mb-4">{t('seller.loginRequired')}</p>
-          <Link to="/login" className="btn-primary">
+          <Link to="/login" className="inline-flex items-center px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">
             {t('auth.login')}
           </Link>
         </div>
-      </Layout>
+      </>
     );
   }
 
@@ -157,10 +154,12 @@ function SellerDashboard() {
   const pendingOrders = orders?.filter(order =>
     ['pending', 'confirmed', 'preparing'].includes(order.status)
   ).length || 0;
+  const formatCurrency = (amount) =>
+    `Rp ${Number(amount || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
 
   return (
-    <Layout>
-      <div className="seller-dashboard container py-8">
+    <>
+      <div className="container py-8 md:py-10">
         {/* Confirmation Modal */}
         {confirmModal.show && (
           <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
@@ -201,24 +200,49 @@ function SellerDashboard() {
           </div>
         )}
 
-        <div className="dashboard-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">{t('seller.dashboard')}</h1>
-            <p className="text-muted-foreground">{t('seller.welcomeBack')}, {user.businessName || user.name}!</p>
+        <div className="endfield-card endfield-gradient p-5 md:p-7 mb-8">
+          <div className="dashboard-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-primary mb-2">Seller Console</p>
+              <h1 className="text-3xl font-bold">{t('seller.dashboard')}</h1>
+              <p className="text-muted-foreground">{t('seller.welcomeBack')}, {user.businessName || user.name}!</p>
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              <Link
+                to="/seller/product-tracking"
+                className="inline-flex items-center gap-2 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+              >
+                <BarChart3 size={20} />
+                {t('seller.productTracking')}
+              </Link>
+              <Link
+                to="/logo-generator"
+                className="inline-flex items-center gap-2 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+              >
+                <Sparkles size={18} />
+                Logo Generator
+              </Link>
+              <Link to="/seller/add-product" className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+                <Plus size={20} />
+                {t('seller.addProduct')}
+              </Link>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <Link
-              to="/seller/product-tracking"
-              className="btn-secondary inline-flex items-center gap-2 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
-            >
-              <BarChart3 size={20} />
-              {t('seller.productTracking')}
-            </Link>
-            <Link to="/seller/add-product" className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-              <Plus size={20} />
-              {t('seller.addProduct')}
-            </Link>
-          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Link to="/seller/product-tracking" className="endfield-card p-4 hover:border-primary/60 transition-colors">
+            <p className="text-sm font-semibold">Track Deliveries</p>
+            <p className="text-xs text-muted-foreground mt-1">Monitor buyer status and delivery locations.</p>
+          </Link>
+          <Link to="/logo-generator" className="endfield-card p-4 hover:border-primary/60 transition-colors">
+            <p className="text-sm font-semibold">Generate Brand Logo</p>
+            <p className="text-xs text-muted-foreground mt-1">Create and apply AI logos for your store profile.</p>
+          </Link>
+          <Link to="/orders" className="endfield-card p-4 hover:border-primary/60 transition-colors">
+            <p className="text-sm font-semibold">Manage Orders</p>
+            <p className="text-xs text-muted-foreground mt-1">Review new orders and payment status.</p>
+          </Link>
         </div>
 
         {/* Membership Section */}
@@ -265,7 +289,7 @@ function SellerDashboard() {
                     </p>
                   </div>
                   <div className="text-sm text-yellow-600 dark:text-yellow-400">
-                    ✓ Unlimited product listings
+                    Unlimited product listings enabled
                   </div>
                 </div>
               ) : (
@@ -318,8 +342,8 @@ function SellerDashboard() {
                             required
                           />
                         </div>
-                        <Button type="submit" className="w-full" disabled={uploading}>
-                          {uploading ? 'Submitting...' : 'Submit Payment Proof'}
+                        <Button type="submit" className="w-full" disabled={uploadPaymentMutation.isPending}>
+                          {uploadPaymentMutation.isPending ? 'Submitting...' : 'Submit Payment Proof'}
                         </Button>
                       </form>
                     </DialogContent>
@@ -330,7 +354,7 @@ function SellerDashboard() {
           </Card>
         </div>
 
-        <div className="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
             <div className="stat-icon products mb-2 text-primary">
               <Package size={24} />
@@ -363,7 +387,7 @@ function SellerDashboard() {
               <DollarSign size={24} />
             </div>
             <div className="stat-info">
-              <h3 className="text-2xl font-bold">Rp {totalSales.toFixed(2)}</h3>
+              <h3 className="text-2xl font-bold">{formatCurrency(totalSales)}</h3>
               <p className="text-sm text-muted-foreground">{t('seller.totalRevenue')}</p>
             </div>
           </div>
@@ -373,10 +397,10 @@ function SellerDashboard() {
         <AnalyticsSection />
         <PromoManager />
 
-        <div className="dashboard-section mb-8">
+        <div className="endfield-card p-4 md:p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">{t('seller.myProducts')}</h2>
           {productsLoading ? (
-            <div className="loading">{t('seller.loadingProducts')}</div>
+            <div className="py-6 text-sm text-muted-foreground">{t('seller.loadingProducts')}</div>
           ) : products?.length === 0 ? (
             <div className="empty-state text-center py-12 border rounded-lg">
               <p className="mb-4 text-muted-foreground">{t('seller.noProductsEmpty')}</p>
@@ -406,7 +430,7 @@ function SellerDashboard() {
                             {product.images?.[0] ? (
                               <img src={resolveImageUrl(product.images[0])} alt={product.name} className="w-full h-full object-cover" />
                             ) : (
-                              <div className="placeholder w-full h-full bg-muted flex items-center justify-center text-xs">📷</div>
+                              <div className="placeholder w-full h-full bg-muted flex items-center justify-center text-xs">No image</div>
                             )}
                           </div>
                           <span className="font-medium">{product.name}</span>
@@ -497,7 +521,7 @@ function SellerDashboard() {
         </div>
 
         {orders && orders.length > 0 && (
-          <div className="dashboard-section">
+          <div className="endfield-card p-4 md:p-6">
             <h2 className="text-xl font-semibold mb-4">{t('seller.recentOrders')}</h2>
             <div className="orders-list space-y-4">
               {orders.slice(0, 5).map((order) => (
@@ -510,7 +534,7 @@ function SellerDashboard() {
                   </div>
                   <div className="order-details text-right">
                     <span className="block">{order.products.length} {t('seller.items')}</span>
-                    <span className="order-amount font-bold text-primary">Rp {order.totalAmount}</span>
+                    <span className="order-amount font-bold text-primary">{formatCurrency(order.totalAmount)}</span>
                   </div>
                 </div>
               ))}
@@ -519,7 +543,7 @@ function SellerDashboard() {
           </div>
         )}
       </div>
-    </Layout>
+    </>
   );
 }
 

@@ -1,4 +1,3 @@
-import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,7 +51,7 @@ const Sell = () => {
     };
 
     return (
-        <Layout>
+        <>
             <div className="container py-8">
                 {/* Hero Section */}
                 <div className="text-center mb-12">
@@ -274,7 +273,7 @@ const Sell = () => {
                     </CardContent>
                 </Card>
             </div>
-        </Layout>
+        </>
     );
 };
 

@@ -1,4 +1,3 @@
-import Layout from "@/components/layout/Layout";
 import ForumPostCard from "@/components/forums/ForumPostCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -89,7 +88,7 @@ const Forums = () => {
     ];
 
     return (
-        <Layout>
+        <>
             <div className="container py-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
@@ -306,7 +305,7 @@ const Forums = () => {
                     </div>
                 </div>
             </div>
-        </Layout>
+        </>
     );
 };
 

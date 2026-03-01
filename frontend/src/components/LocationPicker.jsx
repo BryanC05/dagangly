@@ -1,326 +1,357 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Search, Navigation } from 'lucide-react';
-import { DEFAULT_LOCATION, GEOLOCATION_TIMEOUT, GEOLOCATION_MAX_AGE, DEFAULT_MAP_ZOOM } from '../utils/constants';
+import {
+  DEFAULT_LOCATION,
+  GEOLOCATION_TIMEOUT,
+  GEOLOCATION_MAX_AGE,
+  DEFAULT_MAP_ZOOM,
+} from '../utils/constants';
 import './LocationPicker.css';
 
-function LocationPicker({ onLocationSelect, initialLocation }) {
-    const [position, setPosition] = useState(initialLocation || null);
-    const [address, setAddress] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [mapReady, setMapReady] = useState(false);
-    const [, setMapError] = useState(null);
+// Leaflet
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import '../utils/leafletSetup';
 
-    const mapContainerRef = useRef(null);
-    const mapRef = useRef(null);
-    const markerRef = useRef(null);
-    const isInitializingRef = useRef(false);
+const DEFAULT_START_LOCATION = DEFAULT_LOCATION.Bekasi;
+const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org';
 
-    // Initialize Map
-    useEffect(() => {
-        const containerEl = mapContainerRef.current;
-        if (!containerEl || mapRef.current || isInitializingRef.current) return;
+/** Simple coordinate validation — rejects Leaflet max-bounds corners */
+function isValidCoord(lat, lng) {
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    Math.abs(lat) <= 84 &&
+    Math.abs(lng) <= 180
+  );
+}
 
-        let cancelled = false;
-        isInitializingRef.current = true;
+let lastNominatimCall = 0;
 
-        const initMap = async () => {
-            try {
-                const L = (await import('leaflet')).default;
-                await import('leaflet/dist/leaflet.css');
+/** Reverse geocode via Nominatim with a 1-second rate-limit guard. */
+async function nominatimReverse(lat, lng) {
+  if (!isValidCoord(lat, lng)) return null;
 
-                if (cancelled || mapRef.current) return;
+  const now = Date.now();
+  const wait = Math.max(0, 1100 - (now - lastNominatimCall));
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  lastNominatimCall = Date.now();
 
-                // Fix marker icons
-                const markerIcon = await import('leaflet/dist/images/marker-icon.png');
-                const markerShadow = await import('leaflet/dist/images/marker-shadow.png');
-
-                const DefaultIcon = L.icon({
-                    iconUrl: markerIcon.default,
-                    shadowUrl: markerShadow.default,
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                });
-                L.Marker.prototype.options.icon = DefaultIcon;
-
-                const container = mapContainerRef.current;
-                if (!container || cancelled || mapRef.current) return;
-
-                // In dev strict mode/hot-reload, a stale leaflet id can remain.
-                if (container._leaflet_id) {
-                    delete container._leaflet_id;
-                }
-
-                // Try to get user's current location first
-                let startPos;
-                if (position) {
-                    startPos = [position.lat, position.lng];
-                } else if (navigator.geolocation) {
-                    try {
-                        const pos = await new Promise((resolve, reject) => {
-                            navigator.geolocation.getCurrentPosition(resolve, reject, {
-                                enableHighAccuracy: true,
-                                timeout: GEOLOCATION_TIMEOUT,
-                                maximumAge: GEOLOCATION_MAX_AGE
-                            });
-                        });
-                        startPos = [pos.coords.latitude, pos.coords.longitude];
-                        // Trigger location select with current position
-                        handlePositionChange(pos.coords.latitude, pos.coords.longitude);
-                    } catch (err) {
-                        console.log('Could not get current location, using default:', err);
-                        // Fallback to Bekasi, Indonesia if geolocation fails
-                        startPos = [DEFAULT_LOCATION.Bekasi.lat, DEFAULT_LOCATION.Bekasi.lng];
-                        handlePositionChange(startPos[0], startPos[1]);
-                    }
-                } else {
-                    // Fallback to Bekasi, Indonesia if geolocation not supported
-                    startPos = [DEFAULT_LOCATION.Bekasi.lat, DEFAULT_LOCATION.Bekasi.lng];
-                    handlePositionChange(startPos[0], startPos[1]);
-                }
-
-                const map = L.map(container, {
-                    center: startPos,
-                    zoom: DEFAULT_MAP_ZOOM,
-                    scrollWheelZoom: true,
-                });
-
-                // Add tile layer
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
-
-                // Add draggable marker
-                const marker = L.marker(startPos, {
-                    draggable: true
-                }).addTo(map);
-
-                marker.on('dragend', async (e) => {
-                    const newPos = e.target.getLatLng();
-                    handlePositionChange(newPos.lat, newPos.lng);
-                });
-
-                // Map click handler
-                map.on('click', (e) => {
-                    marker.setLatLng(e.latlng);
-                    handlePositionChange(e.latlng.lat, e.latlng.lng);
-                });
-
-                if (cancelled) {
-                    map.remove();
-                    return;
-                }
-
-                mapRef.current = map;
-                markerRef.current = marker;
-                setMapReady(true);
-
-                // Don't auto-request location - let user click the map or use "Locate Me" button
-
-            } catch (err) {
-                if (!cancelled) {
-                    console.error('Error initializing map:', err);
-                    setMapError(err.message);
-                }
-            } finally {
-                isInitializingRef.current = false;
-            }
-        };
-
-        initMap();
-
-        return () => {
-            cancelled = true;
-            isInitializingRef.current = false;
-            if (mapRef.current) {
-                mapRef.current.remove();
-                mapRef.current = null;
-            }
-            markerRef.current = null;
-        };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    // Sync valid position with marker if updated externally
-    useEffect(() => {
-        if (mapReady && mapRef.current && markerRef.current && position) {
-            const currentLatLng = markerRef.current.getLatLng();
-            // Only update if significantly different to avoid loops
-            if (Math.abs(currentLatLng.lat - position.lat) > 0.0001 ||
-                Math.abs(currentLatLng.lng - position.lng) > 0.0001) {
-                const newLatLng = [position.lat, position.lng];
-                markerRef.current.setLatLng(newLatLng);
-                mapRef.current.setView(newLatLng, 15);
-            }
-        }
-    }, [position, mapReady]);
-
-    const handlePositionChange = async (lat, lng) => {
-        setPosition({ lat, lng });
-
-        // Reverse geocoding to get address
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-
-            const addr = data.address;
-            setAddress(data.display_name);
-
-            const locationData = {
-                lat,
-                lng,
-                address: data.display_name,
-                city: addr.city || addr.town || addr.village || addr.county || '',
-                state: addr.state || '',
-                pincode: addr.postcode || '',
-                fullAddress: data.display_name
-            };
-
-            onLocationSelect(locationData);
-        } catch (error) {
-            console.error('Error reverse geocoding:', error);
-        }
-    };
-
-    const handleSearch = async (e) => {
-        e.preventDefault();
-        if (!searchQuery.trim()) return;
-
-        setIsSearching(true);
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            setSearchResults(data);
-        } catch (error) {
-            console.error('Error searching location:', error);
-        } finally {
-            setIsSearching(false);
-        }
-    };
-
-    const selectSearchResult = (result) => {
-        const lat = parseFloat(result.lat);
-        const lng = parseFloat(result.lon);
-
-        if (mapRef.current && markerRef.current) {
-            const newLatLng = [lat, lng];
-            mapRef.current.setView(newLatLng, 15);
-            markerRef.current.setLatLng(newLatLng);
-            handlePositionChange(lat, lng);
-        }
-
-        setSearchResults([]);
-        setSearchQuery('');
-    };
-
-    const handleLocateMe = () => {
-        setIsSearching(true);
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const { latitude, longitude } = pos.coords;
-                    if (mapRef.current && markerRef.current) {
-                        const newLatLng = [latitude, longitude];
-                        mapRef.current.setView(newLatLng, 15);
-                        markerRef.current.setLatLng(newLatLng);
-                        handlePositionChange(latitude, longitude);
-                    }
-                    setIsSearching(false);
-                },
-                (err) => {
-                    console.warn('Geolocation warning (using existing/default map location):', err);
-                    setIsSearching(false);
-
-                    let errorMessage = 'Could not access your location.';
-                    if (err.code === 1) {
-                        errorMessage = 'Location permission denied. Please enable it in browser settings.';
-                    } else if (err.code === 2) {
-                        errorMessage = 'Location unavailable. Please ensure GPS is enabled.';
-                    } else if (err.code === 3) {
-                        errorMessage = 'Location request timed out. Please try again.';
-                    }
-
-                    const hasExistingLocation = !!position && Number.isFinite(position.lat) && Number.isFinite(position.lng);
-                    if (!hasExistingLocation) {
-                        alert(errorMessage);
-                    }
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
-        } else {
-            alert('Geolocation is not supported by your browser.');
-            setIsSearching(false);
-        }
-    };
-
-    return (
-        <div className="location-picker">
-            <div className="picker-header">
-                <div className="search-form">
-                    <div className="search-input-wrapper">
-                        <Search size={18} className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Search for an area, street, or landmark..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleSearch(e);
-                                }
-                            }}
-                        />
-                        {searchResults.length > 0 && (
-                            <button type="button" className="clear-search" onClick={() => setSearchResults([])}>×</button>
-                        )}
-                    </div>
-                    <button type="button" className="btn-search" disabled={isSearching} onClick={handleSearch}>
-                        {isSearching ? 'Searching...' : 'Search'}
-                    </button>
-                </div>
-                <button type="button" className="btn-locate" onClick={handleLocateMe} title="Use my current location">
-                    <Navigation size={18} />
-                </button>
-            </div>
-
-            {searchResults.length > 0 && (
-                <ul className="search-results">
-                    {searchResults.map((result) => (
-                        <li key={result.place_id} onClick={() => selectSearchResult(result)}>
-                            <MapPin size={16} />
-                            <span>{result.display_name}</span>
-                        </li>
-                    ))}
-                </ul>
-            )}
-
-            <div className="map-wrapper">
-                <div ref={mapContainerRef} className="picker-map"></div>
-                {address && (
-                    <div className="selected-address">
-                        <span className="label">Selected Location:</span>
-                        <span className="value">{address}</span>
-                    </div>
-                )}
-            </div>
-
-            <div className="picker-instructions">
-                <small>📍 Drag the marker or click on the map to pinpoint exact location.</small>
-            </div>
-        </div>
+  try {
+    const res = await fetch(
+      `${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=id,en`,
+      { headers: { 'User-Agent': 'UMKM-Marketplace/1.0' } }
     );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+/** Search locations via Nominatim with a 1-second rate-limit guard. */
+async function nominatimSearch(query) {
+  const now = Date.now();
+  const wait = Math.max(0, 1100 - (now - lastNominatimCall));
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  lastNominatimCall = Date.now();
+
+  try {
+    const res = await fetch(
+      `${NOMINATIM_BASE}/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&accept-language=id,en`,
+      { headers: { 'User-Agent': 'UMKM-Marketplace/1.0' } }
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+function LocationPicker({ onLocationSelect, initialLocation }) {
+  const [position, setPosition] = useState(initialLocation || null);
+  const [address, setAddress] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
+  const isInitializingRef = useRef(false);
+  const onLocationSelectRef = useRef(onLocationSelect);
+
+  // Keep callback ref fresh without re-triggering effect
+  useEffect(() => {
+    onLocationSelectRef.current = onLocationSelect;
+  }, [onLocationSelect]);
+
+  const reverseGeocode = useCallback(async (lat, lng) => {
+    if (!isValidCoord(lat, lng)) return;
+
+    const data = await nominatimReverse(lat, lng);
+    if (!data || data.error) return;
+
+    const addr = data.address || {};
+    const city =
+      addr.city || addr.town || addr.municipality || addr.county || addr.state || '';
+    const state = addr.state || '';
+    const pincode = addr.postcode || '';
+    const fullAddress = data.display_name || '';
+
+    setAddress(fullAddress);
+    onLocationSelectRef.current?.({
+      lat,
+      lng,
+      address: fullAddress,
+      city,
+      state,
+      pincode,
+      fullAddress,
+    });
+  }, []);
+
+  const handlePositionChange = useCallback(
+    (lat, lng) => {
+      if (!isValidCoord(lat, lng)) return;
+      setPosition({ lat, lng });
+      reverseGeocode(lat, lng);
+    },
+    [reverseGeocode]
+  );
+
+  // Initialize Leaflet map — guarded against React StrictMode double-mount
+  useEffect(() => {
+    const containerEl = mapContainerRef.current;
+    if (!containerEl || mapRef.current || isInitializingRef.current) return;
+
+    let cancelled = false;
+    isInitializingRef.current = true;
+
+    const initMap = async () => {
+      let startPos = initialLocation
+        ? { lat: initialLocation.lat, lng: initialLocation.lng }
+        : null;
+
+      // Try GPS
+      if (!startPos && navigator.geolocation) {
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: GEOLOCATION_TIMEOUT,
+              maximumAge: GEOLOCATION_MAX_AGE,
+            });
+          });
+          startPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        } catch (err) {
+          console.log('Could not get current location, using default:', err.message);
+        }
+      }
+
+      if (!startPos) {
+        startPos = { lat: DEFAULT_START_LOCATION.lat, lng: DEFAULT_START_LOCATION.lng };
+      }
+
+      if (cancelled) { isInitializingRef.current = false; return; }
+
+      // Validate before creating anything
+      if (!isValidCoord(startPos.lat, startPos.lng)) {
+        startPos = { lat: DEFAULT_START_LOCATION.lat, lng: DEFAULT_START_LOCATION.lng };
+      }
+
+      const map = L.map(containerEl, {
+        center: [startPos.lat, startPos.lng],
+        zoom: DEFAULT_MAP_ZOOM || 13,
+        zoomControl: true,
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+
+      const marker = L.marker([startPos.lat, startPos.lng], { draggable: true }).addTo(map);
+
+      marker.on('dragend', () => {
+        const ll = marker.getLatLng();
+        handlePositionChange(ll.lat, ll.lng);
+      });
+
+      map.on('click', (e) => {
+        marker.setLatLng(e.latlng);
+        handlePositionChange(e.latlng.lat, e.latlng.lng);
+      });
+
+      if (cancelled) {
+        map.remove();
+        isInitializingRef.current = false;
+        return;
+      }
+
+      mapRef.current = map;
+      markerRef.current = marker;
+
+      // Ensure map tiles render correctly after the container is laid out
+      setTimeout(() => {
+        if (mapRef.current) mapRef.current.invalidateSize();
+      }, 400);
+
+      handlePositionChange(startPos.lat, startPos.lng);
+      isInitializingRef.current = false;
+    };
+
+    initMap();
+
+    return () => {
+      cancelled = true;
+      isInitializingRef.current = false;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+      markerRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync marker position if `position` changes from outside
+  useEffect(() => {
+    if (!mapRef.current || !markerRef.current || !position) return;
+    if (!isValidCoord(position.lat, position.lng)) return;
+
+    const cur = markerRef.current.getLatLng();
+    if (
+      Math.abs(cur.lat - position.lat) > 0.0001 ||
+      Math.abs(cur.lng - position.lng) > 0.0001
+    ) {
+      markerRef.current.setLatLng([position.lat, position.lng]);
+      mapRef.current.setView([position.lat, position.lng], 15);
+    }
+  }, [position]);
+
+  const handleSearch = async (event) => {
+    event.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    try {
+      const results = await nominatimSearch(searchQuery.trim());
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Error searching location:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const selectSearchResult = (result) => {
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+    if (!isValidCoord(lat, lng)) return;
+
+    if (mapRef.current && markerRef.current) {
+      mapRef.current.setView([lat, lng], 15);
+      markerRef.current.setLatLng([lat, lng]);
+    }
+    handlePositionChange(lat, lng);
+    setSearchResults([]);
+    setSearchQuery('');
+  };
+
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setIsSearching(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const nextPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        if (mapRef.current && markerRef.current) {
+          mapRef.current.setView([nextPos.lat, nextPos.lng], 15);
+          markerRef.current.setLatLng([nextPos.lat, nextPos.lng]);
+        }
+        handlePositionChange(nextPos.lat, nextPos.lng);
+        setIsSearching(false);
+      },
+      (err) => {
+        console.warn('Geolocation warning (using existing/default map location):', err);
+        setIsSearching(false);
+
+        let errorMessage = 'Could not access your location.';
+        if (err.code === 1) errorMessage = 'Location permission denied. Please enable it in browser settings.';
+        else if (err.code === 2) errorMessage = 'Location unavailable. Please ensure GPS is enabled.';
+        else if (err.code === 3) errorMessage = 'Location request timed out. Please try again.';
+
+        const hasExisting = !!position && isValidCoord(position.lat, position.lng);
+        if (!hasExisting) alert(errorMessage);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+  return (
+    <div className="location-picker">
+      <div className="picker-header">
+        <div className="search-form">
+          <div className="search-input-wrapper">
+            <Search size={18} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search for an area, street, or landmark..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSearch(e);
+                }
+              }}
+            />
+            {searchResults.length > 0 && (
+              <button type="button" className="clear-search" onClick={() => setSearchResults([])}>
+                x
+              </button>
+            )}
+          </div>
+          <button type="button" className="btn-search" disabled={isSearching} onClick={handleSearch}>
+            {isSearching ? 'Searching...' : 'Search'}
+          </button>
+        </div>
+        <button type="button" className="btn-locate" onClick={handleLocateMe} title="Use my current location">
+          <Navigation size={18} />
+        </button>
+      </div>
+
+      {searchResults.length > 0 && (
+        <ul className="search-results">
+          {searchResults.map((result) => (
+            <li key={result.place_id || result.display_name} onClick={() => selectSearchResult(result)}>
+              <MapPin size={16} />
+              <span>{result.display_name}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="map-wrapper">
+        <div ref={mapContainerRef} className="picker-map" />
+        {address && (
+          <div className="selected-address">
+            <span className="label">Selected Location:</span>
+            <span className="value">{address}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="picker-instructions">
+        <small>Drag the marker or click on the map to pinpoint exact location.</small>
+      </div>
+    </div>
+  );
 }
 
 export default LocationPicker;

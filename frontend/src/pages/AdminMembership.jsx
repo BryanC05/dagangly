@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, XCircle, Clock, User, Image } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -48,7 +47,7 @@ function AdminMembership() {
   });
 
   return (
-    <Layout>
+    <>
       <div className="container py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Membership Approvals</h1>
@@ -135,7 +134,7 @@ function AdminMembership() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </>
   );
 }
 

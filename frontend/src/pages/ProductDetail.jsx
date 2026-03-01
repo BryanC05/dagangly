@@ -6,7 +6,6 @@ import { useCartStore, useAuthStore } from '../store/authStore';
 import { useSavedProductsStore } from '../store/savedProductsStore';
 import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -148,7 +147,7 @@ function ProductDetail() {
 
   if (isLoading) {
     return (
-      <Layout>
+      <>
         <div className="container py-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Image Skeleton */}
@@ -174,13 +173,13 @@ function ProductDetail() {
             </div>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   if (!product) {
     return (
-      <Layout>
+      <>
         <div className="container py-20">
           <div className="text-center py-12">
             <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -189,7 +188,7 @@ function ProductDetail() {
             <Button onClick={() => navigate('/products')}>{t('profile.browseProducts')}</Button>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
@@ -204,18 +203,22 @@ function ProductDetail() {
     null;
 
   return (
-    <Layout>
-      <div className="container py-8">
-        {/* Back Button */}
-        <Button variant="ghost" onClick={handleBack} className="mb-6 gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          {t('productDetail.back')}
-        </Button>
+    <>
+      <div className="bg-[#0d1117] min-h-screen py-8">
+      <div className="container">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
+          <Link to="/" className="hover:text-white">Beranda</Link>
+          <span>›</span>
+          <Link to="/products" className="hover:text-white">Produk</Link>
+          <span>›</span>
+          <span className="text-white">{product.name}</span>
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-square bg-muted rounded-xl overflow-hidden border">
+            <div className="aspect-square bg-[#161b22] rounded-xl overflow-hidden border border-[#21262d]">
               {productImages[selectedImage] ? (
                 <img
                   src={productImages[selectedImage]}
@@ -224,7 +227,7 @@ function ProductDetail() {
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               ) : (
-                <div className="w-full h-full bg-muted" />
+                <div className="w-full h-full bg-[#161b22]" />
               )}
             </div>
 
@@ -234,7 +237,7 @@ function ProductDetail() {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`aspect-square bg-muted rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === index ? 'border-primary' : 'border-transparent hover:border-muted-foreground/30'
+                    className={`aspect-square bg-[#161b22] rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === index ? 'border-primary' : 'border-transparent hover:border-gray-600'
                       }`}
                   >
                     <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
@@ -246,79 +249,47 @@ function ProductDetail() {
 
           {/* Product Info */}
           <div className="space-y-6">
-            {/* Category & Title */}
+            {/* Seller Name */}
             <div>
-              <Badge variant="secondary" className="mb-3 capitalize">
-                {product.category}
-              </Badge>
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">{product.name}</h1>
+              <Link to={sellerId ? `/store/${sellerId}` : '#'} className="text-primary hover:underline text-sm">
+                {seller?.businessName || seller?.name || 'Toko'}
+              </Link>
+            </div>
 
-              {/* Seller Info Card */}
-              {sellerId ? (
-                <Link to={`/store/${sellerId}`}>
-                  <Card className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Store className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-lg">{seller?.businessName || t('productDetail.localStore')}</span>
-                            {seller?.isVerified && (
-                              <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
-                                <Shield className="h-3 w-3 mr-1" />
-                                {t('productDetail.verified')}
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 mt-1">
-                            {seller?.rating > 0 && (
-                              <div className="flex items-center gap-1">
-                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                <span className="font-medium">{seller.rating.toFixed(1)}</span>
-                              </div>
-                            )}
-                            <span className="text-sm text-muted-foreground">
-                              {product.location?.city || 'Bekasi'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ) : (
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Store className="h-6 w-6 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <span className="font-semibold text-lg">{t('productDetail.localStore')}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+            {/* Product Title */}
+            <h1 className="text-2xl md:text-3xl font-bold text-white">{product.name}</h1>
+
+            {/* Rating */}
+            <div className="flex items-center gap-2">
+              <Star className="h-5 w-5 fill-primary text-primary" />
+              <span className="text-white font-medium">{product.rating?.toFixed(1) || '4.5'}</span>
+              <span className="text-gray-400">({product.reviewCount || product.reviews?.length || 0} ulasan)</span>
+            </div>
+
+            {/* Price */}
+            <div className="text-3xl font-bold text-primary">
+              Rp{getUnitPrice().toLocaleString('id-ID')}
             </div>
 
             {/* Description */}
             <div>
-              <h3 className="font-semibold mb-2">{t('productDetail.description')}</h3>
-              <div className="max-h-64 overflow-y-auto pr-2">
-                <MarkdownContent content={product.description} />
-              </div>
+              <p className="text-gray-400 leading-relaxed">
+                {product.description}
+              </p>
             </div>
 
-            {/* Location */}
-            <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
-              <MapPin className="h-5 w-5 mt-0.5 text-muted-foreground shrink-0" />
-              <div className="text-sm">
-                <p className="font-medium">{product.location?.address || t('productDetail.localPickup')}</p>
-                <p className="text-muted-foreground">{product.location?.city}, {product.location?.state}</p>
-              </div>
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2">
+              {product.tags?.map((tag) => (
+                <Badge key={tag} variant="outline" className="bg-[#21262d] border-[#30363d] text-gray-300">
+                  #{tag}
+                </Badge>
+              )) || (
+                <>
+                  <Badge variant="outline" className="bg-[#21262d] border-[#30363d] text-gray-300">#produk-lokal</Badge>
+                  <Badge variant="outline" className="bg-[#21262d] border-[#30363d] text-gray-300">#umkm</Badge>
+                </>
+              )}
             </div>
 
             {/* Price & Purchase Card */}
@@ -377,37 +348,23 @@ function ProductDetail() {
                   </div>
                 ))}
 
-                {/* Price Display */}
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <span className="text-3xl font-bold text-primary">
-                      Rp{getUnitPrice().toLocaleString('id-ID')}
-                    </span>
-                    <span className="text-muted-foreground ml-1">/ {product.unit || 'item'}</span>
-                  </div>
-                  <Badge variant={getAvailableStock() > 0 ? 'default' : 'destructive'}>
-                    {getAvailableStock() > 0 ? `${getAvailableStock()} ${t('productDetail.inStock')}` : t('productDetail.outOfStock')}
-                  </Badge>
-                </div>
-
                 {getAvailableStock() > 0 && (
                   <div className="space-y-4">
                     {/* Quantity Selector */}
                     <div className="flex items-center gap-4">
-                      <span className="text-sm text-muted-foreground">{t('productDetail.quantity')}:</span>
-                      <div className="flex items-center border rounded-lg">
+                      <div className="flex items-center border border-[#30363d] rounded-lg bg-[#0d1117]">
                         <button
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
                           disabled={quantity <= 1}
-                          className="w-10 h-10 flex items-center justify-center hover:bg-muted rounded-l-lg text-lg font-bold disabled:opacity-50 transition-colors"
+                          className="w-10 h-10 flex items-center justify-center hover:bg-[#161b22] rounded-l-lg text-lg font-bold text-white disabled:opacity-50 transition-colors"
                         >
                           −
                         </button>
-                        <span className="w-12 text-center font-medium">{quantity}</span>
+                        <span className="w-12 text-center font-medium text-white">{quantity}</span>
                         <button
                           onClick={() => setQuantity(Math.min(getAvailableStock(), quantity + 1))}
                           disabled={quantity >= getAvailableStock()}
-                          className="w-10 h-10 flex items-center justify-center hover:bg-muted rounded-r-lg text-lg font-bold disabled:opacity-50 transition-colors"
+                          className="w-10 h-10 flex items-center justify-center hover:bg-[#161b22] rounded-r-lg text-lg font-bold text-white disabled:opacity-50 transition-colors"
                         >
                           +
                         </button>
@@ -423,52 +380,47 @@ function ProductDetail() {
                         }));
                       }}
                       size="lg"
-                      className="w-full gap-2"
+                      className="w-full gap-2 bg-primary hover:bg-primary/90 h-12"
                     >
                       <ShoppingCart className="h-5 w-5" />
-                      {t('productDetail.addToCart')} - Rp{(getUnitPrice() * quantity).toLocaleString('id-ID')}
+                      Tambah ke Keranjang
                     </Button>
 
-                    {/* Save Product Button */}
-                    {user && (
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          className="flex-1 gap-2"
-                          onClick={async (e) => {
-                            // Only burst when SAVING — not when removing
-                            if (!isSaved) {
-                              window.dispatchEvent(new CustomEvent('particle-burst', {
-                                detail: { type: 'save', x: e.clientX, y: e.clientY },
-                              }));
-                            }
-                            await handleToggleSave();
-                          }}
-                          disabled={isSaveLoading}
-                        >
-                          <Heart className={`h-5 w-5 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
-                          {isSaved ? t('productDetail.saved') : t('productDetail.saveProduct')}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          className="gap-2"
-                          onClick={() => {
-                            const url = window.location.href;
-                            const text = `Check out ${product.name} on UMKM Marketplace!`;
-                            if (navigator.share) {
-                              navigator.share({ title: product.name, text, url });
-                            } else {
-                              navigator.clipboard.writeText(`${text} ${url}`);
-                              alert('Link copied to clipboard!');
-                            }
-                          }}
-                        >
-                          <Share2 className="h-5 w-5" />
-                        </Button>
-                      </div>
-                    )}
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="flex-1 gap-2 bg-transparent border-[#30363d] text-white hover:bg-[#161b22] h-12"
+                        onClick={async (e) => {
+                          if (!isSaved) {
+                            window.dispatchEvent(new CustomEvent('particle-burst', {
+                              detail: { type: 'save', x: e.clientX, y: e.clientY },
+                            }));
+                          }
+                          await handleToggleSave();
+                        }}
+                        disabled={isSaveLoading}
+                      >
+                        <Heart className={`h-5 w-5 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="gap-2 bg-transparent border-[#30363d] text-white hover:bg-[#161b22] h-12"
+                        onClick={() => {
+                          const url = window.location.href;
+                          if (navigator.share) {
+                            navigator.share({ title: product.name, url });
+                          } else {
+                            navigator.clipboard.writeText(url);
+                            alert('Link disalin!');
+                          }
+                        }}
+                      >
+                        <Share2 className="h-5 w-5" />
+                      </Button>
+                    </div>
                   </div>
                 )}
 
@@ -538,7 +490,8 @@ function ProductDetail() {
           </div>
         </div>
       </div>
-    </Layout>
+      </div>
+    </>
   );
 }
 

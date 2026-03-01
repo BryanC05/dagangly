@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet,
     FlatList, RefreshControl, Dimensions, ActivityIndicator,
@@ -17,16 +17,19 @@ export default function ProductsScreen({ navigation, route }) {
     const { colors, isDarkMode } = useThemeStore();
     const { t, language } = useLanguageStore();
     const initialCategory = route?.params?.category || 'all';
+    const initialSearch = route?.params?.search || '';
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
-    const [search, setSearch] = useState('');
+    const [searchInput, setSearchInput] = useState(initialSearch);
+    const [searchQuery, setSearchQuery] = useState(initialSearch);
     const [category, setCategory] = useState(initialCategory);
     const [sortBy, setSortBy] = useState('newest');
     const [showSort, setShowSort] = useState(false);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const searchTimeoutRef = useRef(null);
 
     const categories = language === 'id' ? CATEGORIES_ID : CATEGORIES_EN;
     const sortOptions = language === 'id' ? SORT_OPTIONS_ID : SORT_OPTIONS_EN;
@@ -38,7 +41,7 @@ export default function ProductsScreen({ navigation, route }) {
                 page: pageNum,
                 limit: 20,
             };
-            if (search) params.search = search;
+            if (searchQuery) params.search = searchQuery;
             if (category && category !== 'all') params.category = category;
 
             const response = await api.get('/products', { params });
@@ -58,7 +61,7 @@ export default function ProductsScreen({ navigation, route }) {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [search, category, sortBy]);
+    }, [searchQuery, category, sortBy]);
 
     useEffect(() => {
         setLoading(true);
@@ -70,6 +73,37 @@ export default function ProductsScreen({ navigation, route }) {
             setCategory(route.params.category);
         }
     }, [route?.params?.category]);
+
+    useEffect(() => {
+        if (route?.params?.search !== undefined) {
+            setSearchInput(route.params.search);
+            setSearchQuery(route.params.search);
+        }
+    }, [route?.params?.search]);
+
+    const handleSearchChange = (text) => {
+        setSearchInput(text);
+        
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+        
+        searchTimeoutRef.current = setTimeout(() => {
+            setSearchQuery(text);
+            setLoading(true);
+            fetchProducts(1);
+        }, 500);
+    };
+
+    const handleSearchClear = () => {
+        setSearchInput('');
+        setSearchQuery('');
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+        setLoading(true);
+        fetchProducts(1);
+    };
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -200,12 +234,13 @@ export default function ProductsScreen({ navigation, route }) {
                         style={styles.searchInput}
                         placeholder="Cari produk..."
                         placeholderTextColor={colors.textSecondary}
-                        value={search}
-                        onChangeText={setSearch}
+                        value={searchInput}
+                        onChangeText={handleSearchChange}
                         returnKeyType="search"
+                        blurOnSubmit={false}
                     />
-                    {search.length > 0 && (
-                        <TouchableOpacity onPress={() => setSearch('')}>
+                    {searchInput.length > 0 && (
+                        <TouchableOpacity onPress={handleSearchClear}>
                             <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
                         </TouchableOpacity>
                     )}

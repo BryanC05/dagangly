@@ -195,11 +195,11 @@
 }
 
 .order-card.delivery {
-  box-shadow: inset 0 0 0 1px rgba(66, 153, 225, 0.12);
+  box-shadow: inset 0 0 0 1px var(--status-confirmed-bg);
 }
 
 .order-card.pickup {
-  box-shadow: inset 0 0 0 1px rgba(72, 187, 120, 0.14);
+  box-shadow: inset 0 0 0 1px var(--status-ready-bg);
 }
 
 .order-card:hover {
@@ -212,27 +212,27 @@
 
 /* Status-specific left border */
 .order-card.pending {
-  border-left: 3px solid #ed8936;
+  border-left: 3px solid var(--status-pending);
 }
 
 .order-card.confirmed {
-  border-left: 3px solid #4299e1;
+  border-left: 3px solid var(--status-confirmed);
 }
 
 .order-card.preparing {
-  border-left: 3px solid #9f7aea;
+  border-left: 3px solid var(--status-preparing);
 }
 
 .order-card.ready {
-  border-left: 3px solid #48bb78;
+  border-left: 3px solid var(--status-ready);
 }
 
 .order-card.delivered {
-  border-left: 3px solid #38a169;
+  border-left: 3px solid var(--status-delivered);
 }
 
 .order-card.cancelled {
-  border-left: 3px solid #f56565;
+  border-left: 3px solid var(--status-cancelled);
 }
 
 /* Order Card - Make entire card clickable */
@@ -313,13 +313,13 @@
 }
 
 .order-type-chip.delivery {
-  color: #1e40af;
-  background: rgba(59, 130, 246, 0.14);
+  color: var(--status-confirmed);
+  background: var(--status-confirmed-bg);
 }
 
 .order-type-chip.pickup {
-  color: #166534;
-  background: rgba(34, 197, 94, 0.16);
+  color: var(--status-ready);
+  background: var(--status-ready-bg);
 }
 
 .order-header-right {
@@ -525,7 +525,7 @@
 }
 
 .order-type-meta.pickup {
-  color: #166534;
+  color: var(--status-ready);
 }
 
 .contact-inline {
@@ -577,6 +577,111 @@
 
 .update-status-btn {
   white-space: nowrap;
+}
+
+/* Preorder Card */
+.preorder-card {
+  background: var(--status-pending-bg);
+  border: 2px solid var(--status-pending);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.preorder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 12px;
+}
+
+.preorder-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.preorder-icon {
+  color: var(--status-pending);
+}
+
+.preorder-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--status-pending);
+}
+
+.preorder-date {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-foreground, #333);
+}
+
+.preorder-time {
+  font-size: 14px;
+  color: var(--color-muted-foreground, #666);
+  margin-top: 2px;
+}
+
+.preorder-request-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.preorder-request-badge span {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.preorder-request-badge.pending_seller_review {
+  background-color: var(--status-pending);
+}
+
+.preorder-request-badge.seller_accepted {
+  background-color: var(--status-delivered);
+}
+
+.preorder-request-badge.seller_declined {
+  background-color: var(--status-cancelled);
+}
+
+.preorder-request-badge.pending {
+  background-color: var(--color-muted-foreground, #666);
+}
+
+.preorder-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--color-foreground, #333);
+}
+
+.preorder-confirm-btn {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.preorder-pill {
+  background: var(--status-pending);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+.dark .preorder-date,
+.dark .preorder-meta {
+  color: var(--color-foreground, #f8f8f8);
+}
+
+.dark .preorder-time {
+  color: var(--color-muted-foreground, #bdbdbd);
 }
 
 /* Responsive */

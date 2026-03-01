@@ -29,7 +29,7 @@
         "lightMode": "Mode Terang"
     },
     "onboarding": {
-        "welcome": "Selamat Datang di TroliToko!",
+        "welcome": "Selamat Datang di MARTKU!",
         "welcomeDesc": "Mari kami tunjukkan cara berbelanja dengan mudah",
         "step1Title": "Cari Produk",
         "step1Desc": "Cari produk atau jelajahi kategori",
@@ -197,7 +197,17 @@
         "saved": "Disimpan",
         "saveProduct": "Simpan Produk",
         "tags": "Tag",
-        "loadingProduct": "Memuat produk..."
+        "loadingProduct": "Memuat produk...",
+        "reviews": "ulasan",
+        "reportProduct": "Laporkan produk",
+        "linkCopied": "Link disalin!",
+        "reportReason": "Mengapa Anda melaporkan produk ini?",
+        "reportSubmitted": "Laporan dikirim. Terima kasih!",
+        "reportFailed": "Gagal mengirim laporan",
+        "selectVariant": "Pilih Varian",
+        "selectRequired": "Silakan pilih",
+        "selectMultiple": "pilih beberapa",
+        "store": "Toko"
     },
     "cart": {
         "title": "Keranjang Belanja",
@@ -495,6 +505,20 @@
         "noMessagesDesc": "Chat dengan penjual melalui halaman produk mereka",
         "typeMessage": "Ketik pesan...",
         "send": "Kirim"
+    },
+    "footer": {
+        "marketplace": "Pasar",
+        "community": "Komunitas",
+        "sellerSection": "Penjual",
+        "helpSection": "Bantuan",
+        "categories": "Kategori",
+        "startSelling": "Mulai Berjualan",
+        "sellerDashboard": "Dasbor Penjual",
+        "aboutUs": "Tentang Kami",
+        "contactUs": "Kontak",
+        "faq": "FAQ",
+        "chat": "Chat",
+        "tagline": "Marketplace UMKM Indonesia. Menghubungkan penjual lokal dengan pembeli terdekat."
     },
     "common": {
         "loading": "Memuat...",

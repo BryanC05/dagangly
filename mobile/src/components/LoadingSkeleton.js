@@ -51,7 +51,7 @@ export function HomeScreenSkeleton() {
         <ScrollView style={{ flex: 1, backgroundColor: colors.background }} showsVerticalScrollIndicator={false}>
             {/* Hero banner */}
             <View style={{
-                backgroundColor: isDarkMode ? '#0f172a' : '#f3f5f7',
+                backgroundColor: isDarkMode ? '#0d1117' : '#f0f3f8',
                 paddingHorizontal: 20, paddingTop: 60, paddingBottom: 32,
             }}>
                 <View style={{ alignItems: 'center', marginBottom: 16 }}>
@@ -100,7 +100,7 @@ export function HomeScreenSkeleton() {
                                 flexDirection: 'row',
                                 alignItems: 'center',
                                 padding: 10,
-                                backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc',
+                                backgroundColor: isDarkMode ? '#1c2128' : '#f8fafc',
                                 borderRadius: 10,
                                 gap: 12,
                                 marginRight: 8,

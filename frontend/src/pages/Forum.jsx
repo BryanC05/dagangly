@@ -5,7 +5,6 @@ import { MessageSquare, Plus, Eye, Heart, Clock, Search, Filter } from 'lucide-r
 import { useAuthStore } from '../store/authStore';
 import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
-import Layout from '@/components/layout/Layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import './Forum.css';
 
@@ -54,7 +53,7 @@ function Forum() {
     };
 
     return (
-        <Layout>
+        <>
             <div className="forum-page container py-8">
                 <div className="forum-header flex justify-between items-center mb-8 pb-8 border-b">
                     <div className="header-content">
@@ -188,7 +187,7 @@ function Forum() {
                     </main>
                 </div>
             </div>
-        </Layout>
+        </>
     );
 }
 

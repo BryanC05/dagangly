@@ -32,7 +32,14 @@ func (h *ForumHandler) GetThreads(c *gin.Context) {
 		query["category"] = category
 	}
 	if search != "" {
-		query["$text"] = bson.M{"$search": search}
+		searchRegex := bson.M{
+			"$regex":   search,
+			"$options": "i",
+		}
+		query["$or"] = []bson.M{
+			{"title": searchRegex},
+			{"content": searchRegex},
+		}
 	}
 
 	threadsCollection := database.GetDB().Collection("forumthreads")

@@ -63,7 +63,7 @@ export default function ThreadDetailScreen({ route }) {
     const isLiked = thread.likes?.includes(user?.id);
 
     const styles = StyleSheet.create({
-        container: { flex: 1, backgroundColor: '#f8fafc' },
+        container: { flex: 1, backgroundColor: colors.background },
         list: { paddingBottom: 8 },
         threadContent: { padding: 20 },
         authorRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 12 },
@@ -71,7 +71,7 @@ export default function ThreadDetailScreen({ route }) {
             width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary,
             justifyContent: 'center', alignItems: 'center',
         },
-        avatarText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+        avatarText: { color: colors.white, fontWeight: '700', fontSize: 16 },
         authorName: { fontSize: 14, fontWeight: '700', color: colors.text },
         date: { fontSize: 12, color: colors.textTertiary, marginTop: 1 },
         title: { fontSize: 20, fontWeight: '800', color: colors.text, lineHeight: 26, marginBottom: 10 },

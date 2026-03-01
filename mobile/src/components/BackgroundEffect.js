@@ -10,6 +10,68 @@ import { useThemeStore } from '../store/themeStore';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
+// Simple ParticleBurst component
+function ParticleBurst({ x, y, icons, count, onDone }) {
+    const animations = useRef(
+        Array.from({ length: count }, () => ({
+            translateX: new Animated.Value(0),
+            translateY: new Animated.Value(0),
+            opacity: new Animated.Value(1),
+            scale: new Animated.Value(0),
+        }))
+    ).current;
+
+    useEffect(() => {
+        const duration = 800;
+        const angleStep = (2 * Math.PI) / count;
+        
+        const anims = animations.map((anim, i) => {
+            const angle = angleStep * i + Math.random() * 0.5;
+            const distance = 80 + Math.random() * 60;
+            const targetX = Math.cos(angle) * distance;
+            const targetY = Math.sin(angle) * distance;
+
+            return Animated.parallel([
+                Animated.timing(anim.translateX, { toValue: targetX, duration, useNativeDriver: true }),
+                Animated.timing(anim.translateY, { toValue: targetY, duration, useNativeDriver: true }),
+                Animated.sequence([
+                    Animated.timing(anim.scale, { toValue: 1, duration: duration * 0.3, useNativeDriver: true }),
+                    Animated.timing(anim.scale, { toValue: 0, duration: duration * 0.7, useNativeDriver: true }),
+                ]),
+                Animated.timing(anim.opacity, { toValue: 0, duration, useNativeDriver: true }),
+            ]);
+        });
+
+        Animated.parallel(anims).start(() => onDone?.());
+    }, []);
+
+    return (
+        <View style={[StyleSheet.absoluteFill, { left: x, top: y }]}>
+            {animations.map((anim, i) => (
+                <Animated.Text
+                    key={i}
+                    style={[
+                        {
+                            position: 'absolute',
+                            fontSize: 20,
+                        },
+                        {
+                            transform: [
+                                { translateX: anim.translateX },
+                                { translateY: anim.translateY },
+                                { scale: anim.scale },
+                            ],
+                            opacity: anim.opacity,
+                        },
+                    ]}
+                >
+                    {icons[i % icons.length]}
+                </Animated.Text>
+            ))}
+        </View>
+    );
+}
+
 // ─── Global Event Bus ────────────────────────────────────────────────────────
 // A lightweight pub/sub that replaces window.dispatchEvent for React Native.
 // Usage from any screen:

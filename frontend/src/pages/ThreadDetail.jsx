@@ -5,7 +5,6 @@ import { ArrowLeft, Heart, MessageSquare, Clock, Edit2, Trash2, Paperclip, Send,
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
 import { getBackendUrl } from '../config';
-import Layout from '@/components/layout/Layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import './Forum.css';
 
@@ -95,7 +94,7 @@ function ThreadDetail() {
 
     if (isLoading) {
         return (
-            <Layout>
+            <>
                 <div className="container py-8">
                     <div className="space-y-4">
                         <Skeleton className="h-8 w-3/4" />
@@ -111,25 +110,25 @@ function ThreadDetail() {
                         </div>
                     </div>
                 </div>
-            </Layout>
+            </>
         );
     }
 
     if (!data?.thread) {
         return (
-            <Layout>
+            <>
                 <div className="forum-page error container py-12 text-center">
                     <h2 className="text-2xl font-bold mb-4">Thread not found</h2>
                     <Link to="/forum" className="text-primary hover:underline">Back to Forum</Link>
                 </div>
-            </Layout>
+            </>
         );
     }
 
     const { thread, replies } = data;
 
     return (
-        <Layout>
+        <>
             <div className="forum-page thread-detail-page container py-8 max-w-4xl">
                 <div className="thread-header flex justify-between items-center mb-6">
                     <button className="btn-back inline-flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={() => navigate('/forum')}>
@@ -334,7 +333,7 @@ function ThreadDetail() {
                     )}
                 </section>
             </div>
-        </Layout>
+        </>
     );
 }
 

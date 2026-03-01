@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import Layout from "@/components/layout/Layout";
 import ProductCard from "@/components/products/ProductCard";
 import { ProductsGridSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,31 @@ import {
 import { Search, SlidersHorizontal, X, Loader2, Package } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
+
+const normalizeProductsPayload = (payload) => {
+  if (Array.isArray(payload)) {
+    return {
+      products: payload,
+      pagination: { page: 1, total: payload.length, pages: 1 },
+    };
+  }
+
+  if (Array.isArray(payload?.products)) {
+    return {
+      products: payload.products,
+      pagination: payload.pagination || { page: 1, total: payload.products.length, pages: 1 },
+    };
+  }
+
+  if (Array.isArray(payload?.data)) {
+    return {
+      products: payload.data,
+      pagination: payload.pagination || { page: 1, total: payload.data.length, pages: 1 },
+    };
+  }
+
+  return { products: [], pagination: { page: 1, total: 0, pages: 1 } };
+};
 
 const Products = () => {
   const { t } = useTranslation();
@@ -67,8 +91,9 @@ const Products = () => {
         params.append("limit", "20");
 
         const response = await api.get(`/products?${params.toString()}`);
-        setProducts(response.data.products || []);
-        setPagination(response.data.pagination || { page: 1, total: 0, pages: 1 });
+        const normalized = normalizeProductsPayload(response.data);
+        setProducts(normalized.products);
+        setPagination(normalized.pagination);
       } catch (error) {
         console.error("Failed to fetch products:", error);
         setProducts([]);
@@ -114,54 +139,63 @@ const Products = () => {
   };
 
   return (
-    <Layout>
+    <div className="bg-[#0d1117] min-h-screen">
       <div className="container py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">{t('products.browseProducts')}</h1>
-          <p className="text-muted-foreground">
-            {t('products.browseDesc')}
+          <h1 className="text-2xl font-bold text-white mb-2">Produk UMKM</h1>
+          <p className="text-gray-400">
+            Jelajahi {pagination.total} produk dari penjual lokal
           </p>
         </div>
 
         {/* Search and Filters */}
         <form onSubmit={handleSearch} className="flex flex-col lg:flex-row gap-4 mb-8">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             <Input
               type="search"
-              placeholder={t('products.searchPlaceholder')}
+              placeholder="Cari produk..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-[#161b22] border-[#21262d] text-white placeholder:text-gray-500"
             />
           </div>
           <div className="flex gap-2">
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('products.allCategories')} />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <Button
               type="button"
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
+              className="gap-2 bg-[#161b22] border-[#21262d] text-white hover:bg-[#1c2128]"
             >
               <SlidersHorizontal className="h-4 w-4" />
-              {t('products.filters')}
+              Semua
               {activeFiltersCount > 0 && (
-                <Badge variant="secondary" className="ml-1">
+                <Badge variant="secondary" className="ml-1 bg-primary text-primary-foreground">
                   {activeFiltersCount}
                 </Badge>
               )}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 bg-[#161b22] border-[#21262d] text-white hover:bg-[#1c2128]"
+            >
+              Terbaru
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              className="bg-primary hover:bg-primary/90"
+            >
+              Grid
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="bg-[#161b22] border-[#21262d] text-white hover:bg-[#1c2128]"
+            >
+              List
             </Button>
           </div>
         </form>
@@ -310,7 +344,7 @@ const Products = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

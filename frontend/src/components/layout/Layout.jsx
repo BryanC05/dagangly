@@ -1,16 +1,17 @@
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import BottomNav from "./BottomNav";
+import Navbar from "../new-ui/Navbar";
+import Footer from "../new-ui/Footer";
+import AnimatedOutlet from "./AnimatedOutlet";
 
-const Layout = ({ children }) => {
-    return (
-        <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1 pb-20 md:pb-0">{children}</main>
-            <Footer className="hidden md:block" />
-            <BottomNav />
-        </div>
-    );
+const Layout = () => {
+  return (
+    <div className="flex min-h-screen flex-col bg-background text-foreground overflow-x-clip">
+      <Navbar />
+      <main className="flex-1 w-full overflow-hidden pb-16 lg:pb-0">
+        <AnimatedOutlet />
+      </main>
+      <Footer />
+    </div>
+  );
 };
 
 export default Layout;

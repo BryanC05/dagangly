@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity,
     RefreshControl, Dimensions, StyleSheet, ActivityIndicator,
+    TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +32,7 @@ export default function HomeScreen({ navigation }) {
     const [nearbySellers, setNearbySellers] = useState([]);
     const [nearbyLoading, setNearbyLoading] = useState(true);
     const [userLocation, setUserLocation] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const allCategories = language === 'id' ? CATEGORIES_ID : CATEGORIES_EN;
     const categories = allCategories.filter((c) => c.id !== 'all');
@@ -109,6 +111,10 @@ export default function HomeScreen({ navigation }) {
         setRefreshing(false);
     };
 
+    const handleSearch = () => {
+        navigation.navigate('ProductsTab', { screen: 'Products', params: { search: searchQuery } });
+    };
+
     const styles = {
         container: { flex: 1, backgroundColor: colors.background },
         hero: {
@@ -180,10 +186,11 @@ export default function HomeScreen({ navigation }) {
             borderColor: colors.border,
         },
         searchIcon: { marginRight: 10 },
-        searchPlaceholder: {
+        searchTextInput: {
             flex: 1,
             fontSize: 14,
-            color: colors.textSecondary,
+            color: colors.text,
+            padding: 0,
         },
         searchBtn: {
             backgroundColor: colors.primary,
@@ -481,11 +488,24 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.searchContainer}>
                     <View style={styles.searchInput}>
                         <Ionicons name="search" size={18} color={colors.textSecondary} style={styles.searchIcon} />
-                        <Text style={styles.searchPlaceholder}>Cari produk, toko, atau kategori...</Text>
+                        <TextInput
+                            style={styles.searchTextInput}
+                            placeholder={t('home.searchPlaceholder') || 'Cari produk, toko, atau kategori...'}
+                            placeholderTextColor={colors.textSecondary}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            onSubmitEditing={handleSearch}
+                            returnKeyType="search"
+                        />
+                        {searchQuery.length > 0 && (
+                            <TouchableOpacity onPress={() => setSearchQuery('')}>
+                                <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+                            </TouchableOpacity>
+                        )}
                     </View>
                     <TouchableOpacity
                         style={styles.searchBtn}
-                        onPress={() => navigation.navigate('ProductsTab')}
+                        onPress={handleSearch}
                     >
                         <Ionicons name="arrow-forward" size={18} color="#fff" />
                     </TouchableOpacity>
@@ -637,7 +657,7 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.ctaSection}>
                 <View style={styles.ctaCard}>
                     <Text style={styles.ctaTitle}>
-                        Mulai Berjualan di <Text style={styles.ctaHighlight}>MartKu</Text>
+                        Mulai Berjualan di <Text style={styles.ctaHighlight}>TroliToko</Text>
                     </Text>
                     <Text style={styles.ctaDesc}>
                         Daftarkan usahamu dan mulai jangkau lebih banyak pembeli di sekitarmu.

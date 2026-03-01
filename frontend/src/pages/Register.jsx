@@ -1,16 +1,14 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Phone, Store, ArrowRight, Building2, Sparkles, ImageIcon } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
 import { useTranslation } from '@/hooks/useTranslation';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -18,7 +16,7 @@ function Register() {
     email: '',
     password: '',
     phone: '',
-    isSeller: false,
+    isSeller: true,
     businessName: '',
     businessType: 'micro',
     location: {
@@ -58,7 +56,7 @@ function Register() {
   };
 
   return (
-    <Layout>
+    <>
       <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
         <Card className="w-full max-w-2xl">
           <CardHeader className="space-y-1">
@@ -122,31 +120,12 @@ function Register() {
                 </div>
               </div>
 
-              {/* Optional Seller Checkbox */}
-              <div className="flex items-start space-x-3 p-4 border rounded-lg bg-muted/30">
-                <Checkbox
-                  id="isSeller"
-                  checked={formData.isSeller}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isSeller: checked })}
-                />
-                <div className="space-y-1 leading-none">
-                  <Label htmlFor="isSeller" className="flex items-center gap-2 cursor-pointer">
-                    <Store className="h-4 w-4" />
-                    I want to sell products (Optional)
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Check this if you want to list your products for sale. You can change this later.
-                  </p>
-                </div>
-              </div>
-
-              {/* Seller Information - Only shown if isSeller is checked */}
-              {formData.isSeller && (
-                <div className="space-y-4 border rounded-lg p-4 bg-muted/30 animate-in slide-in-from-top-2">
-                  <h3 className="font-semibold text-sm flex items-center gap-2">
-                    <Building2 className="h-4 w-4" />
-                    Business Details (Optional)
-                  </h3>
+              {/* Business Details - Always visible for all users */}
+              <div className="space-y-4 border rounded-lg p-4 bg-muted/30 animate-in slide-in-from-top-2">
+                <h3 className="font-semibold text-sm flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Business Details (Optional)
+                </h3>
                   <div className="space-y-2">
                     <Label htmlFor="businessName">{t('auth.businessName')}</Label>
                     <div className="relative">
@@ -252,7 +231,6 @@ function Register() {
                     </div>
                   </div>
                 </div>
-              )}
 
               <div className="space-y-2">
                 <Label htmlFor="password">{t('auth.password')}</Label>
@@ -294,7 +272,7 @@ function Register() {
           </CardFooter>
         </Card>
       </div>
-    </Layout>
+    </>
   );
 }
 

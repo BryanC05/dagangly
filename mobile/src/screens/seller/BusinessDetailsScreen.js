@@ -43,14 +43,14 @@ export default function BusinessDetailsScreen() {
     if (loading) return <BusinessDetailSkeleton />;
 
     const styles = StyleSheet.create({
-        container: { flex: 1, backgroundColor: '#f8fafc' },
+        container: { flex: 1, backgroundColor: colors.background },
         header: {
             flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
             paddingHorizontal: 16, paddingTop: 50, paddingBottom: 16,
-            backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e7eb',
+            backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
         },
         backBtn: {
-            width: 40, height: 40, borderRadius: 20, backgroundColor: '#f3f4f6',
+            width: 40, height: 40, borderRadius: 20, backgroundColor: colors.input,
             justifyContent: 'center', alignItems: 'center',
         },
         shareBtn: {
@@ -214,7 +214,7 @@ export default function BusinessDetailsScreen() {
                         })}
                     >
                         <View style={styles.locationIcon}>
-                            <Ionicons name="location" size={20} color="#06b6d4" />
+                            <Ionicons name="location" size={20} color="#14b8a6" />
                         </View>
                         <View style={styles.locationInfo}>
                             <Text style={styles.locationAddress} numberOfLines={2}>

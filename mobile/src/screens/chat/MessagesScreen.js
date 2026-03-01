@@ -46,17 +46,17 @@ export default function MessagesScreen({ navigation }) {
     if (loading) return <MessagesScreenSkeleton />;
 
     const styles = StyleSheet.create({
-        container: { flex: 1, backgroundColor: '#f8fafc' },
+        container: { flex: 1, backgroundColor: colors.background },
         list: { paddingBottom: 20 },
         roomCard: {
             flexDirection: 'row', alignItems: 'center', padding: 16,
-            backgroundColor: '#fff', borderBottomWidth: 1, borderColor: '#f3f4f6',
+            backgroundColor: colors.card, borderBottomWidth: 1, borderColor: colors.border,
         },
         avatar: {
-            width: 48, height: 48, borderRadius: 24, backgroundColor: '#06b6d4',
+            width: 48, height: 48, borderRadius: 24, backgroundColor: colors.primary,
             justifyContent: 'center', alignItems: 'center', marginRight: 12,
         },
-        avatarText: { color: '#fff', fontWeight: '700', fontSize: 18 },
+        avatarText: { color: colors.white, fontWeight: '700', fontSize: 18 },
         roomInfo: { flex: 1 },
         roomHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
         roomName: { fontSize: 15, fontWeight: '600', color: colors.text, flex: 1, marginRight: 8 },
@@ -72,10 +72,10 @@ export default function MessagesScreen({ navigation }) {
             width: 22, height: 22, borderRadius: 11, backgroundColor: colors.primary,
             justifyContent: 'center', alignItems: 'center', marginLeft: 8,
         },
-        unreadText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+        unreadText: { color: colors.white, fontSize: 11, fontWeight: '700' },
         empty: { alignItems: 'center', paddingTop: 80 },
-        emptyTitle: { fontSize: 16, fontWeight: '600', color: '#6b7280', marginTop: 12 },
-        emptyText: { fontSize: 13, color: '#9ca3af', marginTop: 4, textAlign: 'center', paddingHorizontal: 32 },
+        emptyTitle: { fontSize: 16, fontWeight: '600', color: colors.textSecondary, marginTop: 12 },
+        emptyText: { fontSize: 13, color: colors.textTertiary, marginTop: 4, textAlign: 'center', paddingHorizontal: 32 },
     });
 
     const renderRoom = ({ item: room }) => {
@@ -125,7 +125,7 @@ export default function MessagesScreen({ navigation }) {
                 keyExtractor={(item) => item._id}
                 renderItem={renderRoom}
                 contentContainerStyle={styles.list}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#06b6d4" />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#14b8a6" />}
                 ListEmptyComponent={
                     <View style={styles.empty}>
                         <Ionicons name="chatbubbles-outline" size={48} color="#d1d5db" />

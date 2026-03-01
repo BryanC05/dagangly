@@ -29,7 +29,7 @@
     "lightMode": "Light Mode"
   },
   "onboarding": {
-    "welcome": "Welcome to TroliToko!",
+    "welcome": "Welcome to MARTKU!",
     "welcomeDesc": "Let us show you how to shop easily",
     "step1Title": "Find Products",
     "step1Desc": "Search for products or browse categories",
@@ -197,7 +197,17 @@
     "saved": "Saved",
     "saveProduct": "Save Product",
     "tags": "Tags",
-    "loadingProduct": "Loading product..."
+    "loadingProduct": "Loading product...",
+    "reviews": "reviews",
+    "reportProduct": "Report product",
+    "linkCopied": "Link copied!",
+    "reportReason": "Why are you reporting this product?",
+    "reportSubmitted": "Report submitted. Thank you!",
+    "reportFailed": "Failed to submit report",
+    "selectVariant": "Select Variant",
+    "selectRequired": "Please select",
+    "selectMultiple": "select multiple",
+    "store": "Store"
   },
   "cart": {
     "title": "Shopping Cart",
@@ -495,6 +505,20 @@
     "noMessagesDesc": "Chat with sellers by visiting their products",
     "typeMessage": "Type a message...",
     "send": "Send"
+  },
+  "footer": {
+    "marketplace": "Marketplace",
+    "community": "Community",
+    "sellerSection": "Seller",
+    "helpSection": "Help",
+    "categories": "Categories",
+    "startSelling": "Start Selling",
+    "sellerDashboard": "Seller Dashboard",
+    "aboutUs": "About Us",
+    "contactUs": "Contact",
+    "faq": "FAQ",
+    "chat": "Chat",
+    "tagline": "Indonesian MSME Marketplace. Connecting local sellers with nearby buyers."
   },
   "common": {
     "loading": "Loading...",

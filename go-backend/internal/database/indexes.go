@@ -96,6 +96,37 @@ func SetupIndexes(db *mongo.Database) error {
 		return fmt.Errorf("failed to create earnings driver index: %w", err)
 	}
 
+	// Products collection indexes
+	productsCollection := db.Collection("products")
+
+	// Text index for product search (searches name, description, tags)
+	_, err = productsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "name", Value: "text"},
+			{Key: "description", Value: "text"},
+			{Key: "tags", Value: "text"},
+		},
+		Options: nil,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create products text index: %w", err)
+	}
+
+	// Forum threads collection indexes
+	forumThreadsCollection := db.Collection("forumthreads")
+
+	// Text index for forum thread search
+	_, err = forumThreadsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "title", Value: "text"},
+			{Key: "content", Value: "text"},
+		},
+		Options: nil,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create forumthreads text index: %w", err)
+	}
+
 	fmt.Println("✅ Database indexes created successfully")
 	return nil
 }

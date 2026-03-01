@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Printer, FileText } from 'lucide-react';
 import api from '../utils/api';
-import Layout from '@/components/layout/Layout';
 import './Invoice.css';
 
 // Helper function to format address object to string
@@ -40,11 +39,11 @@ export default function Invoice() {
         fetchOrder();
     }, [orderId]);
 
-    if (loading) return <Layout><div className="container py-12 text-center">Loading...</div></Layout>;
+    if (loading) return <><div className="container py-12 text-center">Loading...</div></>;
     if (!order) return null;
 
     return (
-        <Layout>
+        <>
             <div className="container py-8">
                 <div className="invoice-actions">
                     <button className="invoice-back" onClick={() => navigate('/orders')}>
@@ -132,6 +131,6 @@ export default function Invoice() {
                     </div>
                 </div>
             </div>
-        </Layout>
+        </>
     );
 }

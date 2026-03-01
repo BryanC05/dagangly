@@ -47,7 +47,7 @@ function getNotifIcon(type) {
     switch (type) {
         case 'new_order':
         case 'order_status':
-            return { name: 'bag-handle', color: '#06b6d4', bg: '#ecfeff' };
+            return { name: 'bag-handle', color: '#14b8a6', bg: '#ccfbf1' };
         case 'new_message':
             return { name: 'chatbubble', color: '#10b981', bg: '#ecfdf5' };
         case 'payment_update':

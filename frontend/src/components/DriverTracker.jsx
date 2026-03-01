@@ -1,62 +1,31 @@
-import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Navigation, Phone, User, RefreshCw } from 'lucide-react';
-import L from 'leaflet';
 import api from '@/utils/api';
+import { DEFAULT_LOCATION } from '@/utils/constants';
 
-// Custom driver icon
-const driverIcon = L.divIcon({
-    className: 'custom-driver-icon',
-    html: `
-        <div style="
-            background-color: #22c55e;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        ">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
-                <circle cx="7" cy="17" r="2"/>
-                <circle cx="17" cy="17" r="2"/>
-            </svg>
-        </div>
-    `,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18]
-});
-
-const destinationIcon = L.divIcon({
-    className: 'custom-destination-icon',
-    html: `
-        <div style="
-            background-color: #3b82f6;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        "></div>
-    `,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
-});
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { driverMarkerIcon, deliveryMarkerIcon as destIcon } from '@/utils/leafletSetup';
 
 export default function DriverTracker({ orderId, deliveryAddress, driverInfo }) {
     const [driverLocation, setDriverLocation] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
+    const [mapError, setMapError] = useState(null);
 
-    const fetchDriverLocation = async () => {
+    const mapContainerRef = useRef(null);
+    const mapRef = useRef(null);
+    const driverMarkerRef = useRef(null);
+    const routePolylineRef = useRef(null);
+    const isInitRef = useRef(false);
+
+    const defaultCenter = DEFAULT_LOCATION.Jakarta;
+
+    const fetchDriverLocation = useCallback(async () => {
         if (!orderId) return;
-        
         setLoading(true);
         try {
             const response = await api.get(`/orders/${orderId}/driver/location`);
@@ -70,15 +39,97 @@ export default function DriverTracker({ orderId, deliveryAddress, driverInfo }) 
         } finally {
             setLoading(false);
         }
-    };
+    }, [orderId]);
 
     // Poll for driver location every 10 seconds
     useEffect(() => {
         fetchDriverLocation();
-        
         const interval = setInterval(fetchDriverLocation, 10000);
         return () => clearInterval(interval);
-    }, [orderId]);
+    }, [fetchDriverLocation]);
+
+    // Initialize Leaflet map
+    useEffect(() => {
+        const el = mapContainerRef.current;
+        if (!el || mapRef.current || isInitRef.current) return;
+        isInitRef.current = true;
+
+        try {
+            const center = driverLocation
+                ? [driverLocation.latitude, driverLocation.longitude]
+                : deliveryAddress?.coordinates
+                    ? [deliveryAddress.coordinates[1], deliveryAddress.coordinates[0]]
+                    : [defaultCenter.lat, defaultCenter.lng];
+
+            const map = L.map(el).setView(center, 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            }).addTo(map);
+
+            // Destination marker
+            if (deliveryAddress?.coordinates) {
+                L.marker(
+                    [deliveryAddress.coordinates[1], deliveryAddress.coordinates[0]],
+                    { icon: destIcon }
+                )
+                    .addTo(map)
+                    .bindPopup('Delivery Address');
+            }
+
+            mapRef.current = map;
+            setTimeout(() => map.invalidateSize(), 300);
+        } catch (err) {
+            console.error('Error initializing map:', err);
+            setMapError(err.message || 'Failed to load map');
+        }
+
+        return () => {
+            isInitRef.current = false;
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+            }
+            driverMarkerRef.current = null;
+            routePolylineRef.current = null;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Update driver marker when location changes
+    useEffect(() => {
+        if (!mapRef.current || !driverLocation) return;
+
+        const driverPos = [driverLocation.latitude, driverLocation.longitude];
+
+        if (!driverMarkerRef.current) {
+            driverMarkerRef.current = L.marker(driverPos, { icon: driverMarkerIcon })
+                .addTo(mapRef.current)
+                .bindPopup('Driver Location');
+        } else {
+            driverMarkerRef.current.setLatLng(driverPos);
+        }
+
+        mapRef.current.setView(driverPos);
+
+        // Draw route polyline from driver to destination
+        if (deliveryAddress?.coordinates) {
+            const destPos = [deliveryAddress.coordinates[1], deliveryAddress.coordinates[0]];
+
+            if (routePolylineRef.current) {
+                routePolylineRef.current.remove();
+            }
+            routePolylineRef.current = L.polyline([driverPos, destPos], {
+                color: '#22c55e',
+                weight: 4,
+                opacity: 0.8,
+                dashArray: '10, 6',
+            }).addTo(mapRef.current);
+
+            // Fit bounds to show both markers
+            const bounds = L.latLngBounds([driverPos, destPos]);
+            mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+        }
+    }, [driverLocation, deliveryAddress]);
 
     if (!driverLocation && !driverInfo) {
         return (
@@ -96,10 +147,6 @@ export default function DriverTracker({ orderId, deliveryAddress, driverInfo }) 
         );
     }
 
-    const center = driverLocation ? 
-        [driverLocation.latitude, driverLocation.longitude] : 
-        [deliveryAddress?.coordinates?.[1] || -6.2088, deliveryAddress?.coordinates?.[0] || 106.8456];
-
     return (
         <Card>
             <CardHeader>
@@ -108,9 +155,9 @@ export default function DriverTracker({ orderId, deliveryAddress, driverInfo }) 
                         <Navigation className="h-5 w-5" />
                         Live Driver Tracking
                     </span>
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={fetchDriverLocation}
                         disabled={loading}
                     >
@@ -128,7 +175,7 @@ export default function DriverTracker({ orderId, deliveryAddress, driverInfo }) 
                         <div className="flex-1">
                             <p className="font-medium">{driverInfo.driverName || 'Driver'}</p>
                             {driverInfo.driverPhone && (
-                                <a 
+                                <a
                                     href={`tel:${driverInfo.driverPhone}`}
                                     className="text-sm text-primary flex items-center gap-1"
                                 >
@@ -141,53 +188,32 @@ export default function DriverTracker({ orderId, deliveryAddress, driverInfo }) 
                 )}
 
                 {/* Map */}
-                <div className="h-[300px] rounded-lg overflow-hidden border">
-                    <MapContainer
-                        center={center}
-                        zoom={14}
-                        style={{ height: '100%', width: '100%' }}
-                    >
-                        <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        
-                        {/* Driver marker */}
-                        {driverLocation && (
-                            <Marker 
-                                position={[driverLocation.latitude, driverLocation.longitude]}
-                                icon={driverIcon}
-                            >
-                                <Popup>
-                                    <div className="text-sm">
-                                        <p className="font-medium">Driver Location</p>
-                                        <p className="text-muted-foreground">
-                                            Last updated: {new Date(driverLocation.timestamp).toLocaleTimeString()}
-                                        </p>
-                                    </div>
-                                </Popup>
-                            </Marker>
+                {mapError ? (
+                    <div className="h-[300px] rounded-lg overflow-hidden border flex items-center justify-center">
+                        <div className="text-center text-muted-foreground p-4">
+                            <Navigation className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">Unable to load map</p>
+                            <p className="text-xs text-red-500 mt-1">{mapError}</p>
+                        </div>
+                    </div>
+                ) : (
+                    <div ref={mapContainerRef} className="h-[300px] rounded-lg overflow-hidden border" />
+                )}
+
+                {/* Driver location info */}
+                {driverLocation && (
+                    <div className="p-3 bg-secondary rounded-lg">
+                        <p className="text-sm font-medium">Driver Position</p>
+                        <p className="text-xs text-muted-foreground">
+                            Lat: {driverLocation.latitude?.toFixed(6)}, Lng: {driverLocation.longitude?.toFixed(6)}
+                        </p>
+                        {driverLocation.timestamp && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Last updated: {new Date(driverLocation.timestamp).toLocaleTimeString()}
+                            </p>
                         )}
-                        
-                        {/* Destination marker */}
-                        {deliveryAddress?.coordinates && (
-                            <Marker 
-                                position={[
-                                    deliveryAddress.coordinates[1], 
-                                    deliveryAddress.coordinates[0]
-                                ]}
-                                icon={destinationIcon}
-                            >
-                                <Popup>
-                                    <div className="text-sm">
-                                        <p className="font-medium">Delivery Address</p>
-                                        <p className="text-muted-foreground">{deliveryAddress.address}</p>
-                                    </div>
-                                </Popup>
-                            </Marker>
-                        )}
-                    </MapContainer>
-                </div>
+                    </div>
+                )}
 
                 {lastUpdated && (
                     <p className="text-xs text-muted-foreground text-center">

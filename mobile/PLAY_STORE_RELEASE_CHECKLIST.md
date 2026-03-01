@@ -5,8 +5,38 @@ This checklist is tailored to the current project configuration:
 - EAS project ID: `034edfa1-ecd5-47df-b050-47725a620224` (`mobile/app.config.js`)
 - Production build profile: `production` (`mobile/eas.json`)
 
-**Last Updated:** 2026-02-28  
-**Overall Status:** ⚠️ **NOT READY** - Several critical items pending
+**Last Updated:** 2026-03-01
+**Overall Status:** ⚠️ **READY FOR FREE DISTRIBUTION** - APK builds work, Play Store requires additional setup
+
+> **NEW:** Quick deployment scripts and guides added! See `DEPLOYMENT_GUIDE.md`
+
+---
+
+## 🚀 Quick Start (FREE Distribution - No Play Store Needed!)
+
+You can start distributing your app **immediately** without Play Store:
+
+### Option 1: One-Command Deployment
+```bash
+cd mobile
+scripts/quick-deploy.bat    # Windows
+# OR
+bash scripts/quick-deploy.sh  # Linux/Mac
+```
+
+### Option 2: Manual Build
+```bash
+cd mobile
+npx eas build --platform android --profile preview
+```
+
+Then share the APK via WhatsApp, email, or QR code!
+
+**Cost:** $0
+**Time:** ~15 minutes for build
+**Requirements:** Just a Google Maps API key
+
+See `DEPLOYMENT_GUIDE.md` for full details.
 
 ---
 
@@ -42,10 +72,13 @@ npx eas-cli@latest login
 - [ ] Login/register works on physical Android device.
 - [ ] Product list, product detail, cart, checkout, nearby sellers, chat all work.
 - [ ] No critical crash in release-like testing.
-- [ ] App icon/splash are final (`mobile/app.config.js`, `mobile/assets`).
-- [ ] Privacy policy URL is ready. 🔴 **REQUIRED for Play Store**
+- [x] App icon/splash configured (`mobile/app.config.js`, `mobile/assets`).
+  - **Note:** Using placeholder icon - replace with final branding before production
+- [x] Privacy policy document created. ✅ **NEW**
+  - **Location:** `mobile/PRIVACY_POLICY.md`
+  - **For Play Store:** Host online and add URL to store listing
 
-**Status:** ⚠️ Partially complete - Testing and privacy policy needed
+**Status:** ⚠️ Ready for APK distribution - Google Maps key and testing needed for full release
 
 ---
 
@@ -147,7 +180,36 @@ npx eas secret:create --name GOOGLEMAPS_API_KEY --value "AIza..."
 
 ---
 
-## 9. Testing Checklist (Before Release)
+## 9. Free Distribution Alternatives (No Play Store Required)
+
+Distribute your app **for FREE** without Google Play Store:
+
+### Direct APK Distribution ($0)
+- Build preview APK using this checklist
+- Share via WhatsApp, Telegram, email
+- Host on Google Drive, Dropbox, or your server
+- Generate QR code for easy download
+
+### Alternative App Stores (All FREE)
+| Store | Setup Time | Notes |
+|-------|------------|-------|
+| Amazon Appstore | 1 day | Good for Fire devices |
+| Samsung Galaxy Store | 2-3 days | Pre-installed on Samsung phones |
+| Xiaomi GetApps | 1-2 days | Major in Indonesia |
+| APKPure | Immediate | Just upload APK |
+| Uptodown | Immediate | Simple hosting |
+
+**Benefits:**
+- ✅ No $25 developer fee
+- ✅ No review delays
+- ✅ Immediate distribution
+- ✅ Test before Play Store launch
+
+See `DEPLOYMENT_GUIDE.md` for detailed instructions.
+
+---
+
+## 10. Testing Checklist (Before Release)
 
 Test on a physical Android device (not emulator):
 

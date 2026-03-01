@@ -4,8 +4,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Upload, Plus, X, Trash2, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import api from '../utils/api';
 import LocationPicker from '../components/LocationPicker';
-import Layout from '@/components/layout/Layout';
-import './AddProduct.css';
 
 const categories = [
   { id: 'food', name: 'Food & Beverages' },
@@ -310,7 +308,7 @@ function AddProduct() {
     const newEnhance = !item.enhance;
 
     if (!newEnhance) {
-      // Turning off enhance — revert to original preview
+      // Turning off enhance - revert to original preview
       setImageItems((prev) =>
         prev.map((i) =>
           i.id === id ? { ...i, enhance: false, preview: i.originalPreview } : i
@@ -319,7 +317,7 @@ function AddProduct() {
       return;
     }
 
-    // Turning on enhance — call preview endpoint
+    // Turning on enhance - call preview endpoint
     setImageItems((prev) =>
       prev.map((i) =>
         i.id === id ? { ...i, enhance: true, enhancing: true } : i
@@ -433,22 +431,23 @@ function AddProduct() {
   };
 
   return (
-    <Layout>
-      <div className="add-product container py-8">
-        <button onClick={() => navigate(-1)} className="back-button inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground">
+    <>
+      <div className="container py-8 md:py-10">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground">
           <ArrowLeft size={20} />
           Back to Dashboard
         </button>
 
-        <div className="add-product-container max-w-4xl mx-auto">
-          <div className="form-header text-center mb-8">
+        <div className="max-w-5xl mx-auto endfield-card endfield-gradient p-4 md:p-8">
+          <div className="text-center mb-8">
+            <p className="text-xs uppercase tracking-[0.2em] text-primary mb-2">Seller Catalog</p>
             <h1 className="text-3xl font-bold mb-2">Add New Product</h1>
             <p className="text-muted-foreground">List your product for nearby customers</p>
           </div>
 
           <form onSubmit={handleSubmit} className="product-form space-y-8">
             {/* Basic Info */}
-            <div className="form-section p-6 border rounded-lg bg-card">
+            <div className="endfield-card p-6">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Basic Information</h3>
 
               <div className="space-y-4">
@@ -536,7 +535,7 @@ function AddProduct() {
             </div>
 
             {/* Pricing & Stock */}
-            <div className="form-section p-6 border rounded-lg bg-card">
+            <div className="endfield-card p-6">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Pricing & Stock</h3>
 
               {/* Variant Toggle */}
@@ -642,7 +641,7 @@ function AddProduct() {
             </div>
 
             {/* Custom Option Groups (Menus) */}
-            <div className="form-section p-6 border rounded-lg bg-card">
+            <div className="endfield-card p-6">
               <div className="flex items-center justify-between mb-2 pb-2 border-b">
                 <div>
                   <h3 className="text-xl font-semibold">Custom Options (Optional)</h3>
@@ -660,7 +659,7 @@ function AddProduct() {
               {optionGroups.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
                   <p>No custom options added yet.</p>
-                  <p className="text-xs mt-1">Great for food & beverages — let buyers customize their order!</p>
+                  <p className="text-xs mt-1">Great for food and beverages - let buyers customize their order!</p>
                 </div>
               ) : (
                 <div className="space-y-4 mt-4">
@@ -757,7 +756,7 @@ function AddProduct() {
             </div>
 
             {/* Location */}
-            <div className="form-section p-6 border rounded-lg bg-card">
+            <div className="endfield-card p-6">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Product Location</h3>
               <p className="text-sm text-muted-foreground mb-4">Where is this product located? (Defaults to your current location)</p>
 
@@ -778,7 +777,7 @@ function AddProduct() {
             </div>
 
             {/* Images */}
-            <div className="form-section p-6 border rounded-lg bg-card">
+            <div className="endfield-card p-6">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Product Images</h3>
               <p className="text-sm text-muted-foreground mb-3">
                 Up to {MAX_IMAGES} images, max {MAX_IMAGE_SIZE_MB}MB each (JPEG, PNG, WEBP)
@@ -835,7 +834,7 @@ function AddProduct() {
                           disabled={addMutation.isPending || item.enhancing}
                         >
                           <Sparkles size={12} />
-                          {item.enhancing ? 'Enhancing...' : item.enhance ? 'Enhanced ✓' : 'Enhance'}
+                          {item.enhancing ? 'Enhancing...' : item.enhance ? 'Enhanced' : 'Enhance'}
                         </button>
                         {item.uploadState === 'uploading' && <p className="text-blue-600">Uploading...</p>}
                         {item.uploadState === 'done' && <p className="text-green-600">Ready</p>}
@@ -857,7 +856,7 @@ function AddProduct() {
             </div>
 
             {/* Tags */}
-            <div className="form-section p-6 border rounded-lg bg-card">
+            <div className="endfield-card p-6">
               <h3 className="text-xl font-semibold mb-6 pb-2 border-b">Tags</h3>
 
               <div className="tags-section">
@@ -918,8 +917,9 @@ function AddProduct() {
           </form>
         </div>
       </div>
-    </Layout>
+    </>
   );
 }
 
 export default AddProduct;
+

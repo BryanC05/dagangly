@@ -4,7 +4,6 @@ import { useMutation } from '@tanstack/react-query';
 import { ArrowLeft, Send, Paperclip, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
-import Layout from '@/components/layout/Layout';
 import './Forum.css';
 
 const categories = [
@@ -68,7 +67,7 @@ function NewThread() {
     }
 
     return (
-        <Layout>
+        <>
             <div className="forum-page new-thread-page container py-8 max-w-3xl">
                 <div className="page-header flex items-center gap-4 mb-8">
                     <button className="btn-back p-2 hover:bg-muted rounded-full" onClick={() => navigate('/forum')}>
@@ -171,7 +170,7 @@ function NewThread() {
                     </div>
                 </form>
             </div>
-        </Layout>
+        </>
     );
 }
 

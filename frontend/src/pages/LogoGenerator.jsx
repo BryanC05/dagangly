@@ -10,7 +10,6 @@ import { Separator } from '@/components/ui/separator';
 import { useLogoGenerator } from '@/hooks/useLogoGenerator';
 import { useAuthStore } from '@/store/authStore';
 import { getBackendUrl } from '@/config';
-import Layout from '@/components/layout/Layout';
 import LogoGallery from '@/components/logo/LogoGallery';
 import LogoUpload from '@/components/logo/LogoUpload';
 import PromptSuggestions from '@/components/logo/PromptSuggestions';
@@ -158,11 +157,11 @@ function LogoGenerator() {
   };
 
   return (
-    <Layout>
-      <div className="container py-8 max-w-6xl">
+    <>
+      <div className="container py-8 md:py-10 max-w-6xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
+        <div className="endfield-card endfield-gradient p-5 md:p-7 flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+          <div className="min-w-0">
             {fromRegistration && (
               <Button
                 variant="ghost"
@@ -173,6 +172,7 @@ function LogoGenerator() {
                 Back to Registration
               </Button>
             )}
+            <p className="text-xs uppercase tracking-[0.2em] text-primary mb-2">Brand Builder</p>
             <h1 className="text-3xl font-bold">Logo Generator</h1>
             <p className="text-muted-foreground mt-1">
               Create a professional logo for your business using AI
@@ -206,7 +206,7 @@ function LogoGenerator() {
         )}
 
         {/* Daily Limit Card */}
-        <Card className="mb-6">
+        <Card className="mb-6 endfield-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Daily Generation Limit</span>
@@ -249,7 +249,7 @@ function LogoGenerator() {
 
         {/* Current Logo Display */}
         {currentBusinessLogo && (
-          <Card className="mb-6 border-primary">
+        <Card className="mb-6 border-primary endfield-card">
             <CardHeader>
               <CardTitle className="text-base">Current Business Logo</CardTitle>
               <CardDescription>
@@ -278,7 +278,7 @@ function LogoGenerator() {
         )}
 
         {/* Generation Section */}
-        <Card className="mb-6">
+        <Card className="mb-6 endfield-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
@@ -299,7 +299,7 @@ function LogoGenerator() {
                 disabled={isGenerating || (status && status.remaining === 0)}
               />
               <p className="text-xs text-muted-foreground">
-                💡 Supports Bahasa Indonesia! The AI will automatically translate Indonesian prompts for best results.
+                Tip: Supports Bahasa Indonesia. Prompts are auto-translated for best results.
               </p>
             </div>
 
@@ -346,7 +346,7 @@ function LogoGenerator() {
         <Separator className="my-8" />
 
         {/* Upload Section */}
-        <Card>
+        <Card className="endfield-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
@@ -364,8 +364,9 @@ function LogoGenerator() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </>
   );
 }
 
 export default LogoGenerator;
+

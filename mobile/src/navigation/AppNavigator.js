@@ -9,6 +9,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     AppState,
+    TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCartStore } from '../store/cartStore';
@@ -53,58 +54,76 @@ const AddStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
 const DeliveryStack = createNativeStackNavigator();
 
+// Wrapper component to add floating cart button to HomeScreen
+function HomeScreenWithCart({ navigation, route }) {
+    return (
+        <View style={{ flex: 1 }}>
+            <HomeScreen navigation={navigation} route={route} />
+            <FloatingCartButton navigation={navigation} />
+        </View>
+    );
+}
+
 // Stack Navigators
 function HomeStackNavigator() {
     const { colors } = useThemeStore();
     return (
-        <HomeStack.Navigator
-            screenOptions={{
-                contentStyle: { backgroundColor: colors.background },
-                animation: 'slide_from_right',
-            }}
-        >
-            <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-            <HomeStack.Screen
-                name="ProductDetail"
-                component={ProductDetailScreen}
-                options={{ headerShown: false }}
-            />
-            <HomeStack.Screen
-                name="MapView"
-                component={MapViewScreen}
-                options={{ headerShown: false }}
-            />
-            <HomeStack.Screen
-                name="BusinessDetails"
-                component={BusinessDetailsScreen}
-                options={{ headerShown: false }}
-            />
-            <HomeStack.Screen
-                name="NearbySellers"
-                component={NearbySellersScreen}
-                options={{ headerShown: false }}
-            />
-        </HomeStack.Navigator>
+        <View style={{ flex: 1 }}>
+            <HomeStack.Navigator
+                screenOptions={{
+                    contentStyle: { backgroundColor: colors.background },
+                    animation: 'slide_from_right',
+                }}
+            >
+                <HomeStack.Screen name="Home" component={HomeScreenWithCart} options={{ headerShown: false }} />
+                <HomeStack.Screen
+                    name="ProductDetail"
+                    component={ProductDetailScreen}
+                    options={{ headerShown: false }}
+                />
+                <HomeStack.Screen
+                    name="MapView"
+                    component={MapViewScreen}
+                    options={{ headerShown: false }}
+                />
+                <HomeStack.Screen
+                    name="BusinessDetails"
+                    component={BusinessDetailsScreen}
+                    options={{ headerShown: false }}
+                />
+                <HomeStack.Screen
+                    name="NearbySellers"
+                    component={NearbySellersScreen}
+                    options={{ headerShown: false }}
+                />
+            </HomeStack.Navigator>
+        </View>
     );
 }
 
 function ProductsStackNavigator() {
     const { colors } = useThemeStore();
-    const { t } = useLanguageStore();
+    const { t, language } = useLanguageStore();
 
-    const ProductsWrapper = ({ navigation, route }) => {
+    const ProductsWrapper = ({ navigation: nav, route }) => {
         React.useEffect(() => {
             if (route?.params?.reset) {
-                navigation.setParams({ reset: undefined });
-                navigation.popToTop();
+                nav.setParams({ reset: undefined });
+                nav.popToTop();
             }
-        }, [navigation, route?.params?.reset]);
+        }, [nav, route?.params?.reset]);
 
-        return <ProductsScreen navigation={navigation} route={route} />;
+        return (
+            <View style={{ flex: 1 }}>
+                <ProductsScreen navigation={nav} route={route} />
+                <FloatingCartButton navigation={nav} />
+            </View>
+        );
     };
 
     return (
         <ProductsStack.Navigator
+            key={`products-lang-${language}`}
             screenOptions={{
                 contentStyle: { backgroundColor: colors.background },
                 animation: 'slide_from_right',
@@ -142,9 +161,10 @@ function ProductsStackNavigator() {
 
 function CartStackNavigator() {
     const { colors } = useThemeStore();
-    const { t } = useLanguageStore();
+    const { t, language } = useLanguageStore();
     return (
         <CartStack.Navigator
+            key={`cart-lang-${language}`}
             screenOptions={{
                 contentStyle: { backgroundColor: colors.background },
                 animation: 'slide_from_right',
@@ -185,9 +205,10 @@ function AddStackNavigator() {
 
 function DeliveryStackNavigator() {
     const { colors } = useThemeStore();
-    const { t } = useLanguageStore();
+    const { t, language } = useLanguageStore();
     return (
         <DeliveryStack.Navigator
+            key={`delivery-lang-${language}`}
             screenOptions={{
                 contentStyle: { backgroundColor: colors.background },
                 animation: 'slide_from_right',
@@ -204,9 +225,10 @@ function DeliveryStackNavigator() {
 
 function ProfileStackNavigator() {
     const { colors } = useThemeStore();
-    const { t } = useLanguageStore();
+    const { t, language } = useLanguageStore();
     return (
         <ProfileStack.Navigator
+            key={`profile-lang-${language}`}
             screenOptions={{
                 contentStyle: { backgroundColor: colors.background },
                 animation: 'slide_from_right',
@@ -311,11 +333,7 @@ function ProfileStackNavigator() {
                 name="Wishlist"
                 component={WishlistScreen}
                 options={{
-                    title: 'Saved Products',
-                    headerStyle: { backgroundColor: colors.card },
-                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
-                    headerShadowVisible: false,
-                    headerTintColor: colors.text,
+                    headerShown: false,
                 }}
             />
             <ProfileStack.Screen
@@ -376,6 +394,55 @@ function CartBadge() {
         <View style={badgeStyles.badge}>
             <Text style={badgeStyles.text}>{count > 9 ? '9+' : count}</Text>
         </View>
+    );
+}
+
+// Floating Cart Button - appears on Home and Products screens
+function FloatingCartButton({ navigation }) {
+    const items = useCartStore((s) => s.items);
+    const count = items.reduce((sum, item) => sum + item.quantity, 0);
+    const { colors } = useThemeStore();
+
+    if (count === 0) return null;
+
+    return (
+        <TouchableOpacity
+            style={{
+                position: 'absolute',
+                bottom: 20,
+                right: 20,
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: colors.primary,
+                justifyContent: 'center',
+                alignItems: 'center',
+                shadowColor: colors.primary,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 8,
+            }}
+            onPress={() => navigation.navigate('CartTab', { screen: 'CartMain' })}
+        >
+            <Ionicons name="cart" size={24} color={colors.white} />
+            <View style={{
+                position: 'absolute',
+                top: -4,
+                right: -4,
+                backgroundColor: colors.danger,
+                borderRadius: 10,
+                minWidth: 20,
+                height: 20,
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingHorizontal: 4,
+            }}>
+                <Text style={{ color: colors.white, fontSize: 10, fontWeight: '700' }}>
+                    {count > 9 ? '9+' : count}
+                </Text>
+            </View>
+        </TouchableOpacity>
     );
 }
 
@@ -583,13 +650,14 @@ const badgeStyles = StyleSheet.create({
 // Main Tab Navigator
 export default function AppNavigator() {
     const { colors, isDarkMode } = useThemeStore();
-    const { t } = useLanguageStore();
+    const { t, language } = useLanguageStore();
     const isDriverMode = useDriverStore((s) => s.isDriverMode);
 
     return (
         <>
             <NotificationListener />
             <Tab.Navigator
+                key={`lang-${language}`}
                 screenOptions={({ route, navigation }) => ({
                     tabBarOnPress: ({ defaultHandler, navigation: tabNavigation }) => {
                         const state = tabNavigation.getState();
@@ -624,7 +692,6 @@ export default function AppNavigator() {
                         switch (route.name) {
                             case 'HomeTab': iconName = focused ? 'home' : 'home-outline'; break;
                             case 'ProductsTab': iconName = focused ? 'grid' : 'grid-outline'; break;
-                            case 'CartTab': iconName = focused ? 'cart' : 'cart-outline'; break;
                             case 'DeliveryTab': iconName = focused ? 'bicycle' : 'bicycle-outline'; break;
                             case 'AddTab': iconName = focused ? 'add-circle' : 'add-circle-outline'; break;
                             case 'ProfileTab': iconName = focused ? 'person' : 'person-outline'; break;
@@ -633,7 +700,6 @@ export default function AppNavigator() {
                         return (
                             <View>
                                 <Ionicons name={iconName} size={22} color={color} />
-                                {route.name === 'CartTab' && <CartBadge />}
                                 {route.name === 'DeliveryTab' && <DeliveryBadge />}
                                 {route.name === 'ProfileTab' && <NotificationBadge />}
                             </View>
@@ -654,6 +720,11 @@ export default function AppNavigator() {
                         shadowRadius: 8,
                         elevation: 5,
                     },
+                    tabBarItemStyle: {
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    },
                     tabBarLabelStyle: {
                         fontSize: 11,
                         fontWeight: '600',
@@ -664,7 +735,14 @@ export default function AppNavigator() {
             >
                 <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ tabBarLabel: t.tabHome }} />
                 <Tab.Screen name="ProductsTab" component={ProductsStackNavigator} options={{ tabBarLabel: t.tabProducts }} />
-                <Tab.Screen name="CartTab" component={CartStackNavigator} options={{ tabBarLabel: t.tabCart }} />
+                <Tab.Screen 
+                    name="CartTab" 
+                    component={CartStackNavigator} 
+                    options={{ 
+                        tabBarLabel: t.tabCart,
+                        tabBarButton: () => null, // Hide from tab bar but keep navigable
+                    }} 
+                />
                 {/* Delivery disabled
                 {isDriverMode && (
                     <Tab.Screen name="DeliveryTab" component={DeliveryStackNavigator} options={{ tabBarLabel: t.tabDelivery || 'Delivery' }} />

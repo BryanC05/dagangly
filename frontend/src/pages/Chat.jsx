@@ -17,7 +17,6 @@ import {
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
 import { getBackendUrl } from '../config';
-import Layout from '@/components/layout/Layout';
 import { ChatListSkeleton } from '@/components/ui/skeleton';
 import './Chat.css';
 
@@ -276,7 +275,7 @@ function Chat() {
 
   if (!user) {
     return (
-      <Layout>
+      <>
         <div className="chat-page container py-12 flex justify-center">
           <div className="chat-auth-required text-center p-8 border rounded-lg bg-card shadow-sm max-w-md w-full">
             <MessageCircle size={48} className="mx-auto text-primary mb-4" />
@@ -287,12 +286,12 @@ function Chat() {
             </button>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <div className="chat-page h-[calc(100vh-theme(spacing.16))] flex overflow-hidden">
         {/* Chat List Sidebar */}
         <div className={`chat-sidebar w-full md:w-80 lg:w-96 border-r flex flex-col bg-background ${activeRoom ? 'hidden md:flex' : 'flex'}`}>
@@ -539,7 +538,7 @@ function Chat() {
           )}
         </div>
       </div>
-    </Layout>
+    </>
   );
 }
 

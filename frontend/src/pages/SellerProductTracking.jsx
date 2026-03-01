@@ -3,16 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { 
   Package, MapPin, Phone, User, Calendar, 
   DollarSign, ChevronDown, ChevronUp, Search,
-  TrendingUp, ShoppingBag, Map, Filter
+  TrendingUp, ShoppingBag, Filter
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { resolveImageUrl } from '@/utils/imageUrl';
-import './SellerProductTracking.css';
 
 const statusConfig = {
   pending: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200', label: 'Pending' },
@@ -95,7 +93,7 @@ function SellerProductTracking() {
 
   if (isLoading) {
     return (
-      <Layout>
+      <>
         <div className="container py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-muted rounded w-1/4"></div>
@@ -103,13 +101,13 @@ function SellerProductTracking() {
             <div className="h-64 bg-muted rounded"></div>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   if (error) {
     return (
-      <Layout>
+      <>
         <div className="container py-8">
           <div className="text-center py-12 border rounded-lg bg-card">
             <Package size={48} className="mx-auto mb-4 text-red-500" />
@@ -119,15 +117,16 @@ function SellerProductTracking() {
             </p>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
-      <div className="seller-tracking container py-8">
+    <>
+      <div className="container py-8 md:py-10">
         {/* Header */}
-        <div className="mb-8">
+        <div className="endfield-card endfield-gradient p-5 md:p-7 mb-8">
+          <p className="text-xs uppercase tracking-[0.2em] text-primary mb-2">Seller Analytics</p>
           <h1 className="text-3xl font-bold mb-2">Product Tracking</h1>
           <p className="text-muted-foreground">
             Track your products, view buyer details, and monitor delivery locations
@@ -136,28 +135,28 @@ function SellerProductTracking() {
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
+          <div className="endfield-card p-6">
             <div className="flex items-center gap-2 mb-2 text-primary">
               <Package size={20} />
               <span className="text-sm font-medium">Products Sold</span>
             </div>
             <div className="text-2xl font-bold">{totalProducts}</div>
           </div>
-          <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
+          <div className="endfield-card p-6">
             <div className="flex items-center gap-2 mb-2 text-blue-500">
               <ShoppingBag size={20} />
               <span className="text-sm font-medium">Total Orders</span>
             </div>
             <div className="text-2xl font-bold">{totalOrders}</div>
           </div>
-          <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
+          <div className="endfield-card p-6">
             <div className="flex items-center gap-2 mb-2 text-green-500">
               <TrendingUp size={20} />
               <span className="text-sm font-medium">Units Sold</span>
             </div>
             <div className="text-2xl font-bold">{totalUnitsSold}</div>
           </div>
-          <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
+          <div className="endfield-card p-6">
             <div className="flex items-center gap-2 mb-2 text-orange-500">
               <DollarSign size={20} />
               <span className="text-sm font-medium">Total Revenue</span>
@@ -167,7 +166,7 @@ function SellerProductTracking() {
         </div>
 
         {/* Filters */}
-        <div className="filters flex flex-col md:flex-row gap-4 mb-6">
+        <div className="endfield-card p-4 filters flex flex-col md:flex-row gap-4 mb-6">
           <div className="search-box flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
             <Input
@@ -223,10 +222,10 @@ function SellerProductTracking() {
               const pendingOrders = item.orders.filter(o => !['delivered', 'cancelled'].includes(o.status));
               
               return (
-                <div key={item.product._id} className="product-tracking-card border rounded-lg bg-card overflow-hidden">
+                <div key={item.product._id} className="endfield-card overflow-hidden transition-shadow hover:shadow-md">
                   {/* Product Header */}
                   <div 
-                    className="product-header p-4 flex items-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    className="product-header p-4 flex flex-col lg:flex-row lg:items-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => toggleProduct(item.product._id)}
                   >
                     <div className="product-image w-16 h-16 rounded-lg border overflow-hidden flex-shrink-0">
@@ -247,12 +246,12 @@ function SellerProductTracking() {
                       <h3 className="font-semibold text-lg">{item.product.name || 'Unnamed Product'}</h3>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                         <span className="capitalize">{item.product.category || 'Uncategorized'}</span>
-                        <span>•</span>
+                        <span>|</span>
                         <span>Price: {formatCurrency(item.product.price)}</span>
                       </div>
                     </div>
 
-                    <div className="product-stats flex items-center gap-6 text-right">
+                    <div className="product-stats flex items-center gap-6 text-right lg:ml-auto">
                       <div>
                         <div className="text-2xl font-bold">{item.totalSold}</div>
                         <div className="text-xs text-muted-foreground">Units Sold</div>
@@ -282,7 +281,7 @@ function SellerProductTracking() {
                         
                         <div className="space-y-3">
                           {item.orders.map((order) => (
-                            <div key={order.orderId} className="order-detail-card p-4 bg-background border rounded-lg">
+                            <div key={order.orderId} className="order-detail-card p-4 bg-background border rounded-lg hover:border-primary/40 transition-colors">
                               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                                 {/* Order Info */}
                                 <div className="flex items-start gap-4">
@@ -342,7 +341,7 @@ function SellerProductTracking() {
                                 <div className="text-right">
                                   <div className="text-lg font-bold">{formatCurrency(order.totalAmount)}</div>
                                   <div className="text-sm text-muted-foreground">
-                                    Qty: {order.quantity} × {formatCurrency(order.price)}
+                                    Qty: {order.quantity} x {formatCurrency(order.price)}
                                   </div>
                                 </div>
                               </div>
@@ -389,8 +388,9 @@ function SellerProductTracking() {
           )}
         </div>
       </div>
-    </Layout>
+    </>
   );
 }
 
 export default SellerProductTracking;
+

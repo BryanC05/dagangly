@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Layout from "@/components/layout/Layout";
 import { getBackendUrl } from "@/config";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -238,6 +237,7 @@ const Profile = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
+  const isSellerUser = profile?.role === 'seller' || profile?.isSeller;
   const [myProducts, setMyProducts] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -260,7 +260,7 @@ const Profile = () => {
       return;
     }
     fetchProfile();
-    if (user?.role === "seller") {
+    if (isSellerUser) {
       fetchMyProducts();
     }
   }, [isAuthenticated, navigate, user?.role]);
@@ -333,7 +333,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <Layout>
+      <>
         <div className="container py-8">
           <div className="flex flex-col md:flex-row gap-8">
             {/* Sidebar Skeleton */}
@@ -361,19 +361,19 @@ const Profile = () => {
             </div>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   if (!profile) {
     return (
-      <Layout>
+      <>
         <div className="container py-20 text-center">
           <User className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
           <h2 className="text-2xl font-bold mb-2">{t('profile.profileNotFound')}</h2>
           <Button onClick={() => navigate("/")}>{t('profile.goHome')}</Button>
         </div>
-      </Layout>
+      </>
     );
   }
 
@@ -386,7 +386,7 @@ const Profile = () => {
   };
 
   return (
-    <Layout>
+    <>
       <div className="container py-8">
         {/* Profile Header */}
         <Card className="mb-8">
@@ -430,42 +430,39 @@ const Profile = () => {
                         placeholder="+62 xxx xxx xxx"
                       />
                     </div>
-                    {profile.role === "seller" && (
-                      <>
-                        <div>
-                          <Label htmlFor="businessName">{t('profile.businessName')}</Label>
-                          <Input
-                            id="businessName"
-                            value={editForm.businessName}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                businessName: e.target.value,
-                              })
-                            }
-                            placeholder={t('profile.yourStoreName')}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="businessType">{t('profile.businessSize')}</Label>
-                          <Select
-                            value={editForm.businessType}
-                            onValueChange={(value) =>
-                              setEditForm({ ...editForm, businessType: value })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder={t('profile.selectBusinessSize')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="micro">{t('auth.micro')}</SelectItem>
-                              <SelectItem value="small">{t('auth.small')}</SelectItem>
-                              <SelectItem value="medium">{t('auth.medium')}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </>
-                    )}
+                    {/* Business Info - Always visible for all users (optional) */}
+                    <div>
+                      <Label htmlFor="businessName">{t('profile.businessName')}</Label>
+                      <Input
+                        id="businessName"
+                        value={editForm.businessName}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            businessName: e.target.value,
+                          })
+                        }
+                        placeholder={t('profile.yourStoreName')}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="businessType">{t('profile.businessSize')}</Label>
+                      <Select
+                        value={editForm.businessType}
+                        onValueChange={(value) =>
+                          setEditForm({ ...editForm, businessType: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('profile.selectBusinessSize')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="micro">{t('auth.micro')}</SelectItem>
+                          <SelectItem value="small">{t('auth.small')}</SelectItem>
+                          <SelectItem value="medium">{t('auth.medium')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   {/* Location Info */}
@@ -604,21 +601,17 @@ const Profile = () => {
                 <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                     <h1 className="text-2xl font-bold">
-                      {profile.role === "seller"
+                      {isSellerUser
                         ? profile.businessName || profile.name
                         : profile.name}
                     </h1>
-                    {profile.role === "seller" && profile.isVerified && (
+                    {isSellerUser && profile.isVerified && (
                       <Badge className="w-fit gap-1">
                         <Shield className="h-3 w-3" />
                         {t('profile.verifiedSeller')}
                       </Badge>
                     )}
-                    {profile.role === "buyer" && (
-                      <Badge variant="secondary" className="w-fit">
-                        {t('profile.buyer')}
-                      </Badge>
-                    )}
+                    {/* No more buyer badge - all users are sellers now */}
                   </div>
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
                     <span className="flex items-center gap-1">
@@ -637,7 +630,7 @@ const Profile = () => {
                         {profile.location.city}, {profile.location.state}
                       </span>
                     )}
-                    {profile.role === "seller" && profile.rating > 0 && (
+                    {isSellerUser && profile.rating > 0 && (
                       <span className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-warning text-warning" />
                         {profile.rating.toFixed(1)} {t('profile.rating')}
@@ -664,7 +657,7 @@ const Profile = () => {
         </Card>
 
         {/* Business Logo Section */}
-        {profile.role === "seller" && (
+        {isSellerUser && (
           <Card className="mb-8">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -732,9 +725,9 @@ const Profile = () => {
         )}
 
         {/* Tabs */}
-        <Tabs defaultValue={profile.role === "seller" ? "products" : "orders"}>
+        <Tabs defaultValue={isSellerUser ? "products" : "orders"}>
           <TabsList className="mb-6">
-            {profile.role === "seller" && (
+            {isSellerUser && (
               <TabsTrigger value="products" className="gap-2">
                 <Package className="h-4 w-4" />
                 {t('profile.myProducts')}
@@ -751,7 +744,7 @@ const Profile = () => {
           </TabsList>
 
           {/* My Products (Seller only) */}
-          {profile.role === "seller" && (
+          {isSellerUser && (
             <TabsContent value="products">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold">
@@ -803,7 +796,7 @@ const Profile = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </>
   );
 };
 

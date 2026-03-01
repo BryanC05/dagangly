@@ -15,6 +15,9 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.msmemarketplace.mobile",
+      "config": {
+        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We need your location to show nearby sellers and products."
       }
@@ -26,6 +29,11 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.msmemarketplace.mobile",
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+        }
+      },
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -46,7 +54,8 @@
         {
           "locationWhenInUsePermission": "Allow MSME Marketplace to use your location to show nearby sellers and products."
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

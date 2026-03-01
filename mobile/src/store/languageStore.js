@@ -5,15 +5,31 @@ import id from '../i18n/id';
 
 const translations = { en, id };
 
+const getNestedValue = (obj, path) => {
+    const keys = path.split('.');
+    let result = obj;
+    for (const key of keys) {
+        if (result && typeof result === 'object' && key in result) {
+            result = result[key];
+        } else {
+            return path;
+        }
+    }
+    return result;
+};
+
+const createT = (translations) => (key) => getNestedValue(translations, key);
+
 export const useLanguageStore = create((set, get) => ({
     language: 'id',
-    t: id,
+    t: createT(id),
+    languageVersion: 0,
 
     initLanguage: async () => {
         try {
             const saved = await AsyncStorage.getItem('language');
             if (saved && translations[saved]) {
-                set({ language: saved, t: translations[saved] });
+                set({ language: saved, t: createT(translations[saved]), languageVersion: get().languageVersion + 1 });
             }
         } catch (error) {
             console.error('Failed to load language:', error);
@@ -21,13 +37,14 @@ export const useLanguageStore = create((set, get) => ({
     },
 
     toggleLanguage: async () => {
-        const newLang = get().language === 'en' ? 'id' : 'en';
+        const currentLang = get().language;
+        const newLang = currentLang === 'en' ? 'id' : 'en';
         try {
             await AsyncStorage.setItem('language', newLang);
         } catch (error) {
             console.error('Failed to save language:', error);
         }
-        set({ language: newLang, t: translations[newLang] });
+        set({ language: newLang, t: createT(translations[newLang]), languageVersion: get().languageVersion + 1 });
     },
 
     setLanguage: async (lang) => {
@@ -37,6 +54,6 @@ export const useLanguageStore = create((set, get) => ({
         } catch (error) {
             console.error('Failed to save language:', error);
         }
-        set({ language: lang, t: translations[lang] });
+        set({ language: lang, t: createT(translations[lang]), languageVersion: get().languageVersion + 1 });
     },
 }));

@@ -133,7 +133,7 @@ export default function RegisterScreen({ navigation }) {
             borderColor: colors.primary 
         },
         typeChipText: { fontSize: 13, color: colors.text },
-        typeChipTextActive: { color: '#fff' },
+        typeChipTextActive: { color: colors.white },
         button: {
             backgroundColor: colors.primary, 
             borderRadius: 8, 
@@ -149,7 +149,7 @@ export default function RegisterScreen({ navigation }) {
         },
         buttonDisabled: { opacity: 0.7 },
         buttonText: { 
-            color: '#fff', 
+            color: colors.white, 
             fontSize: 15, 
             fontWeight: '700',
             letterSpacing: 0.5,
@@ -279,7 +279,7 @@ export default function RegisterScreen({ navigation }) {
                             disabled={loading}
                         >
                             {loading ? (
-                                <ActivityIndicator color="#fff" />
+                                <ActivityIndicator color={colors.white} />
                             ) : (
                                 <Text style={styles.buttonText}>Daftar</Text>
                             )}

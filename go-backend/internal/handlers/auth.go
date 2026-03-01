@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,13 @@ type AuthHandler struct {
 
 func NewAuthHandler(cfg *config.Config) *AuthHandler {
 	return &AuthHandler{Config: cfg}
+}
+
+func (h *AuthHandler) jwtSecret() string {
+	if strings.TrimSpace(h.Config.JWTSecret) == "" {
+		return "your-secret-key"
+	}
+	return h.Config.JWTSecret
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -115,7 +123,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		"isSeller": user.IsSeller,
 		"exp":      time.Now().Add(7 * 24 * time.Hour).Unix(),
 	})
-	tokenString, _ := token.SignedString([]byte(h.Config.JWTSecret))
+	tokenString, err := token.SignedString([]byte(h.jwtSecret()))
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Failed to generate authentication token"})
+		return
+	}
 
 	c.JSON(201, gin.H{
 		"token": tokenString,
@@ -166,7 +178,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		"isSeller": user.IsSeller,
 		"exp":      time.Now().Add(7 * 24 * time.Hour).Unix(),
 	})
-	tokenString, _ := token.SignedString([]byte(h.Config.JWTSecret))
+	tokenString, err := token.SignedString([]byte(h.jwtSecret()))
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Failed to generate authentication token"})
+		return
+	}
 
 	c.JSON(200, gin.H{
 		"token": tokenString,

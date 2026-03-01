@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
-export default function LoadingSpinner({ size = 'large', color = '#06b6d4' }) {
+export default function LoadingSpinner({ size = 'large', color = '#14b8a6' }) {
     return (
         <View style={styles.container}>
             <ActivityIndicator size={size} color={color} />

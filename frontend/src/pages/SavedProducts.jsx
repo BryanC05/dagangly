@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, ArrowLeft, Package } from 'lucide-react';
-import Layout from '@/components/layout/Layout';
 import ProductCard from '@/components/products/ProductCard';
 import { ProductsGridSkeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,7 @@ function SavedProducts() {
   }, [isAuthenticated, navigate, fetchSavedProducts]);
 
   return (
-    <Layout>
+    <>
       <div className="container py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -73,7 +72,7 @@ function SavedProducts() {
           </>
         )}
       </div>
-    </Layout>
+    </>
   );
 }
 

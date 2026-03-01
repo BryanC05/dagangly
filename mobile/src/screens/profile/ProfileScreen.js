@@ -17,10 +17,22 @@ import api from '../../api/api';
 export default function ProfileScreen({ navigation }) {
     const { user, logout, setUser } = useAuthStore();
     const { isDarkMode, toggleTheme, initTheme } = useThemeStore();
-    const { t, language, toggleLanguage, initLanguage } = useLanguageStore();
+    const language = useLanguageStore((s) => s.language);
+    const { t, toggleLanguage, initLanguage } = useLanguageStore();
     const { isDriverMode, stats, initDriverMode, toggleDriverMode } = useDriverStore();
     const unreadNotifCount = useNotificationStore((s) => s.unreadCount);
     const { colors } = useTheme();
+    const [, setForceUpdate] = useState(0);
+
+    useEffect(() => {
+        initTheme();
+        initLanguage();
+        initDriverMode();
+    }, []);
+
+    useEffect(() => {
+        setForceUpdate(n => n + 1);
+    }, [language]);
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
@@ -58,7 +70,7 @@ export default function ProfileScreen({ navigation }) {
             justifyContent: 'center', alignItems: 'center', overflow: 'hidden',
         },
         avatarImage: { width: 90, height: 90, borderRadius: 45 },
-        avatarLargeText: { color: '#fff', fontWeight: '800', fontSize: 34 },
+        avatarLargeText: { color: colors.white, fontWeight: '800', fontSize: 34 },
         cameraBtn: {
             position: 'absolute', bottom: 0, right: -4,
             width: 32, height: 32, borderRadius: 16,
@@ -74,7 +86,7 @@ export default function ProfileScreen({ navigation }) {
             flexDirection: 'row', alignItems: 'center', gap: 4,
             backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, marginBottom: 4,
         },
-        sellerBadgeText: { fontSize: 12, color: '#16a34a', fontWeight: '600' },
+        sellerBadgeText: { fontSize: 12, color: colors.success, fontWeight: '600' },
         businessName: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
         editBtn: {
             flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14,
@@ -99,7 +111,7 @@ export default function ProfileScreen({ navigation }) {
             flex: 1, paddingVertical: 11, borderRadius: 10,
             backgroundColor: colors.primary, alignItems: 'center',
         },
-        saveBtnText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+        saveBtnText: { fontSize: 14, fontWeight: '700', color: colors.white },
         menuSection: {
             marginHorizontal: 16, backgroundColor: colors.card, borderRadius: 16,
             overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
@@ -117,7 +129,7 @@ export default function ProfileScreen({ navigation }) {
             borderRadius: 14, borderWidth: 1.5, borderColor: isDarkMode ? '#7f1d1d' : '#fecaca',
             backgroundColor: colors.card,
         },
-        logoutText: { fontSize: 15, fontWeight: '600', color: '#ef4444' },
+        logoutText: { fontSize: 15, fontWeight: '600', color: colors.danger },
         langValue: { fontSize: 13, color: colors.textSecondary, marginRight: 4 },
     }), [colors, isDarkMode]);
 
@@ -193,28 +205,25 @@ export default function ProfileScreen({ navigation }) {
         ? (user.profileImage.startsWith('data:') ? user.profileImage : getImageUrl(user.profileImage))
         : null;
 
-    const menuItems = [
-        { icon: 'chatbubbles-outline', label: t.messages, onPress: () => navigation.navigate('Messages'), color: '#0ea5e9' },
+    const menuItems = useMemo(() => [
+        { icon: 'chatbubbles-outline', label: t.messages || 'Messages', onPress: () => navigation.navigate('Messages'), color: '#0ea5e9' },
         { icon: 'notifications-outline', label: 'Notifications', onPress: () => navigation.navigate('Notifications'), color: '#f43f5e', badge: unreadNotifCount > 0 ? (unreadNotifCount > 9 ? '9+' : String(unreadNotifCount)) : null },
         { icon: 'heart-outline', label: 'Saved Products', onPress: () => navigation.navigate('Wishlist'), color: '#ef4444' },
-        { icon: 'receipt-outline', label: t.orderHistory, onPress: () => navigation.navigate('Orders'), color: '#06b6d4' },
-        // Delivery disabled: { icon: 'bicycle-outline', label: t.driverMode || 'Driver Mode', onPress: handleToggleDriverMode, color: '#10b981', isToggle: true, toggleValue: isDriverMode, isLoading: togglingDriver },
-        { icon: 'location-outline', label: t.nearbySellers, onPress: () => navigation.navigate('HomeTab', { screen: 'NearbySellers' }), color: '#ef4444' },
-        { icon: 'color-palette-outline', label: t.logoGenerator, onPress: () => navigation.navigate('LogoGenerator'), color: '#8b5cf6' },
-        // All users are now sellers by default
-        { icon: 'storefront-outline', label: t.sellerDashboard, onPress: () => navigation.navigate('SellerDashboard'), color: '#16a34a' },
-        { icon: 'chatbubbles-outline', label: t.forum, onPress: () => navigation.navigate('Forum'), color: '#8b5cf6' },
-        // Admin option (manual access for now)
+        { icon: 'receipt-outline', label: t.orderHistory || 'Order History', onPress: () => navigation.navigate('Orders'), color: '#14b8a6' },
+        { icon: 'location-outline', label: t.nearbySellers || 'Nearby Sellers', onPress: () => navigation.navigate('HomeTab', { screen: 'NearbySellers' }), color: '#ef4444' },
+        { icon: 'color-palette-outline', label: t.logoGenerator || 'Logo Generator', onPress: () => navigation.navigate('LogoGenerator'), color: '#8b5cf6' },
+        { icon: 'storefront-outline', label: t.sellerDashboard || 'Seller Dashboard', onPress: () => navigation.navigate('SellerDashboard'), color: '#16a34a' },
+        { icon: 'chatbubbles-outline', label: t.forum || 'Forum', onPress: () => navigation.navigate('Forum'), color: '#8b5cf6' },
         { icon: 'shield-checkmark-outline', label: t.membershipApprovals || 'Membership Approvals', onPress: () => navigation.navigate('AdminMembership'), color: '#f59e0b' },
         {
-            icon: 'globe-outline', label: t.language,
+            icon: 'globe-outline', label: t.language || 'Language',
             onPress: toggleLanguage, color: '#f59e0b', isToggle: true, toggleValue: language === 'id',
         },
         {
-            icon: isDarkMode ? 'moon' : 'moon-outline', label: t.darkMode,
+            icon: isDarkMode ? 'moon' : 'moon-outline', label: t.darkMode || 'Dark Mode',
             onPress: toggleTheme, color: '#6366f1', isToggle: true, toggleValue: isDarkMode,
         },
-    ];
+    ], [t, navigation, unreadNotifCount, language, isDarkMode]);
 
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -233,12 +242,12 @@ export default function ProfileScreen({ navigation }) {
                             <View style={[StyleSheet.absoluteFill, {
                                 backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', borderRadius: 45,
                             }]}>
-                                <ActivityIndicator color="#fff" size="small" />
+                                <ActivityIndicator color={colors.white} size="small" />
                             </View>
                         )}
                     </View>
                     <TouchableOpacity style={styles.cameraBtn} onPress={pickProfileImage} disabled={uploadingImage}>
-                        <Ionicons name="camera" size={16} color="#fff" />
+                        <Ionicons name="camera" size={16} color={colors.white} />
                     </TouchableOpacity>
                 </View>
 
@@ -251,21 +260,21 @@ export default function ProfileScreen({ navigation }) {
                         ) : null}
                         {/* All users are now sellers - show badge always */}
                         <View style={styles.sellerBadge}>
-                            <Ionicons name="storefront" size={12} color="#16a34a" />
-                            <Text style={styles.sellerBadgeText}>{t.seller}</Text>
+                            <Ionicons name="storefront" size={12} color={colors.success} />
+                            <Text style={styles.sellerBadgeText}>{t.seller || 'Seller'}</Text>
                         </View>
                         {user?.businessName && (
                             <Text style={styles.businessName}>{user.businessName}</Text>
                         )}
                         <TouchableOpacity style={styles.editBtn} onPress={() => setEditing(true)}>
                             <Ionicons name="pencil-outline" size={16} color={colors.primary} />
-                            <Text style={styles.editBtnText}>{t.editProfile}</Text>
+                            <Text style={styles.editBtnText}>{t.editProfile || 'Edit Profile'}</Text>
                         </TouchableOpacity>
                     </>
                 ) : (
                     <View style={styles.editForm}>
                         <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>{t.fullName}</Text>
+                            <Text style={styles.inputLabel}>{t.fullName || 'Full Name'}</Text>
                             <TextInput
                                 style={styles.input}
                                 value={form.name}
@@ -273,19 +282,19 @@ export default function ProfileScreen({ navigation }) {
                             />
                         </View>
                         <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>{t.phone}</Text>
+                            <Text style={styles.inputLabel}>{t.phone || 'Phone'}</Text>
                             <TextInput
                                 style={styles.input}
                                 value={form.phone}
                                 onChangeText={(v) => setForm({ ...form, phone: v })}
                                 keyboardType="phone-pad"
-                                placeholder={t.phonePlaceholder}
+                                placeholder={t.phonePlaceholder || 'Enter phone number'}
                                 placeholderTextColor={colors.textSecondary}
                             />
                         </View>
                         {/* Business info is now optional for all users */}
                         <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>{t.businessName}</Text>
+                            <Text style={styles.inputLabel}>{t.businessName || 'Business Name'}</Text>
                             <TextInput
                                 style={styles.input}
                                 value={form.businessName}
@@ -294,10 +303,10 @@ export default function ProfileScreen({ navigation }) {
                         </View>
                         <View style={styles.editActions}>
                             <TouchableOpacity style={styles.cancelBtn} onPress={() => setEditing(false)}>
-                                <Text style={styles.cancelBtnText}>{t.cancel}</Text>
+                                <Text style={styles.cancelBtnText}>{t.cancel || 'Cancel'}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
-                                {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveBtnText}>{t.save}</Text>}
+                                {saving ? <ActivityIndicator color={colors.white} size="small" /> : <Text style={styles.saveBtnText}>{t.save || 'Save'}</Text>}
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -338,41 +347,49 @@ export default function ProfileScreen({ navigation }) {
 
             <View style={styles.menuSection}>
                 {menuItems.map((item, idx) => (
-                    <TouchableOpacity
-                        key={idx}
-                        style={styles.menuItem}
-                        onPress={item.isToggle ? item.onPress : () => item.onPress && item.onPress()}
-                        disabled={item.isToggle && item.isLoading}
-                    >
-                        <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
-                            <Ionicons name={item.icon} size={20} color={item.color} />
-                        </View>
-                        <Text style={styles.menuLabel}>{item.label}</Text>
-                        {item.isLoading ? (
-                            <ActivityIndicator size="small" color={item.color} />
-                        ) : item.isToggle ? (
+                    item.isToggle ? (
+                        <View key={idx} style={styles.menuItem}>
+                            <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
+                                <Ionicons name={item.icon} size={20} color={item.color} />
+                            </View>
+                            <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
                             <Switch
                                 value={item.toggleValue}
-                                onValueChange={item.onPress}
-                                trackColor={{ true: item.color, false: '#e5e7eb' }}
-                                thumbColor="#fff"
+                                onValueChange={() => item.onPress()}
+                                trackColor={{ true: item.color, false: colors.border }}
+                                thumbColor={colors.white}
                             />
-                        ) : (
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                {item.badge && (
-                                    <View style={{ backgroundColor: item.color, borderRadius: 10, minWidth: 20, height: 20, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6, marginRight: 8 }}>
-                                        <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>{item.badge}</Text>
-                                    </View>
-                                )}
-                                <Ionicons name="chevron-forward" size={18} color="#d1d5db" />
+                        </View>
+                    ) : (
+                        <TouchableOpacity
+                            key={idx}
+                            style={styles.menuItem}
+                            onPress={() => item.onPress && item.onPress()}
+                            disabled={item.isLoading}
+                        >
+                            <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
+                                <Ionicons name={item.icon} size={20} color={item.color} />
                             </View>
-                        )}
-                    </TouchableOpacity>
+                            <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
+                            {item.isLoading ? (
+                                <ActivityIndicator size="small" color={item.color} />
+                            ) : (
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    {item.badge && (
+                                        <View style={{ backgroundColor: item.color, borderRadius: 10, minWidth: 20, height: 20, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6, marginRight: 8 }}>
+                                            <Text style={{ color: colors.white, fontSize: 11, fontWeight: '700' }}>{item.badge}</Text>
+                                        </View>
+                                    )}
+                                    <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    )
                 ))}
             </View>
 
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-                <Ionicons name="log-out-outline" size={20} color="#ef4444" />
+                <Ionicons name="log-out-outline" size={20} color={colors.danger} />
                 <Text style={styles.logoutText}>{t.logout}</Text>
             </TouchableOpacity>
 

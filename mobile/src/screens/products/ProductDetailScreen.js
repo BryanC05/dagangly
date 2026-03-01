@@ -17,9 +17,7 @@ import { API_HOST } from '../../config';
 
 const { width } = Dimensions.get('window');
 
-const paragraphStyle = { fontSize: 14, lineHeight: 22, color: '#6b7280', marginBottom: 12 };
-
-function parseMarkdown(text, textColor = '#6b7280') {
+function parseMarkdown(text, textColor, fallbackColor) {
     if (!text) return [];
     
     const paragraphs = text.split(/\n\n+/);
@@ -62,7 +60,7 @@ function parseMarkdown(text, textColor = '#6b7280') {
             }
         }
         
-        return <Text key={pIndex} style={[paragraphStyle, { color: textColor }]}>{parts}</Text>;
+        return <Text key={pIndex} style={{ fontSize: 14, lineHeight: 22, color: textColor || fallbackColor || '#64748b', marginBottom: 12 }}>{parts}</Text>;
     });
 }
 
@@ -533,7 +531,7 @@ export default function ProductDetailScreen({ route }) {
                             nestedScrollEnabled={true}
                         >
                             {product.description ? (
-                                parseMarkdown(product.description, colors.textSecondary)
+                                parseMarkdown(product.description, null, colors.textSecondary)
                             ) : (
                                 <Text style={styles.description}>{t.noDescriptionAvailable || 'No description available.'}</Text>
                             )}

@@ -10,7 +10,6 @@ import {
 import api from '../utils/api';
 import { useAuthStore } from '../store/authStore';
 import { useTranslation } from '../hooks/useTranslation';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { resolveImageUrl } from '@/utils/imageUrl';
@@ -24,7 +23,7 @@ const statusConfig = {
   ready: { icon: Package, color: 'var(--status-ready)', bg: 'var(--status-ready-bg)', label: 'Ready' },
   delivered: { icon: Truck, color: 'var(--status-delivered)', bg: 'var(--status-delivered-bg)', label: 'Delivered' },
   cancelled: { icon: XCircle, color: 'var(--status-cancelled)', bg: 'var(--status-cancelled-bg)', label: 'Cancelled' },
-  completed: { icon: CheckCircle, color: '#10b981', bg: '#d1fae5', label: 'Order is Completed' },
+  completed: { icon: CheckCircle, color: 'var(--status-delivered)', bg: 'var(--status-delivered-bg)', label: 'Order is Completed' },
 };
 
 // Helper to get status config with dynamic labels for pickup orders
@@ -145,17 +144,17 @@ function Orders() {
 
   if (isLoading) {
     return (
-      <Layout>
+      <>
         <div className="orders-page container py-8">
           <OrdersListSkeleton count={4} />
         </div>
-      </Layout>
+      </>
     );
   }
 
   if (!orders || orders.length === 0) {
     return (
-      <Layout>
+      <>
         <div className="orders-page container py-12">
           <div className="empty-orders">
             <div className="empty-icon-wrapper">
@@ -171,12 +170,12 @@ function Orders() {
             </Link>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <div className="orders-page container py-8">
         {/* Header */}
         <div className="orders-header">
@@ -220,6 +219,7 @@ function Orders() {
               const isPickup = order.deliveryType === 'pickup';
               const OrderTypeIcon = isPickup ? Store : Truck;
               const orderTypeLabel = isPickup ? 'Pickup' : 'Delivery';
+              const preorderRequestClass = order.requestStatus || 'pending';
 
               // Preorder badge
               const isPreorder = order.isPreorder && order.deliveryDate;
@@ -227,53 +227,37 @@ function Orders() {
               return (
                 <div key={`order-wrapper-${orderId}`} style={{ display: 'contents' }}>
                   {isPreorder && (
-                    <div
-                      key={`preorder-${orderId}`}
-                      className="preorder-card"
-                      style={{
-                        backgroundColor: '#fef3c7',
-                        border: '2px solid #f59e0b',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        marginBottom: '12px',
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                    <div key={`preorder-${orderId}`} className="preorder-card">
+                      <div className="preorder-header">
                         <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                            <Calendar size={20} style={{ color: '#f59e0b' }} />
-                            <span style={{ fontSize: '14px', fontWeight: 700, color: '#92400e' }}>PREORDER</span>
+                          <div className="preorder-label-row">
+                            <Calendar size={20} className="preorder-icon" />
+                            <span className="preorder-label">PREORDER</span>
                           </div>
-                          <div style={{ fontSize: '18px', fontWeight: 800, color: '#92400e' }}>
+                          <div className="preorder-date">
                             {formatDate(order.deliveryDate)}
                           </div>
-                          <div style={{ fontSize: '14px', color: '#92400e', marginTop: '2px' }}>
+                          <div className="preorder-time">
                             at {order.preorderTime}
                           </div>
                         </div>
-                        <div style={{
-                          backgroundColor: order.requestStatus === 'seller_accepted' ? '#10b981' :
-                            order.requestStatus === 'seller_declined' ? '#ef4444' :
-                              order.requestStatus === 'pending_seller_review' ? '#f59e0b' : '#6b7280',
-                          padding: '4px 10px',
-                          borderRadius: '12px',
-                        }}>
-                          <span style={{ color: '#fff', fontSize: '11px', fontWeight: 700 }}>
+                        <div className={`preorder-request-badge ${preorderRequestClass}`}>
+                          <span>
                             {order.requestStatus === 'pending_seller_review' ? 'WAITING' :
                               order.requestStatus === 'seller_accepted' ? 'APPROVED' :
                                 order.requestStatus === 'seller_declined' ? 'DECLINED' : 'PENDING'}
                           </span>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                        <Package size={16} style={{ color: '#92400e' }} />
-                        <span style={{ fontSize: '13px', color: '#92400e', flex: 1 }}>
-                          {order.products?.length || 0} items • {formatCurrency(order.totalAmount)}
+                      <div className="preorder-meta">
+                        <Package size={16} className="preorder-icon" />
+                        <span>
+                          {order.products?.length || 0} items | {formatCurrency(order.totalAmount)}
                         </span>
                       </div>
                       {order.requestStatus === 'seller_accepted' && (
-                        <Button size="sm" style={{ marginTop: '8px', backgroundColor: '#10b981', width: '100%' }}>
-                          <CheckCircle size={16} style={{ marginRight: '6px' }} />
+                        <Button size="sm" className="preorder-confirm-btn">
+                          <CheckCircle size={16} className="mr-1.5" />
                           Confirm & Pay
                         </Button>
                       )}
@@ -290,16 +274,16 @@ function Orders() {
                       <div className="order-header-left">
                         <div className="order-id-section">
                           <span className="order-label">{t('orders.order')}</span>
-                          {isPreorder && <span style={{ backgroundColor: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', marginLeft: '4px' }}>PREORDER</span>}
+                          {isPreorder && <span className="preorder-pill">PREORDER</span>}
                           <span className="order-id">#{orderId.slice(-8).toUpperCase()}</span>
                         </div>
                         <div className="order-date">
                           <Calendar size={14} />
                           <span>{formatDate(order.createdAt)}</span>
                         </div>
-                        <div className="order-type-chip pickup" style={{ background: '#ecfdf5', color: '#065f46' }}>
-                          <Store size={13} />
-                          <span>Pickup</span>
+                        <div className={`order-type-chip ${isPickup ? 'pickup' : 'delivery'}`}>
+                          <OrderTypeIcon size={13} />
+                          <span>{orderTypeLabel}</span>
                         </div>
                       </div>
                       <div className="order-header-right">
@@ -341,7 +325,7 @@ function Orders() {
                                       }}
                                     />
                                   ) : (
-                                    <div className="placeholder">📷</div>
+                                    <div className="placeholder">No image</div>
                                   )}
                                 </div>
                                 <div className="item-details">
@@ -358,7 +342,7 @@ function Orders() {
                                       ))}
                                     </div>
                                   )}
-                                  <p>Qty: {item.quantity} × {formatCurrency(item.price)}</p>
+                                  <p>Qty: {item.quantity} x {formatCurrency(item.price)}</p>
                                 </div>
                                 <div className="item-total">{formatCurrency(item.quantity * item.price)}</div>
                               </div>
@@ -398,11 +382,11 @@ function Orders() {
 
                             {/* Pickup Info */}
                             <div className="meta-row">
-                              <span className="meta-label">Pickup</span>
-                              <span className="meta-value order-type-meta pickup">
-                                <Store size={12} />
-                                Pickup at Store
-                                {order.preorderTime && ` — ${order.preorderTime}`}
+                              <span className="meta-label">Order Type</span>
+                              <span className={`meta-value order-type-meta ${isPickup ? 'pickup' : 'delivery'}`}>
+                                <OrderTypeIcon size={12} />
+                                {isPickup ? 'Pickup at Store' : 'Delivery'}
+                                {isPickup && order.preorderTime && ` - ${order.preorderTime}`}
                               </span>
                             </div>
 
@@ -451,7 +435,7 @@ function Orders() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="gap-2 text-red-600 border-red-300 hover:bg-red-50"
+                                  className="gap-2 text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-900/70 dark:hover:bg-red-950/40"
                                   onClick={async (e) => {
                                     e.stopPropagation();
                                     const reportType = window.confirm(
@@ -556,8 +540,10 @@ function Orders() {
           )}
         </div>
       </div>
-    </Layout>
+    </>
   );
 }
 
 export default Orders;
+
+

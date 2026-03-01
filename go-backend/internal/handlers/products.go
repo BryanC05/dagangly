@@ -51,7 +51,15 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 	}
 
 	if search != "" {
-		query["$text"] = bson.M{"$search": search}
+		searchRegex := bson.M{
+			"$regex":   search,
+			"$options": "i",
+		}
+		query["$or"] = []bson.M{
+			{"name": searchRegex},
+			{"description": searchRegex},
+			{"tags": searchRegex},
+		}
 	}
 
 	if minPrice != "" || maxPrice != "" {

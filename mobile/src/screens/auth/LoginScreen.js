@@ -115,7 +115,7 @@ export default function LoginScreen({ navigation }) {
         },
         buttonDisabled: { opacity: 0.7 },
         buttonText: { 
-            color: '#fff', 
+            color: colors.white, 
             fontSize: 15, 
             fontWeight: '700',
             letterSpacing: 0.5,
@@ -197,7 +197,7 @@ export default function LoginScreen({ navigation }) {
                             disabled={loading}
                         >
                             {loading ? (
-                                <ActivityIndicator color="#fff" />
+                                <ActivityIndicator color={colors.white} />
                             ) : (
                                 <Text style={styles.buttonText}>Masuk</Text>
                             )}

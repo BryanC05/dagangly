@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Send, Paperclip, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
-import Layout from '@/components/layout/Layout';
 import './Forum.css';
 
 const categories = [
@@ -72,17 +71,17 @@ function EditThread() {
 
     if (isLoading) {
         return (
-            <Layout>
+            <>
                 <div className="forum-page container py-8 max-w-3xl">
                     <div className="text-center py-12">Loading thread...</div>
                 </div>
-            </Layout>
+            </>
         );
     }
 
     if (!thread) {
         return (
-            <Layout>
+            <>
                 <div className="forum-page container py-8 max-w-3xl">
                     <div className="text-center py-12">
                         <h2 className="text-xl font-bold mb-4">Thread not found</h2>
@@ -91,7 +90,7 @@ function EditThread() {
                         </button>
                     </div>
                 </div>
-            </Layout>
+            </>
         );
     }
 
@@ -99,7 +98,7 @@ function EditThread() {
 
     if (!isAuthor) {
         return (
-            <Layout>
+            <>
                 <div className="forum-page container py-8 max-w-3xl">
                     <div className="text-center py-12">
                         <h2 className="text-xl font-bold mb-4">Not Authorized</h2>
@@ -109,12 +108,12 @@ function EditThread() {
                         </button>
                     </div>
                 </div>
-            </Layout>
+            </>
         );
     }
 
     return (
-        <Layout>
+        <>
             <div className="forum-page new-thread-page container py-8 max-w-3xl">
                 <div className="page-header flex items-center gap-4 mb-8">
                     <button className="btn-back p-2 hover:bg-muted rounded-full" onClick={() => navigate(`/forum/${id}`)}>
@@ -186,7 +185,7 @@ function EditThread() {
                     </div>
                 </form>
             </div>
-        </Layout>
+        </>
     );
 }
 

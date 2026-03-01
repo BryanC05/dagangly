@@ -1,4 +1,3 @@
-import Layout from "@/components/layout/Layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,7 +105,7 @@ const Messages = () => {
     };
 
     return (
-        <Layout>
+        <>
             <div className="container py-4 md:py-8">
                 <div className="flex h-[calc(100vh-12rem)] overflow-hidden rounded-lg border bg-card">
                     {/* Conversations List */}
@@ -293,7 +292,7 @@ const Messages = () => {
                     )}
                 </div>
             </div>
-        </Layout>
+        </>
     );
 };
 

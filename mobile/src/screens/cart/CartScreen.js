@@ -57,7 +57,7 @@ export default function CartScreen({ navigation }) {
         browseBtn: {
             marginTop: 20, backgroundColor: colors.primary, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12,
         },
-        browseBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+        browseBtnText: { color: colors.white, fontWeight: '700', fontSize: 14 },
         // Seller section styles
         sellerSection: {
             backgroundColor: colors.card, borderRadius: 16, marginBottom: 16,
@@ -100,7 +100,7 @@ export default function CartScreen({ navigation }) {
             backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 16,
             alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8,
         },
-        checkoutBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+        checkoutBtnText: { color: colors.white, fontSize: 16, fontWeight: '700' },
         // Modal styles
         modalOverlay: {
             flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end',
@@ -158,7 +158,7 @@ export default function CartScreen({ navigation }) {
             backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 16,
             alignItems: 'center', marginTop: 10,
         },
-        payBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+        payBtnText: { color: colors.white, fontSize: 16, fontWeight: '700' },
         payBtnDisabled: { opacity: 0.6 },
     };
 
@@ -320,7 +320,7 @@ export default function CartScreen({ navigation }) {
                             onPress={() => startCheckout(seller)}
                         >
                             <Text style={styles.checkoutBtnText}>{t.checkout}</Text>
-                            <Ionicons name="arrow-forward" size={18} color="#fff" />
+                            <Ionicons name="arrow-forward" size={18} color={colors.white} />
                         </TouchableOpacity>
                     </View>
                 )}
@@ -437,7 +437,7 @@ export default function CartScreen({ navigation }) {
                                     styles.checkIcon,
                                     { backgroundColor: enableScheduledDelivery ? '#10b981' : colors.border }
                                 ]}>
-                                    <Ionicons name="checkmark" size={16} color="#fff" />
+                                    <Ionicons name="checkmark" size={16} color={colors.white} />
                                 </View>
                             </TouchableOpacity>
 
@@ -570,7 +570,7 @@ export default function CartScreen({ navigation }) {
                                     </View>
                                     {selectedPayment === method.id && (
                                         <View style={styles.checkIcon}>
-                                            <Ionicons name="checkmark" size={16} color="#fff" />
+                                            <Ionicons name="checkmark" size={16} color={colors.white} />
                                         </View>
                                     )}
                                 </TouchableOpacity>

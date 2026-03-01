@@ -62,7 +62,7 @@ export default function ProductCard({ product, onPress }) {
             backgroundColor: colors.card,
             borderWidth: 1,
             borderColor: colors.border,
-            shadowColor: isDarkMode ? '#06b6d4' : '#000',
+            shadowColor: isDarkMode ? '#14b8a6' : '#000',
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: isDarkMode ? 0.15 : 0.08,
             shadowRadius: 8,

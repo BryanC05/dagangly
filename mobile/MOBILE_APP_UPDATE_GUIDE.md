@@ -14,7 +14,7 @@ For Play Store publishing, use:
 
 ```bash
 # 1. Start the backend
-cd go-backend
+cd backend
 go mod download
 go run ./cmd/server
 
@@ -59,7 +59,7 @@ Choose a cloud hosting provider:
 1. Push your project to GitHub
 2. Go to [railway.app](https://railway.app) and sign in with GitHub
 3. Create a new project → "Deploy from GitHub Repo"
-4. Select your repository and point it to the `/go-backend` folder
+4. Select your repository and point it to the `/backend` folder
 5. Add environment variables:
    - `MONGODB_URI` – your MongoDB Atlas connection string
    - `JWT_SECRET` – a secure random string

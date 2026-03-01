@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+﻿import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Star, Heart } from "lucide-react";
@@ -10,7 +10,15 @@ import { resolveImageUrl } from "@/utils/imageUrl";
 const ProductCard = ({ product }) => {
     const productId = product._id || product.id;
     const productImage = resolveImageUrl(product.images?.[0] || product.image);
-    const sellerRating = product.seller?.rating || product.rating || 4.5;
+    const sellerName = product.seller?.businessName || product.seller?.name || (typeof product.seller === 'string' ? 'Store' : null);
+    const productRating = product.rating || 4.5;
+    const reviewCount = product.reviewCount || product.reviews?.length || 0;
+    
+    // Calculate discount if originalPrice exists
+    const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+    const discountPercent = hasDiscount 
+        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) 
+        : 0;
 
     const { isProductSaved, toggleSaveProduct, isLoading } = useSavedProductsStore();
     const { isAuthenticated } = useAuthStore();
@@ -20,7 +28,6 @@ const ProductCard = ({ product }) => {
         e.preventDefault();
         e.stopPropagation();
         if (!isAuthenticated) return;
-        // Only burst hearts when SAVING — not when removing from wishlist
         if (!isSaved) {
             window.dispatchEvent(new CustomEvent('particle-burst', {
                 detail: { type: 'save', x: e.clientX, y: e.clientY },
@@ -29,66 +36,76 @@ const ProductCard = ({ product }) => {
         await toggleSaveProduct(productId);
     };
 
-    const getLocationDisplay = () => {
-        if (!product.seller?.location && !product.location) return 'Nearby';
-        const loc = product.seller?.location || product.location;
-        if (typeof loc === 'string') return loc;
-        return loc.city || loc.address || 'Nearby';
-    };
-
     return (
         <Link to={`/product/${productId}`}>
-            <Card className="group overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
-                <div className="relative aspect-square overflow-hidden bg-muted">
+            <Card className="group overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 bg-[#161b22] border-[#21262d]">
+                <div className="relative aspect-square overflow-hidden bg-[#0d1117]">
                     {productImage ? (
-                        <img
-                            src={productImage}
-                            alt={product.name}
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                        />
+                      <img
+                        src={productImage}
+                        alt={product.name}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.parentElement?.classList.add('bg-[#0d1117]');
+                        }}
+                      />
                     ) : null}
-                    {product.isNew && (
-                        <Badge className="absolute top-2 left-2 bg-accent text-accent-foreground text-sm px-2 py-1">
-                            New
+                    {!productImage && (
+                      <div className="h-full w-full flex items-center justify-center text-gray-500 text-sm">
+                        No image
+                      </div>
+                    )}
+                    
+                    {/* Discount Badge */}
+                    {hasDiscount && (
+                        <Badge className="absolute top-2 left-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded font-medium">
+                            -{discountPercent}%
                         </Badge>
                     )}
-                    {isAuthenticated && (
-                        <Button
-                            variant="ghost"
-                            size="default"
-                            className={`absolute top-2 right-2 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full h-10 w-10 p-0 ${isSaved ? 'text-red-500' : 'text-gray-600'}`}
-                            onClick={handleSaveClick}
-                            disabled={isLoading}
-                            title="Save product"
-                        >
-                            <Heart
-                                className={`h-5 w-5 transition-colors ${isSaved ? 'fill-red-500 text-red-500' : ''}`}
-                            />
-                        </Button>
-                    )}
+
+                    {/* Wishlist Button */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`absolute top-2 right-2 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full h-7 w-7 p-0 border-0 ${isSaved ? 'text-red-500' : 'text-white'}`}
+                        onClick={handleSaveClick}
+                        disabled={isLoading}
+                        title="Save product"
+                    >
+                        <Heart
+                            className={`h-3.5 w-3.5 transition-colors ${isSaved ? 'fill-red-500 text-red-500' : ''}`}
+                        />
+                    </Button>
                 </div>
-                <CardContent className="p-4">
-                    {product.category && (
-                        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                            {product.category}
-                        </p>
+                
+                <CardContent className="p-3">
+                    {/* Seller Name */}
+                    {sellerName && (
+                        <p className="text-xs text-gray-500 mb-1">{sellerName}</p>
                     )}
-                    <h3 className="font-semibold text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                    
+                    {/* Product Name */}
+                    <h3 className="font-medium text-sm text-white line-clamp-2 mb-2 min-h-[40px]">
                         {product.name}
                     </h3>
-                    <p className="text-xl font-bold text-primary mt-2">
-                        Rp{product.price?.toLocaleString('id-ID') || product.price}
-                    </p>
-                    <div className="mt-3 pt-3 border-t flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            <span className="truncate max-w-[100px]">{getLocationDisplay()}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-warning text-warning" />
-                            <span className="font-medium">{sellerRating?.toFixed(1) || '4.5'}</span>
-                        </div>
+                    
+                    {/* Price */}
+                    <div className="mb-2 flex items-center gap-2">
+                        <p className="text-primary font-bold text-sm">
+                            Rp {product.price?.toLocaleString('id-ID')}
+                        </p>
+                        {hasDiscount && (
+                            <p className="text-xs text-gray-500 line-through">
+                                Rp {product.originalPrice?.toLocaleString('id-ID')}
+                            </p>
+                        )}
+                    </div>
+                    
+                    {/* Rating */}
+                    <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-cyan-400 text-cyan-400" />
+                        <span className="text-xs text-gray-400">{productRating.toFixed(1)} ({reviewCount})</span>
                     </div>
                 </CardContent>
             </Card>

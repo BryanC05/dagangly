@@ -1,10 +1,9 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Phone } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
 import { useTranslation } from '@/hooks/useTranslation';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -18,7 +17,6 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [loginMethod, setLoginMethod] = useState('email');
 
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
@@ -31,17 +29,25 @@ function Login() {
 
     try {
       const response = await api.post('/auth/login', formData);
-      setAuth(response.data.user, response.data.token);
+      const token = response?.data?.token;
+      const user = response?.data?.user;
+
+      // Login must be JWT-based; reject malformed token payloads.
+      if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
+        throw new Error('Invalid authentication token received');
+      }
+
+      setAuth(user, token);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      setError(err.response?.data?.message || err.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Layout>
+    <>
       <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1 text-center">
@@ -59,42 +65,17 @@ function Login() {
               </div>
             )}
 
-            <div className="flex gap-2 mb-6">
-              <Button
-                type="button"
-                variant={loginMethod === 'email' ? 'default' : 'outline'}
-                className="flex-1 h-11 gap-2"
-                onClick={() => setLoginMethod('email')}
-              >
-                <Mail className="h-5 w-5" />
-                Email
-              </Button>
-              <Button
-                type="button"
-                variant={loginMethod === 'phone' ? 'default' : 'outline'}
-                className="flex-1 h-11 gap-2"
-                onClick={() => setLoginMethod('phone')}
-              >
-                <Phone className="h-5 w-5" />
-                Phone
-              </Button>
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-base">
-                  {loginMethod === 'email' ? t('auth.email') : 'Phone Number'}
+                  {t('auth.email')}
                 </Label>
                 <div className="relative">
-                  {loginMethod === 'email' ? (
-                    <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                  ) : (
-                    <Phone className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                  )}
+                  <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="email"
-                    type={loginMethod === 'email' ? 'email' : 'tel'}
-                    placeholder={loginMethod === 'email' ? 'your@email.com' : '08xxxxxxxxxx'}
+                    type="email"
+                    placeholder="your@email.com"
                     className="pl-12 h-12 text-base"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -102,7 +83,7 @@ function Login() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-base">
                   {t('auth.password')}
@@ -144,7 +125,7 @@ function Login() {
           </CardFooter>
         </Card>
       </div>
-    </Layout>
+    </>
   );
 }
 

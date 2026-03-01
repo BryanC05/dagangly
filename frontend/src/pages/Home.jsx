@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +18,28 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
+
+const normalizeProductsPayload = (payload) => {
+  if (Array.isArray(payload)) {
+    return {
+      products: payload,
+      pagination: { total: payload.length },
+    };
+  }
+
+  if (Array.isArray(payload?.products)) {
+    return payload;
+  }
+
+  if (Array.isArray(payload?.data)) {
+    return {
+      products: payload.data,
+      pagination: payload.pagination || { total: payload.data.length },
+    };
+  }
+
+  return { products: [], pagination: { total: 0 } };
+};
 
 const categoryDefs = [
   { id: "food", key: "food", icon: "🍜", color: "bg-orange-100" },
@@ -50,10 +71,12 @@ const Home = () => {
     const fetchFeaturedProducts = async () => {
       try {
         const response = await api.get('/products?limit=4&sort=newest');
-        setFeaturedProducts(response.data.products || []);
-        setStats(prev => ({ ...prev, products: response.data.pagination?.total || 0 }));
+        const normalized = normalizeProductsPayload(response.data);
+        setFeaturedProducts(normalized.products || []);
+        setStats(prev => ({ ...prev, products: normalized.pagination?.total || 0 }));
       } catch (error) {
         console.error('Failed to fetch featured products:', error);
+        setFeaturedProducts([]);
       }
     };
 
@@ -86,122 +109,93 @@ const Home = () => {
   ];
 
   return (
-    <Layout>
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5">
-        <div className="container py-12 md:py-20">
+    <>
+      <section className="relative overflow-hidden bg-[#0a0f1c]">
+        <div className="container py-16 md:py-24">
           <OnboardingPrompt />
           
-          <div className="max-w-3xl mx-auto text-center mb-8">
-            <Badge variant="secondary" className="mb-4 text-base px-4 py-1">
-              {t('home.heroBadge')}
+          <div className="max-w-3xl mx-auto text-center">
+            <Badge variant="outline" className="mb-6 px-4 py-1.5 text-sm border-primary/30 text-primary bg-primary/10 rounded-full inline-flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              MARKETPLACE UMKM INDONESIA
             </Badge>
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
-              {t('home.heroHeading')}{" "}
-              <span className="text-primary">{t('home.heroHeadingAccent')}</span>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-4">
+              Temukan Produk{" "}
+              <span className="text-primary">Lokal Terbaik</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8">
-              {t('home.heroDescription')}
+            <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-xl mx-auto">
+              Hubungkan langsung dengan penjual UMKM di sekitarmu. Belanja mudah, dukung ekonomi lokal.
             </p>
 
             <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-8">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
                 <Input
                   type="search"
-                  placeholder={t('nav.searchPlaceholder')}
+                  placeholder="Cari produk, toko, atau kategori..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-14 text-lg bg-card border-2 shadow-lg"
+                  className="pl-12 h-14 text-base bg-[#1a1f2e] border-[#2a3040] text-white placeholder:text-gray-500 rounded-lg"
                 />
-                <Button type="submit" size="lg" className="absolute right-2 top-1/2 -translate-y-1/2 h-10 gap-2">
-                  <Search className="h-5 w-5" />
-                  <span className="hidden sm:inline">{t('common.search')}</span>
+                <Button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-6 bg-primary hover:bg-primary/90 text-primary-foreground">
+                  Cari
                 </Button>
               </div>
             </form>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/products">
-                <Button size="lg" className="gap-2 w-full sm:w-auto h-12 text-base">
-                  <ShoppingBag className="h-5 w-5" />
-                  {t('home.browseProducts')}
-                </Button>
-              </Link>
-              <Link to="/nearby">
-                <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto h-12 text-base">
-                  <MapPin className="h-5 w-5" />
-                  {t('home.findNearby')}
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4 max-w-2xl mx-auto">
-            {[
-              { label: t('home.activeSellers'), value: stats.sellers.toString(), icon: Users },
-              { label: t('home.productsListed'), value: stats.products.toString(), icon: ShoppingBag },
-            ].map((stat) => (
-              <Card key={stat.label} className="text-center w-36">
-                <CardContent className="pt-4 pb-4">
-                  <stat.icon className="h-7 w-7 mx-auto mb-2 text-primary" />
-                  <p className="text-xl md:text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </section>
 
-      {categoryDefs.filter((cat) => (categoryCounts[cat.id] || 0) > 0).length > 0 && (
-        <section className="py-12 bg-card">
-          <div className="container">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold">{t('home.shopByCategory')}</h2>
-                <p className="text-muted-foreground mt-1">{t('home.findProductsMatch')}</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap justify-center gap-3">
-              {categoryDefs
-                .filter((category) => (categoryCounts[category.id] || 0) > 0)
-                .map((category) => (
-                  <Link key={category.id} to={`/products?category=${category.id}`}>
-                    <Card className="text-center hover:shadow-md hover:border-primary/30 transition-all cursor-pointer w-28">
-                      <CardContent className="pt-4 pb-4 bg-card rounded-lg m-1">
-                        <span className="text-3xl md:text-4xl mb-2 block">{category.icon}</span>
-                        <h3 className="font-semibold text-sm text-foreground">{t(`categories.${category.key}`)}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">{categoryCounts[category.id]}</p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      <section className="py-12">
+      <section className="py-12 bg-[#0d1117]">
         <div className="container">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold">{t('home.featuredProducts')}</h2>
-              <p className="text-muted-foreground mt-1">{t('home.handpickedItems')}</p>
-            </div>
-            <Link to="/products">
-              <Button variant="ghost" size="lg" className="gap-2">
-                {t('home.viewAll')} <ArrowRight className="h-5 w-5" />
-              </Button>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold text-white">Kategori</h2>
+            <Link to="/products" className="text-primary text-sm hover:underline">
+              Lihat semua →
             </Link>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+            {[
+              { id: "food", name: "Makanan", icon: "🍜" },
+              { id: "fashion", name: "Fashion", icon: "👕" },
+              { id: "handicrafts", name: "Kerajinan", icon: "🎨" },
+              { id: "beauty", name: "Kecantikan", icon: "💄" },
+              { id: "electronics", name: "Elektronik", icon: "📱" },
+              { id: "home", name: "Rumah Tangga", icon: "🏠" },
+              { id: "agriculture", name: "Pertanian", icon: "🌾" },
+              { id: "services", name: "Jasa", icon: "🛠️" },
+            ].map((category) => {
+              const count = categoryCounts[category.id] || 0;
+              return (
+                <Link key={category.id} to={`/products?category=${category.id}`}>
+                  <div className="bg-[#161b22] border border-[#2a3040] rounded-xl p-4 text-center hover:bg-[#1c2128] hover:border-[#3a4050] transition-all">
+                    <span className="text-3xl mb-3 block">{category.icon}</span>
+                    <p className="text-sm text-white font-medium mb-1">{category.name}</p>
+                    <p className="text-xs text-gray-500">{count} produk</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12 bg-[#0d1117]">
+        <div className="container">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold text-white">Produk Unggulan</h2>
+            <Link to="/products" className="text-primary text-sm hover:underline">
+              Lihat semua →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {featuredProducts.length > 0 ? (
               featuredProducts.map((product) => (
                 <ProductCard key={product._id || product.id} product={product} />
               ))
             ) : (
-              <p className="text-muted-foreground col-span-full text-center py-8">
-                {t('common.loading')}
+              <p className="text-gray-500 col-span-full text-center py-8">
+                Memuat produk...
               </p>
             )}
           </div>
@@ -252,8 +246,7 @@ const Home = () => {
           </div>
         </div>
       </section>
-    </Layout>
+    </>
   );
 };
-
 export default Home;

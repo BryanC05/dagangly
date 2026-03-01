@@ -1,6 +1,32 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const parseTokenPayload = (token) => {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+
+  try {
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+};
+
+const isValidJWT = (token) => {
+  const payload = parseTokenPayload(token);
+  if (!payload) return false;
+  if (!payload.exp) return false;
+  return payload.exp * 1000 > Date.now();
+};
+
 const normalizeUser = (user) => {
   if (!user || typeof user !== 'object') {
     return user ?? null;
@@ -22,6 +48,11 @@ export const useAuthStore = create(
       isAuthenticated: false,
 
       setAuth: (user, token) => {
+        if (!isValidJWT(token)) {
+          set({ user: null, token: null, isAuthenticated: false });
+          localStorage.removeItem('token');
+          return;
+        }
         set({ user: normalizeUser(user), token, isAuthenticated: true });
         localStorage.setItem('token', token);
       },
@@ -38,26 +69,10 @@ export const useAuthStore = create(
 
       initializeAuth: () => {
         const token = localStorage.getItem('token');
-        if (token) {
-          try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(
-              atob(base64)
-                .split('')
-                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                .join('')
-            );
-            const payload = JSON.parse(jsonPayload);
-
-            if (payload.exp * 1000 > Date.now()) {
-              set({ token, isAuthenticated: true });
-            } else {
-              localStorage.removeItem('token');
-            }
-          } catch {
-            localStorage.removeItem('token');
-          }
+        if (isValidJWT(token)) {
+          set({ token, isAuthenticated: true });
+        } else if (token) {
+          localStorage.removeItem('token');
         }
       },
     }),

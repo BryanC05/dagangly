@@ -1,98 +1,23 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-import { 
-  ArrowLeft, Navigation, Phone, User, Clock, MapPin, 
-  Store, Package, CheckCircle, RefreshCw 
+import {
+  ArrowLeft, Navigation, Phone, User, Clock, MapPin,
+  Store, Package, CheckCircle, RefreshCw
 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import { useAuthStore } from '../store/authStore';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { DEFAULT_LOCATION } from '@/utils/constants';
+
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+import { storeMarkerIcon as storeIcon, deliveryMarkerIcon as deliveryIcon, driverMarkerIcon as driverIcon } from '@/utils/leafletSetup';
+
 const isNotFoundError = (error) => error?.response?.status === 404;
-
-// Custom icons
-const driverIcon = L.divIcon({
-  className: 'custom-driver-icon',
-  html: `
-    <div style="
-      background-color: #22c55e;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    ">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
-        <circle cx="7" cy="17" r="2"/>
-        <circle cx="17" cy="17" r="2"/>
-      </svg>
-    </div>
-  `,
-  iconSize: [40, 40],
-  iconAnchor: [20, 20]
-});
-
-const destinationIcon = L.divIcon({
-  className: 'custom-destination-icon',
-  html: `
-    <div style="
-      background-color: #3b82f6;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    ">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-        <circle cx="12" cy="10" r="3"/>
-      </svg>
-    </div>
-  `,
-  iconSize: [32, 32],
-  iconAnchor: [16, 32]
-});
-
-const storeIcon = L.divIcon({
-  className: 'custom-store-icon',
-  html: `
-    <div style="
-      background-color: #f59e0b;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    ">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
-        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-        <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/>
-        <path d="M2 7h20"/>
-        <path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 15.5 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 11.5 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 7.5 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/>
-      </svg>
-    </div>
-  `,
-  iconSize: [32, 32],
-  iconAnchor: [16, 32]
-});
 
 const statusConfig = {
   pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
@@ -109,6 +34,17 @@ export default function TrackingPage() {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [mapError, setMapError] = useState(null);
+
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
+  const storeMarkerRef = useRef(null);
+  const deliveryMarkerRef = useRef(null);
+  const driverMarkerRef = useRef(null);
+  const routePolylineRef = useRef(null);
+  const isInitRef = useRef(false);
+
+  const defaultCenter = DEFAULT_LOCATION.Jakarta;
 
   // Fetch order details
   const {
@@ -129,7 +65,7 @@ export default function TrackingPage() {
     },
     retryOnMount: false,
     refetchOnMount: false,
-    refetchInterval: (query) => (query.state.data ? 30000 : false), // Refetch every 30 seconds only when order exists
+    refetchInterval: (query) => (query.state.data ? 30000 : false),
   });
 
   // Fetch driver location (buyer only)
@@ -142,38 +78,36 @@ export default function TrackingPage() {
     },
     enabled: !!orderId && order?.deliveryType === 'delivery' && order?.status !== 'delivered' && order?.status !== 'cancelled',
     retry: 1,
-    refetchInterval: 10000, // Poll every 10 seconds
+    refetchInterval: 10000,
   });
 
-  // Get coordinates (lat, lng)
+  // Get coordinates
   const storeLocation = order?.seller?.location?.coordinates
-    ? [order.seller.location.coordinates[1], order.seller.location.coordinates[0]]
+    ? { lat: order.seller.location.coordinates[1], lng: order.seller.location.coordinates[0] }
     : null;
   const deliveryLocation = order?.deliveryAddress?.coordinates
-    ? [order.deliveryAddress.coordinates[1], order.deliveryAddress.coordinates[0]]
+    ? { lat: order.deliveryAddress.coordinates[1], lng: order.deliveryAddress.coordinates[0] }
     : null;
   const driverLoc = driverLocation
-    ? [driverLocation.latitude, driverLocation.longitude]
+    ? { lat: driverLocation.latitude, lng: driverLocation.longitude }
     : null;
   const routeOrigin = driverLoc || storeLocation;
 
+  // Fetch route data
   const { data: routeData } = useQuery({
     queryKey: [
-      'deliveryRoute',
-      orderId,
-      routeOrigin?.[0],
-      routeOrigin?.[1],
-      deliveryLocation?.[0],
-      deliveryLocation?.[1],
+      'deliveryRoute', orderId,
+      routeOrigin?.lat, routeOrigin?.lng,
+      deliveryLocation?.lat, deliveryLocation?.lng,
       order?.status,
     ],
     queryFn: async () => {
       const response = await api.get('/navigation/route', {
         params: {
-          originLat: routeOrigin[0],
-          originLng: routeOrigin[1],
-          destinationLat: deliveryLocation[0],
-          destinationLng: deliveryLocation[1],
+          originLat: routeOrigin.lat,
+          originLng: routeOrigin.lng,
+          destinationLat: deliveryLocation.lat,
+          destinationLng: deliveryLocation.lng,
           profile: 'driving',
         },
       });
@@ -209,39 +143,136 @@ export default function TrackingPage() {
   // Auto-update location for seller
   useEffect(() => {
     if (!isSeller || order?.status === 'delivered') return;
-
-    // Update immediately
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(updateLocation);
     }
-
-    // Update every 15 seconds
     const interval = setInterval(() => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(updateLocation);
       }
     }, 15000);
-
     return () => clearInterval(interval);
   }, [isSeller, order?.status, updateLocation]);
 
+  // Initialize Leaflet map
+  useEffect(() => {
+    const el = mapContainerRef.current;
+    if (!el || mapRef.current || isInitRef.current) return;
+    isInitRef.current = true;
+
+    try {
+      let center = [defaultCenter.lat, defaultCenter.lng];
+      if (driverLoc) center = [driverLoc.lat, driverLoc.lng];
+      else if (deliveryLocation) center = [deliveryLocation.lat, deliveryLocation.lng];
+      else if (storeLocation) center = [storeLocation.lat, storeLocation.lng];
+
+      const map = L.map(el).setView(center, 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+
+      mapRef.current = map;
+      setTimeout(() => map.invalidateSize(), 300);
+    } catch (err) {
+      console.error('Error initializing map:', err);
+      setMapError(err.message || 'Failed to load map');
+    }
+
+    return () => {
+      isInitRef.current = false;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+      storeMarkerRef.current = null;
+      deliveryMarkerRef.current = null;
+      driverMarkerRef.current = null;
+      routePolylineRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update markers when locations change
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    // Store marker
+    if (storeLocation) {
+      if (!storeMarkerRef.current) {
+        storeMarkerRef.current = L.marker([storeLocation.lat, storeLocation.lng], { icon: storeIcon })
+          .addTo(mapRef.current)
+          .bindPopup(`<b>${order?.seller?.businessName || order?.seller?.name || 'Store'}</b><br>Store Location`);
+      } else {
+        storeMarkerRef.current.setLatLng([storeLocation.lat, storeLocation.lng]);
+      }
+    }
+
+    // Delivery marker
+    if (deliveryLocation) {
+      if (!deliveryMarkerRef.current) {
+        deliveryMarkerRef.current = L.marker([deliveryLocation.lat, deliveryLocation.lng], { icon: deliveryIcon })
+          .addTo(mapRef.current)
+          .bindPopup(`<b>Delivery Address</b><br>${order?.deliveryAddress?.address || ''}`);
+      } else {
+        deliveryMarkerRef.current.setLatLng([deliveryLocation.lat, deliveryLocation.lng]);
+      }
+    }
+
+    // Driver marker
+    if (driverLoc) {
+      if (!driverMarkerRef.current) {
+        driverMarkerRef.current = L.marker([driverLoc.lat, driverLoc.lng], { icon: driverIcon })
+          .addTo(mapRef.current)
+          .bindPopup(`<b>Driver Location</b><br>Last updated: ${lastUpdated?.toLocaleTimeString() || 'N/A'}`);
+      } else {
+        driverMarkerRef.current.setLatLng([driverLoc.lat, driverLoc.lng]);
+        driverMarkerRef.current.setPopupContent(`<b>Driver Location</b><br>Last updated: ${lastUpdated?.toLocaleTimeString() || 'N/A'}`);
+      }
+      mapRef.current.setView([driverLoc.lat, driverLoc.lng]);
+    }
+
+    // Draw route
+    if (routeOrigin && deliveryLocation && routeData?.path) {
+      if (routePolylineRef.current) {
+        routePolylineRef.current.remove();
+      }
+      const path = routeData.path.map(point => [point.lat, point.lng]);
+      routePolylineRef.current = L.polyline(path, {
+        color: '#22c55e',
+        weight: 4,
+        opacity: 0.8,
+      }).addTo(mapRef.current);
+
+      const bounds = L.latLngBounds(path);
+      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+    } else if (storeLocation && deliveryLocation) {
+      // Fit bounds to show store and delivery
+      const bounds = L.latLngBounds([
+        [storeLocation.lat, storeLocation.lng],
+        [deliveryLocation.lat, deliveryLocation.lng],
+      ]);
+      if (driverLoc) bounds.extend([driverLoc.lat, driverLoc.lng]);
+      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [storeLocation, deliveryLocation, driverLoc, routeData, order, lastUpdated, routeOrigin]);
+
   if (orderLoading) {
     return (
-      <Layout>
+      <>
         <div className="container py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-secondary rounded w-1/4"></div>
             <div className="h-[500px] bg-secondary rounded"></div>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   if (!order && !orderLoading) {
     const notFound = isNotFoundError(orderQueryError);
     return (
-      <Layout>
+      <>
         <div className="container py-8 text-center">
           <h1 className="text-2xl font-bold mb-4">
             {notFound ? 'Order Not Found' : 'Failed to Load Order'}
@@ -255,15 +286,12 @@ export default function TrackingPage() {
             <Link to="/orders">Back to Orders</Link>
           </Button>
         </div>
-      </Layout>
+      </>
     );
   }
 
   const status = statusConfig[order.status] || statusConfig.pending;
   const isDelivery = order.deliveryType === 'delivery';
-  const routePositions = Array.isArray(routeData?.path) && routeData.path.length > 1
-    ? routeData.path.map((point) => [point.lat, point.lng])
-    : (routeOrigin && deliveryLocation ? [routeOrigin, deliveryLocation] : []);
   const routeDistanceKm = routeData?.distanceMeters
     ? routeData.distanceMeters / 1000
     : null;
@@ -271,18 +299,8 @@ export default function TrackingPage() {
     ? Math.round(routeData.durationSeconds / 60)
     : null;
 
-  // Calculate center for map
-  let mapCenter = [-6.2088, 106.8456]; // Default Jakarta
-  if (driverLoc) {
-    mapCenter = driverLoc;
-  } else if (deliveryLocation) {
-    mapCenter = deliveryLocation;
-  } else if (storeLocation) {
-    mapCenter = storeLocation;
-  }
-
   return (
-    <Layout>
+    <>
       <div className="container py-4">
         {/* Header */}
         <div className="flex items-center gap-4 mb-4">
@@ -303,63 +321,20 @@ export default function TrackingPage() {
           <div className="lg:col-span-2">
             <Card className="h-[600px]">
               <CardContent className="p-0 h-full">
-                <MapContainer
-                  center={mapCenter}
-                  zoom={14}
-                  style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                {mapError ? (
+                  <div className="h-full flex items-center justify-center">
+                    <div className="text-center text-muted-foreground p-4">
+                      <Navigation className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Unable to load map</p>
+                      <p className="text-xs text-red-500 mt-1">{mapError}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    ref={mapContainerRef}
+                    style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
                   />
-                  
-                  {/* Store Marker */}
-                  {storeLocation && (
-                    <Marker position={storeLocation} icon={storeIcon}>
-                      <Popup>
-                        <div className="text-sm">
-                          <p className="font-semibold">{order.seller?.businessName || order.seller?.name}</p>
-                          <p className="text-muted-foreground">Store Location</p>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  )}
-
-                  {/* Delivery Location Marker */}
-                  {deliveryLocation && (
-                    <Marker position={deliveryLocation} icon={destinationIcon}>
-                      <Popup>
-                        <div className="text-sm">
-                          <p className="font-semibold">Delivery Address</p>
-                          <p className="text-muted-foreground">{order.deliveryAddress?.address}</p>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  )}
-
-                  {/* Driver Marker */}
-                  {driverLoc && (
-                    <Marker position={driverLoc} icon={driverIcon}>
-                      <Popup>
-                        <div className="text-sm">
-                          <p className="font-semibold">Driver Location</p>
-                          <p className="text-muted-foreground">
-                            Last updated: {lastUpdated?.toLocaleTimeString()}
-                          </p>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  )}
-
-                  {/* Route Line */}
-                  {routePositions.length > 1 && (
-                    <Polyline 
-                      positions={routePositions}
-                      color="#22c55e" 
-                      weight={4} 
-                    />
-                  )}
-                </MapContainer>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -427,9 +402,9 @@ export default function TrackingPage() {
                       </div>
                     </div>
                   )}
-                  
+
                   {order.driverPhone && (
-                    <a 
+                    <a
                       href={`tel:${order.driverPhone}`}
                       className="flex items-center gap-2 text-primary hover:underline"
                     >
@@ -475,8 +450,8 @@ export default function TrackingPage() {
                   <CardTitle className="text-base">Driver Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     onClick={() => {
                       if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(updateLocation);
@@ -507,14 +482,13 @@ export default function TrackingPage() {
                     const isActive = order.status === step;
                     const isPast = ['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered']
                       .indexOf(order.status) >= index;
-                    
+
                     if (!isDelivery && step === 'out_for_delivery') return null;
-                    
+
                     return (
                       <div key={step} className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                          isPast ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                        } ${isActive ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${isPast ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                          } ${isActive ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
                           {isPast ? '✓' : index + 1}
                         </div>
                         <span className={`text-sm ${isActive ? 'font-medium' : isPast ? '' : 'text-muted-foreground'}`}>
@@ -529,6 +503,6 @@ export default function TrackingPage() {
           </div>
         </div>
       </div>
-    </Layout>
+    </>
   );
 }

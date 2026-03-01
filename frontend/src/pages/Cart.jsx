@@ -5,7 +5,6 @@ import { Trash2, ArrowRight, ArrowLeft, ShoppingBag, MapPin, Plus, Minus, Credit
 import { useCartStore, useAuthStore } from '../store/authStore';
 import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -511,7 +510,7 @@ function Cart() {
 
     if (checkoutSeller) {
         return (
-            <Layout>
+            <>
                 <div className="container py-8">
                     <div className="max-w-2xl mx-auto">
                         <Button variant="ghost" className="mb-4 gap-2" onClick={cancelCheckout}>
@@ -557,12 +556,12 @@ function Cart() {
                         </div>
                     </div>
                 </div>
-            </Layout>
+            </>
         );
     }
 
     return (
-        <Layout>
+        <>
             <div className="container py-8">
                 <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
                     <ShoppingBag className="h-7 w-7" />
@@ -699,7 +698,7 @@ function Cart() {
                     </div>
                 )}
             </div>
-        </Layout>
+        </>
     );
 }
 

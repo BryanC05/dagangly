@@ -93,7 +93,7 @@ export default function AdminMembershipScreen() {
         date: { fontSize: 12, color: colors.textTertiary, marginTop: 4 },
         actions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
         viewProofBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
-        viewProofText: { color: '#06b6d4', fontSize: 14 },
+        viewProofText: { color: '#14b8a6', fontSize: 14 },
         actionBtns: { flexDirection: 'row', gap: 8 },
         rejectBtn: {
             width: 36, height: 36, borderRadius: 18,
@@ -104,14 +104,14 @@ export default function AdminMembershipScreen() {
             backgroundColor: '#22c55e', justifyContent: 'center', alignItems: 'center',
         },
         empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
-        emptyText: { fontSize: 16, color: '#9ca3af', marginTop: 12 },
+        emptyText: { fontSize: 16, color: colors.textTertiary, marginTop: 12 },
     });
 
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
                 <View style={styles.avatar}>
-                    <Ionicons name="person" size={24} color="#06b6d4" />
+                    <Ionicons name="person" size={24} color="#14b8a6" />
                 </View>
                 <View style={styles.info}>
                     <Text style={styles.name}>{item.name}</Text>
@@ -135,7 +135,7 @@ export default function AdminMembershipScreen() {
                             ]);
                         }}
                     >
-                        <Ionicons name="image" size={16} color="#06b6d4" />
+                        <Ionicons name="image" size={16} color="#14b8a6" />
                         <Text style={styles.viewProofText}>View Proof</Text>
                     </TouchableOpacity>
                 )}
@@ -178,7 +178,7 @@ export default function AdminMembershipScreen() {
                     keyExtractor={(item) => item._id}
                     contentContainerStyle={styles.list}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#06b6d4" />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#14b8a6" />
                     }
                 />
             )}

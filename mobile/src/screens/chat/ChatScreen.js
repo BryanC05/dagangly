@@ -129,19 +129,19 @@ export default function ChatScreen({ route, navigation }) {
     if (loading) return <LoadingSpinner />;
 
     const styles = StyleSheet.create({
-        container: { flex: 1, backgroundColor: '#f8fafc' },
+        container: { flex: 1, backgroundColor: colors.background },
         messageList: { padding: 16, paddingBottom: 8 },
         msgRow: { marginBottom: 8, alignItems: 'flex-start' },
         msgRowMe: { alignItems: 'flex-end' },
         bubble: { maxWidth: '78%', padding: 12, borderRadius: 16 },
-        bubbleMe: { backgroundColor: '#06b6d4', borderBottomRightRadius: 4 },
+        bubbleMe: { backgroundColor: colors.primary, borderBottomRightRadius: 4 },
         bubbleOther: {
             backgroundColor: colors.card, borderBottomLeftRadius: 4,
             shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.05, shadowRadius: 2, elevation: 1,
         },
         msgText: { fontSize: 14, color: colors.text, lineHeight: 20 },
-        msgTextMe: { color: '#fff' },
+        msgTextMe: { color: colors.white },
         msgTime: { fontSize: 10, color: colors.textTertiary, marginTop: 4, alignSelf: 'flex-end' },
         msgTimeMe: { color: 'rgba(255,255,255,0.7)' },
         empty: { alignItems: 'center', justifyContent: 'center', paddingTop: 40, transform: [{ scaleY: -1 }] },
@@ -155,10 +155,10 @@ export default function ChatScreen({ route, navigation }) {
             paddingVertical: 10, fontSize: 14, color: colors.text, maxHeight: 100,
         },
         sendBtn: {
-            width: 42, height: 42, borderRadius: 21, backgroundColor: '#06b6d4',
+            width: 42, height: 42, borderRadius: 21, backgroundColor: colors.primary,
             justifyContent: 'center', alignItems: 'center',
         },
-        sendBtnDisabled: { backgroundColor: '#d1d5db' },
+        sendBtnDisabled: { backgroundColor: colors.textTertiary },
     });
 
     return (
