@@ -23,7 +23,13 @@ func main() {
 		}
 	}
 
-	cfg := config.Load()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Configuration error: %v", err)
+	}
+
+	// Log connection info (without exposing credentials)
+	log.Printf("Connecting to MongoDB (NodeEnv: %s)...", cfg.NodeEnv)
 
 	err = database.Connect(cfg.MongoDBURI, "msme_marketplace")
 	if err != nil {

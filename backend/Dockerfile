@@ -7,7 +7,8 @@ RUN go mod download
 
 COPY . .
 RUN mkdir -p uploads/logos uploads/products uploads/forum
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server ./cmd/server
+# Force rebuild to ensure latest changes are included
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o server ./cmd/server
 
 FROM alpine:3.19
 

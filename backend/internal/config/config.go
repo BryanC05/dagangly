@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 )
@@ -20,12 +21,42 @@ type Config struct {
 	ProductEnhanceLimit  int
 }
 
-func Load() *Config {
+func Load() (*Config, error) {
+	mongoURI := getEnv("MONGODB_URI", "")
+	if mongoURI == "" {
+		// Check for common alternative env var names used by different platforms
+		mongoURI = getEnv("MONGODB_URL", "") // Railway, Render often use this
+	}
+	if mongoURI == "" {
+		mongoURI = getEnv("MONGO_URL", "") // Some platforms use this
+	}
+	if mongoURI == "" {
+		mongoURI = getEnv("DATABASE_URL", "") // Heroku, etc.
+	}
+
+	// In production, require MONGODB_URI to be set
+	nodeEnv := getEnv("NODE_ENV", "development")
+	if mongoURI == "" {
+		if nodeEnv == "production" {
+			return nil, fmt.Errorf("MONGODB_URI environment variable is required in production")
+		}
+		// Default for development only
+		mongoURI = "mongodb://localhost:27017/msme_marketplace"
+	}
+
+	jwtSecret := getEnv("JWT_SECRET", "")
+	if jwtSecret == "" && nodeEnv == "production" {
+		return nil, fmt.Errorf("JWT_SECRET environment variable is required in production")
+	}
+	if jwtSecret == "" {
+		jwtSecret = "your-secret-key"
+	}
+
 	return &Config{
 		Port:                 getEnv("PORT", "5000"),
-		MongoDBURI:           getEnv("MONGODB_URI", "mongodb://localhost:27017/msme_marketplace"),
-		JWTSecret:            getEnv("JWT_SECRET", "your-secret-key"),
-		NodeEnv:              getEnv("NODE_ENV", "development"),
+		MongoDBURI:           mongoURI,
+		JWTSecret:            jwtSecret,
+		NodeEnv:              nodeEnv,
 		LogoGenerationLimit:  5,
 		LogoRetentionDays:    7,
 		ClaidAPIKey:          firstNonEmpty(getEnv("CLAID_API_KEY", ""), getEnv("CLAID_EDITING_API_KEY", "")),
@@ -34,7 +65,7 @@ func Load() *Config {
 		ProductImageMaxSize:  getEnvInt("PRODUCT_IMAGE_MAX_SIZE_MB", 5),
 		ProductImageMaxCount: getEnvInt("PRODUCT_IMAGE_MAX_COUNT", 4),
 		ProductEnhanceLimit:  getEnvInt("PRODUCT_ENHANCE_DAILY_LIMIT", 20),
-	}
+	}, nil
 }
 
 func getEnv(key, defaultValue string) string {
