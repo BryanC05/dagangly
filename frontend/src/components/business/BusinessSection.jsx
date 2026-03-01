@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Store, Mail, Phone, MapPin, Edit, Camera, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import api from '@/api';
+import api from '@/utils/api';
 
 export default function BusinessSection() {
     const [business, setBusiness] = useState(null);
