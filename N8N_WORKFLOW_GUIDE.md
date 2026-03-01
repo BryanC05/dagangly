@@ -45,7 +45,7 @@ Before you begin, ensure you have the following installed and ready:
 | **Gmail Account**    | With 2FA enabled | For SMTP email sending    |
 
 > [!IMPORTANT]
-> Your MSME Marketplace **backend** must be running on `http://localhost:5000` before n8n can communicate with it. Start it with `go run ./cmd/server` inside the `go-backend/` folder.
+> Your MSME Marketplace **backend** must be running on `http://localhost:5000` before n8n can communicate with it. Start it with `go run ./cmd/server` inside the `backend/` folder.
 
 ### Verify Backend is Running
 
@@ -106,9 +106,9 @@ curl http://localhost:5000/api/health
 | `n8n-custom-nodes/credentials/`             | MSME API credential definition       |
 | `n8n-workflows/order-confirmation.json`     | Pre-built order confirmation workflow|
 | `n8n-workflows/order-status-update.json`    | Pre-built status update workflow     |
-| `go-backend/internal/handlers/webhooks.go`  | Receives callbacks from n8n          |
-| `go-backend/internal/handlers/workflows.go` | CRUD for seller workflow configs     |
-| `go-backend/internal/models/workflow.go`    | Workflow data model                  |
+| `backend/internal/handlers/webhooks.go`  | Receives callbacks from n8n          |
+| `backend/internal/handlers/workflows.go` | CRUD for seller workflow configs     |
+| `backend/internal/models/workflow.go`    | Workflow data model                  |
 | `frontend/src/pages/Automation/`            | Seller automation dashboard UI       |
 
 ---
@@ -712,7 +712,7 @@ The marketplace frontend includes a seller **Automation Dashboard** at `/automat
 1. **Start all services:**
    ```bash
    # Terminal 1: Backend
-   cd go-backend && go run ./cmd/server
+   cd backend && go run ./cmd/server
 
    # Terminal 2: Frontend
    cd frontend && npm run dev
@@ -1242,7 +1242,7 @@ cp package.json dist/
 
 | Symptom                        | Likely Cause                              | Quick Fix                              |
 | ------------------------------ | ----------------------------------------- | -------------------------------------- |
-| "Connection refused"           | Backend not running on port 5000          | `cd go-backend && go run ./cmd/server` |
+| "Connection refused"           | Backend not running on port 5000          | `cd backend && go run ./cmd/server` |
 | "Authentication failed"        | JWT token expired                          | Re-login and update credential         |
 | "Custom nodes not found"       | `dist/` missing or n8n not restarted       | Rebuild dist + `docker-compose restart` |
 | "Email not sent"               | Wrong Gmail App Password                   | Regenerate from Google account         |

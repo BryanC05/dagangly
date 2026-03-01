@@ -3,7 +3,7 @@
 Seed script:
 
 ```bash
-cd go-backend
+cd backend
 npm install
 node seed-food-simulation.js
 npm run seed:food
@@ -12,7 +12,7 @@ npm run seed:food
 Database cleanup before reseed (optional):
 
 ```bash
-cd go-backend
+cd backend
 npm install
 node clear-db.js
 ```

@@ -73,7 +73,7 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 
 ```
 msme-marketplace/
-├── go-backend/
+├── backend/
 │   ├── cmd/
 │   │   └── server/
 │   │       └── main.go
@@ -168,7 +168,7 @@ msme-marketplace/
 
 1. Navigate to the backend directory:
 ```bash
-cd msme-marketplace/go-backend
+cd msme-marketplace/backend
 ```
 
 2. Install dependencies:
@@ -211,7 +211,7 @@ The backend will run on http://localhost:5000
 To populate the database with test sellers and products for testing the Nearby feature:
 
 ```bash
-cd go-backend
+cd backend
 npm install
 npm run seed:food
 ```
@@ -404,7 +404,7 @@ Orders flow through statuses:
 
 **Terminal 1 - Backend:**
 ```bash
-cd go-backend
+cd backend
 go run ./cmd/server
 ```
 

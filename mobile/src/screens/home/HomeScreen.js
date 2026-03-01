@@ -473,16 +473,16 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.hero}>
                 <View style={styles.heroBadge}>
                     <View style={styles.heroBadgeDot} />
-                    <Text style={styles.heroBadgeText}>MARKETPLACE UMKM INDONESIA</Text>
+                    <Text style={styles.heroBadgeText}>{t('heroBadge')}</Text>
                 </View>
                 
                 <Text style={styles.heroTitle}>
-                    Temukan Produk{'\n'}
-                    <Text style={styles.heroHighlight}>Lokal Terbaik</Text>
+                    {t('heroTitle')}{'\n'}
+                    <Text style={styles.heroHighlight}>{t('heroHighlight')}</Text>
                 </Text>
                 
                 <Text style={styles.heroSubtitle}>
-                    Hubungkan langsung dengan penjual UMKM di sekitarmu. Belanja mudah, dukung ekonomi lokal.
+                    {t('heroSubtitle')}
                 </Text>
 
                 <View style={styles.searchContainer}>
@@ -490,7 +490,7 @@ export default function HomeScreen({ navigation }) {
                         <Ionicons name="search" size={18} color={colors.textSecondary} style={styles.searchIcon} />
                         <TextInput
                             style={styles.searchTextInput}
-                            placeholder={t('home.searchPlaceholder')}
+                            placeholder={t('searchProductsPlaceholder')}
                             placeholderTextColor={colors.textSecondary}
                             value={searchQuery}
                             onChangeText={setSearchQuery}
@@ -519,20 +519,20 @@ export default function HomeScreen({ navigation }) {
                         <View>
                             <View style={styles.nearbyMapTitleRow}>
                                 <Ionicons name="location" size={16} color={colors.primary} />
-                                <Text style={styles.nearbyMapLabel}>UMKM TERDEKAT</Text>
+                                <Text style={styles.nearbyMapLabel}>{t('nearbySellersLabel')}</Text>
                             </View>
                             <Text style={styles.nearbyMapTitle}>
-                                Penjual di Sekitar Anda
+                                {t('nearbySellersTitle')}
                             </Text>
                             <Text style={styles.nearbyMapSubtitle}>
-                                {nearbySellers.length} penjual terdekat
+                                {nearbySellers.length} {t('nearbySellersCount')}
                             </Text>
                         </View>
                         <TouchableOpacity
                             style={styles.nearbyMapBtn}
                             onPress={() => navigation.navigate('HomeTab', { screen: 'NearbySellers' })}
                         >
-                            <Text style={styles.nearbyMapBtnText}>Lihat Semua</Text>
+                            <Text style={styles.nearbyMapBtnText}>{t('seeAll')}</Text>
                             <Ionicons name="arrow-forward" size={12} color={colors.primary} />
                         </TouchableOpacity>
                     </View>
@@ -581,7 +581,7 @@ export default function HomeScreen({ navigation }) {
                     ) : (
                         <View style={{ padding: 20, alignItems: 'center' }}>
                             <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
-                                Tidak ada penjualan di sekitar
+                                {t('noNearbySellersFound')}
                             </Text>
                         </View>
                     )}
@@ -591,9 +591,9 @@ export default function HomeScreen({ navigation }) {
             {categories.filter((cat) => (categoryCounts[cat.id] || 0) > 0).length > 0 && (
                 <View style={styles.categorySection}>
                     <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>{t('categories') || 'Kategori'}</Text>
+                        <Text style={styles.sectionTitle}>{t('categories')}</Text>
                         <TouchableOpacity onPress={() => navigation.navigate('ProductsTab')}>
-                            <Text style={styles.seeAll}>Lihat semua</Text>
+                            <Text style={styles.seeAll}>{t('seeAllLower')}</Text>
                         </TouchableOpacity>
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catScroll}>
@@ -617,9 +617,9 @@ export default function HomeScreen({ navigation }) {
 
             <View style={styles.productsSection}>
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>{t('featuredProducts') || 'Produk Unggulan'}</Text>
+                    <Text style={styles.sectionTitle}>{t('featuredProducts')}</Text>
                     <TouchableOpacity onPress={() => navigation.navigate('ProductsTab')}>
-                        <Text style={styles.seeAll}>Lihat semua</Text>
+                        <Text style={styles.seeAll}>{t('seeAllLower')}</Text>
                     </TouchableOpacity>
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
@@ -638,17 +638,17 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.nearbyCard}>
                     <View style={styles.nearbyHeader}>
                         <Ionicons name="location" size={16} color={colors.primary} />
-                        <Text style={styles.nearbyLabel}>PENJUAL TERDEKAT</Text>
+                        <Text style={styles.nearbyLabel}>{t('nearbySellersLabel')}</Text>
                     </View>
-                    <Text style={styles.nearbyTitle}>Temukan UMKM di Sekitarmu</Text>
+                    <Text style={styles.nearbyTitle}>{t('discoverNearbyTitle')}</Text>
                     <Text style={styles.nearbyDesc}>
-                        Gunakan fitur peta untuk menemukan penjual lokal terdekat. Dukung ekonomi di komunitasmu.
+                        {t('discoverNearbyDesc')}
                     </Text>
                     <TouchableOpacity
                         style={styles.nearbyBtn}
                         onPress={() => navigation.navigate('HomeTab', { screen: 'NearbySellers' })}
                     >
-                        <Text style={styles.nearbyBtnText}>Buka Peta</Text>
+                        <Text style={styles.nearbyBtnText}>{t('openMap')}</Text>
                         <Ionicons name="arrow-forward" size={16} color="#fff" />
                     </TouchableOpacity>
                 </View>
@@ -657,16 +657,16 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.ctaSection}>
                 <View style={styles.ctaCard}>
                     <Text style={styles.ctaTitle}>
-                        Mulai Berjualan di <Text style={styles.ctaHighlight}>TroliToko</Text>
+                        {t('startSellingOn')} <Text style={styles.ctaHighlight}>TroliToko</Text>
                     </Text>
                     <Text style={styles.ctaDesc}>
-                        Daftarkan usahamu dan mulai jangkau lebih banyak pembeli di sekitarmu.
+                        {t('registerBusinessDesc')}
                     </Text>
                     <TouchableOpacity
                         style={styles.ctaBtn}
                         onPress={() => navigation.navigate('Auth', { screen: 'Register' })}
                     >
-                        <Text style={styles.ctaBtnText}>Daftar Sekarang</Text>
+                        <Text style={styles.ctaBtnText}>{t('registerNow')}</Text>
                         <Ionicons name="arrow-forward" size={16} color="#fff" />
                     </TouchableOpacity>
                 </View>

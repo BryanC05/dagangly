@@ -52,7 +52,7 @@ CREATOR_EMAIL=admin@yourdomain.com # Where reports are sent
 
 3. **Test the configuration:**
    ```bash
-   cd go-backend
+   cd backend
    go run cmd/server/main.go
    ```
 
@@ -287,7 +287,7 @@ CREATOR_EMAIL=admin@yourdomain.com
 
 1. **Start the backend:**
    ```bash
-   cd go-backend
+   cd backend
    go run cmd/server/main.go
    ```
 

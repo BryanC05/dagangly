@@ -19,7 +19,7 @@ echo -e "${BLUE}[1] Checking server health...${NC}"
 HEALTH=$(curl -s "$API_URL/health")
 if [ -z "$HEALTH" ]; then
     echo -e "${RED}Server is not running at $API_URL${NC}"
-    echo "Please start the server first: cd go-backend && go run cmd/server/main.go"
+    echo "Please start the server first: cd backend && go run cmd/server/main.go"
     exit 1
 fi
 echo -e "${GREEN}Server is running: $HEALTH${NC}"

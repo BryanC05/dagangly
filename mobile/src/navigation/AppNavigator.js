@@ -729,18 +729,19 @@ export default function AppNavigator() {
                 })}
                 sceneContainerStyle={{ backgroundColor: colors.background }}
             >
-                <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ tabBarLabel: t.tabHome }} />
-                <Tab.Screen name="ProductsTab" component={ProductsStackNavigator} options={{ tabBarLabel: t.tabProducts }} />
                 {/* Spacer for center alignment - creates space in middle */}
                 <Tab.Screen
                     name="Spacer"
-                    component={View}
+                    component={HomeStackNavigator}
                     options={{
                         tabBarLabel: '',
                         tabBarIcon: () => null,
                         tabBarButton: () => <View style={{ flex: 1, minWidth: 60 }} />,
                     }}
                 />
+                <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ tabBarLabel: t.tabHome }} />
+                <Tab.Screen name="ProductsTab" component={ProductsStackNavigator} options={{ tabBarLabel: t.tabProducts }} />
+                
                 <Tab.Screen name="AddTab" component={AddStackNavigator} options={{ tabBarLabel: t.tabAdd }} />
                 <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: t.tabProfile }} />
                 {/* Hidden CartTab - not shown in tab bar */}

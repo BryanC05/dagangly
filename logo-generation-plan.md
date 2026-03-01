@@ -47,7 +47,7 @@ The logo generator now supports multiple AI providers with automatic fallback:
 - **Detection**: Automatic language detection in prompts
 
 ### Storage & Retention
-- **Location**: `/go-backend/uploads/logos/`
+- **Location**: `/backend/uploads/logos/`
 - **Format**: `{userId}-{timestamp}-{uuid}.png`
 - **Retention**: 7 days auto-delete (cron job or TTL index)
 - **Max History**: Keep last 20 generated logos per user in DB
@@ -61,7 +61,7 @@ The logo generator now supports multiple AI providers with automatic fallback:
 
 ## 2. Database Schema Changes
 
-### User Model Updates (`/go-backend/internal/models/user.go`)
+### User Model Updates (`/backend/internal/models/user.go`)
 
 ```go
 LogoGenerationCount struct {
@@ -81,7 +81,7 @@ HasCustomLogo bool
 
 ### Backend Files (Go)
 
-#### `/go-backend/internal/handlers/logo.go`
+#### `/backend/internal/handlers/logo.go`
 **Routes and responsibilities:**
 - `POST /api/logo/generate` - Generate new logo
 - `GET /api/logo/history` - Get user's logo history
@@ -92,10 +92,10 @@ HasCustomLogo bool
 - `POST /api/logo/reset-limit` - Reset own daily logo limit
 - Includes daily limit checks and provider fallback logic
 
-#### `/go-backend/internal/models/user.go`
+#### `/backend/internal/models/user.go`
 **Purpose**: Stores logo usage counters and generated logo metadata
 
-#### `/go-backend/cmd/server/main.go`
+#### `/backend/cmd/server/main.go`
 **Purpose**: Registers logo routes under `/api/logo`
 
 **Features:**
@@ -122,7 +122,7 @@ HasCustomLogo bool
 
 ### Dependencies to Install
 ```bash
-cd go-backend
+cd backend
 go mod tidy
 ```
 
@@ -364,7 +364,7 @@ VITE_API_URL=http://localhost:5000/api
 
 ## 10. Cleanup Behavior
 
-### Expired Logo Handling (`/go-backend/internal/handlers/logo.go`)
+### Expired Logo Handling (`/backend/internal/handlers/logo.go`)
 Current behavior:
 1. Expired logos are filtered out when history is fetched.
 2. Invalid/legacy logo references are removed from user records.
@@ -442,10 +442,10 @@ Current behavior:
 
 1. **Phase 1: Backend Foundation** ✓
    - ✅ Update User model with logo fields
-   - ✅ Create logo routes (`/go-backend/internal/handlers/logo.go`)
+   - ✅ Create logo routes (`/backend/internal/handlers/logo.go`)
    - ✅ Implement multi-provider AI integration (Pollinations + OpenAI + SVG)
    - ✅ Add Bahasa Indonesia translation support (100+ words)
-   - ✅ Add rate limiter middleware (`/go-backend/internal/handlers/logo.go`)
+   - ✅ Add rate limiter middleware (`/backend/internal/handlers/logo.go`)
    - ✅ Set up file upload support
    - ✅ Create logo generator utility with fallback chain
 
@@ -462,7 +462,7 @@ Current behavior:
    - ✅ Style with Tailwind
 
 4. **Phase 4: Cleanup & Testing** ✓
-   - ✅ Implement cron job for auto-cleanup (`/go-backend/internal/handlers/logo.go`)
+   - ✅ Implement cron job for auto-cleanup (`/backend/internal/handlers/logo.go`)
    - ✅ Add error handling
    - ✅ Test Indonesian language support
    - ✅ Test multi-provider fallback
@@ -513,11 +513,11 @@ This ensures logos can always be generated even without AI API keys.
 ### ✅ Completed Files
 
 #### Backend Files
-1. ✅ `/go-backend/internal/handlers/logo.go` - Logo generation routes
-2. ✅ `/go-backend/internal/handlers/logo.go` - Daily limit enforcement
-3. ✅ `/go-backend/internal/handlers/logo.go` - Multi-provider AI fallback (Pollinations + SVG)
-4. ✅ `/go-backend/internal/handlers/logo.go` - Limit reset endpoint (`/api/logo/reset-limit`)
-5. ✅ `/go-backend/internal/models/user.go` - Logo fields in user model
+1. ✅ `/backend/internal/handlers/logo.go` - Logo generation routes
+2. ✅ `/backend/internal/handlers/logo.go` - Daily limit enforcement
+3. ✅ `/backend/internal/handlers/logo.go` - Multi-provider AI fallback (Pollinations + SVG)
+4. ✅ `/backend/internal/handlers/logo.go` - Limit reset endpoint (`/api/logo/reset-limit`)
+5. ✅ `/backend/internal/models/user.go` - Logo fields in user model
 
 #### Frontend Files
 8. ✅ `/frontend/src/pages/LogoGenerator.jsx` - Main logo generation page
@@ -527,8 +527,8 @@ This ensures logos can always be generated even without AI API keys.
 12. ✅ `/frontend/src/components/logo/LogoCard.jsx` - Individual logo display
 
 #### Modified Files
-13. ✅ `/go-backend/internal/models/user.go` - Logo fields added
-14. ✅ `/go-backend/cmd/server/main.go` - Logo routes mounted
+13. ✅ `/backend/internal/models/user.go` - Logo fields added
+14. ✅ `/backend/cmd/server/main.go` - Logo routes mounted
 15. ✅ `/frontend/src/App.jsx` - Logo route added
 
 ---
@@ -619,13 +619,13 @@ db.users.updateMany(
 
 **Setup:**
 1. Get free API key from https://enter.pollinations.ai
-2. Add to `go-backend/.env`: `POLLINATIONS_API_KEY=your_key`
+2. Add to `backend/.env`: `POLLINATIONS_API_KEY=your_key`
 3. Restart backend server
 4. Logo generator works immediately
 
 **Optional - Add OpenAI for better quality:**
 ```bash
-# Add to go-backend/.env
+# Add to backend/.env
 OPENAI_API_KEY=sk-your-key
 ```
 

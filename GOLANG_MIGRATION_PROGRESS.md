@@ -103,7 +103,7 @@
 ## Running the Server
 
 ```bash
-cd go-backend
+cd backend
 ./server
 ```
 

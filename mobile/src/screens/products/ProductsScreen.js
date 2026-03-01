@@ -170,7 +170,7 @@ export default function ProductsScreen({ navigation, route }) {
             justifyContent: 'space-between', 
             alignItems: 'center',
             paddingHorizontal: 16, 
-            paddingVertical: 12, 
+            paddingVertical: 16, 
             borderBottomWidth: 1, 
             borderColor: colors.border,
         },
@@ -232,7 +232,7 @@ export default function ProductsScreen({ navigation, route }) {
                     <Ionicons name="search" size={18} color={colors.textSecondary} />
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Cari produk..."
+                        placeholder={t('searchProducts')}
                         placeholderTextColor={colors.textSecondary}
                         value={searchInput}
                         onChangeText={handleSearchChange}
@@ -307,8 +307,8 @@ export default function ProductsScreen({ navigation, route }) {
     const renderEmpty = () => (
         <View style={styles.empty}>
             <Ionicons name="cube-outline" size={48} color={colors.textTertiary} />
-            <Text style={styles.emptyTitle}>Tidak ada produk</Text>
-            <Text style={styles.emptyText}>Coba sesuaikan filter pencarian</Text>
+            <Text style={styles.emptyTitle}>{t('noProducts')}</Text>
+            <Text style={styles.emptyText}>{t('adjustFilters')}</Text>
         </View>
     );
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Food simulation seed for go-backend.
+ * Food simulation seed for backend.
  * Creates test sellers/buyers and food products around:
  * - Summarecon Mall Bekasi
  * - BINUS Bekasi
@@ -313,7 +313,7 @@ function requireDependency(packageName) {
   }
 
   throw new Error(
-    `Cannot find dependency "${packageName}". Run "cd go-backend && npm install" first.`
+    `Cannot find dependency "${packageName}". Run "cd backend && npm install" first.`
   );
 }
 

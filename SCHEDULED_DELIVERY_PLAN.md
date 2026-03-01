@@ -84,7 +84,7 @@ This document outlines the implementation plan for a new feature that allows buy
 ### Order Model Changes (Go Backend)
 
 ```go
-// go-backend/internal/models/order.go
+// backend/internal/models/order.go
 
 // Existing fields to repurpose
 IsPreorder   bool   `bson:"isPreorder" json:"isPreorder"`   // repurposed: is scheduled delivery
@@ -137,7 +137,7 @@ BuyerConfirmed      bool      `bson:"buyerConfirmed" json:"buyerConfirmed"`     
 
 ### 1. Update Order Model
 
-**File**: `go-backend/internal/models/order.go`
+**File**: `backend/internal/models/order.go`
 
 Add these fields to the Order struct:
 - `DeliveryDate` (string)
@@ -153,7 +153,7 @@ Repurpose existing fields:
 
 ### 2. Update CreateOrder Handler
 
-**File**: `go-backend/internal/handlers/orders.go`
+**File**: `backend/internal/handlers/orders.go`
 
 **Function**: `CreateOrder`
 
@@ -176,7 +176,7 @@ Repurpose existing fields:
 
 ### 3. Add Seller Response Endpoint
 
-**File**: `go-backend/internal/handlers/orders.go`
+**File**: `backend/internal/handlers/orders.go`
 
 **New Endpoint**: `PUT /api/orders/:id/seller-response`
 
@@ -203,7 +203,7 @@ func (h *OrderHandler) SellerResponse(c *gin.Context) {
 
 ### 4. Add Buyer Confirm Endpoint
 
-**File**: `go-backend/internal/handlers/orders.go`
+**File**: `backend/internal/handlers/orders.go`
 
 **New Endpoint**: `PUT /api/orders/:id/buyer-confirm`
 
@@ -227,7 +227,7 @@ func (h *OrderHandler) BuyerConfirm(c *gin.Context) {
 
 ### 5. Add Get Orders Filter
 
-**File**: `go-backend/internal/handlers/orders.go`
+**File**: `backend/internal/handlers/orders.go`
 
 **Endpoint**: `GET /api/orders`
 
@@ -238,7 +238,7 @@ Add query parameter `requestStatus` to filter:
 
 ### 6. Update Order Status Update
 
-**File**: `go-backend/internal/handlers/orders.go`
+**File**: `backend/internal/handlers/orders.go`
 
 **Function**: `UpdateOrderStatus`
 
@@ -246,7 +246,7 @@ Prevent seller from updating status while `RequestStatus == "pending_seller_revi
 
 ### 7. Update Payment Flow
 
-**File**: `go-backend/internal/handlers/orders.go`
+**File**: `backend/internal/handlers/orders.go`
 
 **Function**: `UpdatePayment`
 
@@ -256,7 +256,7 @@ Validate before processing payment:
 
 ### 8. Background Task - Auto-Decline Expired Requests
 
-**File**: `go-backend/internal/handlers/orders.go`
+**File**: `backend/internal/handlers/orders.go`
 
 **New Function**: `CleanupExpiredRequests` (call via cron)
 
@@ -276,7 +276,7 @@ func (h *OrderHandler) CleanupExpiredRequests() {
 
 ### 9. Notification Reminders
 
-**File**: `go-backend/internal/handlers/notifications.go` (or existing notification handler)
+**File**: `backend/internal/handlers/notifications.go` (or existing notification handler)
 
 **Function**: `SendDeadlineReminders`
 
@@ -520,7 +520,7 @@ func (h *OrderHandler) CleanupExpiredRequests() {
 
 ### MongoDB Indexes
 
-**File**: `go-backend/internal/database/indexes.go`
+**File**: `backend/internal/database/indexes.go`
 
 ```go
 // Add index for efficient queries
@@ -630,9 +630,9 @@ ordersCollection.Indexes().CreateOne(
 ## Related Files
 
 ### Backend
-- `go-backend/internal/models/order.go`
-- `go-backend/internal/handlers/orders.go`
-- `go-backend/internal/database/indexes.go`
+- `backend/internal/models/order.go`
+- `backend/internal/handlers/orders.go`
+- `backend/internal/database/indexes.go`
 
 ### Mobile
 - `mobile/src/screens/cart/CartScreen.js`

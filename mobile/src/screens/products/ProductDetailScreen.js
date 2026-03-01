@@ -524,7 +524,7 @@ export default function ProductDetailScreen({ route }) {
 
                     {/* Description */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>{t.description || 'Description'}</Text>
+                        <Text style={styles.sectionTitle}>{t.description || 'Deskripsi'}</Text>
                         <ScrollView 
                             style={{ maxHeight: 200 }} 
                             showsVerticalScrollIndicator={true}
@@ -533,7 +533,7 @@ export default function ProductDetailScreen({ route }) {
                             {product.description ? (
                                 parseMarkdown(product.description, null, colors.textSecondary)
                             ) : (
-                                <Text style={styles.description}>{t.noDescriptionAvailable || 'No description available.'}</Text>
+                                <Text style={styles.description}>{t.noDescriptionAvailable || 'Tidak ada deskripsi.'}</Text>
                             )}
                         </ScrollView>
                     </View>
@@ -541,7 +541,7 @@ export default function ProductDetailScreen({ route }) {
                     {/* Variant Selector */}
                     {product.hasVariants && product.variants?.length > 0 && (
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>{t.selectVariant || 'Select Variant'}</Text>
+                            <Text style={styles.sectionTitle}>{t.selectVariant || 'Select Varian'}</Text>
                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                                 {product.variants.map((v) => (
                                     <TouchableOpacity
@@ -609,7 +609,7 @@ export default function ProductDetailScreen({ route }) {
                     {/* Quantity Selector */}
                     {getAvailableStock() > 0 && (
                         <View style={styles.quantityRow}>
-                            <Text style={styles.quantityLabel}>{t.quantity || 'Quantity'}:</Text>
+                            <Text style={styles.quantityLabel}>{t.quantity || 'Jumlah'}:</Text>
                             <View style={styles.quantityStepper}>
                                 <TouchableOpacity
                                     style={styles.stepperBtn}
@@ -730,8 +730,8 @@ export default function ProductDetailScreen({ route }) {
                     <Ionicons name="cart" size={20} color="#fff" />
                     <Text style={styles.addToCartText}>
                         {getAvailableStock() === 0
-                            ? (t.outOfStock || 'Out of Stock')
-                            : `${t.addToCart || 'Add to Cart'} - ${formatPrice(getUnitPrice() * quantity)}`}
+                            ? (t.outOfStock || 'Stok habis')
+                            : `${t.addToCart || 'Masuk Keranjang'} - ${formatPrice(getUnitPrice() * quantity)}`}
                     </Text>
                 </TouchableOpacity>
             </View>

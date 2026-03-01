@@ -37,7 +37,7 @@ Add the following Tailwind CSS utility classes to image tags across `ProductCard
 If the goal is to permanently fix vendor images right as they are uploaded, we can process them on the Go backend before saving to cloud storage.
 
 **How to implement:**
-Modify the upload handler in `go-backend/internal/handlers/upload.go` to use a fast, native Go imaging library like `github.com/disintegration/imaging`.
+Modify the upload handler in `backend/internal/handlers/upload.go` to use a fast, native Go imaging library like `github.com/disintegration/imaging`.
 
 ```go
 import "github.com/disintegration/imaging"

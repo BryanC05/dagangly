@@ -13,7 +13,7 @@ This plan should be written to the repo root as: `MVP_ROADMAP.md`.
 
 ## Delivery Model
 - Cadence: 2-week sprints, rolling phases.
-- Backend source of truth: `go-backend`.
+- Backend source of truth: `backend`.
 - Node backend: fallback/reference only, no new feature ownership.
 - Release strategy: each phase independently shippable behind feature flags.
 
@@ -90,7 +90,7 @@ This plan should be written to the repo root as: `MVP_ROADMAP.md`.
 - `timeline`: array of `status`, `at`, `by`, `note`.
 - `payment`: `method`, `provider`, `providerRef`, `status`, `paidAt`, `amount`.
 
-## Backend Work Plan (`go-backend`)
+## Backend Work Plan (`backend`)
 - Add handlers/services/models for reviews, notifications, scheduling, payments.
 - Add validation and authorization middleware checks:
 - review only after delivered order and only buyer.

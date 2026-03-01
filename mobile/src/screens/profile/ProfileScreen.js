@@ -18,7 +18,7 @@ import api from '../../api/api';
 export default function ProfileScreen({ navigation }) {
     const { user, logout, setUser } = useAuthStore();
     const { isDarkMode, toggleTheme, initTheme } = useThemeStore();
-    const { initLanguage } = useLanguageStore();
+    const { language, toggleLanguage, initLanguage } = useLanguageStore();
     const { t } = useTranslation();
     const { isDriverMode, stats, initDriverMode, toggleDriverMode } = useDriverStore();
     const unreadNotifCount = useNotificationStore((s) => s.unreadCount);
@@ -203,8 +203,8 @@ export default function ProfileScreen({ navigation }) {
 
     const menuItems = useMemo(() => [
         { icon: 'chatbubbles-outline', label: t.messages || 'Messages', onPress: () => navigation.navigate('Messages'), color: '#0ea5e9' },
-        { icon: 'notifications-outline', label: 'Notifications', onPress: () => navigation.navigate('Notifications'), color: '#f43f5e', badge: unreadNotifCount > 0 ? (unreadNotifCount > 9 ? '9+' : String(unreadNotifCount)) : null },
-        { icon: 'heart-outline', label: 'Saved Products', onPress: () => navigation.navigate('Wishlist'), color: '#ef4444' },
+        { icon: 'notifications-outline', label: t.notifications || 'Notifications', onPress: () => navigation.navigate('Notifications'), color: '#f43f5e', badge: unreadNotifCount > 0 ? (unreadNotifCount > 9 ? '9+' : String(unreadNotifCount)) : null },
+        { icon: 'heart-outline', label: t.savedProducts || 'Saved Products', onPress: () => navigation.navigate('Wishlist'), color: '#ef4444' },
         { icon: 'receipt-outline', label: t.orderHistory || 'Order History', onPress: () => navigation.navigate('Orders'), color: '#14b8a6' },
         { icon: 'location-outline', label: t.nearbySellers || 'Nearby Sellers', onPress: () => navigation.navigate('HomeTab', { screen: 'NearbySellers' }), color: '#ef4444' },
         { icon: 'color-palette-outline', label: t.logoGenerator || 'Logo Generator', onPress: () => navigation.navigate('LogoGenerator'), color: '#8b5cf6' },
@@ -215,7 +215,12 @@ export default function ProfileScreen({ navigation }) {
             icon: isDarkMode ? 'moon' : 'moon-outline', label: t.darkMode || 'Dark Mode',
             onPress: toggleTheme, color: '#6366f1', isToggle: true, toggleValue: isDarkMode,
         },
-    ], [t, navigation, unreadNotifCount, isDarkMode]);
+        {
+            icon: 'language-outline', label: t.language || 'Language',
+            onPress: toggleLanguage, color: '#10b981', isToggle: true, toggleValue: language === 'id',
+            showValue: language === 'id' ? 'ID' : 'EN',
+        },
+    ], [t, navigation, unreadNotifCount, isDarkMode, language]);
 
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -394,8 +399,8 @@ export default function ProfileScreen({ navigation }) {
             </View>
 
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+                <Text style={styles.logoutText}>{t.logout || 'Logout'}</Text>
                 <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-                <Text style={styles.logoutText}>{t.logout}</Text>
             </TouchableOpacity>
 
             <View style={{ height: 40 }} />

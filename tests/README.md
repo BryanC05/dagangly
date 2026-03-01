@@ -6,7 +6,7 @@ This directory contains test scripts for the Driver Marketplace feature.
 
 1. **Backend Server Running**
    ```bash
-   cd ../go-backend
+   cd ../backend
    go run cmd/server/main.go
    ```
 

@@ -97,7 +97,7 @@ msme-marketplace/backend/
 ## Proposed Go Architecture
 
 ```
-msme-marketplace/go-backend/
+msme-marketplace/backend/
 ├── cmd/
 │   └── server/
 │       └── main.go              # Application entrypoint
@@ -414,10 +414,10 @@ During migration, both backends can run side-by-side:
 
 ```bash
 # Go backend on port 5000 (primary)
-cd go-backend && PORT=5000 go run ./cmd/server
+cd backend && PORT=5000 go run ./cmd/server
 
 # Go backend on port 5001 (staging/comparison)
-cd go-backend && PORT=5001 go run ./cmd/server
+cd backend && PORT=5001 go run ./cmd/server
 
 # Point frontends at either one to compare
 API_HOST=http://localhost:5001  # Switch to Go to test

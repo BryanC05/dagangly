@@ -78,7 +78,7 @@ function requireMongoClient() {
   }
 
   throw new Error(
-    'Cannot find the "mongodb" package. Run "cd go-backend && npm install" first.'
+    'Cannot find the "mongodb" package. Run "cd backend && npm install" first.'
   );
 }
 

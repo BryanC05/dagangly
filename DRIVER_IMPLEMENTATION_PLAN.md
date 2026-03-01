@@ -828,9 +828,9 @@ func (h *DriverHandler) ClaimOrder(c *gin.Context) {
 - [x] Fee calculation algorithm (base fee + per km, with min/max bounds)
 
 **Files Implemented:**
-- `go-backend/internal/models/driver.go` - Driver, DriverEarnings, fee calculation
-- `go-backend/internal/handlers/driver.go` - All driver API endpoints
-- `go-backend/internal/database/indexes.go` - Geospatial indexes
+- `backend/internal/models/driver.go` - Driver, DriverEarnings, fee calculation
+- `backend/internal/handlers/driver.go` - All driver API endpoints
+- `backend/internal/database/indexes.go` - Geospatial indexes
 
 ### Phase 2: Driver Mobile App (Week 2) ✅ COMPLETE
 - [x] Driver toggle in profile screen
@@ -860,11 +860,11 @@ func (h *DriverHandler) ClaimOrder(c *gin.Context) {
 - `mobile/src/i18n/en.js` - English translations for driver strings
 - `mobile/src/i18n/id.js` - Indonesian translations for driver strings
 - `mobile/App.js` - Updated to initialize driver mode
-- `go-backend/internal/models/driver.go` - Added PushToken field
-- `go-backend/internal/models/order.go` - Added ClaimedBy field
-- `go-backend/internal/handlers/driver.go` - Added push token, rating endpoints
-- `go-backend/internal/websocket/hub.go` - Added driver location broadcasting
-- `go-backend/cmd/server/main.go` - Added driver-rating routes
+- `backend/internal/models/driver.go` - Added PushToken field
+- `backend/internal/models/order.go` - Added ClaimedBy field
+- `backend/internal/handlers/driver.go` - Added push token, rating endpoints
+- `backend/internal/websocket/hub.go` - Added driver location broadcasting
+- `backend/cmd/server/main.go` - Added driver-rating routes
 
 ### Phase 2b: Buyer Tracking (Partial) ✅ COMPLETE
 - [x] DriverTracker component for buyers to track their delivery
