@@ -113,12 +113,12 @@ func main() {
 
 		products := api.Group("/products")
 		{
-			products.GET("/", productHandler.GetProducts)
+			products.GET("", productHandler.GetProducts)
 			products.GET("/categories/counts", productHandler.GetCategoryCounts)
 			products.GET("/seller/:sellerId", productHandler.GetProductsBySeller)
 			products.GET("/:id", productHandler.GetProductByID)
 
-			products.POST("/", middleware.AuthRequired(cfg.JWTSecret), productHandler.CreateProduct)
+			products.POST("", middleware.AuthRequired(cfg.JWTSecret), productHandler.CreateProduct)
 			products.PUT("/:id", middleware.AuthRequired(cfg.JWTSecret), productHandler.UpdateProduct)
 			products.DELETE("/:id", middleware.AuthRequired(cfg.JWTSecret), productHandler.DeleteProduct)
 
@@ -150,7 +150,7 @@ func main() {
 			orders.GET("/:id/driver/location", orderHandler.GetDriverLocation)
 			orders.POST("/:id/driver/assign", orderHandler.AssignDriver)
 
-			orders.POST("/", orderHandler.CreateOrder)
+			orders.POST("", orderHandler.CreateOrder)
 		}
 
 		driver := api.Group("/driver")
@@ -192,10 +192,10 @@ func main() {
 
 		forum := api.Group("/forum")
 		{
-			forum.GET("/", forumHandler.GetThreads)
+			forum.GET("", forumHandler.GetThreads)
 			forum.GET("/:id", forumHandler.GetThread)
 
-			forum.POST("/", middleware.AuthRequired(cfg.JWTSecret), forumHandler.CreateThread)
+			forum.POST("", middleware.AuthRequired(cfg.JWTSecret), forumHandler.CreateThread)
 			forum.PUT("/:id", middleware.AuthRequired(cfg.JWTSecret), forumHandler.UpdateThread)
 			forum.DELETE("/:id", middleware.AuthRequired(cfg.JWTSecret), forumHandler.DeleteThread)
 			forum.POST("/:id/reply", middleware.AuthRequired(cfg.JWTSecret), forumHandler.CreateReply)
@@ -206,8 +206,8 @@ func main() {
 		workflows := api.Group("/workflows")
 		workflows.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
-			workflows.GET("/", workflowHandler.GetWorkflows)
-			workflows.POST("/", workflowHandler.CreateWorkflow)
+			workflows.GET("", workflowHandler.GetWorkflows)
+			workflows.POST("", workflowHandler.CreateWorkflow)
 			workflows.PATCH("/:id/toggle", workflowHandler.ToggleWorkflow)
 			workflows.DELETE("/:id", workflowHandler.DeleteWorkflow)
 		}
@@ -235,10 +235,10 @@ func main() {
 		business.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
 			business.GET("/my", businessHandler.GetMyBusiness)
-			business.POST("/", businessHandler.CreateBusiness)
-			business.PUT("/", businessHandler.UpdateBusiness)
+			business.POST("", businessHandler.CreateBusiness)
+			business.PUT("", businessHandler.UpdateBusiness)
 			business.PUT("/logo", businessHandler.UpdateBusinessLogo)
-			business.DELETE("/", businessHandler.DeleteBusiness)
+			business.DELETE("", businessHandler.DeleteBusiness)
 		}
 		// Public business endpoint
 		api.GET("/business/:id", businessHandler.GetBusinessByID)
@@ -246,7 +246,7 @@ func main() {
 		notifications := api.Group("/notifications")
 		notifications.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
-			notifications.GET("/", notificationHandler.GetNotifications)
+			notifications.GET("", notificationHandler.GetNotifications)
 			notifications.GET("/unread-count", notificationHandler.GetUnreadCount)
 			notifications.PUT("/:id/read", notificationHandler.MarkAsRead)
 			notifications.PUT("/read-all", notificationHandler.MarkAllRead)
@@ -260,7 +260,7 @@ func main() {
 		reviews := api.Group("/reviews")
 		reviews.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
-			reviews.POST("/", reviewHandler.CreateReview)
+			reviews.POST("", reviewHandler.CreateReview)
 			reviews.GET("/mine", reviewHandler.GetMyReviews)
 			reviews.DELETE("/:id", reviewHandler.DeleteReview)
 		}
@@ -269,8 +269,8 @@ func main() {
 		promos := api.Group("/promos")
 		promos.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
-			promos.POST("/", promoHandler.CreatePromo)
-			promos.GET("/", promoHandler.GetMyPromos)
+			promos.POST("", promoHandler.CreatePromo)
+			promos.GET("", promoHandler.GetMyPromos)
 			promos.POST("/validate", promoHandler.ValidatePromo)
 			promos.DELETE("/:id", promoHandler.DeletePromo)
 		}
@@ -287,16 +287,16 @@ func main() {
 		reports := api.Group("/reports")
 		reports.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
-			reports.POST("/", reportHandler.CreateReport)
-			reports.GET("/", reportHandler.GetReports)
+			reports.POST("", reportHandler.CreateReport)
+			reports.GET("", reportHandler.GetReports)
 			reports.POST("/fraud", reportHandler.CreateFraudReport)
 		}
 
 		disputes := api.Group("/disputes")
 		disputes.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
-			disputes.POST("/", reportHandler.CreateDispute)
-			disputes.GET("/", reportHandler.GetMyDisputes)
+			disputes.POST("", reportHandler.CreateDispute)
+			disputes.GET("", reportHandler.GetMyDisputes)
 			disputes.PUT("/:id/resolve", reportHandler.ResolveDispute)
 		}
 
