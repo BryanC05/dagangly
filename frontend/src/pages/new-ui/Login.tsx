@@ -1,20 +1,47 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
+import api from "@/utils/api";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const { setAuth } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    // TODO: wire to Go backend api.auth.login()
-    setTimeout(() => setLoading(false), 1500);
+    setError("");
+
+    try {
+      if (!email || !password) {
+        throw new Error("Tolong isi email dan password.");
+      }
+
+      const response = await api.post('/auth/login', { email, password });
+      const token = response?.data?.token;
+      const user = response?.data?.user;
+
+      if (!token || typeof token !== "string" || token.split(".").length !== 3) {
+        throw new Error("Invalid authentication token received");
+      }
+
+      setAuth(user, token);
+      navigate("/");
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || "Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,20 +52,44 @@ export default function Login() {
         className="w-full max-w-sm"
       >
         <div className="endfield-card bg-card p-8">
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <h1 className="font-display text-2xl font-bold tracking-wide">Masuk</h1>
             <p className="text-sm text-muted-foreground mt-1">Selamat datang kembali</p>
           </div>
 
+          {error && (
+            <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md mb-6 border border-destructive/20 text-center">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Email</Label>
-              <Input id="email" type="email" placeholder="nama@email.com" required className="bg-surface" />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="nama@email.com"
+                required
+                className="bg-surface"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Password</Label>
               <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" required className="bg-surface pr-10" />
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="bg-surface pr-10"
+                />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
