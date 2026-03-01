@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"strconv"
 	"time"
@@ -135,14 +136,19 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 		ProfileImage *string            `json:"profileImage" bson:"profileImage"`
 	}
 
-	type ProductWithSeller struct {
-		models.Product `bson:",inline"`
-		Seller         SellerInfo               `json:"seller" bson:"seller"`
-		Business       *models.BusinessResponse `json:"business,omitempty" bson:"business,omitempty"`
-	}
-
-	var productsWithSellers []ProductWithSeller
+	var parsedProducts []map[string]interface{}
 	for _, product := range products {
+		// 1. Marshal product to trigger custom MarshalJSON
+		rawBytes, err := json.Marshal(product)
+		if err != nil {
+			continue // skip if marshal fails
+		}
+
+		// 2. Unmarshal into map
+		var prodMap map[string]interface{}
+		if err := json.Unmarshal(rawBytes, &prodMap); err != nil {
+			continue // skip if unmarshal fails
+		}
 		var sellerInfo SellerInfo
 		usersCollection.FindOne(context.Background(), bson.M{"_id": product.Seller}).Decode(&sellerInfo)
 
@@ -187,18 +193,21 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 			}
 		}
 
-		pws := ProductWithSeller{
-			Product:  product,
-			Seller:   sellerInfo,
-			Business: businessResponse,
+		delete(prodMap, "seller")
+		delete(prodMap, "businessId")
+
+		prodMap["seller"] = sellerInfo
+		if businessResponse != nil {
+			prodMap["business"] = businessResponse
 		}
-		productsWithSellers = append(productsWithSellers, pws)
+
+		parsedProducts = append(parsedProducts, prodMap)
 	}
 
 	total, _ := collection.CountDocuments(context.Background(), query)
 
 	c.JSON(200, gin.H{
-		"products": productsWithSellers,
+		"products": parsedProducts,
 		"pagination": gin.H{
 			"page":  page,
 			"limit": limit,
@@ -281,28 +290,30 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 		}
 	}
 
-	c.JSON(200, gin.H{
-		"_id":          product.ID,
-		"name":         product.Name,
-		"description":  product.Description,
-		"price":        product.Price,
-		"category":     product.Category,
-		"stock":        product.Stock,
-		"unit":         product.Unit,
-		"images":       product.Images,
-		"tags":         product.Tags,
-		"location":     product.Location,
-		"hasVariants":  product.HasVariants,
-		"variants":     product.Variants,
-		"optionGroups": product.OptionGroups,
-		"rating":       product.Rating,
-		"totalReviews": product.TotalReviews,
-		"isAvailable":  product.IsAvailable,
-		"createdAt":    product.CreatedAt,
-		"updatedAt":    product.UpdatedAt,
-		"seller":       sellerInfo,
-		"business":     businessResponse,
-	})
+	// 1. Marshal product to trigger custom MarshalJSON
+	rawBytes, err := json.Marshal(product)
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Failed to serialize product"})
+		return
+	}
+
+	// 2. Unmarshal into map
+	var prodMap map[string]interface{}
+	if err := json.Unmarshal(rawBytes, &prodMap); err != nil {
+		c.JSON(500, gin.H{"message": "Failed to parse serialized product"})
+		return
+	}
+
+	// 3. Inject seller and business
+	delete(prodMap, "seller")
+	delete(prodMap, "businessId")
+
+	prodMap["seller"] = sellerInfo
+	if businessResponse != nil {
+		prodMap["business"] = businessResponse
+	}
+
+	c.JSON(200, prodMap)
 }
 
 func (h *ProductHandler) CreateProduct(c *gin.Context) {

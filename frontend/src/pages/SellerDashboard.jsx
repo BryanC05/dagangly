@@ -114,6 +114,40 @@ function SellerDashboard() {
     setEditValues({ price: product.price, stock: product.stock });
   };
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }) => {
+      await api.put(`/orders/${orderId}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sellerOrders', sellerId] });
+      queryClient.invalidateQueries({ queryKey: ['sellerProductTracking', sellerId] });
+    },
+    onError: (error) => {
+      alert(`Failed to update status: ${error.response?.data?.message || error.message}`);
+    },
+  });
+
+  const getNextStatus = (currentStatus) => {
+    const statusFlow = ['pending', 'confirmed', 'preparing', 'ready', 'delivered'];
+    const currentIndex = statusFlow.indexOf(currentStatus);
+    if (currentIndex < statusFlow.length - 1) {
+      return statusFlow[currentIndex + 1];
+    }
+    return null;
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      pending: 'Pending',
+      confirmed: 'Confirmed',
+      preparing: 'Preparing',
+      ready: 'Ready',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled'
+    };
+    return labels[status] || status;
+  };
+
   const cancelEditing = () => {
     setEditingProduct(null);
     setEditValues({ price: 0, stock: 0 });
@@ -525,17 +559,27 @@ function SellerDashboard() {
             <h2 className="text-xl font-semibold mb-4">{t('seller.recentOrders')}</h2>
             <div className="orders-list space-y-4">
               {orders.slice(0, 5).map((order) => (
-                <div key={order._id} className="order-card p-4 border rounded-lg flex justify-between items-center bg-card">
+                <div key={order._id} className="order-card p-4 border rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center bg-card gap-4">
                   <div className="order-info">
                     <span className="order-id font-medium block">Order #{order._id.slice(-8)}</span>
                     <span className={`order-status text-sm ${order.status === 'delivered' ? 'text-green-600 dark:text-green-400' :
                       order.status === 'cancelled' ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'
-                      }`}>{order.status}</span>
+                      }`}>{t(`orders.status.${order.status}`) || getStatusLabel(order.status)}</span>
                   </div>
-                  <div className="order-details text-right">
+                  <div className="order-details text-left md:text-right flex-1 md:flex-none">
                     <span className="block">{order.products.length} {t('seller.items')}</span>
                     <span className="order-amount font-bold text-primary">{formatCurrency(order.totalAmount)}</span>
                   </div>
+                  {getNextStatus(order.status) && (
+                    <Button
+                      size="sm"
+                      onClick={() => updateStatusMutation.mutate({ orderId: order._id, status: getNextStatus(order.status) })}
+                      disabled={updateStatusMutation.isPending}
+                      className="w-full md:w-auto mt-2 md:mt-0"
+                    >
+                      {t('orders.markAs') || 'Mark As'} {getStatusLabel(getNextStatus(order.status))}
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

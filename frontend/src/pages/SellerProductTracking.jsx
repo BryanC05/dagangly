@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Package, MapPin, Phone, User, Calendar, 
+import {
+  Package, MapPin, Phone, User, Calendar,
   DollarSign, ChevronDown, ChevronUp, Search,
   TrendingUp, ShoppingBag, Filter
 } from 'lucide-react';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { resolveImageUrl } from '@/utils/imageUrl';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 
 const statusConfig = {
   pending: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200', label: 'Pending' },
@@ -33,6 +34,41 @@ function SellerProductTracking() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedProducts, setExpandedProducts] = useState({});
   const [statusFilter, setStatusFilter] = useState('all');
+  const queryClient = useQueryClient();
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }) => {
+      await api.put(`/orders/${orderId}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sellerProductTracking', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['sellerOrders', user?.id] });
+    },
+    onError: (error) => {
+      alert(`Failed to update status: ${error.response?.data?.message || error.message}`);
+    },
+  });
+
+  const getNextStatus = (currentStatus) => {
+    const statusFlow = ['pending', 'confirmed', 'preparing', 'ready', 'delivered'];
+    const currentIndex = statusFlow.indexOf(currentStatus);
+    if (currentIndex < statusFlow.length - 1) {
+      return statusFlow[currentIndex + 1];
+    }
+    return null;
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      pending: 'Pending',
+      confirmed: 'Confirmed',
+      preparing: 'Preparing',
+      ready: 'Ready',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled'
+    };
+    return labels[status] || status;
+  };
 
   const { data: trackingData, isLoading, error } = useQuery({
     queryKey: ['sellerProductTracking', user?.id],
@@ -71,17 +107,17 @@ function SellerProductTracking() {
   const filteredData = trackingData?.filter(item => {
     // Safety check for product data
     if (!item.product) return false;
-    
+
     const productName = item.product.name || '';
     const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.orders.some(order => 
+      item.orders.some(order =>
         (order.buyer?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (order.deliveryAddress?.city || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
-    
-    const matchesStatus = statusFilter === 'all' || 
+
+    const matchesStatus = statusFilter === 'all' ||
       item.orders.some(order => order.status === statusFilter);
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -217,21 +253,21 @@ function SellerProductTracking() {
             filteredData?.map((item) => {
               // Safety check for product data
               if (!item.product) return null;
-              
+
               const isExpanded = expandedProducts[item.product._id];
               const pendingOrders = item.orders.filter(o => !['delivered', 'cancelled'].includes(o.status));
-              
+
               return (
                 <div key={item.product._id} className="endfield-card overflow-hidden transition-shadow hover:shadow-md">
                   {/* Product Header */}
-                  <div 
+                  <div
                     className="product-header p-4 flex flex-col lg:flex-row lg:items-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => toggleProduct(item.product._id)}
                   >
                     <div className="product-image w-16 h-16 rounded-lg border overflow-hidden flex-shrink-0">
                       {item.product.images?.[0] ? (
-                        <img 
-                          src={resolveImageUrl(item.product.images[0])} 
+                        <img
+                          src={resolveImageUrl(item.product.images[0])}
                           alt={item.product.name || 'Product'}
                           className="w-full h-full object-cover"
                         />
@@ -241,7 +277,7 @@ function SellerProductTracking() {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="product-info flex-1">
                       <h3 className="font-semibold text-lg">{item.product.name || 'Unnamed Product'}</h3>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
@@ -278,7 +314,7 @@ function SellerProductTracking() {
                           <ShoppingBag size={18} />
                           Orders ({item.orders.length})
                         </h4>
-                        
+
                         <div className="space-y-3">
                           {item.orders.map((order) => (
                             <div key={order.orderId} className="order-detail-card p-4 bg-background border rounded-lg hover:border-primary/40 transition-colors">
@@ -355,19 +391,19 @@ function SellerProductTracking() {
                               )}
 
                               {/* Action Buttons */}
-                              <div className="mt-3 flex justify-end gap-2">
-                                {order.deliveryType === 'delivery' && 
-                                 order.status !== 'delivered' && 
-                                 order.status !== 'cancelled' && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => window.open(`/tracking/${order.orderId}`, '_blank')}
-                                  >
-                                    <MapPin size={14} className="mr-1" />
-                                    Track Delivery
-                                  </Button>
-                                )}
+                              <div className="mt-3 flex flex-wrap justify-end gap-2">
+                                {order.deliveryType === 'delivery' &&
+                                  order.status !== 'delivered' &&
+                                  order.status !== 'cancelled' && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => window.open(`/tracking/${order.orderId}`, '_blank')}
+                                    >
+                                      <MapPin size={14} className="mr-1" />
+                                      Track Delivery
+                                    </Button>
+                                  )}
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -375,6 +411,15 @@ function SellerProductTracking() {
                                 >
                                   View Full Order
                                 </Button>
+                                {getNextStatus(order.status) && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => updateStatusMutation.mutate({ orderId: order.orderId, status: getNextStatus(order.status) })}
+                                    disabled={updateStatusMutation.isPending}
+                                  >
+                                    Mark As {getStatusLabel(getNextStatus(order.status))}
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           ))}
