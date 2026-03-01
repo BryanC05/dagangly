@@ -60,7 +60,22 @@ func AuthRequired(jwtSecret string) gin.HandlerFunc {
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := c.Request.Header.Get("Origin")
+
+		// Allow specific origins
+		allowedOrigins := []string{
+			"http://localhost:5173",
+			"https://umkm-marketplace.pages.dev",
+			"https://258fd25d.umkm-marketplace.pages.dev",
+		}
+
+		for _, allowed := range allowedOrigins {
+			if origin == allowed {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+				break
+			}
+		}
+
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH, WS, WSS")
