@@ -32,7 +32,7 @@ export default function BusinessSection() {
 
     const fetchBusiness = async () => {
         try {
-            const response = await api.get('/business');
+            const response = await api.get('/business/my');
             setBusiness(response.data.business);
             if (response.data.business) {
                 setForm({
