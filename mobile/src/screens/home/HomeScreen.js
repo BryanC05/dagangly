@@ -21,7 +21,8 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
     const { colors, isDarkMode } = useThemeStore();
-    const { t, language } = useLanguageStore();
+    const language = useLanguageStore((s) => s.language);
+    const { t } = useLanguageStore();
     const insets = useSafeAreaInsets();
     const [refreshing, setRefreshing] = useState(false);
     const [stats, setStats] = useState({ sellers: 0, products: 0 });

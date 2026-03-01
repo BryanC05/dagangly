@@ -15,7 +15,8 @@ const { width } = Dimensions.get('window');
 
 export default function ProductsScreen({ navigation, route }) {
     const { colors, isDarkMode } = useThemeStore();
-    const { t, language } = useLanguageStore();
+    const language = useLanguageStore((s) => s.language);
+    const { t } = useLanguageStore();
     const initialCategory = route?.params?.category || 'all';
     const initialSearch = route?.params?.search || '';
     const [products, setProducts] = useState([]);

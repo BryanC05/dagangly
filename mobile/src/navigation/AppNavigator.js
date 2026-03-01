@@ -730,19 +730,22 @@ export default function AppNavigator() {
             >
                 <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ tabBarLabel: t.tabHome }} />
                 <Tab.Screen name="ProductsTab" component={ProductsStackNavigator} options={{ tabBarLabel: t.tabProducts }} />
-                <Tab.Screen 
-                    name="CartTab" 
-                    component={CartStackNavigator} 
-                    options={{ 
+                <Tab.Screen
+                    name="CartTab"
+                    component={CartStackNavigator}
+                    options={{
                         tabBarLabel: t.tabCart,
                         tabBarButton: () => null, // Hide from tab bar but keep navigable
-                    }} 
+                    }}
                 />
-                {/* Delivery disabled
-                {isDriverMode && (
-                    <Tab.Screen name="DeliveryTab" component={DeliveryStackNavigator} options={{ tabBarLabel: t.tabDelivery || 'Delivery' }} />
-                )}
-                */}
+                {/* Spacer for centering */}
+                <Tab.Screen
+                    name="Spacer"
+                    component={View}
+                    options={{
+                        tabBarButton: () => <View style={{ flex: 1 }} />,
+                    }}
+                />
                 <Tab.Screen name="AddTab" component={AddStackNavigator} options={{ tabBarLabel: t.tabAdd }} />
                 <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: t.tabProfile }} />
             </Tab.Navigator>

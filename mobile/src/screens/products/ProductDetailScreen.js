@@ -67,7 +67,8 @@ function parseMarkdown(text, textColor, fallbackColor) {
 export default function ProductDetailScreen({ route }) {
     const navigation = useNavigation();
     const { colors, isDarkMode } = useThemeStore();
-    const { t, language } = useLanguageStore();
+    const language = useLanguageStore((s) => s.language);
+    const { t } = useLanguageStore();
     const { productId } = route.params;
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);

@@ -35,7 +35,8 @@ const STATUS_COLORS = {
 
 export default function OrdersScreen({ navigation }) {
     const { colors } = useThemeStore();
-    const { t, language } = useLanguageStore();
+    const language = useLanguageStore((s) => s.language);
+    const { t } = useLanguageStore();
     const { user } = useAuthStore();
     
     const [orders, setOrders] = useState([]);

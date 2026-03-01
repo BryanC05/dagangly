@@ -10,7 +10,8 @@ import { useLanguageStore } from '../../store/languageStore';
 
 export default function RegisterScreen({ navigation }) {
     const { colors, isDarkMode } = useThemeStore();
-    const { t, language } = useLanguageStore();
+    const language = useLanguageStore((s) => s.language);
+    const { t } = useLanguageStore();
     const [form, setForm] = useState({
         name: '', email: '', password: '', phone: '',
         businessName: '', businessType: 'none',

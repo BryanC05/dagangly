@@ -35,7 +35,8 @@ const MAX_IMAGES = 4;
 
 export default function AddProductScreen({ navigation }) {
     const { colors, isDarkMode } = useThemeStore();
-    const { t, language } = useLanguageStore();
+    const language = useLanguageStore((s) => s.language);
+    const { t } = useLanguageStore();
 
     const categories = language === 'id' ? CATEGORIES_ID : CATEGORIES_EN;
     const units = language === 'id' ? UNITS_ID : UNITS_EN;

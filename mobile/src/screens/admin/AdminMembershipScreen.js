@@ -7,7 +7,8 @@ import { useLanguageStore } from '../../store/languageStore';
 import { useThemeStore } from '../../store/themeStore';
 
 export default function AdminMembershipScreen() {
-    const { t, language } = useLanguageStore();
+    const language = useLanguageStore((s) => s.language);
+    const { t } = useLanguageStore();
     const { colors } = useThemeStore();
     const [pendingMembers, setPendingMembers] = useState([]);
     const [loading, setLoading] = useState(true);

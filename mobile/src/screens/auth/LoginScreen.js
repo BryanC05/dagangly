@@ -10,7 +10,8 @@ import { useLanguageStore } from '../../store/languageStore';
 
 export default function LoginScreen({ navigation }) {
     const { colors, isDarkMode } = useThemeStore();
-    const { t, language } = useLanguageStore();
+    const language = useLanguageStore((s) => s.language);
+    const { t } = useLanguageStore();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
