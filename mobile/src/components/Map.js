@@ -1,23 +1,26 @@
 import React, { useRef, useImperativeHandle, forwardRef, Component } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Dimensions } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
+import { tokens } from '../theme/tokens';
 
 const { width, height } = Dimensions.get('window');
 
 // Try to import MapView - it may crash on standalone builds without a valid API key
-let MapView, Marker, Circle, Polyline;
+let MapView, Marker, Circle, Polyline, PROVIDER_GOOGLE;
 try {
     const maps = require('react-native-maps');
     MapView = maps.default;
     Marker = maps.Marker;
     Circle = maps.Circle;
     Polyline = maps.Polyline;
+    PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
 } catch (e) {
     console.warn('Failed to load react-native-maps:', e);
     MapView = null;
     Marker = null;
     Circle = null;
     Polyline = null;
+    PROVIDER_GOOGLE = null;
 }
 
 // Error boundary to catch runtime map crashes
@@ -38,10 +41,10 @@ class MapErrorBoundary extends Component {
     render() {
         if (this.state.hasError || !MapView) {
             return (
-                <View style={[styles.fallbackContainer, this.props.style]}>
-                    <Text style={styles.fallbackIcon}>🗺️</Text>
-                    <Text style={styles.fallbackTitle}>Map Unavailable</Text>
-                    <Text style={styles.fallbackText}>
+                <View style={[this.props.fallbackStyles.container, this.props.style]}>
+                    <Text style={this.props.fallbackStyles.icon}>🗺️</Text>
+                    <Text style={this.props.fallbackStyles.title}>Map Unavailable</Text>
+                    <Text style={this.props.fallbackStyles.text}>
                         Google Maps API key is not configured.{'\n'}
                         Seller data is still shown in the list below.
                     </Text>
@@ -72,37 +75,140 @@ const Map = forwardRef(({
     children,
 }, ref) => {
     const innerMapRef = useRef(null);
+    const { colors } = useThemeStore();
 
     useImperativeHandle(ref, () => ({
         animateToRegion: (region, duration) => {
             innerMapRef.current?.animateToRegion(region, duration);
         },
     }));
-    const { colors } = useThemeStore();
+
+    const dynamicStyles = {
+        container: {
+            flex: 1,
+        },
+        map: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+        },
+        fallbackContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.background,
+        },
+        fallbackIcon: {
+            fontSize: tokens.fontSize['5xl'],
+            marginBottom: tokens.spacing[3],
+        },
+        fallbackTitle: {
+            fontSize: tokens.fontSize.lg,
+            fontWeight: tokens.fontWeight.bold,
+            color: colors.text,
+            marginBottom: tokens.spacing[2],
+        },
+        fallbackText: {
+            fontSize: tokens.fontSize.sm,
+            color: colors.textSecondary,
+            textAlign: 'center',
+            lineHeight: tokens.lineHeight.normal * tokens.fontSize.sm,
+            paddingHorizontal: tokens.spacing[10],
+        },
+        markerContainer: {
+            alignItems: 'center',
+        },
+        markerSelected: {
+            transform: [{ scale: 1.1 }],
+        },
+        markerBubble: {
+            width: 30,
+            height: 30,
+            borderRadius: tokens.radius.full,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.card,
+            backgroundColor: colors.primary,
+            ...tokens.shadows.md,
+        },
+        markerText: {
+            color: '#fff',
+            fontSize: tokens.fontSize.sm,
+            fontWeight: tokens.fontWeight.bold,
+        },
+        markerArrow: {
+            width: 0,
+            height: 0,
+            backgroundColor: 'transparent',
+            borderStyle: 'solid',
+            borderLeftWidth: 6,
+            borderRightWidth: 6,
+            borderTopWidth: 8,
+            borderLeftColor: 'transparent',
+            borderRightColor: 'transparent',
+            borderTopColor: colors.primary,
+            marginTop: -2,
+        },
+    };
 
     if (!MapView) {
         return (
-            <View style={[styles.fallbackContainer, style]}>
-                <Text style={styles.fallbackIcon}>🗺️</Text>
-                <Text style={styles.fallbackTitle}>Map Unavailable</Text>
-                <Text style={styles.fallbackText}>
+            <View style={[dynamicStyles.fallbackContainer, style]}>
+                <Text style={dynamicStyles.fallbackIcon}>🗺️</Text>
+                <Text style={dynamicStyles.fallbackTitle}>Map Unavailable</Text>
+                <Text style={dynamicStyles.fallbackText}>
                     Google Maps API key is not configured.
                 </Text>
             </View>
         );
     }
 
+    // Custom map style for better integration with app theme
+    const mapStyle = [
+        {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+        },
+        {
+            featureType: 'transit',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+        },
+        {
+            featureType: 'water',
+            elementType: 'geometry',
+            stylers: [{ color: '#e3f2fd' }]
+        },
+        {
+            featureType: 'landscape',
+            elementType: 'geometry',
+            stylers: [{ color: '#f8fafc' }]
+        }
+    ];
+
     return (
-        <MapErrorBoundary style={style}>
-            <View style={[styles.container, style]}>
+        <MapErrorBoundary style={style} fallbackStyles={dynamicStyles}>
+            <View style={[dynamicStyles.container, style]}>
                 <MapView
                     ref={innerMapRef}
-                    style={styles.map}
+                    style={dynamicStyles.map}
+                    provider={PROVIDER_GOOGLE}
                     region={region}
                     showsUserLocation={showsUserLocation}
                     showsMyLocationButton={showsMyLocationButton}
                     showsCompass={showsCompass}
+                    customMapStyle={mapStyle}
+                    mapType="standard"
+                    loadingEnabled={true}
+                    loadingIndicatorColor={colors.primary}
+                    loadingBackgroundColor={colors.background}
                 >
+                    {/* Map Padding for better UI */}
+                    {MapView && MapView.setMapPadding && MapView.setMapPadding(0, 0, 0, 100)}
                     {/* User Location Circle */}
                     {userLocation && radius && Circle && (
                         <Circle
@@ -125,15 +231,15 @@ const Map = forwardRef(({
                                 onPress={() => onMarkerPress?.(marker)}
                             >
                                 <View style={[
-                                    styles.markerContainer,
-                                    selectedMarkerId === marker.id && styles.markerSelected
+                                    dynamicStyles.markerContainer,
+                                    selectedMarkerId === marker.id && dynamicStyles.markerSelected
                                 ]}>
-                                    <View style={[styles.markerBubble, { backgroundColor: colors.primary }]}>
-                                        <Text style={styles.markerText}>
+                                    <View style={dynamicStyles.markerBubble}>
+                                        <Text style={dynamicStyles.markerText}>
                                             {marker.number || index + 1}
                                         </Text>
                                     </View>
-                                    <View style={[styles.markerArrow, { borderTopColor: colors.primary }]} />
+                                    <View style={dynamicStyles.markerArrow} />
                                 </View>
                             </Marker>
                         ) : null
@@ -155,70 +261,3 @@ const Map = forwardRef(({
 });
 
 export default Map;
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    map: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    fallbackContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f1f5f9',
-    },
-    fallbackIcon: {
-        fontSize: 48,
-        marginBottom: 12,
-    },
-    fallbackTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#0f172a',
-        marginBottom: 8,
-    },
-    fallbackText: {
-        fontSize: 13,
-        color: '#64748b',
-        textAlign: 'center',
-        lineHeight: 20,
-        paddingHorizontal: 40,
-    },
-    markerContainer: {
-        alignItems: 'center',
-    },
-    markerBubble: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#fff',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 2,
-        elevation: 4,
-    },
-    markerSelected: {
-        transform: [{ scale: 1.2 }],
-    },
-    markerText: {
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    markerArrow: {
-        width: 0,
-        height: 0,
-        borderLeftWidth: 6,
-        borderRightWidth: 6,
-        borderTopWidth: 8,
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
-        marginTop: -2,
-    },
-});

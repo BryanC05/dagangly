@@ -503,9 +503,9 @@ export default function CartScreen({ navigation }) {
                                         </TouchableOpacity>
                                     </View>
 
-                                    <View style={[styles.infoBox, { backgroundColor: '#dbeafe' }]}>
-                                        <Ionicons name="information-circle" size={20} color="#2563eb" />
-                                        <Text style={[styles.infoText, { color: '#1e40af' }]}>
+                                    <View style={[styles.infoBox, { backgroundColor: '#cffafe' }]}>
+                                        <Ionicons name="information-circle" size={20} color="#0891b2" />
+                                        <Text style={[styles.infoText, { color: '#0e7490' }]}>
                                             The seller will confirm your scheduled pickup before preparation
                                         </Text>
                                     </View>

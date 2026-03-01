@@ -122,7 +122,7 @@ export default function OrdersScreen({ navigation }) {
                     padding: 16, 
                     marginBottom: 12,
                     borderLeftWidth: 4,
-                    borderLeftColor: isPickup ? '#f59e0b' : '#2563eb',
+                    borderLeftColor: isPickup ? '#f59e0b' : '#0891b2',
                 }}
                 onPress={() => openOrderDetails(order)}
             >

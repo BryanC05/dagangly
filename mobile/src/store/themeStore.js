@@ -3,18 +3,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Appearance } from 'react-native';
 
 const lightColors = {
-    background: '#f8fafc',
+    background: '#f3f5f7',
     card: '#ffffff',
-    text: '#0f172a',
+    text: '#1e293b',
     textSecondary: '#64748b',
     textTertiary: '#94a3b8',
     border: '#e2e8f0',
-    primary: '#3b82f6',
-    primaryLight: '#eff6ff',
-    primaryDark: '#2563eb',
+    primary: '#06b6d4',
+    primaryLight: '#ecfeff',
+    primaryDark: '#0891b2',
     input: '#f1f5f9',
     tabBar: '#ffffff',
-    tabBorder: '#f1f5f9',
+    tabBorder: '#e2e8f0',
     success: '#10b981',
     successLight: '#ecfdf5',
     danger: '#ef4444',
@@ -23,19 +23,21 @@ const lightColors = {
     warningLight: '#fffbeb',
     white: '#ffffff',
     placeholder: '#94a3b8',
-    shadow: 'rgba(0, 0, 0, 0.06)',
+    shadow: 'rgba(0, 0, 0, 0.08)',
+    surface: '#f1f5f9',
+    glow: 'rgba(6, 182, 212, 0.3)',
 };
 
 const darkColors = {
     background: '#0f172a',
     card: '#1e293b',
-    text: '#f1f5f9',
+    text: '#e2e8f0',
     textSecondary: '#94a3b8',
     textTertiary: '#64748b',
     border: '#334155',
-    primary: '#60a5fa',
-    primaryLight: '#1e3a5f',
-    primaryDark: '#3b82f6',
+    primary: '#22d3ee',
+    primaryLight: '#164e63',
+    primaryDark: '#06b6d4',
     input: '#1e293b',
     tabBar: '#1e293b',
     tabBorder: '#334155',
@@ -48,6 +50,8 @@ const darkColors = {
     white: '#1e293b',
     placeholder: '#64748b',
     shadow: 'rgba(0, 0, 0, 0.4)',
+    surface: '#1e293b',
+    glow: 'rgba(34, 211, 238, 0.3)',
 };
 
 export const useThemeStore = create((set, get) => ({

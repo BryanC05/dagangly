@@ -214,7 +214,7 @@ export default function BusinessDetailsScreen() {
                         })}
                     >
                         <View style={styles.locationIcon}>
-                            <Ionicons name="location" size={20} color="#3b82f6" />
+                            <Ionicons name="location" size={20} color="#06b6d4" />
                         </View>
                         <View style={styles.locationInfo}>
                             <Text style={styles.locationAddress} numberOfLines={2}>

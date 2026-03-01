@@ -1,120 +1,138 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeStore } from '../store/themeStore';
 import { formatRelativeTime, truncateText } from '../utils/helpers';
+import { tokens } from '../theme/tokens';
 
 export default function ForumPostCard({ post, onPress }) {
     const { colors } = useThemeStore();
 
+    const dynamicStyles = {
+        card: {
+            borderRadius: tokens.radius.lg,
+            padding: tokens.spacing[4],
+            marginBottom: tokens.spacing[3],
+            backgroundColor: colors.card,
+            borderWidth: 1,
+            borderColor: colors.border,
+            ...tokens.shadows.sm,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: tokens.spacing[2.5],
+        },
+        avatar: {
+            width: 32,
+            height: 32,
+            borderRadius: tokens.radius.full,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: tokens.spacing[2.5],
+            backgroundColor: colors.primary,
+        },
+        avatarText: {
+            color: '#fff',
+            fontWeight: tokens.fontWeight.bold,
+            fontSize: tokens.fontSize.base,
+        },
+        headerInfo: {
+            flex: 1,
+        },
+        authorName: {
+            fontSize: tokens.fontSize.sm,
+            fontWeight: tokens.fontWeight.semibold,
+            color: colors.text,
+        },
+        date: {
+            fontSize: tokens.fontSize.xs,
+            marginTop: tokens.spacing[0.5],
+            color: colors.textSecondary,
+        },
+        title: {
+            fontSize: tokens.fontSize.base,
+            fontWeight: tokens.fontWeight.bold,
+            marginBottom: tokens.spacing[1.5],
+            lineHeight: tokens.lineHeight.tight * tokens.fontSize.base,
+            color: colors.text,
+        },
+        content: {
+            fontSize: tokens.fontSize.sm,
+            lineHeight: tokens.lineHeight.normal * tokens.fontSize.sm,
+            marginBottom: tokens.spacing[3],
+            color: colors.textSecondary,
+        },
+        footer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: tokens.spacing[4],
+        },
+        stat: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: tokens.spacing[1],
+        },
+        statText: {
+            fontSize: tokens.fontSize.xs,
+            color: colors.textSecondary,
+        },
+        badge: {
+            marginLeft: 'auto',
+            paddingHorizontal: tokens.spacing[2],
+            paddingVertical: tokens.spacing[0.5] + tokens.spacing[1],
+            borderRadius: tokens.radius.md,
+            backgroundColor: colors.primary + '20',
+        },
+        badgeText: {
+            fontSize: tokens.fontSize.xs - 1,
+            fontWeight: tokens.fontWeight.semibold,
+            color: colors.primary,
+        },
+    };
+
     return (
-        <TouchableOpacity style={[styles.card, { backgroundColor: colors.card }]} onPress={onPress} activeOpacity={0.7}>
-            <View style={styles.header}>
-                <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-                    <Text style={styles.avatarText}>
+        <TouchableOpacity 
+            style={dynamicStyles.card} 
+            onPress={onPress} 
+            activeOpacity={0.9}
+        >
+            <View style={dynamicStyles.header}>
+                <View style={dynamicStyles.avatar}>
+                    <Text style={dynamicStyles.avatarText}>
                         {(post.author?.name || 'U').charAt(0).toUpperCase()}
                     </Text>
                 </View>
-                <View style={styles.headerInfo}>
-                    <Text style={[styles.authorName, { color: colors.text }]}>{post.author?.name || 'Anonymous'}</Text>
-                    <Text style={[styles.date, { color: colors.textSecondary }]}>{formatRelativeTime(post.createdAt)}</Text>
+                <View style={dynamicStyles.headerInfo}>
+                    <Text style={dynamicStyles.authorName}>
+                        {post.author?.name || 'Anonymous'}
+                    </Text>
+                    <Text style={dynamicStyles.date}>
+                        {formatRelativeTime(post.createdAt)}
+                    </Text>
                 </View>
             </View>
-            <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{post.title}</Text>
-            <Text style={[styles.content, { color: colors.textSecondary }]} numberOfLines={3}>
+            <Text style={dynamicStyles.title} numberOfLines={2}>
+                {post.title}
+            </Text>
+            <Text style={dynamicStyles.content} numberOfLines={3}>
                 {truncateText(post.content, 150)}
             </Text>
-            <View style={styles.footer}>
-                <View style={styles.stat}>
+            <View style={dynamicStyles.footer}>
+                <View style={dynamicStyles.stat}>
                     <Ionicons name="chatbubble-outline" size={14} color={colors.textSecondary} />
-                    <Text style={[styles.statText, { color: colors.textSecondary }]}>{post.replyCount || 0}</Text>
+                    <Text style={dynamicStyles.statText}>{post.replyCount || 0}</Text>
                 </View>
-                <View style={styles.stat}>
+                <View style={dynamicStyles.stat}>
                     <Ionicons name="heart-outline" size={14} color={colors.textSecondary} />
-                    <Text style={[styles.statText, { color: colors.textSecondary }]}>{post.likes?.length || 0}</Text>
+                    <Text style={dynamicStyles.statText}>{post.likes?.length || 0}</Text>
                 </View>
                 {post.category && (
-                    <View style={[styles.badge, { backgroundColor: colors.primary + '20' }]}>
-                        <Text style={[styles.badgeText, { color: colors.primary }]}>{post.category}</Text>
+                    <View style={dynamicStyles.badge}>
+                        <Text style={dynamicStyles.badgeText}>{post.category}</Text>
                     </View>
                 )}
             </View>
         </TouchableOpacity>
     );
 }
-
-const styles = StyleSheet.create({
-    card: {
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    avatar: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 10,
-    },
-    avatarText: {
-        color: '#fff',
-        fontWeight: '700',
-        fontSize: 14,
-    },
-    headerInfo: {
-        flex: 1,
-    },
-    authorName: {
-        fontSize: 13,
-        fontWeight: '600',
-    },
-    date: {
-        fontSize: 11,
-        marginTop: 1,
-    },
-    title: {
-        fontSize: 15,
-        fontWeight: '700',
-        marginBottom: 6,
-        lineHeight: 20,
-    },
-    content: {
-        fontSize: 13,
-        lineHeight: 18,
-        marginBottom: 12,
-    },
-    footer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-    },
-    stat: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    statText: {
-        fontSize: 12,
-    },
-    badge: {
-        marginLeft: 'auto',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 10,
-    },
-    badgeText: {
-        fontSize: 10,
-        fontWeight: '600',
-    },
-});

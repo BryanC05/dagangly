@@ -53,7 +53,7 @@ export default function MessagesScreen({ navigation }) {
             backgroundColor: '#fff', borderBottomWidth: 1, borderColor: '#f3f4f6',
         },
         avatar: {
-            width: 48, height: 48, borderRadius: 24, backgroundColor: '#3b82f6',
+            width: 48, height: 48, borderRadius: 24, backgroundColor: '#06b6d4',
             justifyContent: 'center', alignItems: 'center', marginRight: 12,
         },
         avatarText: { color: '#fff', fontWeight: '700', fontSize: 18 },
@@ -125,7 +125,7 @@ export default function MessagesScreen({ navigation }) {
                 keyExtractor={(item) => item._id}
                 renderItem={renderRoom}
                 contentContainerStyle={styles.list}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3b82f6" />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#06b6d4" />}
                 ListEmptyComponent={
                     <View style={styles.empty}>
                         <Ionicons name="chatbubbles-outline" size={48} color="#d1d5db" />

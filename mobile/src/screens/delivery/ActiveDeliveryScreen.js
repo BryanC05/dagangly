@@ -4,7 +4,7 @@ import {
     Linking, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useThemeStore } from '../../store/themeStore';
 import { useLanguageStore } from '../../store/languageStore';
 import { useDriverStore } from '../../store/driverStore';
@@ -395,9 +395,12 @@ export default function ActiveDeliveryScreen() {
         <View style={styles.container}>
             <MapView
                 style={styles.map}
+                provider={PROVIDER_GOOGLE}
                 region={mapRegion}
                 showsUserLocation
                 showsMyLocationButton={false}
+                loadingEnabled={true}
+                loadingIndicatorColor={colors.primary}
             >
                 <Marker
                     coordinate={{ latitude: storeLat, longitude: storeLng }}

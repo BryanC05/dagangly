@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Linking, Platform } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -390,10 +390,13 @@ export default function LiveTrackingMap() {
             <MapView
                 ref={mapRef}
                 style={styles.map}
+                provider={PROVIDER_GOOGLE}
                 showsUserLocation
                 showsMyLocationButton={false}
                 showsCompass
                 initialRegion={mapRegion}
+                loadingEnabled={true}
+                loadingIndicatorColor={colors.primary}
             >
                 {storeCoords && (
                     <Marker

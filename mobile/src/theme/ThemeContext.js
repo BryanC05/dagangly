@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
+import { View, Text } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
 
 const ThemeContext = createContext();
@@ -14,6 +15,24 @@ export function ThemeProvider({ children }) {
         isDarkMode,
         colors,
         spacing: (n) => n * 4,
+        fonts: {
+            regular: {
+                fontFamily: 'System',
+                fontWeight: '400',
+            },
+            medium: {
+                fontFamily: 'System',
+                fontWeight: '500',
+            },
+            bold: {
+                fontFamily: 'System',
+                fontWeight: '700',
+            },
+            display: {
+                fontFamily: 'System',
+                fontWeight: '700',
+            },
+        },
     }), [isDarkMode, colors]);
 
     return (

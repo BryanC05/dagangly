@@ -197,14 +197,12 @@ export default function ProfileScreen({ navigation }) {
         { icon: 'chatbubbles-outline', label: t.messages, onPress: () => navigation.navigate('Messages'), color: '#0ea5e9' },
         { icon: 'notifications-outline', label: 'Notifications', onPress: () => navigation.navigate('Notifications'), color: '#f43f5e', badge: unreadNotifCount > 0 ? (unreadNotifCount > 9 ? '9+' : String(unreadNotifCount)) : null },
         { icon: 'heart-outline', label: 'Saved Products', onPress: () => navigation.navigate('Wishlist'), color: '#ef4444' },
-        { icon: 'receipt-outline', label: t.orderHistory, onPress: () => navigation.navigate('Orders'), color: '#3b82f6' },
+        { icon: 'receipt-outline', label: t.orderHistory, onPress: () => navigation.navigate('Orders'), color: '#06b6d4' },
         // Delivery disabled: { icon: 'bicycle-outline', label: t.driverMode || 'Driver Mode', onPress: handleToggleDriverMode, color: '#10b981', isToggle: true, toggleValue: isDriverMode, isLoading: togglingDriver },
         { icon: 'location-outline', label: t.nearbySellers, onPress: () => navigation.navigate('HomeTab', { screen: 'NearbySellers' }), color: '#ef4444' },
         { icon: 'color-palette-outline', label: t.logoGenerator, onPress: () => navigation.navigate('LogoGenerator'), color: '#8b5cf6' },
-        ...(user?.isSeller ? [{
-            icon: 'storefront-outline', label: t.sellerDashboard,
-            onPress: () => navigation.navigate('SellerDashboard'), color: '#16a34a'
-        }] : []),
+        // All users are now sellers by default
+        { icon: 'storefront-outline', label: t.sellerDashboard, onPress: () => navigation.navigate('SellerDashboard'), color: '#16a34a' },
         { icon: 'chatbubbles-outline', label: t.forum, onPress: () => navigation.navigate('Forum'), color: '#8b5cf6' },
         // Admin option (manual access for now)
         { icon: 'shield-checkmark-outline', label: t.membershipApprovals || 'Membership Approvals', onPress: () => navigation.navigate('AdminMembership'), color: '#f59e0b' },
@@ -251,12 +249,11 @@ export default function ProfileScreen({ navigation }) {
                         {user?.phone ? (
                             <Text style={styles.profilePhone}>{user.phone}</Text>
                         ) : null}
-                        {user?.isSeller && (
-                            <View style={styles.sellerBadge}>
-                                <Ionicons name="storefront" size={12} color="#16a34a" />
-                                <Text style={styles.sellerBadgeText}>{t.seller}</Text>
-                            </View>
-                        )}
+                        {/* All users are now sellers - show badge always */}
+                        <View style={styles.sellerBadge}>
+                            <Ionicons name="storefront" size={12} color="#16a34a" />
+                            <Text style={styles.sellerBadgeText}>{t.seller}</Text>
+                        </View>
                         {user?.businessName && (
                             <Text style={styles.businessName}>{user.businessName}</Text>
                         )}
@@ -286,16 +283,15 @@ export default function ProfileScreen({ navigation }) {
                                 placeholderTextColor={colors.textSecondary}
                             />
                         </View>
-                        {user?.isSeller && (
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.inputLabel}>{t.businessName}</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    value={form.businessName}
-                                    onChangeText={(v) => setForm({ ...form, businessName: v })}
-                                />
-                            </View>
-                        )}
+                        {/* Business info is now optional for all users */}
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.inputLabel}>{t.businessName}</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={form.businessName}
+                                onChangeText={(v) => setForm({ ...form, businessName: v })}
+                            />
+                        </View>
                         <View style={styles.editActions}>
                             <TouchableOpacity style={styles.cancelBtn} onPress={() => setEditing(false)}>
                                 <Text style={styles.cancelBtnText}>{t.cancel}</Text>

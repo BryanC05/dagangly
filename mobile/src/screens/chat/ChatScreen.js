@@ -134,7 +134,7 @@ export default function ChatScreen({ route, navigation }) {
         msgRow: { marginBottom: 8, alignItems: 'flex-start' },
         msgRowMe: { alignItems: 'flex-end' },
         bubble: { maxWidth: '78%', padding: 12, borderRadius: 16 },
-        bubbleMe: { backgroundColor: '#3b82f6', borderBottomRightRadius: 4 },
+        bubbleMe: { backgroundColor: '#06b6d4', borderBottomRightRadius: 4 },
         bubbleOther: {
             backgroundColor: colors.card, borderBottomLeftRadius: 4,
             shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
@@ -155,7 +155,7 @@ export default function ChatScreen({ route, navigation }) {
             paddingVertical: 10, fontSize: 14, color: colors.text, maxHeight: 100,
         },
         sendBtn: {
-            width: 42, height: 42, borderRadius: 21, backgroundColor: '#3b82f6',
+            width: 42, height: 42, borderRadius: 21, backgroundColor: '#06b6d4',
             justifyContent: 'center', alignItems: 'center',
         },
         sendBtnDisabled: { backgroundColor: '#d1d5db' },

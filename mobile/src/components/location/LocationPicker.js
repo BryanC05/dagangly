@@ -3,7 +3,7 @@ import {
     View, Text, TouchableOpacity, StyleSheet, Modal,
     ActivityIndicator, Alert, Dimensions, Platform,
 } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeStore } from '../../store/themeStore';
@@ -117,10 +117,14 @@ export default function LocationPicker({ visible, onClose, onLocationSelect, ini
                     <MapView
                         ref={mapRef}
                         style={styles.map}
+                        provider={PROVIDER_GOOGLE}
                         initialRegion={{ ...markerCoord, ...DEFAULT_DELTA }}
                         onPress={handleMapPress}
                         showsUserLocation
                         showsMyLocationButton={false}
+                        loadingEnabled={true}
+                        loadingIndicatorColor={colors.primary}
+                        loadingBackgroundColor={colors.background}
                     >
                         <Marker
                             coordinate={markerCoord}

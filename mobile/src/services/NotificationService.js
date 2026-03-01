@@ -79,7 +79,7 @@ class NotificationService {
                     name: 'High Importance Notifications',
                     importance: Notifications.AndroidImportance.MAX,
                     vibrationPattern: [0, 250, 250, 250],
-                    lightColor: '#3b82f6',
+                    lightColor: '#06b6d4',
                 });
             }
 
@@ -190,7 +190,7 @@ class NotificationService {
                     name: 'High Importance Notifications',
                     importance: Notifications.AndroidImportance.MAX,
                     vibrationPattern: [0, 250, 250, 250],
-                    lightColor: '#3b82f6',
+                    lightColor: '#06b6d4',
                 });
             } catch (channelError) {
                 console.log('Channel setup (may already exist):', channelError.message);

@@ -93,7 +93,7 @@ export default function AdminMembershipScreen() {
         date: { fontSize: 12, color: colors.textTertiary, marginTop: 4 },
         actions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
         viewProofBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
-        viewProofText: { color: '#3b82f6', fontSize: 14 },
+        viewProofText: { color: '#06b6d4', fontSize: 14 },
         actionBtns: { flexDirection: 'row', gap: 8 },
         rejectBtn: {
             width: 36, height: 36, borderRadius: 18,
@@ -111,7 +111,7 @@ export default function AdminMembershipScreen() {
         <View style={styles.card}>
             <View style={styles.cardHeader}>
                 <View style={styles.avatar}>
-                    <Ionicons name="person" size={24} color="#3b82f6" />
+                    <Ionicons name="person" size={24} color="#06b6d4" />
                 </View>
                 <View style={styles.info}>
                     <Text style={styles.name}>{item.name}</Text>
@@ -135,7 +135,7 @@ export default function AdminMembershipScreen() {
                             ]);
                         }}
                     >
-                        <Ionicons name="image" size={16} color="#3b82f6" />
+                        <Ionicons name="image" size={16} color="#06b6d4" />
                         <Text style={styles.viewProofText}>View Proof</Text>
                     </TouchableOpacity>
                 )}
@@ -178,7 +178,7 @@ export default function AdminMembershipScreen() {
                     keyExtractor={(item) => item._id}
                     contentContainerStyle={styles.list}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3b82f6" />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#06b6d4" />
                     }
                 />
             )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet,
     FlatList, RefreshControl, Dimensions, ActivityIndicator,
@@ -28,7 +28,6 @@ export default function ProductsScreen({ navigation, route }) {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    // Get categories and sort options based on language
     const categories = language === 'id' ? CATEGORIES_ID : CATEGORIES_EN;
     const sortOptions = language === 'id' ? SORT_OPTIONS_ID : SORT_OPTIONS_EN;
 
@@ -85,16 +84,122 @@ export default function ProductsScreen({ navigation, route }) {
         }
     };
 
+    const styles = {
+        container: { flex: 1, backgroundColor: colors.background },
+        list: { paddingBottom: 20 },
+        row: { paddingHorizontal: 16, gap: 12 },
+        searchRow: { 
+            flexDirection: 'row', 
+            paddingHorizontal: 16, 
+            paddingTop: 12, 
+            paddingBottom: 8, 
+            gap: 10 
+        },
+        searchWrap: {
+            flex: 1, 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            gap: 10,
+            backgroundColor: colors.card, 
+            borderRadius: 10, 
+            paddingHorizontal: 14, 
+            height: 44,
+            borderWidth: 1, 
+            borderColor: colors.border,
+        },
+        searchInput: { 
+            flex: 1, 
+            fontSize: 14, 
+            color: colors.text,
+        },
+        sortBtn: {
+            width: 44, 
+            height: 44, 
+            borderRadius: 10,
+            backgroundColor: colors.primary + '15', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: colors.primary + '30',
+        },
+        sortDropdown: {
+            marginHorizontal: 16, 
+            backgroundColor: colors.card, 
+            borderRadius: 10,
+            borderWidth: 1, 
+            borderColor: colors.border, 
+            marginBottom: 12, 
+            overflow: 'hidden',
+        },
+        sortOption: {
+            flexDirection: 'row', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            paddingHorizontal: 16, 
+            paddingVertical: 12, 
+            borderBottomWidth: 1, 
+            borderColor: colors.border,
+        },
+        sortOptionText: { 
+            fontSize: 14, 
+            color: colors.text,
+        },
+        sortOptionTextActive: { 
+            color: colors.primary, 
+            fontWeight: '600' 
+        },
+        catRow: { 
+            paddingHorizontal: 16, 
+            paddingBottom: 16, 
+            gap: 10 
+        },
+        catChip: {
+            paddingHorizontal: 14, 
+            paddingVertical: 8, 
+            borderRadius: 20,
+            backgroundColor: colors.card, 
+            borderWidth: 1, 
+            borderColor: colors.border,
+        },
+        catChipActive: { 
+            backgroundColor: colors.primary, 
+            borderColor: colors.primary 
+        },
+        catChipText: { 
+            fontSize: 12, 
+            color: colors.textSecondary, 
+            fontWeight: '500' 
+        },
+        catChipTextActive: { 
+            color: '#fff',
+            fontWeight: '600',
+        },
+        empty: { 
+            alignItems: 'center', 
+            paddingTop: 60 
+        },
+        emptyTitle: { 
+            fontSize: 16, 
+            fontWeight: '600', 
+            color: colors.textSecondary, 
+            marginTop: 12 
+        },
+        emptyText: { 
+            fontSize: 13, 
+            color: colors.textTertiary, 
+            marginTop: 4 
+        },
+    };
+
     const renderHeader = () => (
         <View>
-            {/* Search */}
             <View style={styles.searchRow}>
-                <View style={[styles.searchWrap, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <View style={styles.searchWrap}>
                     <Ionicons name="search" size={18} color={colors.textSecondary} />
                     <TextInput
-                        style={[styles.searchInput, { color: colors.text }]}
-                        placeholder={t.searchProducts || 'Search products...'}
-                        placeholderTextColor={colors.placeholder}
+                        style={styles.searchInput}
+                        placeholder="Cari produk..."
+                        placeholderTextColor={colors.textSecondary}
                         value={search}
                         onChangeText={setSearch}
                         returnKeyType="search"
@@ -105,30 +210,39 @@ export default function ProductsScreen({ navigation, route }) {
                         </TouchableOpacity>
                     )}
                 </View>
-                <TouchableOpacity style={[styles.sortBtn, { backgroundColor: colors.primaryLight }]} onPress={() => setShowSort(!showSort)}>
+                <TouchableOpacity 
+                    style={styles.sortBtn} 
+                    onPress={() => setShowSort(!showSort)}
+                >
                     <Ionicons name="funnel-outline" size={18} color={colors.primary} />
                 </TouchableOpacity>
             </View>
 
-            {/* Sort dropdown */}
             {showSort && (
-                <View style={[styles.sortDropdown, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <View style={styles.sortDropdown}>
                     {sortOptions.map((opt) => (
                         <TouchableOpacity
                             key={opt.id}
-                            style={[styles.sortOption, sortBy === opt.id && { backgroundColor: colors.primaryLight }, { borderBottomColor: colors.border }]}
+                            style={[
+                                styles.sortOption, 
+                                sortBy === opt.id && { backgroundColor: colors.primary + '10' },
+                            ]}
                             onPress={() => { setSortBy(opt.id); setShowSort(false); }}
                         >
-                            <Text style={[styles.sortOptionText, { color: colors.text }, sortBy === opt.id && { color: colors.primary, fontWeight: '600' }]}>
+                            <Text style={[
+                                styles.sortOptionText, 
+                                sortBy === opt.id && styles.sortOptionTextActive
+                            ]}>
                                 {opt.name}
                             </Text>
-                            {sortBy === opt.id && <Ionicons name="checkmark" size={16} color={colors.primary} />}
+                            {sortBy === opt.id && (
+                                <Ionicons name="checkmark" size={16} color={colors.primary} />
+                            )}
                         </TouchableOpacity>
                     ))}
                 </View>
             )}
 
-            {/* Category chips */}
             <FlatList
                 data={categories}
                 horizontal
@@ -137,10 +251,16 @@ export default function ProductsScreen({ navigation, route }) {
                 contentContainerStyle={styles.catRow}
                 renderItem={({ item }) => (
                     <TouchableOpacity
-                        style={[styles.catChip, category === item.id && styles.catChipActive]}
+                        style={[
+                            styles.catChip, 
+                            category === item.id && styles.catChipActive
+                        ]}
                         onPress={() => setCategory(item.id)}
                     >
-                        <Text style={[styles.catChipText, category === item.id && styles.catChipTextActive]}>
+                        <Text style={[
+                            styles.catChipText, 
+                            category === item.id && styles.catChipTextActive
+                        ]}>
                             {item.icon} {item.name}
                         </Text>
                     </TouchableOpacity>
@@ -151,14 +271,14 @@ export default function ProductsScreen({ navigation, route }) {
 
     const renderEmpty = () => (
         <View style={styles.empty}>
-            <Ionicons name="cube-outline" size={48} color="#d1d5db" />
-            <Text style={styles.emptyTitle}>{t.noProductsFound || 'No products found'}</Text>
-            <Text style={styles.emptyText}>{t.tryAdjustingFilters || 'Try adjusting your filters'}</Text>
+            <Ionicons name="cube-outline" size={48} color={colors.textTertiary} />
+            <Text style={styles.emptyTitle}>Tidak ada produk</Text>
+            <Text style={styles.emptyText}>Coba sesuaikan filter pencarian</Text>
         </View>
     );
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.container}>
             {loading && products.length === 0 ? (
                 <ProductsListSkeleton count={8} />
             ) : (
@@ -170,10 +290,23 @@ export default function ProductsScreen({ navigation, route }) {
                     contentContainerStyle={styles.list}
                     ListHeaderComponent={renderHeader}
                     ListEmptyComponent={!loading ? renderEmpty : null}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3b82f6" />}
+                    refreshControl={
+                        <RefreshControl 
+                            refreshing={refreshing} 
+                            onRefresh={onRefresh} 
+                            tintColor={colors.primary} 
+                        />
+                    }
                     onEndReached={onEndReached}
                     onEndReachedThreshold={0.3}
-                    ListFooterComponent={loadingMore ? <ActivityIndicator style={{ padding: 16 }} color="#3b82f6" /> : null}
+                    ListFooterComponent={
+                        loadingMore ? (
+                            <ActivityIndicator 
+                                style={{ padding: 16 }} 
+                                color={colors.primary} 
+                            />
+                        ) : null
+                    }
                     renderItem={({ item }) => (
                         <ProductCard
                             product={item}
@@ -185,46 +318,3 @@ export default function ProductsScreen({ navigation, route }) {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1 },
-    list: { paddingBottom: 20 },
-    row: { paddingHorizontal: 16, gap: 12 },
-    searchRow: { flexDirection: 'row', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, gap: 10 },
-    searchWrap: {
-        flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8,
-        backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 14, height: 44,
-        borderWidth: 1, borderColor: '#e5e7eb',
-    },
-    searchInput: { flex: 1, fontSize: 14, color: '#111827' },
-    sortBtn: {
-        width: 44, height: 44, borderRadius: 12,
-        backgroundColor: '#eff6ff', justifyContent: 'center', alignItems: 'center',
-    },
-    sortDropdown: {
-        marginHorizontal: 16, backgroundColor: '#fff', borderRadius: 12,
-        borderWidth: 1, borderColor: '#e5e7eb', marginBottom: 8, overflow: 'hidden',
-    },
-    sortOption: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderColor: '#f3f4f6',
-    },
-    sortOptionActive: { backgroundColor: '#eff6ff' },
-    sortOptionText: { fontSize: 14, color: '#374151' },
-    sortOptionTextActive: { color: '#3b82f6', fontWeight: '600' },
-    catRow: { paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
-    catChip: {
-        paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-        backgroundColor: '#fff', borderWidth: 1, borderColor: '#e5e7eb',
-    },
-    catChipActive: { backgroundColor: '#3b82f6', borderColor: '#3b82f6' },
-    catChipText: { fontSize: 12, color: '#6b7280', fontWeight: '500' },
-    catChipTextActive: { color: '#fff' },
-    empty: { alignItems: 'center', paddingTop: 60 },
-    emptyTitle: { fontSize: 16, fontWeight: '600', color: '#6b7280', marginTop: 12 },
-    emptyText: { fontSize: 13, color: '#9ca3af', marginTop: 4 },
-    loadingOverlay: {
-        ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center',
-        backgroundColor: 'rgba(248,250,252,0.8)',
-    },
-});

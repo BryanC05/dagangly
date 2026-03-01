@@ -9,7 +9,7 @@ import { useThemeStore } from '../../store/themeStore';
 import { useLanguageStore } from '../../store/languageStore';
 
 export default function LoginScreen({ navigation }) {
-    const { colors } = useThemeStore();
+    const { colors, isDarkMode } = useThemeStore();
     const { t } = useLanguageStore();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -39,108 +39,185 @@ export default function LoginScreen({ navigation }) {
     };
 
     const styles = {
-        container: { flex: 1, backgroundColor: colors.background },
-        scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-        header: { alignItems: 'center', marginBottom: 36 },
-        iconWrap: {
-            width: 80, height: 80, borderRadius: 40,
-            backgroundColor: colors.primary + '20', justifyContent: 'center', alignItems: 'center', marginBottom: 16,
+        container: { 
+            flex: 1, 
+            backgroundColor: isDarkMode ? '#0f172a' : '#f3f5f7',
         },
-        title: { fontSize: 28, fontWeight: '800', color: colors.text, marginBottom: 4 },
-        subtitle: { fontSize: 15, color: colors.textSecondary },
+        scroll: { 
+            flexGrow: 1, 
+            justifyContent: 'center', 
+            padding: 24,
+        },
+        card: {
+            backgroundColor: colors.card,
+            borderRadius: 12,
+            padding: 24,
+            borderWidth: 1,
+            borderColor: colors.border,
+            shadowColor: isDarkMode ? colors.primary : '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: isDarkMode ? 0.1 : 0.08,
+            shadowRadius: 12,
+            elevation: 4,
+        },
+        header: { alignItems: 'center', marginBottom: 24 },
+        title: { 
+            fontSize: 24, 
+            fontWeight: '800', 
+            color: colors.text, 
+            marginBottom: 4,
+            letterSpacing: 0.3,
+        },
+        subtitle: { 
+            fontSize: 14, 
+            color: colors.textSecondary,
+        },
         form: { gap: 16 },
         inputGroup: { gap: 6 },
-        label: { fontSize: 13, fontWeight: '600', color: colors.text, marginLeft: 2 },
+        label: { 
+            fontSize: 11, 
+            fontWeight: '600', 
+            color: colors.textSecondary,
+            letterSpacing: 0.5,
+            textTransform: 'uppercase',
+        },
         inputWrap: {
-            flexDirection: 'row', alignItems: 'center',
-            backgroundColor: colors.card, borderRadius: 12, borderWidth: 1, borderColor: colors.border,
-            paddingHorizontal: 14, height: 50,
+            flexDirection: 'row', 
+            alignItems: 'center',
+            backgroundColor: isDarkMode ? '#1e293b' : '#f1f5f9',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: colors.border,
+            paddingHorizontal: 14,
+            height: 48,
         },
         inputIcon: { marginRight: 10 },
-        input: { flex: 1, fontSize: 15, color: colors.text },
+        input: { 
+            flex: 1, 
+            fontSize: 15, 
+            color: colors.text,
+        },
+        passwordBtn: {
+            padding: 4,
+        },
         button: {
-            backgroundColor: colors.primary, borderRadius: 12, height: 50,
-            justifyContent: 'center', alignItems: 'center', marginTop: 8,
-            shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+            backgroundColor: colors.primary,
+            borderRadius: 8,
+            height: 48,
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            marginTop: 8,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 4,
         },
         buttonDisabled: { opacity: 0.7 },
-        buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-        linkButton: { alignItems: 'center', marginTop: 12 },
+        buttonText: { 
+            color: '#fff', 
+            fontSize: 15, 
+            fontWeight: '700',
+            letterSpacing: 0.5,
+        },
+        linkButton: { alignItems: 'center', marginTop: 20 },
         linkText: { fontSize: 14, color: colors.textSecondary },
         linkBold: { color: colors.primary, fontWeight: '700' },
+        decorRow: {
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 20,
+            gap: 4,
+        },
+        decorDot: {
+            width: 4,
+            height: 4,
+            borderRadius: 2,
+        },
     };
 
     return (
         <KeyboardAvoidingView
-            style={[styles.container, { backgroundColor: colors.background }]}
+            style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-                <View style={styles.header}>
-                    <View style={styles.iconWrap}>
-                        <Ionicons name="storefront" size={40} color={colors.primary} />
+                <View style={styles.card}>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Masuk</Text>
+                        <Text style={styles.subtitle}>Selamat datang kembali</Text>
                     </View>
-                    <Text style={styles.title}>{t.welcomeBack}</Text>
-                    <Text style={styles.subtitle}>{t.signInTo}</Text>
+
+                    <View style={styles.form}>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Email</Text>
+                            <View style={styles.inputWrap}>
+                                <Ionicons name="mail-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="nama@email.com"
+                                    placeholderTextColor={colors.textSecondary}
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                />
+                            </View>
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Password</Text>
+                            <View style={styles.inputWrap}>
+                                <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="••••••••"
+                                    placeholderTextColor={colors.textSecondary}
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry={!showPassword}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.passwordBtn} 
+                                    onPress={() => setShowPassword(!showPassword)}
+                                >
+                                    <Ionicons 
+                                        name={showPassword ? 'eye-off-outline' : 'eye-outline'} 
+                                        size={20} 
+                                        color={colors.textSecondary} 
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        <TouchableOpacity
+                            style={[styles.button, loading && styles.buttonDisabled]}
+                            onPress={handleLogin}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <Text style={styles.buttonText}>Masuk</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.linkButton}
+                            onPress={() => navigation.navigate('Register')}
+                        >
+                            <Text style={styles.linkText}>
+                                Belum punya akun? <Text style={styles.linkBold}>Daftar</Text>
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
-                <View style={styles.form}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>{t.email}</Text>
-                        <View style={styles.inputWrap}>
-                            <Ionicons name="mail-outline" size={18} color="#9ca3af" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder={t.emailPlaceholder}
-                                placeholderTextColor="#9ca3af"
-                                value={email}
-                                onChangeText={setEmail}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                            />
-                        </View>
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>{t.password}</Text>
-                        <View style={styles.inputWrap}>
-                            <Ionicons name="lock-closed-outline" size={18} color="#9ca3af" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder={t.passwordPlaceholder}
-                                placeholderTextColor="#9ca3af"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry={!showPassword}
-                            />
-                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#9ca3af" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    <TouchableOpacity
-                        style={[styles.button, loading && styles.buttonDisabled]}
-                        onPress={handleLogin}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={styles.buttonText}>{t.signIn}</Text>
-                        )}
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.linkButton}
-                        onPress={() => navigation.navigate('Register')}
-                    >
-                        <Text style={styles.linkText}>
-                            {t.noAccount} <Text style={styles.linkBold}>{t.signUp}</Text>
-                        </Text>
-                    </TouchableOpacity>
+                <View style={styles.decorRow}>
+                    <View style={[styles.decorDot, { backgroundColor: colors.primary + '40' }]} />
+                    <View style={[styles.decorDot, { backgroundColor: colors.primary + '20' }]} />
+                    <View style={[styles.decorDot, { backgroundColor: colors.primary + '10' }]} />
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>

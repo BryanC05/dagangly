@@ -43,7 +43,7 @@ export function Skeleton({ width: w = '100%', height = 20, borderRadius = 8, sty
 }
 
 // ===== Home Screen Skeleton =====
-// Matches: hero banner → stats row → categories → product grid
+// Matches: hero banner → nearby sellers → categories → product grid
 export function HomeScreenSkeleton() {
     const { colors, isDarkMode } = useThemeStore();
 
@@ -51,57 +51,99 @@ export function HomeScreenSkeleton() {
         <ScrollView style={{ flex: 1, backgroundColor: colors.background }} showsVerticalScrollIndicator={false}>
             {/* Hero banner */}
             <View style={{
-                backgroundColor: colors.primary,
-                paddingHorizontal: 20, paddingTop: 60, paddingBottom: 36,
-                borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
+                backgroundColor: isDarkMode ? '#0f172a' : '#f3f5f7',
+                paddingHorizontal: 20, paddingTop: 60, paddingBottom: 32,
             }}>
-                <Skeleton width="70%" height={28} borderRadius={6} style={{ marginBottom: 10 }} />
-                <Skeleton width="50%" height={28} borderRadius={6} style={{ marginBottom: 12 }} />
-                <Skeleton width="90%" height={14} borderRadius={4} style={{ marginBottom: 8, opacity: 0.5 }} />
-                <Skeleton width="75%" height={14} borderRadius={4} style={{ marginBottom: 18, opacity: 0.5 }} />
+                <View style={{ alignItems: 'center', marginBottom: 16 }}>
+                    <Skeleton width={160} height={28} borderRadius={14} />
+                </View>
+                <Skeleton width="80%" height={32} borderRadius={6} style={{ marginBottom: 8, alignSelf: 'center' }} />
+                <Skeleton width="60%" height={20} borderRadius={6} style={{ marginBottom: 8, alignSelf: 'center' }} />
+                <Skeleton width="90%" height={14} borderRadius={4} style={{ marginBottom: 8, opacity: 0.5, alignSelf: 'center' }} />
+                <Skeleton width="75%" height={14} borderRadius={4} style={{ marginBottom: 20, opacity: 0.5, alignSelf: 'center' }} />
                 <View style={{ flexDirection: 'row', gap: 10 }}>
-                    <Skeleton width="48%" height={44} borderRadius={12} />
-                    <Skeleton width="48%" height={44} borderRadius={12} />
+                    <Skeleton width="48%" height={44} borderRadius={10} />
+                    <Skeleton width="48%" height={44} borderRadius={10} />
                 </View>
             </View>
 
-            {/* Stats row */}
-            <View style={{ flexDirection: 'row', paddingHorizontal: 16, marginTop: -16, gap: 10, marginBottom: 24 }}>
-                {[1, 2, 3].map(i => (
-                    <View key={i} style={{
-                        flex: 1, backgroundColor: colors.card, borderRadius: 14, padding: 14,
-                        alignItems: 'center', gap: 6,
+            {/* Nearby Sellers Section */}
+            <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
+                <View style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                }}>
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: 16,
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors.border,
                     }}>
-                        <Skeleton width={24} height={24} borderRadius={12} />
-                        <Skeleton width={30} height={20} borderRadius={4} />
-                        <Skeleton width={50} height={12} borderRadius={4} />
+                        <View style={{ flex: 1 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                <Skeleton width={16} height={16} borderRadius={8} />
+                                <Skeleton width={80} height={12} borderRadius={4} />
+                            </View>
+                            <Skeleton width={140} height={16} borderRadius={4} style={{ marginBottom: 4 }} />
+                            <Skeleton width={100} height={12} borderRadius={4} />
+                        </View>
+                        <Skeleton width={80} height={28} borderRadius={8} />
                     </View>
-                ))}
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ padding: 12 }}>
+                        {[1, 2, 3].map(i => (
+                            <View key={i} style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                padding: 10,
+                                backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc',
+                                borderRadius: 10,
+                                gap: 12,
+                                marginRight: 8,
+                                minWidth: 200,
+                            }}>
+                                <Skeleton width={40} height={40} borderRadius={10} />
+                                <View style={{ flex: 1, gap: 4 }}>
+                                    <Skeleton width={100} height={14} borderRadius={4} />
+                                    <Skeleton width={70} height={12} borderRadius={4} />
+                                </View>
+                                <Skeleton width={50} height={24} borderRadius={6} />
+                            </View>
+                        ))}
+                    </ScrollView>
+                </View>
             </View>
 
             {/* Category section header */}
-            <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
-                <Skeleton width={120} height={18} borderRadius={4} />
+            <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Skeleton width={100} height={20} borderRadius={4} />
+                    <Skeleton width={60} height={14} borderRadius={4} />
+                </View>
             </View>
 
             {/* Category chips scroll */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingLeft: 16, marginBottom: 24 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingLeft: 20, marginBottom: 24 }}>
                 {[1, 2, 3, 4, 5].map(i => (
                     <View key={i} style={{
-                        backgroundColor: colors.card, borderRadius: 14, padding: 14,
-                        alignItems: 'center', width: 100, marginRight: 10,
+                        backgroundColor: colors.card, borderRadius: 10, padding: 16,
+                        alignItems: 'center', width: 90, marginRight: 12,
                         borderWidth: 1, borderColor: colors.border,
                     }}>
-                        <Skeleton width={32} height={32} borderRadius={16} style={{ marginBottom: 6 }} />
-                        <Skeleton width={60} height={12} borderRadius={4} style={{ marginBottom: 4 }} />
-                        <Skeleton width={20} height={10} borderRadius={4} />
+                        <Skeleton width={32} height={32} borderRadius={8} style={{ marginBottom: 6 }} />
+                        <Skeleton width={60} height={11} borderRadius={4} style={{ marginBottom: 4 }} />
+                        <Skeleton width={30} height={10} borderRadius={4} />
                     </View>
                 ))}
             </ScrollView>
 
             {/* Featured section header */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginBottom: 14 }}>
-                <Skeleton width={140} height={18} borderRadius={4} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginBottom: 16 }}>
+                <Skeleton width={140} height={20} borderRadius={4} />
                 <Skeleton width={50} height={14} borderRadius={4} />
             </View>
 
@@ -109,22 +151,50 @@ export function HomeScreenSkeleton() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingLeft: 16 }}>
                 {[1, 2, 3].map(i => (
                     <View key={i} style={{
-                        width: (width - 64) / 2, marginRight: 12,
-                        backgroundColor: colors.card, borderRadius: 14, overflow: 'hidden',
+                        width: (width - 56) / 2, marginRight: 12,
+                        backgroundColor: colors.card, borderRadius: 10, overflow: 'hidden',
                         borderWidth: 1, borderColor: colors.border,
                     }}>
-                        <Skeleton width="100%" height={140} borderRadius={0} />
+                        <Skeleton width="100%" height={130} borderRadius={0} />
                         <View style={{ padding: 12, gap: 6 }}>
-                            <Skeleton width="85%" height={14} borderRadius={4} />
+                            <Skeleton width="85%" height={13} borderRadius={4} />
                             <Skeleton width="55%" height={12} borderRadius={4} />
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                                <Skeleton width={70} height={16} borderRadius={4} />
-                                <Skeleton width={24} height={16} borderRadius={4} />
+                                <Skeleton width={60} height={15} borderRadius={4} />
+                                <Skeleton width={20} height={14} borderRadius={4} />
                             </View>
                         </View>
                     </View>
                 ))}
             </ScrollView>
+
+            {/* Nearby Sellers Teaser */}
+            <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
+                <View style={{
+                    backgroundColor: colors.card, borderRadius: 12, padding: 20,
+                    borderWidth: 1, borderColor: colors.border,
+                }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <Skeleton width={16} height={16} borderRadius={8} />
+                        <Skeleton width={80} height={12} borderRadius={4} />
+                    </View>
+                    <Skeleton width="70%" height={22} borderRadius={4} style={{ marginBottom: 8 }} />
+                    <Skeleton width="90%" height={14} borderRadius={4} style={{ marginBottom: 16 }} />
+                    <Skeleton width={100} height={36} borderRadius={8} />
+                </View>
+            </View>
+
+            {/* CTA Section */}
+            <View style={{ paddingHorizontal: 20, marginBottom: 32 }}>
+                <View style={{
+                    backgroundColor: colors.card, borderRadius: 12, padding: 24,
+                    alignItems: 'center', borderWidth: 1, borderColor: colors.border,
+                }}>
+                    <Skeleton width="80%" height={22} borderRadius={4} style={{ marginBottom: 8 }} />
+                    <Skeleton width="60%" height={14} borderRadius={4} style={{ marginBottom: 16 }} />
+                    <Skeleton width={140} height={40} borderRadius={8} />
+                </View>
+            </View>
 
             <View style={{ height: 40 }} />
         </ScrollView>
@@ -134,22 +204,22 @@ export function HomeScreenSkeleton() {
 // ===== Products Screen Skeleton =====
 // Matches: search bar + filter → category chips → 2-column product grid
 export function ProductsScreenSkeleton() {
-    const { colors } = useThemeStore();
+    const { colors, isDarkMode } = useThemeStore();
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
             {/* Search bar */}
-            <View style={{ flexDirection: 'row', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, gap: 10 }}>
+            <View style={{ flexDirection: 'row', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, gap: 10 }}>
                 <View style={{
-                    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8,
-                    backgroundColor: colors.card, borderRadius: 12, paddingHorizontal: 14, height: 44,
+                    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
+                    backgroundColor: colors.card, borderRadius: 10, paddingHorizontal: 14, height: 44,
                     borderWidth: 1, borderColor: colors.border,
                 }}>
                     <Skeleton width={18} height={18} borderRadius={9} />
                     <Skeleton width="70%" height={14} borderRadius={4} />
                 </View>
                 <View style={{
-                    width: 44, height: 44, borderRadius: 12,
+                    width: 44, height: 44, borderRadius: 10,
                     backgroundColor: colors.card, justifyContent: 'center', alignItems: 'center',
                     borderWidth: 1, borderColor: colors.border,
                 }}>
@@ -158,14 +228,14 @@ export function ProductsScreenSkeleton() {
             </View>
 
             {/* Category chips */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingLeft: 16, marginBottom: 12 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingLeft: 16, paddingBottom: 16 }}>
                 {[1, 2, 3, 4, 5, 6].map(i => (
                     <Skeleton
                         key={i}
-                        width={i === 1 ? 50 : 80 + Math.random() * 20}
+                        width={i === 1 ? 50 : 70 + Math.random() * 20}
                         height={34}
                         borderRadius={20}
-                        style={{ marginRight: 8 }}
+                        style={{ marginRight: 10 }}
                     />
                 ))}
             </ScrollView>
@@ -175,16 +245,16 @@ export function ProductsScreenSkeleton() {
                 {[1, 2, 3, 4, 5, 6].map(i => (
                     <View key={i} style={{
                         width: (width - 44) / 2,
-                        backgroundColor: colors.card, borderRadius: 14, overflow: 'hidden',
+                        backgroundColor: colors.card, borderRadius: 10, overflow: 'hidden',
                         borderWidth: 1, borderColor: colors.border,
                     }}>
-                        <Skeleton width="100%" height={140} borderRadius={0} />
+                        <Skeleton width="100%" height={130} borderRadius={0} />
                         <View style={{ padding: 10, gap: 6 }}>
                             <Skeleton width="80%" height={13} borderRadius={4} />
                             <Skeleton width="50%" height={11} borderRadius={4} />
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                                <Skeleton width={65} height={16} borderRadius={4} />
-                                <Skeleton width={22} height={14} borderRadius={4} />
+                                <Skeleton width={60} height={15} borderRadius={4} />
+                                <Skeleton width={20} height={14} borderRadius={4} />
                             </View>
                         </View>
                     </View>
@@ -197,26 +267,26 @@ export function ProductsScreenSkeleton() {
 // ===== Product Detail Skeleton =====
 // Matches: large image → title/price → seller info → description → reviews
 export function ProductDetailSkeleton() {
-    const { colors } = useThemeStore();
+    const { colors, isDarkMode } = useThemeStore();
 
     return (
         <ScrollView style={{ flex: 1, backgroundColor: colors.background }} showsVerticalScrollIndicator={false}>
             {/* Image carousel */}
-            <Skeleton width={width} height={width * 0.8} borderRadius={0} />
+            <Skeleton width={width} height={width * 0.85} borderRadius={0} />
 
-            <View style={{ padding: 16, gap: 12 }}>
+            <View style={{ padding: 20, gap: 12 }}>
                 {/* Category + badge */}
                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Skeleton width={60} height={22} borderRadius={11} />
-                    <Skeleton width={50} height={22} borderRadius={11} />
+                    <Skeleton width={70} height={26} borderRadius={8} />
+                    <Skeleton width={50} height={26} borderRadius={8} />
                 </View>
 
                 {/* Title */}
                 <Skeleton width="90%" height={22} borderRadius={4} />
-                <Skeleton width="60%" height={22} borderRadius={4} />
+                <Skeleton width="65%" height={22} borderRadius={4} />
 
                 {/* Price */}
-                <Skeleton width={120} height={28} borderRadius={6} style={{ marginTop: 4 }} />
+                <Skeleton width={120} height={26} borderRadius={4} style={{ marginTop: 4 }} />
 
                 {/* Rating row */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
@@ -227,25 +297,61 @@ export function ProductDetailSkeleton() {
                 {/* Seller card */}
                 <View style={{
                     flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8,
-                    backgroundColor: colors.card, borderRadius: 14, padding: 14,
+                    backgroundColor: colors.card, borderRadius: 12, padding: 14,
                     borderWidth: 1, borderColor: colors.border,
                 }}>
-                    <Skeleton width={44} height={44} borderRadius={22} />
+                    <Skeleton width={44} height={44} borderRadius={12} />
                     <View style={{ flex: 1, gap: 6 }}>
                         <Skeleton width="60%" height={14} borderRadius={4} />
                         <Skeleton width="40%" height={12} borderRadius={4} />
                     </View>
-                    <Skeleton width={60} height={30} borderRadius={8} />
+                    <Skeleton width={50} height={24} borderRadius={8} />
                 </View>
+
+                {/* Map button */}
+                <Skeleton width="100%" height={44} borderRadius={10} style={{ marginBottom: 8 }} />
 
                 {/* Description */}
                 <Skeleton width={100} height={16} borderRadius={4} style={{ marginTop: 12 }} />
                 <Skeleton width="100%" height={12} borderRadius={4} />
                 <Skeleton width="95%" height={12} borderRadius={4} />
-                <Skeleton width="70%" height={12} borderRadius={4} />
+                <Skeleton width="75%" height={12} borderRadius={4} />
+
+                {/* Variant section */}
+                <Skeleton height={16} width={100} borderRadius={4} style={{ marginTop: 12 }} />
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <Skeleton width={80} height={40} borderRadius={12} />
+                    <Skeleton width={80} height={40} borderRadius={12} />
+                    <Skeleton width={80} height={40} borderRadius={12} />
+                </View>
+
+                {/* Stock row */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                    <Skeleton width={60} height={16} borderRadius={4} />
+                    <Skeleton width={80} height={16} borderRadius={4} />
+                </View>
+
+                {/* Quantity row */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+                    <Skeleton width={70} height={16} borderRadius={4} />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                        <Skeleton width={36} height={36} borderRadius={10} />
+                        <Skeleton width={30} height={20} borderRadius={4} />
+                        <Skeleton width={36} height={36} borderRadius={10} />
+                    </View>
+                </View>
+
+                {/* Reviews section */}
+                <View style={{ marginTop: 20, paddingTop: 20, borderTopWidth: 1, borderTopColor: colors.border }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                        <Skeleton width={18} height={18} borderRadius={9} />
+                        <Skeleton width={100} height={16} borderRadius={4} />
+                    </View>
+                    <Skeleton width="100%" height={80} borderRadius={10} />
+                </View>
 
                 {/* Add to cart button */}
-                <Skeleton width="100%" height={50} borderRadius={14} style={{ marginTop: 16 }} />
+                <Skeleton width="100%" height={50} borderRadius={10} style={{ marginTop: 16 }} />
             </View>
         </ScrollView>
     );
@@ -258,7 +364,7 @@ export function OrderSkeleton() {
 
     return (
         <View style={{
-            backgroundColor: colors.card, borderRadius: 14, padding: 16,
+            backgroundColor: colors.card, borderRadius: 12, padding: 16,
             marginHorizontal: 16, marginVertical: 6,
             borderWidth: 1, borderColor: colors.border,
         }}>
@@ -268,7 +374,7 @@ export function OrderSkeleton() {
                     <Skeleton width={100} height={13} borderRadius={4} />
                     <Skeleton width={70} height={11} borderRadius={4} />
                 </View>
-                <Skeleton width={72} height={24} borderRadius={12} />
+                <Skeleton width={72} height={26} borderRadius={8} />
             </View>
 
             {/* Divider */}
@@ -291,7 +397,7 @@ export function OrderSkeleton() {
                     <Skeleton width={50} height={11} borderRadius={4} />
                     <Skeleton width={90} height={18} borderRadius={4} />
                 </View>
-                <Skeleton width={80} height={34} borderRadius={10} />
+                <Skeleton width={80} height={36} borderRadius={8} />
             </View>
         </View>
     );
@@ -336,7 +442,7 @@ export function ChatSkeleton() {
             padding: 16, backgroundColor: colors.card,
             borderBottomWidth: 1, borderBottomColor: colors.border,
         }}>
-            <Skeleton width={48} height={48} borderRadius={24} />
+            <Skeleton width={48} height={48} borderRadius={12} />
             <View style={{ flex: 1, gap: 6 }}>
                 <Skeleton width="50%" height={15} borderRadius={4} />
                 <Skeleton width="75%" height={12} borderRadius={4} />
@@ -373,17 +479,17 @@ export function ProductCardSkeleton() {
 
     return (
         <View style={{
-            backgroundColor: colors.card, borderRadius: 14, overflow: 'hidden',
+            backgroundColor: colors.card, borderRadius: 10, overflow: 'hidden',
             margin: 6, width: (width - 48) / 2,
             borderWidth: 1, borderColor: colors.border,
         }}>
-            <Skeleton width="100%" height={140} borderRadius={0} />
-            <View style={{ padding: 10, gap: 6 }}>
+            <Skeleton width="100%" height={130} borderRadius={0} />
+            <View style={{ padding: 12, gap: 6 }}>
                 <Skeleton width="80%" height={13} borderRadius={4} />
-                <Skeleton width="55%" height={11} borderRadius={4} />
+                <Skeleton width="55%" height={12} borderRadius={4} />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
                     <Skeleton width={65} height={16} borderRadius={4} />
-                    <Skeleton width={22} height={14} borderRadius={4} />
+                    <Skeleton width={20} height={14} borderRadius={4} />
                 </View>
             </View>
         </View>
@@ -523,16 +629,16 @@ export function ForumScreenSkeleton({ count = 4 }) {
         <View style={{ flex: 1, backgroundColor: colors.background }}>
             {/* New post button */}
             <View style={{ paddingHorizontal: 16, paddingVertical: 10 }}>
-                <Skeleton width="100%" height={44} borderRadius={12} />
+                <Skeleton width="100%" height={44} borderRadius={10} />
             </View>
             {Array.from({ length: count }).map((_, i) => (
                 <View key={i} style={{
-                    backgroundColor: colors.card, borderRadius: 14, padding: 16,
+                    backgroundColor: colors.card, borderRadius: 12, padding: 16,
                     marginHorizontal: 16, marginBottom: 10,
                     borderWidth: 1, borderColor: colors.border,
                 }}>
                     <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
-                        <Skeleton width={36} height={36} borderRadius={18} />
+                        <Skeleton width={36} height={36} borderRadius={10} />
                         <View style={{ flex: 1, gap: 4 }}>
                             <Skeleton width="40%" height={14} borderRadius={4} />
                             <Skeleton width="25%" height={11} borderRadius={4} />
@@ -586,16 +692,16 @@ export function WishlistScreenSkeleton({ count = 4 }) {
                 {Array.from({ length: count }).map((_, i) => (
                     <View key={i} style={{
                         width: (width - 44) / 2,
-                        backgroundColor: colors.card, borderRadius: 14, overflow: 'hidden',
+                        backgroundColor: colors.card, borderRadius: 10, overflow: 'hidden',
                         borderWidth: 1, borderColor: colors.border,
                     }}>
-                        <Skeleton width="100%" height={140} borderRadius={0} />
-                        <View style={{ padding: 10, gap: 6 }}>
+                        <Skeleton width="100%" height={130} borderRadius={0} />
+                        <View style={{ padding: 12, gap: 6 }}>
                             <Skeleton width="80%" height={13} borderRadius={4} />
-                            <Skeleton width="55%" height={11} borderRadius={4} />
+                            <Skeleton width="55%" height={12} borderRadius={4} />
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
                                 <Skeleton width={65} height={16} borderRadius={4} />
-                                <Skeleton width={24} height={24} borderRadius={12} />
+                                <Skeleton width={24} height={24} borderRadius={10} />
                             </View>
                         </View>
                     </View>
