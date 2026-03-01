@@ -218,10 +218,6 @@ export default function ProfileScreen({ navigation }) {
         { icon: 'chatbubbles-outline', label: t.forum || 'Forum', onPress: () => navigation.navigate('Forum'), color: '#8b5cf6' },
         { icon: 'shield-checkmark-outline', label: t.membershipApprovals || 'Membership Approvals', onPress: () => navigation.navigate('AdminMembership'), color: '#f59e0b' },
         {
-            icon: 'globe-outline', label: t.language || 'Language',
-            onPress: handleToggleLanguage, color: '#f59e0b', isToggle: true, toggleValue: language === 'id',
-        },
-        {
             icon: isDarkMode ? 'moon' : 'moon-outline', label: t.darkMode || 'Dark Mode',
             onPress: toggleTheme, color: '#6366f1', isToggle: true, toggleValue: isDarkMode,
         },
