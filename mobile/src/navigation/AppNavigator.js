@@ -530,6 +530,7 @@ function NotificationListener() {
 
                         console.log('🔵 [WebSocket] Message received:', event.data);
 
+                        // Handle notification type
                         if (message.type === 'notification' && message.data) {
                             // Handle both camelCase and PascalCase from backend
                             const title = message.data.title || message.data.Title || 'New Notification';
@@ -556,7 +557,42 @@ function NotificationListener() {
                                     console.log('🔔 [Notification] Scheduled successfully');
                                 })
                                 .catch((err) => {
-                                    console.error('🔔 [Notification] Failed:', err.message);
+                                    console.error('🔔 [Notification] Failed:', err.message, err);
+                                });
+                        }
+                        
+                        // Handle new_order type
+                        if (message.type === 'new_order' && message.data) {
+                            const title = 'New Order Received!';
+                            const body = message.data.message || `New order #${message.data.orderId?.slice(-8) || ''}`;
+                            const notifType = 'new_order';
+
+                            console.log('🔔 [NewOrder] Received:', title, body);
+
+                            // Add to store
+                            addNotification({
+                                ...message.data,
+                                title,
+                                message: body,
+                                type: 'new_order',
+                            });
+
+                            // Show popup notification
+                            notificationService.initialize()
+                                .then(() => {
+                                    console.log('🔔 [NewOrder] Service initialized, scheduling...');
+                                    return notificationService.scheduleLocalNotification(
+                                        title,
+                                        body,
+                                        { type: notifType, orderId: message.data.orderId },
+                                        1
+                                    );
+                                })
+                                .then(() => {
+                                    console.log('🔔 [NewOrder] Scheduled successfully');
+                                })
+                                .catch((err) => {
+                                    console.error('🔔 [NewOrder] Failed:', err.message, err);
                                 });
                         }
                     } catch (e) {

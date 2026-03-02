@@ -19,17 +19,9 @@ import api from '../../api/api';
 import LoadingSkeleton from '../../components/LoadingSkeleton';
 import notificationService from '../../services/NotificationService';
 
-const getFilters = (t) => [
-    { key: 'all', label: t('notificationFilters.all') },
-    { key: 'orders', label: t('notificationFilters.orders'), types: ['new_order', 'order_status'] },
-    { key: 'messages', label: t('notificationFilters.messages'), types: ['new_message'] },
-    { key: 'payments', label: t('notificationFilters.payments'), types: ['payment_update'] },
-    { key: 'delivery', label: t('notificationFilters.delivery'), types: ['delivery_update'] },
-];
-
 const NOTIFICATION_ACTION_TIMEOUT_MS = 25000;
 
-function formatTimeAgo(dateStr, t) {
+function formatTimeAgo(dateStr) {
     const date = new Date(dateStr);
     const now = new Date();
     const diffMs = now - date;
@@ -37,7 +29,7 @@ function formatTimeAgo(dateStr, t) {
     const diffHrs = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMin < 1) return t('justNowNotif');
+    if (diffMin < 1) return 'Just now';
     if (diffMin < 60) return `${diffMin}m ago`;
     if (diffHrs < 24) return `${diffHrs}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
@@ -67,7 +59,16 @@ export default function NotificationsScreen({ navigation }) {
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [sendingTest, setSendingTest] = useState(false);
-    const FILTERS = getFilters(t);
+    
+    const getFilters = () => [
+        { key: 'all', label: t('notificationFilters.all') },
+        { key: 'orders', label: t('notificationFilters.orders'), types: ['new_order', 'order_status'] },
+        { key: 'messages', label: t('notificationFilters.messages'), types: ['new_message'] },
+        { key: 'payments', label: t('notificationFilters.payments'), types: ['payment_update'] },
+        { key: 'delivery', label: t('notificationFilters.delivery'), types: ['delivery_update'] },
+    ];
+    
+    const FILTERS = getFilters();
     const {
         notifications,
         unreadCount,

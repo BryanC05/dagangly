@@ -176,18 +176,20 @@ class NotificationService {
 
         // Try to initialize if not already done
         if (!notificationHandlerSet) {
+            console.log('🔔 [LocalNotification] Initializing notification handler...');
             const initialized = await this.initialize();
             if (!initialized) {
                 console.log('❌ Notifications not available - handler could not be initialized');
                 return;
             }
+            console.log('🔔 [LocalNotification] Handler initialized');
         }
 
         // Ensure Android notification channel exists
         if (Platform.OS === 'android') {
             try {
-                await Notifications.setNotificationChannelAsync('high_importance_channel', {
-                    name: 'High Importance Notifications',
+                await Notifications.setNotificationChannelAsync('default', {
+                    name: 'Default Notifications',
                     importance: Notifications.AndroidImportance.MAX,
                     vibrationPattern: [0, 250, 250, 250],
                     lightColor: '#14b8a6',
@@ -198,21 +200,21 @@ class NotificationService {
         }
 
         try {
+            console.log('🔔 [LocalNotification] Scheduling notification...');
             // Use null trigger for immediate delivery
-            await Notifications.scheduleNotificationAsync({
+            const notificationId = await Notifications.scheduleNotificationAsync({
                 content: {
                     title,
                     body,
-                    data,
-                    sound: true,
+                    data: { ...data, receivedAt: new Date().toISOString() },
+                    sound: 'default',
                     priority: Platform.OS === 'android' ? Notifications.AndroidNotificationPriority.MAX : undefined,
-                    ...(Platform.OS === 'android' && { channelId: 'high_importance_channel' }),
                 },
                 trigger: null, // Immediate delivery
             });
-            console.log('🔔 [LocalNotification] Scheduled successfully');
+            console.log('🔔 [LocalNotification] Scheduled successfully, ID:', notificationId);
         } catch (error) {
-            console.error('🔔 [LocalNotification] Schedule notification failed:', error);
+            console.error('🔔 [LocalNotification] Schedule notification failed:', error.message, error);
         }
     }
 

@@ -345,6 +345,32 @@
   color: var(--color-primary, #667eea);
 }
 
+.seller-action-btn {
+  background: var(--status-ready);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.seller-action-btn:hover {
+  background: var(--status-ready);
+  filter: brightness(1.1);
+}
+
+.seller-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .expand-toggle {
   background: var(--color-secondary, #f0f0f0);
   border: none;

@@ -64,7 +64,7 @@ export default function ProfileScreen({ navigation, route }) {
         if (viewingUserId && !isOwnProfile) {
             const fetchViewedUser = async () => {
                 try {
-                    const response = await api.get(`/sellers/${viewingUserId}`);
+                    const response = await api.get(`/users/seller/${viewingUserId}`);
                     const userData = response.data;
                     // Transform the response to match User model structure
                     setViewedUser({

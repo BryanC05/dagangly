@@ -17,10 +17,10 @@ const STATUS_FLOW = ['pending', 'confirmed', 'preparing', 'ready', 'delivered'];
 
 const STATUS_LABELS = {
     pending: 'Pending',
-    confirmed: 'Confirmed',
+    confirmed: 'Accepted',
     preparing: 'Preparing',
     ready: 'Ready',
-    delivered: 'Delivered',
+    delivered: 'Completed',
     cancelled: 'Cancelled',
 };
 
@@ -72,7 +72,14 @@ export default function OrdersScreen({ navigation }) {
 
     const isSeller = (order) => {
         const sellerId = order.seller?._id || order.seller;
-        return sellerId === user?._id;
+        // Use 'id' since that's what the user object has (not '_id')
+        const userId = user?.id;
+        const userIdStr = String(userId || '');
+        
+        // Convert to string for comparison
+        const sellerIdStr = String(sellerId || '');
+        
+        return sellerIdStr === userIdStr;
     };
     // isBuyer function removed - no longer needed for UI
 
@@ -110,6 +117,10 @@ export default function OrdersScreen({ navigation }) {
         const canUpdate = isSeller(order) && !['delivered', 'cancelled'].includes(order.status);
         const nextStatus = getNextStatus(order.status);
         
+        // Get products from order
+        const products = order.products || order.items || [];
+        const firstProduct = products[0];
+        
         return (
             <TouchableOpacity 
                 style={{
@@ -122,14 +133,35 @@ export default function OrdersScreen({ navigation }) {
                 }}
                 onPress={() => openOrderDetails(order)}
             >
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                     <Text style={{ fontSize: 13, color: colors?.textSecondary, fontWeight: '600' }}>
                         #{order._id?.slice(-8).toUpperCase()}
                     </Text>
-                    <View style={[{}, { backgroundColor: statusInfo.bg, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }]}>
-                        <Text style={{ fontSize: 11, fontWeight: '700', color: statusInfo.text }}>
-                            {STATUS_LABELS[order.status] || order.status}
-                        </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        {/* Seller action button - next to status */}
+                        {canUpdate && nextStatus && (
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: '#22c55e',
+                                    paddingHorizontal: 10,
+                                    paddingVertical: 4,
+                                    borderRadius: 6,
+                                }}
+                                onPress={(e) => {
+                                    e.stopPropagation();
+                                    updateOrderStatus(order._id, nextStatus);
+                                }}
+                            >
+                                <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>
+                                    {STATUS_LABELS[nextStatus]}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                        <View style={[{}, { backgroundColor: statusInfo.bg, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }]}>
+                            <Text style={{ fontSize: 11, fontWeight: '700', color: statusInfo.text }}>
+                                {STATUS_LABELS[order.status] || order.status}
+                            </Text>
+                        </View>
                     </View>
                 </View>
                 
@@ -160,30 +192,45 @@ export default function OrdersScreen({ navigation }) {
                     </View>
                 )}
                 
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors?.border }}>
-                    <Text style={{ fontSize: 13, color: colors?.textSecondary }}>Total</Text>
-                    <Text style={{ fontSize: 16, fontWeight: '800', color: colors?.text }}>
-                        {formatPrice(order.totalAmount)}
-                    </Text>
-                </View>
-
-                {/* Status update button for seller */}
-                {canUpdate && nextStatus && (
-                    <TouchableOpacity
-                        style={{
-                            marginTop: 12,
-                            backgroundColor: colors?.primary,
-                            paddingVertical: 10,
-                            borderRadius: 8,
-                            alignItems: 'center',
-                        }}
-                        onPress={() => updateOrderStatus(order._id, nextStatus)}
-                    >
-                        <Text style={{ color: '#fff', fontWeight: '600' }}>
-                            Mark as {STATUS_LABELS[nextStatus]}
-                        </Text>
-                    </TouchableOpacity>
+                {/* Product Info */}
+                {products.length > 0 && (
+                    <View style={{ marginTop: 8 }}>
+                        {products.slice(0, 2).map((item, index) => (
+                            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                                {item.product?.images?.[0] ? (
+                                    <Image 
+                                        source={{ uri: item.product.images[0] }} 
+                                        style={{ width: 36, height: 36, borderRadius: 6, marginRight: 8 }} 
+                                    />
+                                ) : (
+                                    <View style={{ width: 36, height: 36, borderRadius: 6, marginRight: 8, backgroundColor: colors?.border }} />
+                                )}
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ fontSize: 12, fontWeight: '500', color: colors?.text }} numberOfLines={1}>
+                                        {item.product?.name || 'Product'}
+                                    </Text>
+                                    <Text style={{ fontSize: 11, color: colors?.textSecondary }}>
+                                        x{item.quantity} {item.price ? `• ${formatPrice(item.price * item.quantity)}` : ''}
+                                    </Text>
+                                </View>
+                            </View>
+                        ))}
+                        {products.length > 2 && (
+                            <Text style={{ fontSize: 11, color: colors?.textSecondary, marginTop: 2 }}>
+                                +{products.length - 2} more item{products.length - 2 > 1 ? 's' : ''}
+                            </Text>
+                        )}
+                    </View>
                 )}
+                
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors?.border, alignItems: 'center' }}>
+                    <View>
+                        <Text style={{ fontSize: 13, color: colors?.textSecondary }}>Total</Text>
+                        <Text style={{ fontSize: 16, fontWeight: '800', color: colors?.text }}>
+                            {formatPrice(order.totalAmount)}
+                        </Text>
+                    </View>
+                </View>
             </TouchableOpacity>
         );
     };
@@ -205,27 +252,48 @@ export default function OrdersScreen({ navigation }) {
                         borderTopLeftRadius: 24, 
                         borderTopRightRadius: 24,
                         maxHeight: '90%',
-                        padding: 20,
                     }}>
                         {/* Header */}
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                            <Text style={{ fontSize: 20, fontWeight: '700', color: colors?.text }}>
-                                Order Details
-                            </Text>
-                            <TouchableOpacity onPress={() => setShowOrderModal(false)}>
-                                <Ionicons name="close" size={24} color={colors?.text} />
-                            </TouchableOpacity>
+                        <View style={{ padding: 20, paddingBottom: 0 }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                                <Text style={{ fontSize: 20, fontWeight: '700', color: colors?.text }}>
+                                    Order Details
+                                </Text>
+                                <TouchableOpacity onPress={() => setShowOrderModal(false)}>
+                                    <Ionicons name="close" size={24} color={colors?.text} />
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
-                        {/* Order ID & Status */}
-                        <View style={{ marginBottom: 16 }}>
+                        <ScrollView style={{ padding: 20 }} showsVerticalScrollIndicator={false}>
+                            {/* Order ID & Status */}
+                            <View style={{ marginBottom: 16 }}>
                             <Text style={{ fontSize: 13, color: colors?.textSecondary }}>
                                 Order #{order._id?.slice(-8).toUpperCase()}
                             </Text>
-                            <View style={[{}, { backgroundColor: statusInfo.bg, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, alignSelf: 'flex-start', marginTop: 8 }]}>
-                                <Text style={{ fontSize: 12, fontWeight: '700', color: statusInfo.text }}>
-                                    {STATUS_LABELS[order.status] || order.status}
-                                </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                                {/* Seller action button - next to status in modal */}
+                                {canUpdate && nextStatus && (
+                                    <TouchableOpacity
+                                        style={{
+                                            backgroundColor: '#22c55e',
+                                            paddingHorizontal: 12,
+                                            paddingVertical: 6,
+                                            borderRadius: 8,
+                                        }}
+                                        onPress={() => updateOrderStatus(order._id, nextStatus)}
+                                        disabled={updatingStatus}
+                                    >
+                                        <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>
+                                            {updatingStatus ? '...' : STATUS_LABELS[nextStatus]}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                                <View style={[{}, { backgroundColor: statusInfo.bg, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 }]}>
+                                    <Text style={{ fontSize: 12, fontWeight: '700', color: statusInfo.text }}>
+                                        {STATUS_LABELS[order.status] || order.status}
+                                    </Text>
+                                </View>
                             </View>
                         </View>
 
@@ -304,10 +372,6 @@ export default function OrdersScreen({ navigation }) {
 
                         {/* Price Breakdown */}
                         <View style={{ borderTopWidth: 1, borderTopColor: colors?.border, paddingTop: 12 }}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                                <Text style={{ fontSize: 14, color: colors?.textSecondary }}>Subtotal</Text>
-                                <Text style={{ fontSize: 14, color: colors?.text }}>{formatPrice(order.subtotal || order.totalAmount)}</Text>
-                            </View>
                             {order.deliveryFee > 0 && (
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                                     <Text style={{ fontSize: 14, color: colors?.textSecondary }}>Delivery Fee</Text>
@@ -324,7 +388,8 @@ export default function OrdersScreen({ navigation }) {
                         {canUpdate && nextStatus && (
                             <TouchableOpacity
                                 style={{
-                                    marginTop: 20,
+                                    marginTop: 100,
+                                    marginBottom: 20,
                                     backgroundColor: colors?.primary,
                                     paddingVertical: 14,
                                     borderRadius: 12,
@@ -338,8 +403,7 @@ export default function OrdersScreen({ navigation }) {
                                 </Text>
                             </TouchableOpacity>
                         )}
-
-                        {/* Account role info removed - all users are equal */}
+                        </ScrollView>
                     </View>
                 </View>
             </Modal>

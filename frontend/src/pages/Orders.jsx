@@ -18,10 +18,10 @@ import './Orders.css';
 
 const statusConfig = {
   pending: { icon: Clock, color: 'var(--status-pending)', bg: 'var(--status-pending-bg)', label: 'Pending' },
-  confirmed: { icon: CheckCircle, color: 'var(--status-confirmed)', bg: 'var(--status-confirmed-bg)', label: 'Confirmed' },
+  confirmed: { icon: CheckCircle, color: 'var(--status-confirmed)', bg: 'var(--status-confirmed-bg)', label: 'Accepted' },
   preparing: { icon: ChefHat, color: 'var(--status-preparing)', bg: 'var(--status-preparing-bg)', label: 'Preparing' },
   ready: { icon: Package, color: 'var(--status-ready)', bg: 'var(--status-ready-bg)', label: 'Ready' },
-  delivered: { icon: Truck, color: 'var(--status-delivered)', bg: 'var(--status-delivered-bg)', label: 'Delivered' },
+  delivered: { icon: Truck, color: 'var(--status-delivered)', bg: 'var(--status-delivered-bg)', label: 'Completed' },
   cancelled: { icon: XCircle, color: 'var(--status-cancelled)', bg: 'var(--status-cancelled-bg)', label: 'Cancelled' },
   completed: { icon: CheckCircle, color: 'var(--status-delivered)', bg: 'var(--status-delivered-bg)', label: 'Order is Completed' },
 };
@@ -219,7 +219,6 @@ function Orders() {
               const isPickup = order.deliveryType === 'pickup';
               const OrderTypeIcon = isPickup ? Store : Truck;
               const orderTypeLabel = isPickup ? 'Pickup' : 'Delivery';
-              const preorderRequestClass = order.requestStatus || 'pending';
 
               // Preorder badge
               const isPreorder = order.isPreorder && order.deliveryDate;
@@ -240,13 +239,6 @@ function Orders() {
                           <div className="preorder-time">
                             at {order.preorderTime}
                           </div>
-                        </div>
-                        <div className={`preorder-request-badge ${preorderRequestClass}`}>
-                          <span>
-                            {order.requestStatus === 'pending_seller_review' ? 'WAITING' :
-                              order.requestStatus === 'seller_accepted' ? 'APPROVED' :
-                                order.requestStatus === 'seller_declined' ? 'DECLINED' : 'PENDING'}
-                          </span>
                         </div>
                       </div>
                       <div className="preorder-meta">
@@ -294,6 +286,24 @@ function Orders() {
                         <div className="order-total-compact">
                           {formatCurrency(order.totalAmount)}
                         </div>
+                        {/* Seller action - visible status update button */}
+                        {order.seller?._id === user?.id && nextStatus && !isExpanded && (
+                          <button
+                            className="seller-action-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateStatusMutation.mutate({
+                                orderId,
+                                status: nextStatus,
+                              });
+                            }}
+                            disabled={updateStatusMutation.isPending}
+                            title={`Mark as ${statusConfig[nextStatus]?.label}`}
+                          >
+                            <ChefHat size={14} />
+                            <span>{statusConfig[nextStatus]?.label}</span>
+                          </button>
+                        )}
                         <button
                           className="expand-toggle"
                           onClick={(e) => {

@@ -271,8 +271,8 @@ const Profile = () => {
     try {
       let response;
       if (id && id !== user?.id) {
-        // Viewing another user's profile
-        response = await api.get(`/sellers/${id}`);
+        // Viewing another user's profile - use correct endpoint
+        response = await api.get(`/users/seller/${id}`);
         setProfile(response.data);
         // Don't allow editing other users' profiles
         setIsEditing(false);
