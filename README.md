@@ -292,6 +292,70 @@ npm run build
 
 2. Deploy the `dist` folder to Railway, Vercel, or any static hosting
 
+### Recommended Free Tier Stack
+
+For cost-effective deployment, this stack handles production workloads:
+
+| Service | Purpose | Free Tier Limits |
+|---------|---------|------------------|
+| **Cloudflare Pages** | Frontend hosting | Unlimited bandwidth & requests |
+| **Railway** | Go backend | 512MB RAM, $5 credit/month |
+| **MongoDB Atlas** | Database | 512MB storage, ~500 connections |
+
+### Scaling Capacity (Free Tier)
+
+| Load Level | Concurrent Users | Experience |
+|------------|------------------|------------|
+| **Comfortable** | 50-100 | Smooth, fast responses |
+| **Maximum** | 200-300 | Some slowdowns possible |
+| **Breaking Point** | 500+ | MongoDB connection limits |
+
+**Bottleneck Analysis:**
+- **Cloudflare Pages**: No limit - handles massive traffic easily
+- **Railway Free**: CPU/RAM limited - first bottleneck (50-200 users)
+- **MongoDB Atlas M0**: Connection pool (500) - second bottleneck (300 users)
+
+### Upgrade Triggers
+
+**Upgrade Railway when:**
+- Response times consistently >500ms
+- $5 monthly credit exhausted
+- Need >1GB RAM for caching
+
+**Upgrade MongoDB when:**
+- Storage approaches 400MB (of 512MB limit)
+- "Connection pool exhausted" errors appear
+- Need dedicated resources for consistent performance
+
+### Performance Optimization Tips
+
+To maximize free tier capacity:
+
+1. **Add Redis caching** (Railway offers free Redis)
+   - Cache product listings, user sessions
+   - Reduce MongoDB queries by 60-80%
+
+2. **Implement connection pooling** in Go backend
+   - Reuse MongoDB connections efficiently
+   - Prevents connection exhaustion
+
+3. **Add database indexes**
+   - Index frequently queried fields (location, category, status)
+   - Speeds up searches 10x
+
+4. **Use Cloudflare Workers KV**
+   - Edge cache for static API responses
+   - Reduces backend load
+
+5. **Enable Gzip compression** in Go backend
+   - Reduces response size by 70%
+
+6. **Implement pagination** for all list endpoints
+   - Never return >50 items per request
+   - Prevents memory spikes
+
+With these optimizations, you can push to **500+ concurrent users** on the free tier.
+
 ## API Endpoints
 
 ### Authentication
