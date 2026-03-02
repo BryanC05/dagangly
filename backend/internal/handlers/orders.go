@@ -101,11 +101,18 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	}
 
 	validMethods := map[string]bool{
-		"cash": true, "qris": true, "ewallet": true, "bank_transfer": true, "credit_card": true,
+		"cash": true, "qris": true,
 	}
 	if !validMethods[req.PaymentMethod] {
 		c.JSON(400, gin.H{"message": "Invalid payment method"})
 		return
+	}
+
+	// Set initial status based on payment method
+	// QRIS and COD require payment confirmation, so start with payment_pending
+	initialStatus := "pending"
+	if req.PaymentMethod == "qris" || req.PaymentMethod == "cash" {
+		initialStatus = "payment_pending"
 	}
 
 	// Validate delivery type
@@ -291,7 +298,7 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		Seller:      sellerID,
 		Products:    orderProducts,
 		TotalAmount: totalAmount,
-		Status:      "pending",
+		Status:      initialStatus,
 		DeliveryAddress: models.DeliveryAddress{
 			Address:     req.DeliveryAddress.Address,
 			City:        req.DeliveryAddress.City,
@@ -543,7 +550,7 @@ func (h *OrderHandler) UpdateOrderStatus(c *gin.Context) {
 	}
 
 	validStatuses := map[string]bool{
-		"pending": true, "confirmed": true, "preparing": true,
+		"pending": true, "payment_pending": true, "confirmed": true, "preparing": true,
 		"ready": true, "delivered": true, "cancelled": true,
 	}
 	if !validStatuses[req.Status] {
@@ -572,7 +579,7 @@ func (h *OrderHandler) UpdateOrderStatus(c *gin.Context) {
 
 	// Notify buyer about order status change
 	statusLabels := map[string]string{
-		"confirmed": "Confirmed", "preparing": "Being Prepared",
+		"payment_pending": "Awaiting Payment", "confirmed": "Paid", "preparing": "Being Prepared",
 		"ready": "Ready", "delivered": "Delivered", "cancelled": "Cancelled",
 	}
 	label := statusLabels[req.Status]

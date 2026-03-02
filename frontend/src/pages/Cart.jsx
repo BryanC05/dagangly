@@ -69,9 +69,7 @@ function Cart() {
 
     const paymentMethods = [
         { id: 'cash', label: 'Cash on Delivery', icon: '💵', desc: 'Pay when you receive' },
-        { id: 'qris', label: 'QRIS', icon: '📱', desc: 'Scan QR code to pay' },
-        { id: 'ewallet', label: 'E-Wallet', icon: '💳', desc: 'GoPay, OVO, Dana' },
-        { id: 'bank_transfer', label: 'Bank Transfer', icon: '🏦', desc: 'Transfer to bank account' },
+        { id: 'qris', label: 'QRIS', icon: '📱', desc: 'Scan QR code at seller place' },
     ];
 
     const deliveryTypes = [

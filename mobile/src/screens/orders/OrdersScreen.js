@@ -13,11 +13,12 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import DriverRatingModal from '../../components/DriverRatingModal';
 import { OrdersListSkeleton } from '../../components/LoadingSkeleton';
 
-const STATUS_FLOW = ['pending', 'confirmed', 'preparing', 'ready', 'delivered'];
+const STATUS_FLOW = ['pending', 'payment_pending', 'confirmed', 'preparing', 'ready', 'delivered'];
 
 const STATUS_LABELS = {
     pending: 'Pending',
-    confirmed: 'Accepted',
+    payment_pending: 'Payment Pending',
+    confirmed: 'Paid',
     preparing: 'Preparing',
     ready: 'Ready',
     delivered: 'Completed',
@@ -26,6 +27,7 @@ const STATUS_LABELS = {
 
 const STATUS_COLORS = {
     pending: { bg: '#fef3c7', text: '#92400e' },
+    payment_pending: { bg: '#fef3c7', text: '#92400e' },
     confirmed: { bg: '#dbeafe', text: '#1e40af' },
     preparing: { bg: '#e0e7ff', text: '#3730a3' },
     ready: { bg: '#d1fae5', text: '#065f46' },
@@ -84,6 +86,10 @@ export default function OrdersScreen({ navigation }) {
     // isBuyer function removed - no longer needed for UI
 
     const getNextStatus = (currentStatus) => {
+        // For payment_pending, next is confirmed (paid)
+        if (currentStatus === 'payment_pending') {
+            return 'confirmed';
+        }
         const currentIndex = STATUS_FLOW.indexOf(currentStatus);
         if (currentIndex < STATUS_FLOW.length - 1) {
             return STATUS_FLOW[currentIndex + 1];
@@ -153,7 +159,7 @@ export default function OrdersScreen({ navigation }) {
                                 }}
                             >
                                 <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>
-                                    {STATUS_LABELS[nextStatus]}
+                                    {nextStatus === 'payment_pending' ? 'Paid' : STATUS_LABELS[nextStatus]}
                                 </Text>
                             </TouchableOpacity>
                         )}
@@ -285,7 +291,7 @@ export default function OrdersScreen({ navigation }) {
                                         disabled={updatingStatus}
                                     >
                                         <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>
-                                            {updatingStatus ? '...' : STATUS_LABELS[nextStatus]}
+                                            {updatingStatus ? '...' : (nextStatus === 'payment_pending' ? 'Paid' : STATUS_LABELS[nextStatus])}
                                         </Text>
                                     </TouchableOpacity>
                                 )}
@@ -399,7 +405,7 @@ export default function OrdersScreen({ navigation }) {
                                 disabled={updatingStatus}
                             >
                                 <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>
-                                    {updatingStatus ? 'Updating...' : `Mark as ${STATUS_LABELS[nextStatus]}`}
+                                    {updatingStatus ? 'Updating...' : (nextStatus === 'payment_pending' ? 'Mark as Paid' : `Mark as ${STATUS_LABELS[nextStatus]}`)}
                                 </Text>
                             </TouchableOpacity>
                         )}

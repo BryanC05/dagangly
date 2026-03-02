@@ -2,6 +2,8 @@
 .orders-page {
   --status-pending: #ed8936;
   --status-pending-bg: rgba(237, 137, 54, 0.1);
+  --status-payment-pending: #f59e0b;
+  --status-payment-pending-bg: rgba(245, 158, 11, 0.1);
   --status-confirmed: #4299e1;
   --status-confirmed-bg: rgba(66, 153, 225, 0.1);
   --status-preparing: #9f7aea;

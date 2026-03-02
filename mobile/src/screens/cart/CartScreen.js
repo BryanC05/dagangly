@@ -13,8 +13,7 @@ import api from '../../api/api';
 
 const PAYMENT_METHODS = [
     { id: 'cash', name: 'Cash on Delivery', icon: 'cash-outline', description: 'Pay when you receive' },
-    { id: 'card', name: 'Credit/Debit Card', icon: 'card-outline', description: 'Pay with card (coming soon)' },
-    { id: 'ewallet', name: 'E-Wallet', icon: 'wallet-outline', description: 'Pay with e-wallet (coming soon)' },
+    { id: 'qris', name: 'QRIS', icon: 'qr-code-outline', description: 'Scan QR at seller place' },
 ];
 
 const DELIVERY_TYPES = [

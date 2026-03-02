@@ -18,6 +18,7 @@ import './Orders.css';
 
 const statusConfig = {
   pending: { icon: Clock, color: 'var(--status-pending)', bg: 'var(--status-pending-bg)', label: 'Pending' },
+  payment_pending: { icon: Clock, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)', label: 'Payment Pending' },
   confirmed: { icon: CheckCircle, color: 'var(--status-confirmed)', bg: 'var(--status-confirmed-bg)', label: 'Accepted' },
   preparing: { icon: ChefHat, color: 'var(--status-preparing)', bg: 'var(--status-preparing-bg)', label: 'Preparing' },
   ready: { icon: Package, color: 'var(--status-ready)', bg: 'var(--status-ready-bg)', label: 'Ready' },
@@ -102,7 +103,11 @@ function Orders() {
   });
 
   const getNextStatus = (currentStatus) => {
-    const statusFlow = ['pending', 'confirmed', 'preparing', 'ready', 'delivered'];
+    // For payment_pending, next is confirmed (paid)
+    if (currentStatus === 'payment_pending') {
+      return 'confirmed';
+    }
+    const statusFlow = ['pending', 'payment_pending', 'confirmed', 'preparing', 'ready', 'delivered'];
     const currentIndex = statusFlow.indexOf(currentStatus);
     if (currentIndex < statusFlow.length - 1) {
       return statusFlow[currentIndex + 1];
@@ -298,10 +303,19 @@ function Orders() {
                               });
                             }}
                             disabled={updateStatusMutation.isPending}
-                            title={`Mark as ${statusConfig[nextStatus]?.label}`}
+                            title={nextStatus === 'payment_pending' ? 'Mark as Paid' : `Mark as ${statusConfig[nextStatus]?.label}`}
                           >
-                            <ChefHat size={14} />
-                            <span>{statusConfig[nextStatus]?.label}</span>
+                            {nextStatus === 'payment_pending' ? (
+                              <>
+                                <CheckCircle size={14} />
+                                <span>Paid</span>
+                              </>
+                            ) : (
+                              <>
+                                <ChefHat size={14} />
+                                <span>{statusConfig[nextStatus]?.label}</span>
+                              </>
+                            )}
                           </button>
                         )}
                         <button
@@ -561,7 +575,7 @@ function Orders() {
                                 disabled={updateStatusMutation.isPending}
                                 className="update-status-btn"
                               >
-                                {t('orders.markAs')} {statusConfig[nextStatus].label}
+                                {nextStatus === 'payment_pending' ? 'Mark as Paid' : `${t('orders.markAs')} ${statusConfig[nextStatus].label}`}
                               </Button>
                             )}
                           </div>
