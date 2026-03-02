@@ -414,12 +414,22 @@ func (h *OrderHandler) GetMyOrders(c *gin.Context) {
 		return
 	}
 
-	// Populate product info for each order
+	// Populate product info and pickup address for each order
+	usersCollection := database.GetDB().Collection("users")
 	for i, order := range orders {
+		// Calculate total items count
 		if products, ok := order["products"].(primitive.A); ok {
+			totalItems := 0
 			populatedProducts := make([]bson.M, 0)
 			for _, p := range products {
 				if productMap, ok := p.(primitive.M); ok {
+					// Count quantity
+					if qty, ok := productMap["quantity"].(int64); ok {
+						totalItems += int(qty)
+					} else if qty, ok := productMap["quantity"].(int); ok {
+						totalItems += qty
+					}
+
 					if productID, ok := productMap["product"].(primitive.ObjectID); ok {
 						var product models.Product
 						productsCollection.FindOne(context.Background(), bson.M{"_id": productID}).Decode(&product)
@@ -436,6 +446,27 @@ func (h *OrderHandler) GetMyOrders(c *gin.Context) {
 				}
 			}
 			orders[i]["products"] = populatedProducts
+			orders[i]["itemsCount"] = totalItems
+		}
+
+		// Add pickup address for pickup orders
+		if deliveryType, ok := order["deliveryType"].(string); ok && deliveryType == "pickup" {
+			// Get seller info to get their location
+			if seller, ok := order["seller"].(bson.M); ok {
+				if sellerID, ok := seller["_id"].(primitive.ObjectID); ok {
+					var sellerUser models.User
+					err := usersCollection.FindOne(context.Background(), bson.M{"_id": sellerID}).Decode(&sellerUser)
+					if err == nil && sellerUser.Location.Address != "" {
+						pickupAddress := fmt.Sprintf("%s, %s, %s %s",
+							sellerUser.Location.Address,
+							sellerUser.Location.City,
+							sellerUser.Location.State,
+							sellerUser.Location.Pincode)
+						orders[i]["pickupAddress"] = pickupAddress
+						orders[i]["pickupLocation"] = sellerUser.Location
+					}
+				}
+			}
 		}
 	}
 

@@ -7,12 +7,20 @@ This guide provides instructions for loading, managing, and using the simulation
 - [Loading Simulation Data](#loading-simulation-data)
 - [Deleting Simulation Data](#deleting-simulation-data)
 - [Simulated User Accounts](#simulated-user-accounts)
-  - [Verified Sellers (With Products)](#verified-sellers-with-products)
-  - [Verified Sellers (Empty Storefronts)](#verified-sellers-empty-storefronts)
-  - [New Sellers (Few Products)](#new-sellers-few-products)
-  - [Unverified Sellers](#unverified-sellers)
-  - [Incomplete Business Registration](#incomplete-business-registration)
+  - [Food Businesses](#food-businesses)
+  - [Beverage Businesses](#beverage-businesses)
+  - [Bakery & Snack Businesses](#bakery--snack-businesses)
+  - [Fresh Produce Businesses](#fresh-produce-businesses-agriculture)
+  - [Handicraft Businesses](#handicraft-businesses)
+  - [Fashion Businesses](#fashion-businesses)
+  - [Beauty Businesses](#beauty-businesses)
+  - [Home Goods Businesses](#home-goods-businesses)
+  - [Electronics Businesses](#electronics-businesses)
+  - [Services Businesses](#services-businesses)
+  - [Catering / Medium Enterprise](#catering--medium-enterprise)
+  - [Mixed Category Businesses](#mixed-category-businesses)
   - [Buyers (No Business)](#buyers-no-business)
+- [Product Categories](#product-categories)
 - [Geographic Locations](#geographic-locations)
 - [Default Credentials](#default-credentials)
 
@@ -22,14 +30,24 @@ This guide provides instructions for loading, managing, and using the simulation
 
 The simulation data creates realistic user/business/product scenarios for testing:
 
-| User Type | Count | Description |
-|-----------|-------|-------------|
-| Verified Sellers (Products) | 3 | Active businesses with 8-25 products |
-| Verified Sellers (Empty) | 2 | Verified but no products yet |
-| New Sellers (Few Products) | 2 | New businesses with 3-8 products |
-| Unverified Sellers | 1 | Business not yet verified |
-| Incomplete Business | 1 | User with incomplete registration |
-| Buyers (No Business) | 8 | Regular buyers without businesses |
+| Category | Count |
+|----------|-------|
+| Total Businesses | 33 |
+| Total Buyers | 10 |
+| Total Users | 43 |
+| Total Products | 400-600 |
+
+**Business Categories:**
+- Food (Makanan)
+- Beverages (Minuman)
+- Snacks (Kue & Snack)
+- Agriculture (Sayur & Buah)
+- Handicrafts (Kerajinan)
+- Fashion (Fashion)
+- Beauty (Kecantikan)
+- Home (Rumah Tangga)
+- Electronics (Elektronik)
+- Services (Jasa)
 
 ---
 
@@ -126,19 +144,13 @@ brew services list | grep mongo
 
 Should show: `mongodb-community started`
 
-### Option 1: Run Seed Script Directly
+### Run Seed Script
 ```bash
 # Navigate to backend directory
 cd backend
 
 # Run the simulation seed script
 node seed-business-simulation.js
-```
-
-### Option 2: Using npm Script (if configured in package.json)
-```bash
-cd backend
-npm run seed:simulation
 ```
 
 ### Environment Variables
@@ -153,9 +165,9 @@ export DB_NAME="msme_marketplace"
 ### What Gets Created
 The script will:
 1. Clear existing collections (users, businesses, products, orders, chatrooms, messages)
-2. Create 15 users with varied business states
-3. Create 8-10 businesses
-4. Generate 50-100 products across different categories
+2. Create 33 businesses across 10 categories
+3. Generate 400-600 products across different categories
+4. Create 10 buyer accounts
 5. Assign realistic locations around Bekasi/Jakarta area
 
 ---
@@ -205,17 +217,11 @@ db.products.deleteMany({})
 db.orders.deleteMany({})
 db.chatrooms.deleteMany({})
 db.messages.deleteMany({})
-db.logos.deleteMany({})  # If exists
+db.logos.deleteMany({})
 
 # Or drop entire database
 db.dropDatabase()
 ```
-
-### Option 4: Using MongoDB Compass
-1. Open MongoDB Compass
-2. Connect to your MongoDB instance
-3. Select `msme_marketplace` database
-4. Delete collections individually or drop the entire database
 
 ---
 
@@ -226,83 +232,116 @@ db.dropDatabase()
 
 ---
 
-### Verified Sellers (With Products)
+### Food Businesses
 
-These are established businesses with verified status and active product listings.
-
-| Name | Email | Phone | Business Name | Location | Products | Status |
-|------|-------|-------|---------------|----------|----------|--------|
-| Rani Pratama | `rani.summarecon@marketplace.test` | 081200000101 | Dapur Summarecon | Summarecon | 8-15 | ✅ Verified, Member |
-| Budi Santoso | `budi.summarecon@marketplace.test` | 081200000102 | Kue Kering Budi | Summarecon | 10-20 | ✅ Verified, Member |
-| PT Rasa Nusantara | `pt.rasa@marketplace.test` | 0218000001 | Rasa Nusantara Catering | Summarecon | 15-25 | ✅ Verified, Member, Medium Enterprise |
-
-**Use Cases:**
-- Test full seller experience
-- Test product browsing with rich catalog
-- Test business logo display
-- Test membership features
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Dapur Summarecon | `rani.summarecon@marketplace.test` | 081200000101 | Summarecon | 12-20 | ✅ Verified, Member |
+| Warung Nusantara | `surya.warung@marketplace.test` | 081200000102 | Harapan Indah | 8-15 | ✅ Verified |
+| Soto & Bakso Pak Joko | `joko.soto@marketplace.test` | 081200000103 | Grand Wisata | 6-12 | ⏳ Not Verified |
+| Nasi Padang Bu Ani | `ani.padang@marketplace.test` | 081200000104 | Cibubur | 10-18 | ✅ Verified, Member |
 
 ---
 
-### Verified Sellers (Empty Storefronts)
+### Beverage Businesses
 
-Verified businesses that haven't added products yet.
-
-| Name | Email | Phone | Business Name | Location | Products | Status |
-|------|-------|-------|---------------|----------|----------|--------|
-| Farhan Alif | `farhan.binus@marketplace.test` | 081200000201 | Student Food Corner | BINUS | 0 | ✅ Verified, Empty Store |
-| Dina Marlina | `dina.binus@marketplace.test` | 081200000202 | Dina Craft Studio | BINUS | 0 | ✅ Verified, Empty Store |
-
-**Use Cases:**
-- Test "Add Product" flow
-- Test empty storefront UI
-- Test business profile without products
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Kopi Kita | `budi.kopi@marketplace.test` | 081200000201 | Summarecon | 10-16 | ✅ Verified, Member |
+| Es Teh Manis Bu Dewi | `dewi.esteh@marketplace.test` | 081200000202 | BINUS | 8-14 | ✅ Verified |
+| Kedai Kopi Senja | `rizal.kedai@marketplace.test` | 081200000203 | Harapan Indah | 10-18 | ✅ Verified, Member |
 
 ---
 
-### New Sellers (Few Products)
+### Bakery & Snack Businesses
 
-Recently joined sellers with small product catalogs.
-
-| Name | Email | Phone | Business Name | Location | Products | Status |
-|------|-------|-------|---------------|----------|----------|--------|
-| Agus Wijaya | `agus.harapan@marketplace.test` | 081200000301 | Sayur Segar Agus | Harapan Indah | 3-6 | ⏳ Not Verified |
-| Maya Sari | `maya.harapan@marketplace.test` | 081200000302 | Maya Coffee House | Harapan Indah | 4-8 | ⏳ Not Verified |
-
-**Use Cases:**
-- Test new seller onboarding
-- Test unverified business display
-- Test product management with few items
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Kue Kering Budi | `budi.kue@marketplace.test` | 081200000301 | Summarecon | 12-22 | ✅ Verified, Member |
+| Browns & Co | `maya.brownies@marketplace.test` | 081200000302 | BINUS | 8-15 | ✅ Verified, Member |
+| Donat Kentang Madu | `siti.donat@marketplace.test` | 081200000303 | Grand Wisata | 6-12 | ⏳ Not Verified |
 
 ---
 
-### Unverified Sellers
+### Fresh Produce Businesses (Agriculture)
 
-Businesses that haven't completed verification.
-
-| Name | Email | Phone | Business Name | Location | Products | Status |
-|------|-------|-------|---------------|----------|----------|--------|
-| Hendra Kurniawan | `hendra.wisata@marketplace.test` | 081200000401 | Snack Box Hendra | Grand Wisata | 5-10 | ❌ Unverified |
-
-**Use Cases:**
-- Test verification workflow
-- Test trust indicators
-- Test unverified seller limitations
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Sayur Segar Agus | `agus.sayur@marketplace.test` | 081200000401 | Harapan Indah | 10-18 | ✅ Verified |
+| Buah Segar Bekasi | `rina.buah@marketplace.test` | 081200000402 | Cibubur | 8-16 | ✅ Verified, Member |
+| Organik Hydroponik | `doni.organic@marketplace.test` | 081200000403 | Summarecon | 6-12 | ⏳ Not Verified |
 
 ---
 
-### Incomplete Business Registration
+### Handicraft Businesses
 
-Users who started but haven't completed business registration.
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Anyaman Lokal | `dina.anyaman@marketplace.test` | 081200000501 | BINUS | 8-16 | ✅ Verified |
+| Kerajinan Kayu Jati | `harto.kayu@marketplace.test` | 081200000502 | Grand Wijata | 6-14 | ✅ Verified, Member |
 
-| Name | Email | Phone | Business Name | Location | Products | Status |
-|------|-------|-------|---------------|----------|----------|--------|
-| Sinta Dewi | `sinta.cibubur@marketplace.test` | 081200000501 | Sinta Fashion | Cibubur | 0 | ⚠️ Incomplete |
+---
 
-**Use Cases:**
-- Test business registration completion flow
-- Test logo generator prerequisite (should redirect to complete business)
-- Test incomplete profile UI
+### Fashion Businesses
+
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Batik Modern Indah | `indah.batik@marketplace.test` | 081200000601 | Summarecon | 10-18 | ✅ Verified, Member |
+| Kaos Polos Premium | `rudi.kaos@marketplace.test` | 081200000602 | Harapan Indah | 8-14 | ⏳ Not Verified |
+| Hijab Syar'i Gallery | `aisyah.hijab@marketplace.test` | 081200000603 | Cibubur | 12-20 | ✅ Verified, Member |
+
+---
+
+### Beauty Businesses
+
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Skincare Alami | `lina.skincare@marketplace.test` | 081200000701 | Summarecon | 8-16 | ✅ Verified, Member |
+| Aromaterapi Nusantara | `yuni.aroma@marketplace.test` | 081200000702 | BINUS | 6-12 | ⏳ Not Verified |
+
+---
+
+### Home Goods Businesses
+
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Perlengkapan Rumah Modern | `budi.home@marketplace.test` | 081200000801 | Summarecon | 10-18 | ✅ Verified, Member |
+| Dekorasi Rumah Unik | `sari.decor@marketplace.test` | 081200000802 | Harapan Indah | 8-15 | ⏳ Not Verified |
+
+---
+
+### Electronics Businesses
+
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Gadget & Accessories | `tech.gadget@marketplace.test` | 081200000901 | BINUS | 10-18 | ✅ Verified, Member |
+| Elektronik Rumah Tangga | `andi.elektronik@marketplace.test` | 081200000902 | Grand Wijata | 6-12 | ⏳ Not Verified |
+
+---
+
+### Services Businesses
+
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Desain Kreatif Studio | `rina.design@marketplace.test` | 081200001001 | Summarecon | 6-10 | ✅ Verified, Member |
+| Digital Marketing Hub | `dodi.marketing@marketplace.test` | 081200001002 | Cibubur | 4-8 | ✅ Verified, Member |
+
+---
+
+### Catering / Medium Enterprise
+
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Rasa Nusantara Catering | `pt.rasa@marketplace.test` | 0218000001 | Summarecon | 20-35 | ✅ Verified, Member, Medium Enterprise |
+
+---
+
+### Mixed Category Businesses
+
+| Name | Email | Phone | Location | Products | Status |
+|------|-------|-------|----------|----------|--------|
+| Snack Box & Katering | `hendra.snackbox@marketplace.test` | 081200001101 | Grand Wijata | 8-16 | ⏳ Not Verified |
+| Market Fresh & Co | `sinta.market@marketplace.test` | 081200001102 | Cibubur | 12-22 | ✅ Verified, Member |
 
 ---
 
@@ -315,17 +354,30 @@ Regular buyer accounts without any business registration.
 | Andi Wijaya | `andi.buyer@marketplace.test` | 081300000101 | Summarecon |
 | Lisa Permata | `lisa.buyer@marketplace.test` | 081300000102 | BINUS |
 | Rudi Hartono | `rudi.buyer@marketplace.test` | 081300000103 | Harapan Indah |
-| Nina Anggraini | `nina.buyer@marketplace.test` | 081300000104 | Grand Wisata |
+| Nina Anggraini | `nina.buyer@marketplace.test` | 081300000104 | Grand Wijata |
 | Yusuf Ibrahim | `yusuf.buyer@marketplace.test` | 081300000105 | Cibubur |
 | Dewi Kusuma | `dewi.buyer@marketplace.test` | 081300000106 | Summarecon |
 | Ahmad Fauzi | `ahmad.buyer@marketplace.test` | 081300000107 | BINUS |
 | Putri Amelia | `putri.buyer@marketplace.test` | 081300000108 | Harapan Indah |
+| Bambang Sulistio | `bambang.buyer@marketplace.test` | 081300000109 | Grand Wijata |
+| Citra Lestari | `citra.buyer@marketplace.test` | 081300000110 | Cibubur |
 
-**Use Cases:**
-- Test buyer-only experience
-- Test product browsing and purchasing
-- Test business registration from profile
-- Test logo generator access (should be blocked)
+---
+
+## Product Categories
+
+The simulation generates products across these categories:
+
+1. **Makanan** - Nasi Goreng, Sate, Rendang, Gado-Gado, Mie Ayam, Soto, dll.
+2. **Minuman** - Kopi Susu, Es Teh, Jus Alpukat, Bandrek, Cendol, Thai Tea, dll.
+3. **Kue & Snack** - Brownies, Donat, Risoles, Kue Lapis, Nastar, Kastengel, dll.
+4. **Sayur & Buah** - Paket Sayur, Buah Segar, Selada Hydroponik, Apel, Jeruk, dll.
+5. **Kerajinan** - Tas Rotan, Vas Bunga, Lampu Hias, Anyaman Bambu, dll.
+6. **Fashion** - Kaos Polos, Kemeja Batik, Hoodie, Blouse, Dress, Scarf, dll.
+7. **Kecantikan** - Face Wash, Body Scrub, Lip Tint, Moisturizer, Sunscreen, Serum, dll.
+8. **Rumah Tangga** - Peralatan Makan, Lilin Aromaterapi, Gorden, Rak Dinding, dll.
+9. **Elektronik** - Powerbank, Earphone Wireless, Kabel Charger, Speaker Bluetooth, dll.
+10. **Jasa** - Desain Logo, Foto Produk, Edit Video, Konten Medsos, Konsultasi Bisnis, dll.
 
 ---
 
@@ -338,45 +390,8 @@ All simulation data is centered around these Bekasi/Jakarta locations:
 | summarecon | Ruko Emerald Commercial, Summarecon Bekasi | 107.0029, -6.2247 | Bekasi |
 | binus | Jl. Bulevar Ahmad Yani, area BINUS Bekasi | 107.0008, -6.2232 | Bekasi |
 | harapanIndah | Jl. Harapan Indah Boulevard, Bekasi | 106.9898, -6.2154 | Bekasi |
-| grandWisata | Jl. Grand Wisata, Tambun Selatan | 107.0167, -6.2389 | Bekasi |
+| grandWisata | Jl. Grand Wijata, Tambun Selatan | 107.0167, -6.2389 | Bekasi |
 | cibubur | Cibubur CBD, Ciracas | 106.8813, -6.3688 | Jakarta Timur |
-
----
-
-## Product Categories
-
-The simulation generates products across these categories:
-
-1. **Makanan** - Nasi Goreng, Sate, Rendang, Gado-Gado, etc.
-2. **Minuman** - Kopi, Teh, Jus, Bandrek, Cendol, etc.
-3. **Kue & Snack** - Brownies, Donat, Risoles, etc.
-4. **Sayur & Buah** - Sayur segar, buah mix, paket organik, etc.
-5. **Kerajinan** - Tas rotan, vas anyaman, lampu hias, etc.
-
----
-
-## Quick Test Scenarios
-
-### Test Business Registration Flow
-1. Login as: `sinta.cibubur@marketplace.test` / `test123`
-2. Go to Profile → Complete business registration
-3. Try Logo Generator (should now work)
-
-### Test Logo Generator Prerequisite
-1. Login as: `andi.buyer@marketplace.test` / `test123`
-2. Try to access Logo Generator
-3. Should see "Business Registration Required" message
-
-### Test Business Logo Display
-1. Login as: `rani.summarecon@marketplace.test` / `test123`
-2. Add business logo via Logo Generator
-3. Check ProductCard and ProductDetail show the logo
-4. Check Profile shows business logo
-
-### Test Empty Storefront
-1. Login as: `farhan.binus@marketplace.test` / `test123`
-2. Navigate to "My Products"
-3. Should show empty state with "Add Product" CTA
 
 ---
 

@@ -233,13 +233,13 @@ function ProfileStackNavigator() {
             <ProfileStack.Screen
                 name="ProfileMain"
                 component={ProfileScreen}
-                options={{
-                    title: t.navProfile,
+                options={({ route }) => ({
+                    title: route.params?.userId ? t.navProfile : t.navProfile,
                     headerStyle: { backgroundColor: colors.card },
                     headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
                     headerShadowVisible: false,
                     headerTintColor: colors.text,
-                }}
+                })}
             />
             <ProfileStack.Screen
                 name="Orders"

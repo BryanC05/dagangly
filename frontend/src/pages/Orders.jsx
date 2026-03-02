@@ -5,7 +5,7 @@ import {
   Package, Clock, CheckCircle, XCircle, MapPin, Phone,
   ShoppingBag, Truck, ChefHat, CreditCard, Banknote, Store,
   Smartphone, Building2, ChevronDown, ChevronUp, Calendar,
-  Navigation, FileText, Flag
+  Navigation, FileText, Flag, User
 } from 'lucide-react';
 import api from '../utils/api';
 import { useAuthStore } from '../store/authStore';
@@ -252,7 +252,7 @@ function Orders() {
                       <div className="preorder-meta">
                         <Package size={16} className="preorder-icon" />
                         <span>
-                          {order.products?.length || 0} items | {formatCurrency(order.totalAmount)}
+                          {order.itemsCount || order.products?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0} items | {formatCurrency(order.totalAmount)}
                         </span>
                       </div>
                       {order.requestStatus === 'seller_accepted' && (
@@ -358,7 +358,14 @@ function Orders() {
                               <div className="meta-row">
                                 <span className="meta-label">{t('orders.buyer')}</span>
                                 <span className="meta-value">
-                                  {order.buyer?.name}
+                                  <Link 
+                                    to={`/profile/${order.buyer?._id}`} 
+                                    className="text-primary hover:underline flex items-center gap-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <User size={12} />
+                                    {order.buyer?.name}
+                                  </Link>
                                   {order.buyer?.phone && (
                                     <span className="contact-inline">
                                       <Phone size={12} /> {order.buyer.phone}
@@ -370,7 +377,14 @@ function Orders() {
                               <div className="meta-row">
                                 <span className="meta-label">{t('orders.seller')}</span>
                                 <span className="meta-value">
-                                  {order.seller?.businessName || order.seller?.name}
+                                  <Link 
+                                    to={`/profile/${order.seller?._id}`}
+                                    className="text-primary hover:underline flex items-center gap-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Store size={12} />
+                                    {order.seller?.businessName || order.seller?.name}
+                                  </Link>
                                   {order.seller?.phone && (
                                     <span className="contact-inline">
                                       <Phone size={12} /> {order.seller.phone}
@@ -389,6 +403,17 @@ function Orders() {
                                 {isPickup && order.preorderTime && ` - ${order.preorderTime}`}
                               </span>
                             </div>
+
+                            {/* Pickup Address for Pickup Orders */}
+                            {isPickup && order.pickupAddress && (
+                              <div className="meta-row">
+                                <span className="meta-label">Pickup Location</span>
+                                <span className="meta-value">
+                                  <MapPin size={12} style={{ marginRight: 4 }} />
+                                  {order.pickupAddress}
+                                </span>
+                              </div>
+                            )}
 
                             {/* Payment Method */}
                             <div className="meta-row">

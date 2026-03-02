@@ -16,7 +16,8 @@ import { getImageUrl } from '../../utils/helpers';
 import BusinessSection from '../../components/business/BusinessSection';
 import api from '../../api/api';
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ navigation, route }) {
+    const { userId: viewingUserId } = route?.params || {};
     const { user, logout, setUser } = useAuthStore();
     const { isDarkMode, toggleTheme, initTheme } = useThemeStore();
     const { language, toggleLanguage, initLanguage } = useLanguageStore();
@@ -24,6 +25,10 @@ export default function ProfileScreen({ navigation }) {
     const { isDriverMode, stats, initDriverMode, toggleDriverMode } = useDriverStore();
     const unreadNotifCount = useNotificationStore((s) => s.unreadCount);
     const { colors } = useTheme();
+    
+    // Determine if viewing own profile or another user's profile
+    const isOwnProfile = !viewingUserId || viewingUserId === user?._id;
+    const [viewedUser, setViewedUser] = useState(null);
 
     useEffect(() => {
         initTheme();
@@ -53,6 +58,38 @@ export default function ProfileScreen({ navigation }) {
             businessName: user?.businessName || '',
         });
     }, [user]);
+
+    // Fetch viewed user's profile when viewing someone else's profile
+    useEffect(() => {
+        if (viewingUserId && !isOwnProfile) {
+            const fetchViewedUser = async () => {
+                try {
+                    const response = await api.get(`/sellers/${viewingUserId}`);
+                    const userData = response.data;
+                    // Transform the response to match User model structure
+                    setViewedUser({
+                        _id: userData._id,
+                        name: userData.name,
+                        email: userData.email,
+                        phone: userData.phone,
+                        businessName: userData.businessName,
+                        businessType: userData.businessType,
+                        profileImage: userData.profileImage,
+                        isVerified: userData.isVerified,
+                        isSeller: userData.isSeller,
+                        rating: userData.rating,
+                        location: userData.location,
+                    });
+                } catch (error) {
+                    console.log('Failed to fetch user:', error);
+                }
+            };
+            fetchViewedUser();
+        }
+    }, [viewingUserId, isOwnProfile]);
+
+    // Determine which user data to display
+    const displayUser = isOwnProfile ? user : viewedUser;
 
     const styles = useMemo(() => StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background },
@@ -229,7 +266,7 @@ export default function ProfileScreen({ navigation }) {
                             <Image source={{ uri: profileImageUri }} style={styles.avatarImage} />
                         ) : (
                             <Text style={styles.avatarLargeText}>
-                                {(user?.name || 'U').charAt(0).toUpperCase()}
+                                {(displayUser?.name || 'U').charAt(0).toUpperCase()}
                             </Text>
                         )}
                         {uploadingImage && (
@@ -240,26 +277,30 @@ export default function ProfileScreen({ navigation }) {
                             </View>
                         )}
                     </View>
-                    <TouchableOpacity style={styles.cameraBtn} onPress={pickProfileImage} disabled={uploadingImage}>
-                        <Ionicons name="camera" size={16} color={colors.white} />
-                    </TouchableOpacity>
+                    {isOwnProfile && (
+                        <TouchableOpacity style={styles.cameraBtn} onPress={pickProfileImage} disabled={uploadingImage}>
+                            <Ionicons name="camera" size={16} color={colors.white} />
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 {!editing ? (
                     <>
-                        <Text style={styles.profileName}>{user?.name || 'User'}</Text>
-                        <Text style={styles.profileEmail}>{user?.email}</Text>
-                        {user?.phone ? (
-                            <Text style={styles.profilePhone}>{user.phone}</Text>
+                        <Text style={styles.profileName}>{displayUser?.name || 'User'}</Text>
+                        <Text style={styles.profileEmail}>{displayUser?.email}</Text>
+                        {displayUser?.phone ? (
+                            <Text style={styles.profilePhone}>{displayUser.phone}</Text>
                         ) : null}
                         {/* Account status badges removed - all users are equal */}
-                        {user?.businessName && (
-                            <Text style={styles.businessName}>{user.businessName}</Text>
+                        {displayUser?.businessName && (
+                            <Text style={styles.businessName}>{displayUser.businessName}</Text>
                         )}
-                        <TouchableOpacity style={styles.editBtn} onPress={() => setEditing(true)}>
-                            <Ionicons name="pencil-outline" size={16} color={colors.primary} />
-                            <Text style={styles.editBtnText}>{t.editProfile || 'Edit Profile'}</Text>
-                        </TouchableOpacity>
+                        {isOwnProfile && (
+                            <TouchableOpacity style={styles.editBtn} onPress={() => setEditing(true)}>
+                                <Ionicons name="pencil-outline" size={16} color={colors.primary} />
+                                <Text style={styles.editBtnText}>{t.editProfile || 'Edit Profile'}</Text>
+                            </TouchableOpacity>
+                        )}
                     </>
                 ) : (
                     <View style={styles.editForm}>

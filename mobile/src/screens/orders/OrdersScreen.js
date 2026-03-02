@@ -144,7 +144,7 @@ export default function OrdersScreen({ navigation }) {
                             {order.seller?.name || order.seller?.businessName || 'Store'}
                         </Text>
                         <Text style={{ fontSize: 12, color: colors?.textSecondary }}>
-                            {order.items?.length || 0} item(s)
+                            {order.itemsCount || order.items?.reduce((sum, item) => sum + (item.quantity || 1), 0) || order.products?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0} item(s)
                         </Text>
                     </View>
                 </View>
@@ -230,10 +230,41 @@ export default function OrdersScreen({ navigation }) {
                         {/* Store Info */}
                         <View style={{ marginBottom: 16 }}>
                             <Text style={{ fontSize: 12, color: colors?.textSecondary, marginBottom: 4 }}>Store</Text>
-                            <Text style={{ fontSize: 16, fontWeight: '600', color: colors?.text }}>
-                                {order.seller?.name || order.seller?.businessName || 'Store'}
-                            </Text>
+                            <TouchableOpacity 
+                                onPress={() => {
+                                    if (order.seller?._id) {
+                                        navigation.navigate('ProfileScreen', { userId: order.seller._id });
+                                    }
+                                }}
+                            >
+                                <Text style={{ fontSize: 16, fontWeight: '600', color: colors?.primary }}>
+                                    {order.seller?.name || order.seller?.businessName || 'Store'}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
+
+                        {/* Buyer Info - only show if current user is the seller */}
+                        {isSeller(order) && order.buyer && (
+                            <View style={{ marginBottom: 16 }}>
+                                <Text style={{ fontSize: 12, color: colors?.textSecondary, marginBottom: 4 }}>Buyer</Text>
+                                <TouchableOpacity 
+                                    onPress={() => {
+                                        if (order.buyer?._id) {
+                                            navigation.navigate('ProfileScreen', { userId: order.buyer._id });
+                                        }
+                                    }}
+                                >
+                                    <Text style={{ fontSize: 16, fontWeight: '600', color: colors?.primary }}>
+                                        {order.buyer?.name || 'Buyer'}
+                                    </Text>
+                                    {order.buyer?.phone && (
+                                        <Text style={{ fontSize: 12, color: colors?.textSecondary, marginTop: 2 }}>
+                                            {order.buyer.phone}
+                                        </Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        )}
 
                         {/* Delivery Info */}
                         {order.deliveryType === 'pickup' ? (
@@ -251,12 +282,12 @@ export default function OrdersScreen({ navigation }) {
                         {/* Items */}
                         <View style={{ marginBottom: 16 }}>
                             <Text style={{ fontSize: 12, color: colors?.textSecondary, marginBottom: 8 }}>Items</Text>
-                            {order.items?.map((item, index) => (
+                            {(order.items || order.products || []).map((item, index) => (
                                 <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                                     <View style={{ width: 40, height: 40, borderRadius: 8, backgroundColor: colors?.border, marginRight: 10 }} />
                                     <View style={{ flex: 1 }}>
                                         <Text style={{ fontSize: 14, fontWeight: '600', color: colors?.text }}>
-                                            {item.name || 'Product'}
+                                            {item.product?.name || item.name || 'Product'}
                                         </Text>
                                         <Text style={{ fontSize: 12, color: colors?.textSecondary }}>
                                             x{item.quantity}

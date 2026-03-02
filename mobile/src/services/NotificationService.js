@@ -275,40 +275,69 @@ export function usePushNotifications() {
     const [initialized, setInitialized] = React.useState(false);
 
     React.useEffect(() => {
+        let cleanup = null;
+
         const init = async () => {
             // Try to initialize notification handler
-            const isInitialized = await notificationService.initialize();
-            setInitialized(isInitialized);
-
-            if (!isInitialized) {
-                console.log('Notifications not available on this device');
-                return;
-            }
-
             try {
-                const pushToken = await notificationService.registerForPushNotifications();
-                setToken(pushToken);
-            } catch (error) {
-                console.log('Push registration error:', error.message);
+                const isInitialized = await notificationService.initialize();
+                setInitialized(isInitialized);
+
+                if (!isInitialized) {
+                    console.log('Notifications not available on this device');
+                    return;
+                }
+
+                try {
+                    const pushToken = await notificationService.registerForPushNotifications();
+                    setToken(pushToken);
+                } catch (error) {
+                    console.log('Push registration error:', error.message);
+                }
+            } catch (initError) {
+                console.log('Notification init error:', initError.message);
             }
         };
 
         init();
 
-        // Only setup listeners if initialization succeeded
+        // Setup listeners only after initialization succeeds
+        return () => {
+            if (cleanup) {
+                cleanup();
+            }
+        };
+    }, []);
+
+    // Separate effect for setting up listeners after initialization
+    React.useEffect(() => {
         if (!initialized) return;
 
         const cleanup = notificationService.setupNotificationListeners(
-            (notif) => setNotification(notif),
+            (notif) => {
+                try {
+                    setNotification(notif);
+                } catch (e) {
+                    console.log('Notification callback error:', e.message);
+                }
+            },
             (response) => {
-                const data = response.notification.request.content.data;
-                if (data?.type === 'new_order' && data?.orderId) {
-                    // Navigate to order details or available orders
+                try {
+                    const data = response.notification.request.content.data;
+                    if (data?.type === 'new_order' && data?.orderId) {
+                        // Navigate to order details or available orders
+                    }
+                } catch (e) {
+                    console.log('Notification response error:', e.message);
                 }
             }
         );
 
-        return cleanup;
+        return () => {
+            if (cleanup) {
+                cleanup();
+            }
+        };
     }, [initialized]);
 
     return {

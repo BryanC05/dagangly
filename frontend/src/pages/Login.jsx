@@ -24,10 +24,13 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    alert('Login form submitted!');
+    console.log('Login attempt with:', formData);
     setError('');
     setIsLoading(true);
 
     try {
+      console.log('Making API call to /auth/login');
       const response = await api.post('/auth/login', formData);
       const token = response?.data?.token;
       const user = response?.data?.user;
