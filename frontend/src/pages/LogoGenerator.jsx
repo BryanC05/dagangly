@@ -189,9 +189,9 @@ function LogoGenerator() {
 
         {/* Success Message */}
         {successMessage && (
-          <Alert className="mb-6 bg-green-50 border-green-200">
-            <Check className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
+          <Alert className="mb-6 bg-green-500/10 border-green-500/30">
+            <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-700 dark:text-green-300">
               {successMessage}
             </AlertDescription>
           </Alert>
@@ -223,13 +223,13 @@ function LogoGenerator() {
                 Daily limit reached. Resets in {status.resetInHours} hours.
               </p>
             )}
-            <div className="mt-4">
+              <div className="mt-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleResetLimit}
                 disabled={isLoading}
-                className="text-amber-700 border-amber-300 hover:bg-amber-50"
+                className="text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/30"
               >
                 {isLoading ? (
                   <>

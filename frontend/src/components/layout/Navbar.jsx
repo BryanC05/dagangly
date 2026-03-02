@@ -19,6 +19,7 @@ import {
   BarChart3,
   PlusCircle,
   ChevronDown,
+  Palette,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -223,6 +224,10 @@ const Navbar = () => {
                       <DropdownMenuItem onSelect={() => handleNavigate("/seller/add-product")}>
                         <PlusCircle className="h-4 w-4 mr-2" />
                         Add Product
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => handleNavigate("/logo-generator")}>
+                        <Palette className="h-4 w-4 mr-2" />
+                        Logo Generator
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
