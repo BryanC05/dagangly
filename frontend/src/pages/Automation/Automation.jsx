@@ -412,9 +412,10 @@ const Automation = () => {
         </div>
       )}
 
-      {/* Create Workflow Modal */}
+
+      {/* Create Workflow Modal — rendered outside main content to prevent bleed-through */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
           <Card className="w-full max-w-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -497,6 +498,18 @@ const Automation = () => {
                     Copy the Production Webhook URL from your n8n Webhook
                     node and paste it here.
                   </p>
+                  <details className="mt-2">
+                    <summary className="text-xs text-primary cursor-pointer hover:underline">
+                      Where do I find this URL?
+                    </summary>
+                    <div className="mt-2 p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-1">
+                      <p>1. Open your <strong>n8n dashboard</strong></p>
+                      <p>2. Create or open your workflow</p>
+                      <p>3. Click the <strong>Webhook</strong> node</p>
+                      <p>4. Switch to the <strong>Production</strong> tab</p>
+                      <p>5. Copy the URL shown (e.g. <code className="bg-muted px-1 rounded">https://your-n8n.railway.app/webhook/abc...</code>)</p>
+                    </div>
+                  </details>
                 </div>
 
                 {/* Actions */}
