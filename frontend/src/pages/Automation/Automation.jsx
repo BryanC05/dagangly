@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -413,10 +414,10 @@ const Automation = () => {
       )}
 
 
-      {/* Create Workflow Modal — rendered outside main content to prevent bleed-through */}
-      {showCreateModal && (
+      {/* Create Workflow Modal — rendered outside main content using a Portal to prevent bleed-through */}
+      {showCreateModal && createPortal(
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <Card className="w-full max-w-lg">
+          <Card className="w-full max-w-lg shadow-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Zap size={20} className="text-primary" />
@@ -544,7 +545,8 @@ const Automation = () => {
               </form>
             </CardContent>
           </Card>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
