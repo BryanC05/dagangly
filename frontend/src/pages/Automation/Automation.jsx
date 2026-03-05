@@ -1,11 +1,12 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Zap, Plus, Trash2, ExternalLink, AlertCircle, CheckCircle,
-  Mail, Package, UserPlus, Copy, Loader2, ArrowLeft
+  Mail, Package, UserPlus, Copy, Loader2, ArrowLeft, Crown
 } from 'lucide-react';
 import api from '@/utils/api';
 import { useAuthStore } from '@/store/authStore';
@@ -147,6 +148,16 @@ const Automation = () => {
     setFeedback({ type: 'success', message: 'Webhook URL copied!' });
   };
 
+  // Membership query
+  const { data: membership, isLoading: membershipLoading } = useQuery({
+    queryKey: ['membership'],
+    queryFn: async () => {
+      const response = await api.get('/users/membership/status');
+      return response.data;
+    },
+    enabled: !!user?.isSeller,
+  });
+
   // Gate: Must be a seller
   if (!user?.isSeller) {
     return (
@@ -160,6 +171,41 @@ const Automation = () => {
             </p>
             <Link to="/sell">
               <Button>Register as Seller</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Gate: Must have premium membership
+  if (membershipLoading) {
+    return (
+      <div className="container py-12 flex items-center justify-center text-muted-foreground gap-2">
+        <Loader2 size={20} className="animate-spin" />
+        Loading…
+      </div>
+    );
+  }
+
+  if (!membership?.isMember) {
+    return (
+      <div className="container py-12">
+        <Card className="border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20">
+          <CardContent className="p-8 text-center">
+            <Crown className="mx-auto mb-4 text-yellow-500" size={48} />
+            <h2 className="text-xl font-bold mb-2">Premium Feature</h2>
+            <p className="text-muted-foreground mb-1">
+              Workflow automation is available exclusively for <strong>Premium Members</strong>.
+            </p>
+            <p className="text-muted-foreground mb-6 text-sm">
+              Upgrade to Premium for <strong>Rp 10.000/month</strong> to unlock automated emails, inventory alerts, and more.
+            </p>
+            <Link to="/seller/dashboard">
+              <Button className="gap-2">
+                <Crown size={16} />
+                Upgrade on Dashboard
+              </Button>
             </Link>
           </CardContent>
         </Card>
@@ -334,8 +380,8 @@ const Automation = () => {
                         toggleWorkflow(workflow._id, workflow.isActive)
                       }
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${workflow.isActive
-                          ? 'bg-primary'
-                          : 'bg-gray-300 dark:bg-gray-600'
+                        ? 'bg-primary'
+                        : 'bg-gray-300 dark:bg-gray-600'
                         }`}
                       title={
                         workflow.isActive
@@ -345,8 +391,8 @@ const Automation = () => {
                     >
                       <span
                         className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${workflow.isActive
-                            ? 'translate-x-6'
-                            : 'translate-x-1'
+                          ? 'translate-x-6'
+                          : 'translate-x-1'
                           }`}
                       />
                     </button>
@@ -391,8 +437,8 @@ const Automation = () => {
                           key={wt.value}
                           type="button"
                           className={`w-full p-3 border rounded-lg text-left transition-all flex items-center gap-3 ${newWorkflowType === wt.value
-                              ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                              : 'hover:bg-muted'
+                            ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                            : 'hover:bg-muted'
                             }`}
                           onClick={() => setNewWorkflowType(wt.value)}
                         >
