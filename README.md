@@ -30,7 +30,8 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 - Manage business profile
 - Participate in community forums
 - Real-time messaging with buyers
-- AI-powered logo generation
+- AI-powered logo generation (Premium)
+- n8n workflow automation (Premium)
 
 ### Technical Features
 - Geolocation-based search for nearby sellers
@@ -46,6 +47,8 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 - Multi-language i18n support
 - Theme management (dark/light mode)
 - Persistent cart and saved items
+- Premium membership system (Rp 10.000/month)
+- n8n webhook integrations for workflow automation
 
 ## Tech Stack
 
@@ -412,6 +415,18 @@ With these optimizations, you can push to **500+ concurrent users** on the free 
 - `GET /api/logo/status` - Get generation status (authenticated)
 - `PUT /api/logo/select/:logoId` - Select logo (authenticated)
 - `DELETE /api/logo/:logoId` - Delete logo (authenticated)
+- `POST /api/logo/reset-limit` - Reset daily limit (testing)
+
+### Membership
+- `GET /api/users/membership/status` - Get membership status (authenticated)
+- `POST /api/users/membership/payment` - Submit payment proof (authenticated)
+- `GET /api/users/membership/pending` - Get pending memberships (admin)
+
+### Workflow Automation
+- `GET /api/workflows` - Get all workflows (authenticated)
+- `POST /api/workflows` - Create workflow (authenticated)
+- `PUT /api/workflows/:id/toggle` - Toggle workflow status (authenticated)
+- `DELETE /api/workflows/:id` - Delete workflow (authenticated)
 
 ## Key Features Explained
 
@@ -454,6 +469,23 @@ Orders flow through statuses:
 - Custom logo upload support
 - Rate limiting (5 logos per user)
 - Logo history and selection
+- Requires seller + premium membership
+
+### Premium Membership
+- Monthly subscription (Rp 10.000/month)
+- Exclusive access to AI Logo Generator
+- Exclusive access to n8n Workflow Automation
+- Admin approval required for payment verification
+- Unlimited product listings
+- Priority search results
+- Verified badge
+
+### n8n Workflow Automation
+- Order confirmation webhooks
+- Inventory alert webhooks
+- Welcome email series
+- Real-time event triggers
+- Requires seller + premium membership
 
 ### Multi-Language Support
 - Toggle between English and Hindi

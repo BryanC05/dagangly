@@ -25,7 +25,8 @@ A React Native (Expo) mobile application for the MSME Marketplace platform. Conn
 - Update order status
 - View sales dashboard
 - Manage business profile
-- AI-powered logo generation
+- AI-powered logo generation (Premium)
+- n8n workflow automation (Premium)
 - Real-time messaging with buyers
 
 ### Technical Features
@@ -36,6 +37,8 @@ A React Native (Expo) mobile application for the MSME Marketplace platform. Conn
 - Persistent storage for cart/auth
 - Multi-language support (English/Indonesian)
 - Dark/light theme support
+- Premium membership system (Rp 10.000/month)
+- n8n workflow automation
 
 ## Tech Stack
 
@@ -98,6 +101,7 @@ mobile/
 │   │   │   └── ProfileScreen.js
 │   │   └── seller/
 │   │       ├── AddProductScreen.js
+│   │       ├── AutomationScreen.js
 │   │       ├── BusinessDetailsScreen.js
 │   │       ├── LogoGeneratorScreen.js
 │   │       ├── MyProductsScreen.js
@@ -308,7 +312,8 @@ Edit `app.json` for app name, icon, splash screen, etc.
 - Product management
 - Order management
 - Sales dashboard
-- AI Logo generation
+- AI Logo generation (Premium)
+- Workflow automation (Premium)
 
 ### Settings
 - Language toggle (English/Indonesian)
