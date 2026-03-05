@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  Zap, Plus, Trash2, ExternalLink, AlertCircle, CheckCircle,
-  Mail, Package, UserPlus, Copy, Loader2, ArrowLeft, Crown
+  Zap, Plus, Trash2, AlertCircle, CheckCircle,
+  Mail, Package, UserPlus, Loader2, ArrowLeft, Crown
 } from 'lucide-react';
 import api from '@/utils/api';
 import { useAuthStore } from '@/store/authStore';
@@ -52,7 +52,6 @@ const Automation = () => {
 
   // Create form state
   const [newWorkflowType, setNewWorkflowType] = useState('order_confirmation');
-  const [newWebhookUrl, setNewWebhookUrl] = useState('');
   const [newWorkflowName, setNewWorkflowName] = useState('');
   const [creating, setCreating] = useState(false);
 
@@ -100,10 +99,6 @@ const Automation = () => {
 
   const createWorkflow = async (e) => {
     e.preventDefault();
-    if (!newWebhookUrl.trim()) {
-      setFeedback({ type: 'error', message: 'Webhook URL is required' });
-      return;
-    }
 
     const meta = getWorkflowMeta(newWorkflowType);
     setCreating(true);
@@ -112,12 +107,10 @@ const Automation = () => {
       const response = await api.post('/workflows', {
         name: newWorkflowName.trim() || meta.label,
         type: newWorkflowType,
-        webhookUrl: newWebhookUrl.trim(),
         config: {},
       });
       setWorkflows([...workflows, response.data]);
       setShowCreateModal(false);
-      setNewWebhookUrl('');
       setNewWorkflowName('');
       setNewWorkflowType('order_confirmation');
       setFeedback({ type: 'success', message: 'Workflow created successfully!' });
@@ -142,11 +135,6 @@ const Automation = () => {
       console.error('Failed to delete workflow:', error);
       setFeedback({ type: 'error', message: 'Failed to delete workflow' });
     }
-  };
-
-  const copyUrl = (url) => {
-    navigator.clipboard.writeText(url);
-    setFeedback({ type: 'success', message: 'Webhook URL copied!' });
   };
 
   // Membership query
@@ -268,23 +256,23 @@ const Automation = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-lg bg-muted/50">
               <div className="text-2xl font-bold text-primary mb-1">1</div>
-              <p className="text-sm font-medium mb-1">Set Up n8n</p>
+              <p className="text-sm font-medium mb-1">Choose a Workflow</p>
               <p className="text-xs text-muted-foreground">
-                Deploy n8n (locally or in the cloud) and create your workflow with a Webhook trigger node.
+                Pick the type of automation you want — order confirmations, inventory alerts, or welcome emails.
               </p>
             </div>
             <div className="p-4 rounded-lg bg-muted/50">
               <div className="text-2xl font-bold text-primary mb-1">2</div>
-              <p className="text-sm font-medium mb-1">Paste Webhook URL</p>
+              <p className="text-sm font-medium mb-1">Activate It</p>
               <p className="text-xs text-muted-foreground">
-                Copy the Production Webhook URL from n8n and paste it here when creating a workflow.
+                Click Create and you're done. Our platform handles the automation infrastructure for you.
               </p>
             </div>
             <div className="p-4 rounded-lg bg-muted/50">
               <div className="text-2xl font-bold text-primary mb-1">3</div>
               <p className="text-sm font-medium mb-1">Sit Back & Relax</p>
               <p className="text-xs text-muted-foreground">
-                When an event happens (e.g. new order), the marketplace will automatically trigger your n8n workflow.
+                When events occur (e.g. new orders), your automations trigger automatically.
               </p>
             </div>
           </div>
@@ -340,20 +328,6 @@ const Automation = () => {
                         {meta.description}
                       </p>
                       {/* Webhook URL (truncated) */}
-                      {workflow.webhookUrl && (
-                        <div className="flex items-center gap-1.5 mt-2">
-                          <code className="text-xs bg-muted px-2 py-0.5 rounded truncate max-w-[300px] block">
-                            {workflow.webhookUrl}
-                          </code>
-                          <button
-                            onClick={() => copyUrl(workflow.webhookUrl)}
-                            className="text-muted-foreground hover:text-foreground shrink-0"
-                            title="Copy URL"
-                          >
-                            <Copy size={14} />
-                          </button>
-                        </div>
-                      )}
                       {/* Execution stats */}
                       <p className="text-xs text-muted-foreground mt-2">
                         Triggered {workflow.executionCount || 0} times
@@ -479,49 +453,13 @@ const Automation = () => {
                     onChange={(e) => setNewWorkflowName(e.target.value)}
                   />
                 </div>
-
-                {/* Webhook URL */}
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">
-                    n8n Webhook URL{' '}
-                    <span className="text-destructive">*</span>
-                  </label>
-                  <input
-                    type="url"
-                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    placeholder="https://your-n8n.railway.app/webhook/abc-123-def"
-                    value={newWebhookUrl}
-                    onChange={(e) => setNewWebhookUrl(e.target.value)}
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground mt-1.5 flex items-start gap-1">
-                    <ExternalLink size={12} className="mt-0.5 shrink-0" />
-                    Copy the Production Webhook URL from your n8n Webhook
-                    node and paste it here.
-                  </p>
-                  <details className="mt-2">
-                    <summary className="text-xs text-primary cursor-pointer hover:underline">
-                      Where do I find this URL?
-                    </summary>
-                    <div className="mt-2 p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-1">
-                      <p>1. Open your <strong>n8n dashboard</strong></p>
-                      <p>2. Create or open your workflow</p>
-                      <p>3. Click the <strong>Webhook</strong> node</p>
-                      <p>4. Switch to the <strong>Production</strong> tab</p>
-                      <p>5. Copy the URL shown (e.g. <code className="bg-muted px-1 rounded">https://your-n8n.railway.app/webhook/abc...</code>)</p>
-                    </div>
-                  </details>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-3 pt-6">
                   <Button
                     type="button"
                     variant="outline"
                     className="flex-1"
                     onClick={() => {
                       setShowCreateModal(false);
-                      setNewWebhookUrl('');
                       setNewWorkflowName('');
                     }}
                   >

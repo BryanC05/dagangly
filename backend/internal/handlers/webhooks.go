@@ -5,12 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"os"
+
+	"msme-marketplace/internal/database"
+	"msme-marketplace/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"msme-marketplace/internal/database"
-	"msme-marketplace/internal/models"
 )
 
 type WebhookHandler struct{}
@@ -121,6 +123,13 @@ func (h *WebhookHandler) TestWebhook(c *gin.Context) {
 }
 
 func (h *WebhookHandler) TriggerOrderConfirmation(order models.Order, sellerID primitive.ObjectID) {
+	// Use centralized N8N_WEBHOOK_URL from environment
+	webhookURL := os.Getenv("N8N_WEBHOOK_URL")
+	if webhookURL == "" {
+		return // No centralized webhook configured
+	}
+
+	// Check if the seller has opted in with an active workflow
 	workflowsCollection := database.GetDB().Collection("workflows")
 	var workflow models.Workflow
 	err := workflowsCollection.FindOne(context.Background(), bson.M{
@@ -129,8 +138,8 @@ func (h *WebhookHandler) TriggerOrderConfirmation(order models.Order, sellerID p
 		"isActive": true,
 	}).Decode(&workflow)
 
-	if err != nil || workflow.WebhookURL == nil {
-		return
+	if err != nil {
+		return // Seller has not opted in
 	}
 
 	payload := map[string]interface{}{
@@ -147,7 +156,7 @@ func (h *WebhookHandler) TriggerOrderConfirmation(order models.Order, sellerID p
 
 	jsonData, _ := json.Marshal(payload)
 	httpClient := &http.Client{}
-	httpClient.Post(*workflow.WebhookURL, "application/json", bytes.NewBuffer(jsonData))
+	httpClient.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
 
 	workflowsCollection.UpdateOne(context.Background(), bson.M{"_id": workflow.ID}, bson.M{
 		"$inc": bson.M{"executionCount": 1},
