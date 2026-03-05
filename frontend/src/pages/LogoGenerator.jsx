@@ -225,7 +225,7 @@ function LogoGenerator() {
                 {t('logo.limitReached') || 'Daily limit reached. Resets in'} {status.resetInHours} {t('logo.hours') || 'hours'}.
               </p>
             )}
-              <div className="mt-4">
+            <div className="mt-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -251,7 +251,7 @@ function LogoGenerator() {
 
         {/* Current Logo Display */}
         {currentBusinessLogo && (
-        <Card className="mb-6 border-primary endfield-card">
+          <Card className="mb-6 border-primary endfield-card">
             <CardHeader>
               <CardTitle className="text-base">{t('logo.currentLogo')}</CardTitle>
               <CardDescription>
@@ -277,10 +277,10 @@ function LogoGenerator() {
               </div>
             </CardContent>
           </Card>
- {/* Generation Section */}
         )}
 
-               <Card className="mb-6 endfield-card">
+        {/* Generation Section */}
+        <Card className="mb-6 endfield-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
