@@ -32,6 +32,7 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 - Real-time messaging with buyers
 - AI-powered logo generation (Premium)
 - n8n workflow automation (Premium)
+- **Instagram Auto-Post** - Automatically post products to Instagram when listed
 
 ### Technical Features
 - Geolocation-based search for nearby sellers
@@ -49,6 +50,7 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 - Persistent cart and saved items
 - Premium membership system (Rp 10.000/month)
 - n8n webhook integrations for workflow automation
+- **Instagram Auto-Post** - Automatic product posting to Instagram Business accounts via Meta Graph API
 
 ## Tech Stack
 

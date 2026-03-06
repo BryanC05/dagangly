@@ -156,3 +156,47 @@ The backend `webhooks.go` strictly validates `isActive: true` against the `selle
    - The toggle is located in the "Add New Product" page, just above the Submit button.
 4. **Payload missing data:**
    - Ensure the `webhooks.go` file is correctly extracting data via `usersCollection.FindOne(...)`. Note that pointers (like `seller.BusinessName`) must be safely dereferenced before appending to the payload dictionary.
+
+### Instagram-Specific Troubleshooting
+
+#### Error: "Invalid OAuth access token - Cannot parse access token"
+- **Cause**: Token is malformed or expired
+- **Solution**: 
+  1. Debug token: `https://graph.facebook.com/v18.0/debug_token?input_token=YOUR_TOKEN&access_token=YOUR_TOKEN`
+  2. If invalid, generate a new token from Meta Developer Portal
+  3. Ensure token has `instagram_content_publish` permission
+
+#### Error: "Unsupported post request - Object does not exist"
+- **Cause**: Instagram Account ID is wrong or not linked to the token
+- **Solution**:
+  1. Verify IG Account ID: `https://graph.facebook.com/v18.0/YOUR_PAGE_ID?fields=instagram_business_account&access_token=YOUR_TOKEN`
+  2. Ensure the Facebook Page is linked to the Instagram Business Account
+  3. Check token has `pages_show_list` and `instagram_basic` permissions
+
+#### Error: Image not showing / Using fallback image
+- **Cause**: Product image URL is not publicly accessible or is a relative path
+- **Solution**:
+  1. Use external URLs (Unsplash, etc.) OR
+  2. Ensure uploaded images are served with full URL (not relative paths like `/uploads/...`)
+  3. Check the `productImage` field in the webhook payload
+
+#### Node Configuration Issues
+- **Problem**: Parameters in Query String instead of Body
+- **Solution**: For both Node 1 (media) and Node 2 (media_publish), ensure:
+  - Body Content Type: `Form URL Encoded`
+  - Parameters in **Body Fields** (not Query Parameters)
+  - Include `access_token` in Body Fields
+
+```
+WRONG (Query Parameters):
+  ┌─ Query Parameters ───────────┐
+  │ image_url: {{ $json... }}   │
+  │ caption: {{ $json... }}     │
+  └─────────────────────────────┘
+
+CORRECT (Body Parameters):
+  ┌─ Body Fields ───────────────┐
+  │ image_url: {{ $json... }}  │
+  │ caption: {{ $json... }}    │
+  └─────────────────────────────┘
+```
