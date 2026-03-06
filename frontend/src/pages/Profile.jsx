@@ -48,6 +48,7 @@ import {
   ChefHat,
   Sparkles,
   ImageIcon,
+  Instagram,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -654,6 +655,18 @@ const Profile = () => {
                     <Edit className="h-4 w-4" />
                     {t('profile.editProfile')}
                   </Button>
+                  {isOwnProfile && (
+                    <Button
+                      variant="outline"
+                      className="gap-2 flex-1 md:flex-none"
+                      asChild
+                    >
+                      <Link to="/social-links">
+                        <Instagram className="h-4 w-4 text-pink-500" />
+                        Social Links
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
