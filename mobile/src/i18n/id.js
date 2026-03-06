@@ -2136,4 +2136,21 @@ export default {
     membershipActive: 'Aktif',
     expiresOn: 'Berakhir pada',
     pendingApproval: 'Menunggu Persetujuan',
+    
+    // Social Links
+    socialLinks: 'Tautan Media Sosial',
+    addSocialLink: 'Tambah Tautan',
+    editSocialLink: 'Edit Tautan',
+    deleteLink: 'Hapus Tautan',
+    platform: 'Platform',
+    url: 'URL',
+    enterUrl: 'Masukkan URL',
+    invalidUrl: 'Silakan masukkan URL yang valid',
+    linkOpened: 'Tautan dibuka',
+    profileLinks: 'Tautan Profil',
+    storeLinks: 'Tautan Toko',
+    sameAsProfile: 'Sama dengan profil',
+    custom: 'Kustom',
+    maxLinksReached: 'Maksimal 5 tautan diperbolehkan',
+    noLinksYet: 'Belum ada tautan ditambahkan',
 };

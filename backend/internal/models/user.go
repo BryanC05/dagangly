@@ -43,7 +43,8 @@ type User struct {
 	StoreSocialLinks []SocialLink `bson:"storeSocialLinks" json:"storeSocialLinks"` // Store links (separate from profile)
 
 	// Instagram Accounts
-	InstagramAccounts []InstagramAccount `bson:"instagramAccounts" json:"instagramAccounts"`
+	InstagramAccounts       []InstagramAccount `bson:"instagramAccounts" json:"instagramAccounts"`
+	InstagramPostPreference string             `bson:"instagramPostPreference" json:"instagramPostPreference"` // "trolitoko" (default) or "own"
 
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 	UpdatedAt time.Time `bson:"updatedAt" json:"updatedAt"`

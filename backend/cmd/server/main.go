@@ -101,6 +101,8 @@ func main() {
 			users.GET("/instagram/callback", handlers.InstagramCallback)
 			users.POST("/instagram/disconnect", handlers.InstagramDisconnect)
 			users.POST("/instagram/set-default", handlers.InstagramSetDefault)
+			users.POST("/instagram/preference", handlers.InstagramSetPostPreference)
+			users.GET("/instagram/preference", handlers.GetInstagramPostPreference)
 
 			// Social links routes
 			users.GET("/social-links", handlers.GetSocialLinks)

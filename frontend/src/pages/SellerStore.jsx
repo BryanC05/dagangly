@@ -6,6 +6,16 @@ import api from '../utils/api';
 import ProductCard from '@/components/products/ProductCard';
 import { ProductsGridSkeleton } from '@/components/ui/skeleton';
 
+const SOCIAL_PLATFORMS = {
+  instagram: { id: 'instagram', name: 'Instagram', icon: 'instagram', color: '#E4405F' },
+  tiktok: { id: 'tiktok', name: 'TikTok', icon: 'music', color: '#000000' },
+  facebook: { id: 'facebook', name: 'Facebook', icon: 'facebook', color: '#1877F2' },
+  twitter: { id: 'twitter', name: 'Twitter/X', icon: 'twitter', color: '#1DA1F2' },
+  youtube: { id: 'youtube', name: 'YouTube', icon: 'youtube', color: '#FF0000' },
+  whatsapp: { id: 'whatsapp', name: 'WhatsApp', icon: 'phone', color: '#25D366' },
+  website: { id: 'website', name: 'Website', icon: 'globe', color: '#666666' },
+};
+
 function SellerStore() {
   const { id } = useParams();
   const sellerId = id && id !== 'undefined' && id !== 'null' ? id : null;
@@ -31,6 +41,24 @@ function SellerStore() {
     },
     enabled: !!sellerId,
   });
+
+  const { data: socialData } = useQuery({
+    queryKey: ['sellerSocialLinks', sellerId],
+    queryFn: async () => {
+      if (!sellerId) return { storeLinks: [], profileLinks: [] };
+      try {
+        const response = await api.get(`/users/${sellerId}/social-links`);
+        return response.data;
+      } catch {
+        return { storeLinks: [], profileLinks: [] };
+      }
+    },
+    enabled: !!sellerId,
+  });
+
+  const socialLinks = socialData?.storeLinks?.length > 0 
+    ? socialData.storeLinks 
+    : socialData?.profileLinks || [];
 
   const shareStore = async () => {
     if (!seller?.location?.coordinates) return;
@@ -172,6 +200,28 @@ function SellerStore() {
                 </button>
               )}
             </div>
+
+            {/* Social Links */}
+            {socialLinks.length > 0 && (
+              <div className="flex gap-2 mt-4">
+                {socialLinks.slice(0, 5).map((link) => {
+                  const platform = SOCIAL_PLATFORMS[link.platform] || SOCIAL_PLATFORMS.website;
+                  return (
+                    <a
+                      key={link.platform}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center w-10 h-10 rounded-full transition-opacity hover:opacity-80"
+                      style={{ backgroundColor: platform.color + '20' }}
+                      title={platform.name}
+                    >
+                      <i data-lucide={platform.icon} style={{ color: platform.color }}></i>
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 

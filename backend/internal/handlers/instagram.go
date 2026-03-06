@@ -356,6 +356,130 @@ func InstagramSetDefault(c *gin.Context) {
 	})
 }
 
+// InstagramSetPostPreference sets whether to use TroliToko account or user's own account
+func InstagramSetPostPreference(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var req struct {
+		Preference string `json:"preference"` // "trolitoko" or "own"
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// Validate preference
+	if req.Preference != "trolitoko" && req.Preference != "own" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid preference. Must be 'trolitoko' or 'own'"})
+		return
+	}
+
+	// If choosing "own", verify user has connected an account
+	if req.Preference == "own" {
+		userIDObj, err := primitive.ObjectIDFromHex(userID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			return
+		}
+
+		collection := config.GetDB().Collection("users")
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		var user models.User
+		err = collection.FindOne(ctx, bson.M{"_id": userIDObj}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+
+		if len(user.InstagramAccounts) == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "No Instagram account connected. Please connect your Instagram account first."})
+			return
+		}
+	}
+
+	userIDObj, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	collection := config.GetDB().Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_, err = collection.UpdateOne(
+		ctx,
+		bson.M{"_id": userIDObj},
+		bson.M{"$set": bson.M{
+			"instagramPostPreference": req.Preference,
+			"updatedAt":               time.Now(),
+		}},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update preference"})
+		return
+	}
+
+	preferenceLabel := "TroliToko Account"
+	if req.Preference == "own" {
+		preferenceLabel = "Your Instagram Account"
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success":    true,
+		"message":    "Post preference updated",
+		"preference": req.Preference,
+		"label":      preferenceLabel,
+	})
+}
+
+// GetInstagramPostPreference returns the user's Instagram post preference
+func GetInstagramPostPreference(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userIDObj, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	collection := config.GetDB().Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var user models.User
+	err = collection.FindOne(ctx, bson.M{"_id": userIDObj}).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Default to "trolitoko"
+	preference := user.InstagramPostPreference
+	if preference == "" {
+		preference = "trolitoko"
+	}
+
+	hasOwnAccount := len(user.InstagramAccounts) > 0
+
+	c.JSON(http.StatusOK, gin.H{
+		"preference":     preference,
+		"hasOwnAccount":  hasOwnAccount,
+		"troliTokoLabel": "TroliToko Official Account",
+		"ownLabel":       "Your Connected Instagram",
+	})
+}
+
 // Helper functions
 
 func getLongLivedToken(shortLivedToken string) (string, error) {

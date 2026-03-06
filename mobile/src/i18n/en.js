@@ -1847,4 +1847,21 @@ export default {
     membershipActive: 'Active',
     expiresOn: 'Expires on',
     pendingApproval: 'Pending Approval',
+    
+    // Social Links
+    socialLinks: 'Social Media Links',
+    addSocialLink: 'Add Social Link',
+    editSocialLink: 'Edit Social Link',
+    deleteLink: 'Delete Link',
+    platform: 'Platform',
+    url: 'URL',
+    enterUrl: 'Enter URL',
+    invalidUrl: 'Please enter a valid URL',
+    linkOpened: 'Link opened',
+    profileLinks: 'Profile Links',
+    storeLinks: 'Store Links',
+    sameAsProfile: 'Same as profile',
+    custom: 'Custom',
+    maxLinksReached: 'Maximum 5 links allowed',
+    noLinksYet: 'No links added yet',
 };

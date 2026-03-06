@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as Linking from 'expo-linking';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { useLanguageStore } from '../../store/languageStore';
@@ -15,6 +16,31 @@ import { useTheme } from '../../theme/ThemeContext';
 import { getImageUrl } from '../../utils/helpers';
 import BusinessSection from '../../components/business/BusinessSection';
 import api from '../../api/api';
+
+const SOCIAL_PLATFORMS = {
+    instagram: { id: 'instagram', name: 'Instagram', icon: 'logo-instagram', color: '#E4405F' },
+    tiktok: { id: 'tiktok', name: 'TikTok', icon: 'logo-tiktok', color: '#000000' },
+    facebook: { id: 'facebook', name: 'Facebook', icon: 'logo-facebook', color: '#1877F2' },
+    twitter: { id: 'twitter', name: 'Twitter/X', icon: 'logo-twitter', color: '#1DA1F2' },
+    youtube: { id: 'youtube', name: 'YouTube', icon: 'logo-youtube', color: '#FF0000' },
+    whatsapp: { id: 'whatsapp', name: 'WhatsApp', icon: 'logo-whatsapp', color: '#25D366' },
+    website: { id: 'website', name: 'Website', icon: 'globe-outline', color: '#666666' },
+};
+
+const getPlatformInfo = (platformId) => SOCIAL_PLATFORMS[platformId] || { id: platformId, name: platformId, icon: 'globe-outline', color: '#666666' };
+
+const handleOpenLink = async (url) => {
+    try {
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+            await Linking.openURL(url);
+        } else {
+            Alert.alert('Error', 'Cannot open this link');
+        }
+    } catch (error) {
+        Alert.alert('Error', 'Failed to open link');
+    }
+};
 
 export default function ProfileScreen({ navigation, route }) {
     const { userId: viewingUserId } = route?.params || {};
@@ -39,6 +65,7 @@ export default function ProfileScreen({ navigation, route }) {
     const [saving, setSaving] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [togglingDriver, setTogglingDriver] = useState(false);
+    const [socialLinks, setSocialLinks] = useState([]);
     const [form, setForm] = useState({
         name: user?.name || '',
         phone: user?.phone || '',
@@ -58,6 +85,21 @@ export default function ProfileScreen({ navigation, route }) {
             businessName: user?.businessName || '',
         });
     }, [user]);
+
+    // Fetch social links
+    useEffect(() => {
+        const fetchSocialLinks = async () => {
+            if (isOwnProfile) {
+                try {
+                    const response = await api.get('/users/social-links');
+                    setSocialLinks(response.data.profileLinks || []);
+                } catch (error) {
+                    console.error('Failed to fetch social links:', error);
+                }
+            }
+        };
+        fetchSocialLinks();
+    }, [isOwnProfile]);
 
     // Fetch viewed user's profile when viewing someone else's profile
     useEffect(() => {
@@ -118,6 +160,10 @@ export default function ProfileScreen({ navigation, route }) {
         profilePhone: { fontSize: 13, color: colors.textSecondary, marginBottom: 8 },
         // sellerBadge styles removed - account status badges no longer shown
         businessName: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
+        socialIconsRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
+        socialIconBtn: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
+        addSocialLinksBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.primaryLight + '20', borderRadius: 16 },
+        addSocialLinksText: { fontSize: 13, color: colors.primary, fontWeight: '500' },
         editBtn: {
             flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14,
             paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10,
@@ -295,6 +341,43 @@ export default function ProfileScreen({ navigation, route }) {
                         {displayUser?.businessName && (
                             <Text style={styles.businessName}>{displayUser.businessName}</Text>
                         )}
+                        
+                        {/* Social Links */}
+                        {socialLinks.length > 0 && (
+                            <View style={styles.socialIconsRow}>
+                                {socialLinks.slice(0, 5).map((link) => {
+                                    const platform = getPlatformInfo(link.platform);
+                                    return (
+                                        <TouchableOpacity
+                                            key={link.platform}
+                                            style={[styles.socialIconBtn, { backgroundColor: platform.color + '20' }]}
+                                            onPress={() => handleOpenLink(link.url)}
+                                        >
+                                            <Ionicons name={platform.icon} size={18} color={platform.color} />
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                                {isOwnProfile && (
+                                    <TouchableOpacity 
+                                        style={[styles.socialIconBtn, { backgroundColor: colors.input }]}
+                                        onPress={() => navigation.navigate('SocialLinks')}
+                                    >
+                                        <Ionicons name="add" size={18} color={colors.textSecondary} />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        )}
+                        
+                        {isOwnProfile && socialLinks.length === 0 && (
+                            <TouchableOpacity 
+                                style={styles.addSocialLinksBtn}
+                                onPress={() => navigation.navigate('SocialLinks')}
+                            >
+                                <Ionicons name="link-outline" size={16} color={colors.primary} />
+                                <Text style={styles.addSocialLinksText}>{t.addSocialLink || 'Add Social Links'}</Text>
+                            </TouchableOpacity>
+                        )}
+
                         {isOwnProfile && (
                             <TouchableOpacity style={styles.editBtn} onPress={() => setEditing(true)}>
                                 <Ionicons name="pencil-outline" size={16} color={colors.primary} />

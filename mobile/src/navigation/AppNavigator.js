@@ -46,6 +46,7 @@ import DeliveryHubScreen from '../screens/delivery/DeliveryHubScreen';
 import AdminMembershipScreen from '../screens/admin/AdminMembershipScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import WishlistScreen from '../screens/wishlist/WishlistScreen';
+import SocialLinksScreen from '../screens/profile/SocialLinksScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -308,6 +309,20 @@ function ProfileStackNavigator() {
             <ProfileStack.Screen
                 name="Automation"
                 component={AutomationScreen}
+                options={{
+                    headerShown: false,
+                }}
+            />
+            <ProfileStack.Screen
+                name="SocialLinks"
+                component={SocialLinksScreen}
+                options={{
+                    headerShown: false,
+                }}
+            />
+            <ProfileStack.Screen
+                name="StoreSocialLinks"
+                component={SocialLinksScreen}
                 options={{
                     headerShown: false,
                 }}
