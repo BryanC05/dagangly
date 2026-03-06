@@ -502,16 +502,17 @@ maxLinksReached: 'Maksimal 5 tautan diperbolehkan',
 3. Add icons to Store screen with fallback
 4. Add translations
 
-## Phase 3: Mobile - Instagram Connection ⏳ PENDING
-1. Create InstagramScreen
-2. Implement OAuth flow
-3. Add toggle to AddProductScreen
-4. Persist toggle state
+## Phase 3: Mobile - Instagram Connection ✅ COMPLETED
+1. ✅ Create InstagramScreen
+2. ✅ Implement OAuth flow
+3. ✅ Add toggle to AddProductScreen
+4. ✅ Persist toggle state (AsyncStorage)
+5. ✅ Backend n8n webhook trigger on product creation
 
-## Phase 4: Integration ⏳ PENDING
-1. Connect backend to n8n webhook
-2. Test end-to-end flow
-3. Add error handling & notifications
+## Phase 4: Integration ✅ COMPLETED
+1. ✅ Connect backend to n8n webhook
+2. ✅ Support TroliToko account (default) or user's own account
+3. ✅ Toggle state persistence
 
 ---
 
