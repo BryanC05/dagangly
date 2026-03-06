@@ -69,17 +69,23 @@ The n8n workflow is the recommended method for production use as it provides:
    - Path: Copy your unique webhook URL
    - Response: JSON
 
-3. **Add HTTP Request Node (Node 1 - Create Container)**:
+3. **Add HTTP Request Node (Node 1 - Download Image)**:
+   - URL: `{{ $json.body.productImage }}`
+   - Method: GET
+   - Response: Binary File
+   - Output Property Name: `image`
+
+4. **Add HTTP Request Node (Node 2 - Create Media)**:
    - URL: `https://graph.facebook.com/v18.0/{{$json.body.instagramUserID}}/media`
    - Method: POST
-   - Body Content Type: Form URL Encoded
-   - Body Fields:
+   - Body Content Type: Multipart Form
+   - Form Data:
      | Name | Value |
      |------|-------|
-     | image_url | `{{ $json.body.productImage }}` |
+     | media | `{{ $binary.image }}` (select Binary Property) |
      | caption | `{{ $json.body.caption }}` |
 
-4. **Add HTTP Request Node (Node 2 - Publish)**:
+5. **Add HTTP Request Node (Node 3 - Publish)**:
    - URL: `https://graph.facebook.com/v18.0/{{$json.body.instagramUserID}}/media_publish`
    - Method: POST
    - Body Content Type: Form URL Encoded
@@ -88,6 +94,8 @@ The n8n workflow is the recommended method for production use as it provides:
      |------|-------|
      | creation_id | `{{ $json.id }}` |
      | access_token | `YOUR_ACCESS_TOKEN` |
+
+> **⚠️ Important**: Do NOT use `image_url` parameter - Instagram's API cannot download images from most servers due to security restrictions. Always upload the image as binary data instead.
 
 #### Webhook Payload Schema
 
