@@ -333,7 +333,7 @@ const SocialLinks = () => {
               <platform.icon className="h-5 w-5" style={{ color: platform.color }} />
               <input
                 type="url"
-                placeholder={`${platform.name} URL`}
+                placeholder={`https://${platform.id === 'website' ? 'yourwebsite.com' : platform.id + '.com/yourpage'}`}
                 value={links[platform.id] || ''}
                 onChange={(e) => setLinks({ ...links, [platform.id]: e.target.value })}
                 className="flex-1 px-3 py-2 border rounded-md bg-background"
