@@ -683,27 +683,15 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 			imageURL = imagePath
 			fmt.Printf("[Instagram] Using external URL: %s\n", imageURL)
 		} else {
-			// Local file - try to upload to ImgBB for Instagram compatibility
-			imgBBURL := uploadToImgBB(imagePath)
-			if imgBBURL != "" {
-				imageURL = imgBBURL
-				fmt.Printf("[Instagram] Using ImgBB URL: %s\n", imageURL)
+			// Local file - attach Railway production URL
+			serverURL := "https://umkm-marketplace-production.up.railway.app"
+
+			if strings.HasPrefix(imagePath, "/") {
+				imageURL = serverURL + imagePath
 			} else {
-				// Fallback to local URL
-				serverURL := os.Getenv("SERVER_URL")
-				if serverURL == "" {
-					serverURL = os.Getenv("BACKEND_URL")
-				}
-				if serverURL == "" {
-					serverURL = "https://trolitoko.online"
-				}
-				if strings.HasPrefix(imagePath, "/") {
-					imageURL = serverURL + imagePath
-				} else {
-					imageURL = serverURL + "/" + imagePath
-				}
-				fmt.Printf("[Instagram] Using local URL (ImgBB failed): %s\n", imageURL)
+				imageURL = serverURL + "/" + imagePath
 			}
+			fmt.Printf("[Instagram] Using Railway local URL: %s\n", imageURL)
 		}
 	}
 	fmt.Printf("[Instagram] Final image URL: %s\n", imageURL)
