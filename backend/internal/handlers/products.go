@@ -659,6 +659,22 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 	// Build webhook payload
 	productLink := fmt.Sprintf("https://trolitoko.app/product/%s", product.ID.Hex())
 
+	// Ensure caption is never the literal string "empty" or completely blank
+	finalCaption := strings.TrimSpace(caption)
+	if finalCaption == "" || finalCaption == "empty" {
+		businessNameStr := "Store"
+		if user.BusinessName != nil {
+			businessNameStr = *user.BusinessName
+		}
+
+		finalCaption = fmt.Sprintf("Check out our new product: %s!\n\nPrice: Rp %.0f\n\nLink: %s\n\n#%s #%s #UMKM",
+			product.Name,
+			product.Price,
+			productLink,
+			strings.ReplaceAll(businessNameStr, " ", ""),
+			strings.ReplaceAll(product.Category, " ", ""))
+	}
+
 	payload := map[string]interface{}{
 		"event":        "instagram.post",
 		"productName":  product.Name,
@@ -667,7 +683,7 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 		"productLink":  productLink,
 		"productImage": "",
 		"preference":   preference,
-		"caption":      caption,
+		"caption":      finalCaption,
 	}
 
 	// Add first product image if available, else use fallback
