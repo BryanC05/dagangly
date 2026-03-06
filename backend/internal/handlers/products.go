@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -337,6 +340,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		HasVariants     bool                 `json:"hasVariants"`
 		Variants        []models.Variant     `json:"variants"`
 		OptionGroups    []models.OptionGroup `json:"optionGroups"`
+		PostToInstagram bool                 `json:"postToInstagram"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -439,6 +443,12 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 
 	product.ID = result.InsertedID.(primitive.ObjectID)
+
+	// Trigger Instagram posting if enabled
+	if req.PostToInstagram {
+		go triggerInstagramPost(product, user)
+	}
+
 	c.JSON(201, product)
 }
 
@@ -617,4 +627,81 @@ func (h *ProductHandler) GetCategoryCounts(c *gin.Context) {
 	}
 
 	c.JSON(200, categoryCounts)
+}
+
+// triggerInstagramPost triggers the n8n webhook for Instagram posting
+func triggerInstagramPost(product models.Product, user models.User) {
+	n8nWebhookURL := os.Getenv("N8N_WEBHOOK_URL")
+	if n8nWebhookURL == "" {
+		fmt.Println("N8N_WEBHOOK_URL not set, skipping Instagram post")
+		return
+	}
+
+	// Get Instagram preference
+	usersCollection := database.GetDB().Collection("users")
+	var updatedUser models.User
+	err := usersCollection.FindOne(context.Background(), bson.M{"_id": user.ID}).Decode(&updatedUser)
+	if err != nil {
+		fmt.Printf("Failed to get user for Instagram posting: %v\n", err)
+		return
+	}
+
+	preference := updatedUser.InstagramPostPreference
+	if preference == "" {
+		preference = "trolitoko" // Default to TroliToko account
+	}
+
+	// Build webhook payload
+	productLink := fmt.Sprintf("https://trolitoko.app/product/%s", product.ID.Hex())
+
+	payload := map[string]interface{}{
+		"productName":  product.Name,
+		"productPrice": fmt.Sprintf("Rp %.0f", product.Price),
+		"storeName":    user.BusinessName,
+		"productLink":  productLink,
+		"productImage": "",
+		"preference":   preference,
+	}
+
+	// Add first product image if available
+	if len(product.Images) > 0 {
+		payload["productImage"] = product.Images[0]
+	}
+
+	// If preference is "own", get the user's Instagram account token
+	if preference == "own" && len(updatedUser.InstagramAccounts) > 0 {
+		var defaultAccount models.InstagramAccount
+		for _, acc := range updatedUser.InstagramAccounts {
+			if acc.IsDefault {
+				defaultAccount = acc
+				break
+			}
+		}
+		// If no default, use first account
+		if defaultAccount.InstagramUserID == "" && len(updatedUser.InstagramAccounts) > 0 {
+			defaultAccount = updatedUser.InstagramAccounts[0]
+		}
+
+		payload["instagramUserID"] = defaultAccount.InstagramUserID
+		payload["accessToken"] = defaultAccount.AccessToken
+	} else {
+		// Use platform TroliToko account
+		payload["instagramUserID"] = os.Getenv("IG_ACCOUNT_ID")
+		payload["accessToken"] = os.Getenv("IG_ACCESS_TOKEN")
+	}
+
+	// Send webhook to n8n
+	payloadBytes, _ := json.Marshal(payload)
+	resp, err := http.Post(n8nWebhookURL, "application/json", bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		fmt.Printf("Failed to trigger Instagram post webhook: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		fmt.Printf("Instagram post triggered successfully for product: %s\n", product.Name)
+	} else {
+		fmt.Printf("Instagram post webhook failed with status: %d\n", resp.StatusCode)
+	}
 }

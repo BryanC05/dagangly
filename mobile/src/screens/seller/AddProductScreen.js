@@ -1,10 +1,11 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
-    Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform
+    Image, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, Switch
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../api/api';
 import { CATEGORIES_EN, CATEGORIES_ID } from '../../config';
 import { useThemeStore } from '../../store/themeStore';
@@ -32,6 +33,7 @@ const UNITS_ID = [
 ];
 
 const MAX_IMAGES = 4;
+const INSTAGRAM_TOGGLE_KEY = 'user_pref_instagram_post';
 
 export default function AddProductScreen({ navigation }) {
     const { colors, isDarkMode } = useThemeStore();
@@ -57,6 +59,49 @@ export default function AddProductScreen({ navigation }) {
     const [variants, setVariants] = useState([]);
     const [optionGroups, setOptionGroups] = useState([]);
     const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+    
+    // Instagram toggle state
+    const [postToInstagram, setPostToInstagram] = useState(false);
+    const [instagramStatus, setInstagramStatus] = useState({ preference: 'trolitoko', hasOwnAccount: false });
+    const [loadingInstagramStatus, setLoadingInstagramStatus] = useState(false);
+
+    // Load saved toggle preference and Instagram status on mount
+    useEffect(() => {
+        loadInstagramPreference();
+        fetchInstagramStatus();
+    }, []);
+
+    const loadInstagramPreference = async () => {
+        try {
+            const saved = await AsyncStorage.getItem(INSTAGRAM_TOGGLE_KEY);
+            if (saved !== null) {
+                setPostToInstagram(saved === 'true');
+            }
+        } catch (error) {
+            console.error('Failed to load Instagram preference:', error);
+        }
+    };
+
+    const fetchInstagramStatus = async () => {
+        setLoadingInstagramStatus(true);
+        try {
+            const response = await api.get('/users/instagram/preference');
+            setInstagramStatus(response.data);
+        } catch (error) {
+            console.error('Failed to fetch Instagram status:', error);
+        } finally {
+            setLoadingInstagramStatus(false);
+        }
+    };
+
+    const handleToggleInstagram = async (value) => {
+        setPostToInstagram(value);
+        try {
+            await AsyncStorage.setItem(INSTAGRAM_TOGGLE_KEY, value.toString());
+        } catch (error) {
+            console.error('Failed to save Instagram preference:', error);
+        }
+    };
 
     const pickImage = async () => {
         if (images.length >= MAX_IMAGES) {
@@ -165,7 +210,7 @@ export default function AddProductScreen({ navigation }) {
                 unit: form.unit,
                 images: images,
                 tags,
-                currentLocation,
+                location: currentLocation,
                 hasVariants,
                 variants: hasVariants ? variants.map(v => ({ name: v.name, price: Number(v.price), stock: Number(v.stock) })) : [],
                 optionGroups: optionGroups.map(g => ({
@@ -174,6 +219,7 @@ export default function AddProductScreen({ navigation }) {
                     multiple: g.multiple || false,
                     options: g.options.map(o => ({ name: o.name, priceAdjust: Number(o.priceAdjust) || 0 }))
                 })),
+                postToInstagram,
             };
 
             await api.post('/products', productData);
@@ -620,6 +666,47 @@ export default function AddProductScreen({ navigation }) {
                         initialLocation={form.location}
                     />
 
+                    {/* ===== INSTAGRAM POSTING ===== */}
+                    <View style={[styles.section, { marginTop: 8 }]}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>Instagram</Text>
+                        </View>
+                        <View style={[styles.card, { backgroundColor: colors.card }]}>
+                            <TouchableOpacity 
+                                style={styles.toggleRow}
+                                onPress={() => navigation.navigate('Instagram')}
+                            >
+                                <View style={styles.toggleInfo}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                        <Ionicons name="logo-instagram" size={22} color="#E4405F" />
+                                        <Text style={styles.toggleLabel}>{t.postToInstagram || 'Post to Instagram'}</Text>
+                                    </View>
+                                    <Text style={styles.toggleDesc}>
+                                        {instagramStatus.preference === 'trolitoko' 
+                                            ? 'Will post to TroliToko Instagram' 
+                                            : 'Will post to your connected Instagram'}
+                                    </Text>
+                                </View>
+                                <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                            </TouchableOpacity>
+                            
+                            <View style={[styles.toggleRow, { borderTopWidth: 1, borderTopColor: colors.border }]}>
+                                <View style={styles.toggleInfo}>
+                                    <Text style={styles.toggleLabel}>{t.autoPostEnabled || 'Auto-post new products'}</Text>
+                                    <Text style={styles.toggleDesc}>
+                                        {postToInstagram ? 'This product will be posted' : 'Toggle to enable auto-posting'}
+                                    </Text>
+                                </View>
+                                <Switch
+                                    value={postToInstagram}
+                                    onValueChange={handleToggleInstagram}
+                                    trackColor={{ false: colors.border, true: colors.primary + '80' }}
+                                    thumbColor={postToInstagram ? colors.primary : '#f4f3f4'}
+                                />
+                            </View>
+                        </View>
+                    </View>
+
                     {/* ===== SUBMIT ===== */}
                     <TouchableOpacity
                         style={[styles.submitBtn, { backgroundColor: colors.primary }, loading && styles.disabledBtn]}
@@ -753,4 +840,19 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     submitInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     disabledBtn: { opacity: 0.6 },
     submitText: { color: colors.card, fontSize: 16, fontWeight: '700' },
+
+    // Instagram Toggle
+    toggleRow: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        paddingVertical: 12,
+    },
+    toggleInfo: { flex: 1, marginRight: 12 },
+    toggleLabel: { fontSize: 15, fontWeight: '600', color: colors.text },
+    toggleDesc: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    
+    // Sections
+    section: { marginBottom: 20 },
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+    sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+    card: { borderRadius: 14, padding: 14, borderWidth: 1, borderColor: colors.border },
 });

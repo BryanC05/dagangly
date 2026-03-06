@@ -39,6 +39,7 @@ import MyProductsScreen from '../screens/seller/MyProductsScreen';
 import LogoGeneratorScreen from '../screens/seller/LogoGeneratorScreen';
 import AutomationScreen from '../screens/seller/AutomationScreen';
 import BusinessDetailsScreen from '../screens/seller/BusinessDetailsScreen';
+import InstagramScreen from '../screens/seller/InstagramScreen';
 import MapViewScreen from '../screens/location/MapViewScreen';
 import NearbySellersScreen from '../screens/location/NearbySellersScreen';
 import LiveTrackingMap from '../screens/location/LiveTrackingMap';
@@ -323,6 +324,13 @@ function ProfileStackNavigator() {
             <ProfileStack.Screen
                 name="StoreSocialLinks"
                 component={SocialLinksScreen}
+                options={{
+                    headerShown: false,
+                }}
+            />
+            <ProfileStack.Screen
+                name="Instagram"
+                component={InstagramScreen}
                 options={{
                     headerShown: false,
                 }}
