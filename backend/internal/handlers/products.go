@@ -698,7 +698,7 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 	} else {
 		// Use platform TroliToko account
 		payload["instagramUserID"] = os.Getenv("IG_ACCOUNT_ID")
-		payload["accessToken"] = os.Getenv("IG_ACCESS_TOKEN")
+		payload["accessToken"] = os.Getenv("IG_ACCOUNT_TOKEN")
 	}
 
 	// Send webhook to n8n

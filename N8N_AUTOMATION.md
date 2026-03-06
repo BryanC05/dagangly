@@ -58,7 +58,7 @@ If this variable is missing or empty, the backend gracefully skips firing the we
 For the Instagram Auto-Post feature, the following environment variables are required:
 ```env
 # Platform-level Instagram credentials (for posting on behalf of the business)
-IG_ACCESS_TOKEN=your_ig_access_token
+IG_ACCOUNT_TOKEN=your_ig_access_token
 IG_ACCOUNT_ID=your_ig_account_id
 
 # User-level Instagram OAuth (for sellers connecting their own accounts)
