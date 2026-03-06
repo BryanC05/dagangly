@@ -5,9 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"msme-marketplace/internal/database"
@@ -665,10 +667,16 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 		"caption":      caption,
 	}
 
-	// Add first product image if available
-	if len(product.Images) > 0 {
-		payload["productImage"] = product.Images[0]
+	// Add first product image if available, else use fallback
+	fallbackImage := "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800"
+	imageURL := fallbackImage
+
+	if len(product.Images) > 0 && product.Images[0] != "" {
+		if strings.HasPrefix(product.Images[0], "http") {
+			imageURL = product.Images[0]
+		}
 	}
+	payload["productImage"] = imageURL
 
 	// If preference is "own", get the user's Instagram account token
 	if preference == "own" && len(updatedUser.InstagramAccounts) > 0 {
@@ -702,8 +710,14 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		fmt.Printf("Instagram post triggered successfully for product: %s\n", product.Name)
+		fmt.Printf("[Webhook] Instagram post triggered successfully for product: %s\n", product.Name)
 	} else {
-		fmt.Printf("Instagram post webhook failed with status: %d\n", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		fmt.Printf("[Webhook Error] Instagram post webhook failed with status: %d\n", resp.StatusCode)
+		fmt.Printf("[Webhook Error] Response body: %s\n", string(bodyBytes))
+
+		// For debugging, print the payload (hide tokens if you want, but this is a debug print)
+		debugPayload, _ := json.MarshalIndent(payload, "", "  ")
+		fmt.Printf("[Webhook Error] Payload sent: %s\n", string(debugPayload))
 	}
 }
