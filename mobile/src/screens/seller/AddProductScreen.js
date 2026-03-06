@@ -62,8 +62,10 @@ export default function AddProductScreen({ navigation }) {
     
     // Instagram toggle state
     const [postToInstagram, setPostToInstagram] = useState(false);
+    const [instagramCaption, setInstagramCaption] = useState('');
     const [instagramStatus, setInstagramStatus] = useState({ preference: 'trolitoko', hasOwnAccount: false });
     const [loadingInstagramStatus, setLoadingInstagramStatus] = useState(false);
+    const [isPremium, setIsPremium] = useState(false);
 
     // Load saved toggle preference and Instagram status on mount
     useEffect(() => {
@@ -85,8 +87,12 @@ export default function AddProductScreen({ navigation }) {
     const fetchInstagramStatus = async () => {
         setLoadingInstagramStatus(true);
         try {
-            const response = await api.get('/users/instagram/preference');
-            setInstagramStatus(response.data);
+            const [igRes, memberRes] = await Promise.all([
+                api.get('/users/instagram/preference'),
+                api.get('/users/membership/status').catch(() => ({ data: { isMember: false } }))
+            ]);
+            setInstagramStatus(igRes.data);
+            setIsPremium(memberRes.data?.isMember || false);
         } catch (error) {
             console.error('Failed to fetch Instagram status:', error);
         } finally {
@@ -220,6 +226,7 @@ export default function AddProductScreen({ navigation }) {
                     options: g.options.map(o => ({ name: o.name, priceAdjust: Number(o.priceAdjust) || 0 }))
                 })),
                 postToInstagram,
+                instagramCaption: postToInstagram && instagramCaption.trim() ? instagramCaption.trim() : null,
             };
 
             await api.post('/products', productData);
