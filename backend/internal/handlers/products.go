@@ -658,6 +658,7 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 	productLink := fmt.Sprintf("https://trolitoko.app/product/%s", product.ID.Hex())
 
 	payload := map[string]interface{}{
+		"event":        "instagram.post",
 		"productName":  product.Name,
 		"productPrice": fmt.Sprintf("Rp %.0f", product.Price),
 		"storeName":    user.BusinessName,
