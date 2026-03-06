@@ -200,6 +200,11 @@ function AddStackNavigator() {
                 component={AddProductScreen}
                 options={{ headerShown: false }}
             />
+            <AddStack.Screen
+                name="Instagram"
+                component={InstagramScreen}
+                options={{ headerShown: false }}
+            />
         </AddStack.Navigator>
     );
 }
