@@ -651,5 +651,26 @@
     "active": "Active",
     "expiresOn": "Expires on",
     "pendingApproval": "Pending Approval"
+  },
+  "addProduct": {
+    "title": "Add New Product",
+    "subtitle": "List your product for nearby customers",
+    "sellerCatalog": "Seller Catalog",
+    "backToDashboard": "Back to Dashboard",
+    "basicInfo": "Basic Information",
+    "pricingStock": "Pricing & Stock",
+    "productLocation": "Product Location",
+    "productImages": "Product Images",
+    "tags": "Tags",
+    "instagramTitle": "Instagram Auto-Post",
+    "instagramDesc": "Automatically post this product to your Instagram feed when published.",
+    "postToIG": "Post to Instagram",
+    "postToIGDesc": "Product image & details will be posted to your connected Instagram account",
+    "igCaption": "Custom Caption (Optional)",
+    "igCaptionPlaceholder": "Write a custom caption... Leave empty for auto-generated caption.",
+    "igCaptionHint": "Default: Product name, price, store name, and link will be auto-generated.",
+    "cancel": "Cancel",
+    "addProduct": "Add Product",
+    "addingProduct": "Adding Product..."
   }
 }

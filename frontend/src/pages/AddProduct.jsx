@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Upload, Plus, X, Trash2, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, X, Trash2, ChevronDown, ChevronUp, Sparkles, Instagram } from 'lucide-react';
+import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
 import LocationPicker from '../components/LocationPicker';
 
@@ -37,6 +38,7 @@ const formatUploadWarning = (warning) => {
 function AddProduct() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [imageItems, setImageItems] = useState([]);
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
@@ -52,6 +54,10 @@ function AddProduct() {
 
   // Option groups state
   const [optionGroups, setOptionGroups] = useState([]);
+
+  // Instagram auto-post state
+  const [postToInstagram, setPostToInstagram] = useState(false);
+  const [instagramCaption, setInstagramCaption] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -203,7 +209,9 @@ function AddProduct() {
             name: o.name,
             priceAdjust: Number(o.priceAdjust) || 0
           }))
-        }))
+        })),
+        postToInstagram,
+        instagramCaption: postToInstagram ? instagramCaption : '',
       };
 
       await addMutation.mutateAsync(productData);
@@ -889,6 +897,52 @@ function AddProduct() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Instagram Auto-Post */}
+            <div className="endfield-card p-6">
+              <h3 className="text-xl font-semibold mb-4 pb-2 border-b flex items-center gap-2">
+                <Instagram size={20} className="text-pink-500" />
+                {t('addProduct.instagramTitle', 'Instagram Auto-Post')}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {t('addProduct.instagramDesc', 'Automatically post this product to your Instagram feed when published.')}
+              </p>
+
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={postToInstagram}
+                    onChange={(e) => setPostToInstagram(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-muted-foreground/30 rounded-full peer peer-checked:bg-gradient-to-r peer-checked:from-pink-500 peer-checked:to-purple-500 transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                </label>
+                <div>
+                  <span className="text-sm font-medium">{t('addProduct.postToIG', 'Post to Instagram')}</span>
+                  <p className="text-xs text-muted-foreground">{t('addProduct.postToIGDesc', 'Product image & details will be posted to your connected Instagram account')}</p>
+                </div>
+              </div>
+
+              {postToInstagram && (
+                <div className="mt-4">
+                  <label htmlFor="igCaption" className="block text-sm font-medium mb-1">
+                    {t('addProduct.igCaption', 'Custom Caption (Optional)')}
+                  </label>
+                  <textarea
+                    id="igCaption"
+                    value={instagramCaption}
+                    onChange={(e) => setInstagramCaption(e.target.value)}
+                    rows="3"
+                    placeholder={t('addProduct.igCaptionPlaceholder', 'Write a custom caption... Leave empty for auto-generated caption.')}
+                    className="w-full p-2 border rounded-md bg-background text-foreground resize-y text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t('addProduct.igCaptionHint', 'Default: Product name, price, store name, and link will be auto-generated.')}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Submit */}

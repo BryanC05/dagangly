@@ -1,16 +1,16 @@
 {
-  "common": {
-    "back": "Kembali ke",
-    "continue": "Lanjutkan",
-    "loading": "Memuat...",
-    "save": "Simpan",
-    "cancel": "Batal",
-    "delete": "Hapus",
-    "edit": "Edit",
-    "add": "Tambah",
-    "search": "Cari"
-  },
-  "nav": {
+    "common": {
+        "back": "Kembali ke",
+        "continue": "Lanjutkan",
+        "loading": "Memuat...",
+        "save": "Simpan",
+        "cancel": "Batal",
+        "delete": "Hapus",
+        "edit": "Edit",
+        "add": "Tambah",
+        "search": "Cari"
+    },
+    "nav": {
         "home": "Beranda",
         "products": "Produk",
         "nearby": "Terdekat",
@@ -651,5 +651,26 @@
         "active": "Aktif",
         "expiresOn": "Berakhir pada",
         "pendingApproval": "Menunggu Persetujuan"
+    },
+    "addProduct": {
+        "title": "Tambah Produk Baru",
+        "subtitle": "Daftarkan produk Anda untuk pelanggan terdekat",
+        "sellerCatalog": "Katalog Penjual",
+        "backToDashboard": "Kembali ke Dasbor",
+        "basicInfo": "Informasi Dasar",
+        "pricingStock": "Harga & Stok",
+        "productLocation": "Lokasi Produk",
+        "productImages": "Gambar Produk",
+        "tags": "Tag",
+        "instagramTitle": "Posting Otomatis Instagram",
+        "instagramDesc": "Posting produk ini secara otomatis ke feed Instagram Anda saat dipublikasikan.",
+        "postToIG": "Posting ke Instagram",
+        "postToIGDesc": "Gambar & detail produk akan diposting ke akun Instagram Anda yang terhubung",
+        "igCaption": "Caption Kustom (Opsional)",
+        "igCaptionPlaceholder": "Tulis caption kustom... Biarkan kosong untuk caption otomatis.",
+        "igCaptionHint": "Default: Nama produk, harga, nama toko, dan link akan dibuat secara otomatis.",
+        "cancel": "Batal",
+        "addProduct": "Tambah Produk",
+        "addingProduct": "Menambahkan Produk..."
     }
 }
