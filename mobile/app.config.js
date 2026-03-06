@@ -49,6 +49,10 @@ export default {
         projectId: "034edfa1-ecd5-47df-b050-47725a620224"
       }
     },
+    updates: {
+      enabled: false,
+      checkAutomatically: "ON_ERROR_RECOVERY"
+    },
     plugins: [
       [
         "expo-location",
