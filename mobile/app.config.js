@@ -54,6 +54,7 @@ export default {
       checkAutomatically: "ON_ERROR_RECOVERY"
     },
     plugins: [
+      "expo-web-browser",
       [
         "expo-location",
         {
