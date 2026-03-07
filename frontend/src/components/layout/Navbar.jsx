@@ -99,8 +99,8 @@ const Navbar = () => {
   const navLinks = [
     { to: "/", label: "Beranda" },
     { to: "/products", label: getProductsLabel(), isDropdown: true },
-    { to: "/nearby", label: "Penjual Terdekat" },
-    { to: "/forums", label: "Forum" },
+    { to: "/nearby", label: t('nav.nearby') },
+    { to: "/forums", label: t('nav.forums') },
   ];
 
   const accountLinks = [
@@ -182,11 +182,11 @@ const Navbar = () => {
                 <DropdownMenuContent align="start" className="bg-white/50 dark:bg-black/50 backdrop-blur-sm border-border">
                   <DropdownMenuItem onSelect={() => navigate("/products")}>
                     <ShoppingCart className="h-4 w-4 mr-2" />
-                    Produk
+                    {t('nav.products')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => navigate("/projects")}>
                     <Folder className="h-4 w-4 mr-2" />
-                    Projects
+                    {t('nav.projects')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
