@@ -91,7 +91,7 @@ const Navbar = () => {
 
   const navLinks = [
     { to: "/", label: "Beranda" },
-    { to: "/products", label: "Produk" },
+    { to: "/products", label: "Produk", isDropdown: true },
     { to: "/nearby", label: "Penjual Terdekat" },
     { to: "/forums", label: "Forum" },
   ];
@@ -164,15 +164,36 @@ const Navbar = () => {
 
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`relative px-3 py-2 text-sm font-medium rounded-sm transition-colors ${isActive(link.to) ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              {link.label}
-              {isActive(link.to) && <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-primary" />}
-            </Link>
+            link.isDropdown ? (
+              <DropdownMenu key={link.to}>
+                <DropdownMenuTrigger asChild>
+                  <button className={`relative px-3 py-2 text-sm font-medium rounded-sm transition-colors flex items-center gap-1 ${isActive(link.to) ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+                    {link.label}
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-white/50 dark:bg-black/50 backdrop-blur-sm border-border">
+                  <DropdownMenuItem onSelect={() => navigate("/products")}>
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Produk
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => navigate("/projects")}>
+                    <Folder className="h-4 w-4 mr-2" />
+                    Projects
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`relative px-3 py-2 text-sm font-medium rounded-sm transition-colors ${isActive(link.to) ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                {link.label}
+                {isActive(link.to) && <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-primary" />}
+              </Link>
+            )
           ))}
         </nav>
 
@@ -194,7 +215,16 @@ const Navbar = () => {
             </Link>
           </Button>
 
-          <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label="Toggle Language" className="font-semibold text-xs">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => {
+              toggleLanguage();
+              window.location.reload();
+            }} 
+            aria-label="Toggle Language" 
+            className="font-semibold text-xs min-w-[40px]"
+          >
             {language === 'en' ? 'ID' : 'EN'}
           </Button>
 
