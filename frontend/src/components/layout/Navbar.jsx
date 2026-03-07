@@ -97,7 +97,7 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { to: "/", label: "Beranda" },
+    { to: "/", label: t('nav.home') },
     { to: "/products", label: getProductsLabel(), isDropdown: true },
     { to: "/nearby", label: t('nav.nearby') },
     { to: "/forums", label: t('nav.forums') },
