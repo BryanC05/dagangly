@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import {
     Platform,
     AppState,
     TouchableOpacity,
+    Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCartStore } from '../store/cartStore';
@@ -48,6 +49,7 @@ import AdminMembershipScreen from '../screens/admin/AdminMembershipScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import WishlistScreen from '../screens/wishlist/WishlistScreen';
 import SocialLinksScreen from '../screens/profile/SocialLinksScreen';
+import ProjectsScreen from '../screens/projects/ProjectsScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -156,6 +158,17 @@ function ProductsStackNavigator() {
                 name="BusinessDetails"
                 component={BusinessDetailsScreen}
                 options={{ headerShown: false }}
+            />
+            <ProductsStack.Screen
+                name="Projects"
+                component={ProjectsScreen}
+                options={{
+                    title: t.projects,
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
             />
         </ProductsStack.Navigator>
     );
@@ -478,6 +491,89 @@ function FloatingCartButton({ navigation }) {
     );
 }
 
+// Products/Projects Dropdown Button Component
+function ProductsTabButton({ navigation, isFocused }) {
+    const { colors } = useThemeStore();
+    const { t } = useLanguageStore();
+    const [showDropdown, setShowDropdown] = useState(false);
+
+    const menuItems = [
+        { 
+            key: 'products', 
+            label: t.tabProducts || 'Products', 
+            icon: 'grid-outline',
+            screen: 'Products' 
+        },
+        { 
+            key: 'projects', 
+            label: t.projects || 'Projects', 
+            icon: 'folder-outline',
+            screen: 'Projects' 
+        },
+    ];
+
+    const handleSelect = (item) => {
+        setShowDropdown(false);
+        navigation.navigate('ProductsTab', { screen: item.screen });
+    };
+
+    return (
+        <>
+            <TouchableOpacity
+                style={styles.productsTabButton}
+                onPress={() => setShowDropdown(true)}
+            >
+                <Ionicons 
+                    name={isFocused ? 'grid' : 'grid-outline'} 
+                    size={22} 
+                    color={isFocused ? colors.primary : colors.textSecondary} 
+                />
+                <Text 
+                    style={[
+                        styles.productsTabLabel, 
+                        { color: isFocused ? colors.primary : colors.textSecondary }
+                    ]}
+                >
+                    {t.tabProducts || 'Products'}
+                </Text>
+                <Ionicons 
+                    name="chevron-down" 
+                    size={14} 
+                    color={isFocused ? colors.primary : colors.textSecondary} 
+                />
+            </TouchableOpacity>
+
+            <Modal
+                visible={showDropdown}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowDropdown(false)}
+            >
+                <TouchableOpacity 
+                    style={styles.dropdownOverlay} 
+                    activeOpacity={1}
+                    onPress={() => setShowDropdown(false)}
+                >
+                    <View style={[styles.dropdownMenu, { backgroundColor: colors.card }]}>
+                        {menuItems.map((item) => (
+                            <TouchableOpacity
+                                key={item.key}
+                                style={styles.dropdownItem}
+                                onPress={() => handleSelect(item)}
+                            >
+                                <Ionicons name={item.icon} size={20} color={colors.text} />
+                                <Text style={[styles.dropdownItemText, { color: colors.text }]}>
+                                    {item.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+        </>
+    );
+}
+
 // Delivery badge component
 function DeliveryBadge() {
     const { isDriverMode, activeDelivery } = useDriverStore();
@@ -715,6 +811,48 @@ const badgeStyles = StyleSheet.create({
     text: { color: '#fff', fontSize: 10, fontWeight: '800' },
 });
 
+const styles = StyleSheet.create({
+    productsTabButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    productsTabLabel: {
+        fontSize: 11,
+        fontWeight: '600',
+        marginHorizontal: 4,
+    },
+    dropdownOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    dropdownMenu: {
+        borderRadius: 12,
+        padding: 8,
+        minWidth: 180,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    dropdownItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        borderRadius: 8,
+    },
+    dropdownItemText: {
+        fontSize: 16,
+        fontWeight: '500',
+        marginLeft: 12,
+    },
+});
+
 // Main Tab Navigator
 export default function AppNavigator() {
     const { colors, isDarkMode } = useThemeStore();
@@ -812,7 +950,16 @@ export default function AppNavigator() {
                     }}
                 />
                 <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ tabBarLabel: t.tabHome }} />
-                <Tab.Screen name="ProductsTab" component={ProductsStackNavigator} options={{ tabBarLabel: t.tabProducts }} />
+                <Tab.Screen 
+                    name="ProductsTab" 
+                    component={ProductsStackNavigator} 
+                    options={{ 
+                        tabBarLabel: t.tabProducts,
+                        tabBarButton: (props) => (
+                            <ProductsTabButton {...props} />
+                        ),
+                    }} 
+                />
                 
                 <Tab.Screen name="AddTab" component={AddStackNavigator} options={{ tabBarLabel: t.tabAdd }} />
                 <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: t.tabProfile }} />
