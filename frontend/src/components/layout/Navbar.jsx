@@ -109,12 +109,12 @@ const Navbar = () => {
     { to: "/saved-products", label: t("nav.savedProducts") || "Tersimpan", icon: Heart },
     ...(isSeller
       ? [
-        { to: "/seller/dashboard", label: t("nav.dashboard") || "Dashboard Penjual", icon: Store },
-        { to: "/seller/product-tracking", label: "Product Tracker", icon: BarChart3 },
-        { to: "/seller/add-product", label: "Tambah Produk", icon: PlusCircle },
-        { to: "/logo-generator", label: "Logo Generator", icon: Palette, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
-        { to: "/projects", label: "Projects", icon: Folder },
-        { to: "/automation", label: "Automations", icon: Zap, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
+        { to: "/seller/dashboard", label: t("nav.dashboard"), icon: Store },
+        { to: "/seller/product-tracking", label: t("nav.productTracker"), icon: BarChart3 },
+        { to: "/seller/add-product", label: t("nav.addProduct"), icon: PlusCircle },
+        { to: "/logo-generator", label: t("nav.logoGenerator"), icon: Palette, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
+        { to: "/projects", label: t("nav.projects"), icon: Folder },
+        { to: "/automation", label: t("nav.automations"), icon: Zap, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
       ]
       : []),
   ];
@@ -180,12 +180,12 @@ const Navbar = () => {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-white/50 dark:bg-black/50 backdrop-blur-sm border-border">
-                  <DropdownMenuItem onSelect={() => navigate("/products")}>
-                    <ShoppingCart className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem onSelect={() => navigate("/products")} className="cursor-pointer focus:bg-accent focus:text-accent-foreground">
+                    <ShoppingCart className="h-4 w-4 mr-2 text-foreground" />
                     {t('nav.products')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => navigate("/projects")}>
-                    <Folder className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem onSelect={() => navigate("/projects")} className="cursor-pointer focus:bg-accent focus:text-accent-foreground">
+                    <Folder className="h-4 w-4 mr-2 text-foreground" />
                     {t('nav.projects')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -229,7 +229,7 @@ const Navbar = () => {
             aria-label="Toggle Language" 
             className="font-semibold text-xs min-w-[40px]"
           >
-            {language === 'en' ? 'ID' : 'EN'}
+            {language === 'en' ? 'EN' : 'ID'}
           </Button>
 
           <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle Theme">
@@ -245,7 +245,7 @@ const Navbar = () => {
               <>
                 <Button variant="outline" size="sm" asChild>
                   <Link to="/orders" className="relative">
-                    Pesanan
+                    {t("nav.orders")}
                     {activeOrderCount > 0 && (
                       <span className="ml-1 inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
                         {activeOrderCount > 9 ? "9+" : activeOrderCount}
@@ -259,28 +259,24 @@ const Navbar = () => {
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="gap-1.5">
                         <Store className="h-4 w-4" />
-                        Seller
+                        {t("nav.sellerMenu")}
                         <ChevronDown className="h-3.5 w-3.5" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-52 bg-white/50 dark:bg-black/50 backdrop-blur-sm border-border">
-                      <DropdownMenuLabel>Seller Menu</DropdownMenuLabel>
+                      <DropdownMenuLabel>{t("nav.sellerMenu")}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onSelect={() => handleNavigate("/seller/dashboard")}>
                         <Store className="h-4 w-4 mr-2" />
-                        Dashboard
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => handleNavigate("/seller/product-tracking")}>
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        Product Tracker
+                        {t("nav.dashboard")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => handleNavigate("/seller/add-product")}>
                         <PlusCircle className="h-4 w-4 mr-2" />
-                        Add Product
+                        {t("nav.addProduct")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => handleNavigate("/logo-generator")}>
                         <Palette className="h-4 w-4 mr-2" />
-                        Logo Generator
+                        {t("nav.logoGenerator")}
                         {!isSeller ? (
                           <Store className="h-3 w-3 ml-auto text-orange-500" />
                         ) : !membership?.isMember ? (
@@ -289,7 +285,7 @@ const Navbar = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => handleNavigate("/automation")}>
                         <Zap className="h-4 w-4 mr-2" />
-                        Automations
+                        {t("nav.automations")}
                         {!isSeller ? (
                           <Store className="h-3 w-3 ml-auto text-orange-500" />
                         ) : !membership?.isMember ? (
@@ -304,29 +300,29 @@ const Navbar = () => {
                   <DropdownMenuTrigger asChild>
                     <Button size="sm" className="font-display tracking-wide gap-1.5">
                       <User className="h-4 w-4" />
-                      {user?.name?.split(" ")[0] || "Akun"}
+                      {user?.name?.split(" ")[0] || t("nav.myAccount")}
                       <ChevronDown className="h-3.5 w-3.5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-52 bg-white/50 dark:bg-black/50 backdrop-blur-sm border-border">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t("nav.myAccount")}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onSelect={() => handleNavigate("/profile")}>
                       <User className="h-4 w-4 mr-2" />
-                      Profil
+                      {t("nav.profile")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => handleNavigate("/saved-products")}>
                       <Heart className="h-4 w-4 mr-2" />
-                      Tersimpan
+                      {t("nav.savedProducts")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => handleNavigate("/notifications")}>
                       <Bell className="h-4 w-4 mr-2" />
-                      Notifikasi
+                      {t("nav.notifications")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onSelect={handleLogout} className="text-destructive focus:text-destructive">
                       <LogOut className="h-4 w-4 mr-2" />
-                      Keluar
+                      {t("nav.logout")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -334,10 +330,10 @@ const Navbar = () => {
             ) : (
               <>
                 <Button variant="ghost" size="sm" className="text-foreground hover:text-primary" asChild>
-                  <Link to="/login">Masuk</Link>
+                  <Link to="/login">{t("nav.login")}</Link>
                 </Button>
                 <Button size="sm" className="font-display tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
-                  <Link to="/register">Daftar</Link>
+                  <Link to="/register">{t("nav.register")}</Link>
                 </Button>
               </>
             )}
