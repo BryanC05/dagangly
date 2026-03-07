@@ -143,6 +143,46 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 		ProfileImage *string            `json:"profileImage" bson:"profileImage"`
 	}
 
+	// Collect all seller IDs and business IDs for batch fetching
+	var sellerIDs []primitive.ObjectID
+	var businessIDs []primitive.ObjectID
+	for _, product := range products {
+		sellerIDs = append(sellerIDs, product.Seller)
+		if product.BusinessID != nil {
+			businessIDs = append(businessIDs, *product.BusinessID)
+		}
+	}
+
+	// Batch fetch all sellers in a single query
+	sellersMap := make(map[primitive.ObjectID]SellerInfo)
+	if len(sellerIDs) > 0 {
+		sellerCursor, err := usersCollection.Find(context.Background(), bson.M{"_id": bson.M{"$in": sellerIDs}})
+		if err == nil {
+			defer sellerCursor.Close(context.Background())
+			for sellerCursor.Next(context.Background()) {
+				var seller SellerInfo
+				if err := sellerCursor.Decode(&seller); err == nil {
+					sellersMap[seller.ID] = seller
+				}
+			}
+		}
+	}
+
+	// Batch fetch all businesses in a single query
+	businessesMap := make(map[primitive.ObjectID]models.Business)
+	if len(businessIDs) > 0 {
+		businessCursor, err := businessCollection.Find(context.Background(), bson.M{"_id": bson.M{"$in": businessIDs}})
+		if err == nil {
+			defer businessCursor.Close(context.Background())
+			for businessCursor.Next(context.Background()) {
+				var business models.Business
+				if err := businessCursor.Decode(&business); err == nil {
+					businessesMap[business.ID] = business
+				}
+			}
+		}
+	}
+
 	var parsedProducts []map[string]interface{}
 	for _, product := range products {
 		// 1. Marshal product to trigger custom MarshalJSON
@@ -156,15 +196,17 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 		if err := json.Unmarshal(rawBytes, &prodMap); err != nil {
 			continue // skip if unmarshal fails
 		}
-		var sellerInfo SellerInfo
-		usersCollection.FindOne(context.Background(), bson.M{"_id": product.Seller}).Decode(&sellerInfo)
 
-		// Fetch business info if product has a business association
+		// Get seller from pre-fetched map
+		sellerInfo, hasSeller := sellersMap[product.Seller]
+		if !hasSeller {
+			sellerInfo = SellerInfo{}
+		}
+
+		// Get business from pre-fetched map
 		var businessResponse *models.BusinessResponse
 		if product.BusinessID != nil {
-			var business models.Business
-			err := businessCollection.FindOne(context.Background(), bson.M{"_id": *product.BusinessID}).Decode(&business)
-			if err == nil {
+			if business, hasBusiness := businessesMap[*product.BusinessID]; hasBusiness {
 				// Resolve logo with owner's profile image
 				var logoPtr string
 				if business.Logo != nil {

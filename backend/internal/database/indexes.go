@@ -112,6 +112,57 @@ func SetupIndexes(db *mongo.Database) error {
 		return fmt.Errorf("failed to create products text index: %w", err)
 	}
 
+	// Index for seller field (used when fetching seller info for each product)
+	_, err = productsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    bson.D{{Key: "seller", Value: 1}},
+		Options: nil,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create products seller index: %w", err)
+	}
+
+	// Index for businessId field (used when fetching business info for each product)
+	_, err = productsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    bson.D{{Key: "businessId", Value: 1}},
+		Options: nil,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create products businessId index: %w", err)
+	}
+
+	// Compound index for isAvailable with createdAt (common query pattern)
+	_, err = productsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "isAvailable", Value: -1},
+			{Key: "createdAt", Value: -1},
+		},
+		Options: nil,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create products availability index: %w", err)
+	}
+
+	// Compound index for category with isAvailable
+	_, err = productsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "category", Value: 1},
+			{Key: "isAvailable", Value: 1},
+		},
+		Options: nil,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create products category index: %w", err)
+	}
+
+	// Geospatial index for location-based queries
+	_, err = productsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    bson.D{{Key: "location", Value: "2dsphere"}},
+		Options: nil,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create products location index: %w", err)
+	}
+
 	// Forum threads collection indexes
 	forumThreadsCollection := db.Collection("forumthreads")
 
