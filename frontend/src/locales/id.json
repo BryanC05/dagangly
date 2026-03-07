@@ -29,6 +29,7 @@
         "tracking": "Pelacakan",
         "logoGenerator": "Pembuat Logo",
         "automation": "Otomasi",
+        "projects": "Proyek",
         "profile": "Profil",
         "theme": "Tema",
         "searchPlaceholder": "Cari produk, penjual...",
@@ -672,5 +673,33 @@
         "cancel": "Batal",
         "addProduct": "Tambah Produk",
         "addingProduct": "Menambahkan Produk..."
-    }
+    },
+  "projects": {
+    "title": "Proyek",
+    "subtitle": "Temukan dan bagikan proyek luar biasa yang dibuat oleh komunitas kami",
+    "search": "Cari proyek berdasarkan nama atau deskripsi...",
+    "categories": "Kategori",
+    "allProjects": "Semua Proyek",
+    "websites": "Situs Web",
+    "games": "Permainan",
+    "apps": "Aplikasi",
+    "other": "Lainnya",
+    "shareYourProject": "Bagikan Proyek Anda",
+    "createProject": "Buat Proyek",
+    "noProjects": "Belum ada proyek",
+    "noProjectsDesc": "Jadilah yang pertama berbagi proyek dengan komunitas!",
+    "projectName": "Nama Proyek",
+    "description": "Deskripsi",
+    "projectLink": "Link Proyek",
+    "category": "Kategori",
+    "tags": "Tag",
+    "tagsPlaceholder": "Masukkan tag dipisahkan dengan koma",
+    "creating": "Membuat...",
+    "viewProject": "Lihat Proyek",
+    "by": "oleh",
+    "projectsFound": "proyek ditemukan",
+    "loginToCreate": "Silakan masuk untuk membuat proyek",
+    "sessionExpired": "Sesi Anda telah berakhir. Silakan masuk lagi.",
+    "createFailed": "Gagal membuat proyek. Silakan coba lagi."
+  }
 }

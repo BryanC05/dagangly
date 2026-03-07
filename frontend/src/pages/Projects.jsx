@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, Plus, ExternalLink, Globe, Gamepad2, Smartphone, Folder, 
@@ -15,18 +15,22 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 const categories = [
-  { id: 'all', icon: Folder, label: 'All Projects' },
-  { id: 'website', icon: Globe, label: 'Websites' },
-  { id: 'game', icon: Gamepad2, label: 'Games' },
-  { id: 'app', icon: Smartphone, label: 'Apps' },
-  { id: 'other', icon: Folder, label: 'Other' },
+  { id: 'all', icon: Folder, labelKey: 'allProjects' },
+  { id: 'website', icon: Globe, labelKey: 'websites' },
+  { id: 'game', icon: Gamepad2, labelKey: 'games' },
+  { id: 'app', icon: Smartphone, labelKey: 'apps' },
+  { id: 'other', icon: Folder, labelKey: 'other' },
 ];
 
 function Projects() {
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  
+  // Get translated category label
+  const getCategoryLabel = (labelKey) => {
+    return t(`projects.${labelKey}`);
+  };
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -122,9 +126,9 @@ function Projects() {
       <div className="bg-gradient-to-r from-primary/10 to-primary/5 py-12">
         <div className="container px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl font-bold mb-4">Projects</h1>
+            <h1 className="text-4xl font-bold mb-4">{t('projects.title')}</h1>
             <p className="text-muted-foreground text-lg mb-8">
-              Discover and share amazing projects built by our community
+              {t('projects.subtitle')}
             </p>
             
             {/* Search Bar */}
@@ -132,7 +136,7 @@ function Projects() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
               <Input
                 type="text"
-                placeholder="Search projects by name or description..."
+                placeholder={t('projects.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 py-6 text-lg bg-background border-2 focus:border-primary"
@@ -149,7 +153,7 @@ function Projects() {
             <div className="sticky top-8 space-y-6">
               {/* Categories */}
               <div className="bg-card rounded-lg p-4 border">
-                <h3 className="font-semibold mb-4">Categories</h3>
+                <h3 className="font-semibold mb-4">{t('projects.categories')}</h3>
                 <div className="space-y-2">
                   {categories.map((category) => {
                     const Icon = category.icon;
@@ -164,7 +168,7 @@ function Projects() {
                         }`}
                       >
                         <Icon size={18} />
-                        <span>{category.label}</span>
+                        <span>{getCategoryLabel(category.labelKey)}</span>
                       </button>
                     );
                   })}
@@ -177,12 +181,12 @@ function Projects() {
                   <DialogTrigger asChild>
                     <Button className="w-full gap-2" size="lg">
                       <Plus size={20} />
-                      Share Your Project
+                      {t('projects.shareYourProject')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
-                      <DialogTitle>Share Your Project</DialogTitle>
+                      <DialogTitle>{t('projects.shareYourProject')}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreateProject} className="space-y-4">
                       <div>
@@ -295,14 +299,14 @@ function Projects() {
             ) : projects.length === 0 ? (
               <div className="text-center py-16">
                 <Folder className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No projects yet</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('projects.noProjects')}</h3>
                 <p className="text-muted-foreground mb-6">
-                  Be the first to share your project with the community!
+                  {t('projects.noProjectsDesc')}
                 </p>
                 {isAuthenticated && (
                   <Button onClick={() => setIsCreateDialogOpen(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Share Your Project
+                    {t('projects.shareYourProject')}
                   </Button>
                 )}
               </div>

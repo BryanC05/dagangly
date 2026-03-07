@@ -91,9 +91,9 @@ const Navbar = () => {
 
   const getProductsLabel = () => {
     if (location.pathname.startsWith('/projects')) {
-      return 'Projects';
+      return t('nav.projects') || 'Projects';
     }
-    return 'Produk';
+    return t('nav.products') || 'Produk';
   };
 
   const navLinks = [
@@ -225,10 +225,7 @@ const Navbar = () => {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => {
-              toggleLanguage();
-              window.location.reload();
-            }} 
+            onClick={toggleLanguage} 
             aria-label="Toggle Language" 
             className="font-semibold text-xs min-w-[40px]"
           >
