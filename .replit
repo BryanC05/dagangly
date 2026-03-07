@@ -1,9 +1,3 @@
-language = "nodejs"
-run = "node run.js"
-build = "node build.js"
-
-[gitHubImport]
-requiredFiles = [".replit", "build.js", "run.js"]
-
-[nix]
-channel = "stable-22_11"
+language = "go"
+run = "cd backend && go run ./cmd/server"
+build = "cd backend && go build -o server ./cmd/server"
