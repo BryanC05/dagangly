@@ -71,7 +71,13 @@ function Projects() {
       console.error('Failed to create project:', error);
       // Check if it's an auth error
       if (error.response?.status === 401) {
-        alert('Please login to create a project');
+        if (!isAuthenticated) {
+          alert('Please login to create a project');
+        } else {
+          alert('Your session has expired. Please login again.');
+        }
+      } else {
+        alert('Failed to create project. Please try again.');
       }
     },
   });

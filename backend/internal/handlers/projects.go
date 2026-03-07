@@ -116,15 +116,25 @@ func (h *ProjectHandler) GetProjectByID(c *gin.Context) {
 
 // CreateProject creates a new project
 func (h *ProjectHandler) CreateProject(c *gin.Context) {
-	// Get user from context (set by auth middleware)
+	// Get user from context (set by auth middleware) - optional now
 	userID, exists := c.Get("userId")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
 
-	username, _ := c.Get("username")
-	avatar, _ := c.Get("avatar")
+	var username, avatar string
+	var userIDObj primitive.ObjectID
+
+	if exists {
+		userIDObj = userID.(primitive.ObjectID)
+		if u, ok := c.Get("username"); ok {
+			username = u.(string)
+		}
+		if a, ok := c.Get("avatar"); ok {
+			avatar = a.(string)
+		}
+	} else {
+		// Generate anonymous user ID for guest projects
+		userIDObj = primitive.NewObjectID()
+		username = "Anonymous"
+	}
 
 	var input models.ProjectInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -137,15 +147,20 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		input.Link = "https://" + input.Link
 	}
 
+	// Use provided username if available, otherwise use anonymous
+	if input.Username != "" && username == "Anonymous" {
+		username = input.Username
+	}
+
 	project := models.Project{
 		Name:        input.Name,
 		Description: input.Description,
 		Link:        input.Link,
 		Image:       input.Image,
 		Category:    input.Category,
-		UserID:      userID.(primitive.ObjectID),
-		Username:    username.(string),
-		UserAvatar:  avatar.(string),
+		UserID:      userIDObj,
+		Username:    username,
+		UserAvatar:  avatar,
 		Tags:        input.Tags,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),

@@ -146,7 +146,7 @@ func main() {
 		{
 			projects.GET("", projectHandler.GetProjects)
 			projects.GET("/:id", projectHandler.GetProjectByID)
-			projects.POST("", middleware.AuthRequired(cfg.JWTSecret), projectHandler.CreateProject)
+			projects.POST("", projectHandler.CreateProject)
 			projects.PUT("/:id", middleware.AuthRequired(cfg.JWTSecret), projectHandler.UpdateProject)
 			projects.DELETE("/:id", middleware.AuthRequired(cfg.JWTSecret), projectHandler.DeleteProject)
 			projects.GET("/my-projects", middleware.AuthRequired(cfg.JWTSecret), projectHandler.GetMyProjects)

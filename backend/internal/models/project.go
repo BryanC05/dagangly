@@ -30,4 +30,5 @@ type ProjectInput struct {
 	Image       string   `json:"image,omitempty"`
 	Category    string   `json:"category" binding:"required,oneof=website game app other"`
 	Tags        []string `json:"tags,omitempty"`
+	Username    string   `json:"username,omitempty"`
 }
