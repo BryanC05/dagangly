@@ -194,8 +194,8 @@ const Navbar = () => {
             </Link>
           </Button>
 
-          <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label="Toggle Language">
-            <Languages className="h-5 w-5" />
+          <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label="Toggle Language" className="font-semibold text-xs">
+            {language === 'en' ? 'ID' : 'EN'}
           </Button>
 
           <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle Theme">
