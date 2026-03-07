@@ -41,12 +41,11 @@ api.interceptors.response.use(
       });
     }
 
+    // Don't automatically logout on 401 - let components handle auth errors themselves
+    // This prevents unwanted logout when user tries to access protected endpoints
     if (error.response?.status === 401) {
-      // Check if we're already on the login page to avoid redirect loop
-      if (!window.location.pathname.includes('/login')) {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
+      // Only logout if explicitly on a protected page and not handling it manually
+      // The component can handle the redirect itself
       return Promise.reject(error);
     }
     return Promise.reject(error);

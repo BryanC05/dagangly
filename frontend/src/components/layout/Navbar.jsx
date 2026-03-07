@@ -89,9 +89,16 @@ const Navbar = () => {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  const getProductsLabel = () => {
+    if (location.pathname.startsWith('/projects')) {
+      return 'Projects';
+    }
+    return 'Produk';
+  };
+
   const navLinks = [
     { to: "/", label: "Beranda" },
-    { to: "/products", label: "Produk", isDropdown: true },
+    { to: "/products", label: getProductsLabel(), isDropdown: true },
     { to: "/nearby", label: "Penjual Terdekat" },
     { to: "/forums", label: "Forum" },
   ];

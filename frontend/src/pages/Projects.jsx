@@ -69,6 +69,10 @@ function Projects() {
     },
     onError: (error) => {
       console.error('Failed to create project:', error);
+      // Check if it's an auth error
+      if (error.response?.status === 401) {
+        alert('Please login to create a project');
+      }
     },
   });
 
