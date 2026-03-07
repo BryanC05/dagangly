@@ -299,7 +299,34 @@ npm run build
 
 ### Deploying to Replit
 
-Replit deployment must build the Go binary first, then run the compiled binary. Do not use `go run ./cmd/server` as the deployment run command, because the autoscale runtime container may not include the Go toolchain.
+There are two distinct Replit deployment paths for this repository.
+
+#### Recommended: Static frontend on Replit, backend on Railway
+
+This is the safest option if your Railway backend is already working. Replit hosts only the Vite frontend, and the frontend calls your existing Railway API.
+
+Use the `Static pages` deployment type with:
+
+```bash
+Public directory: frontend/dist
+Build command: sh build-frontend.sh
+```
+
+Add this deployment secret in Replit:
+
+```bash
+VITE_API_URL=https://your-railway-backend-domain/api
+```
+
+If your frontend needs direct asset URLs, you can also set:
+
+```bash
+VITE_BACKEND_URL=https://your-railway-backend-domain
+```
+
+The `.replit` file includes a catch-all rewrite for SPA routing so React Router routes load `index.html`.
+
+#### Alternative: full backend deployment on Replit Autoscale
 
 Use these commands in the Replit deployment UI if it does not automatically read `.replit`:
 
@@ -308,7 +335,7 @@ Build command: sh build.sh
 Run command: sh run.sh
 ```
 
-This repository also includes [`replit.nix`](./replit.nix) so the Replit build environment installs Go and Node before the deployment commands run.
+For the static-pages path, [`replit.nix`](./replit.nix) only installs the minimal frontend build tools needed by Replit.
 
 Required production environment variables:
 

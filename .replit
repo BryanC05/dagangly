@@ -7,3 +7,7 @@ deploymentTarget = "autoscale"
 build = ["sh", "-c", "sh build.sh"]
 run = ["sh", "-c", "sh run.sh"]
 ignorePorts = false
+
+[[deployment.rewrites]]
+from = "/*"
+to = "/index.html"
