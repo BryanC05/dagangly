@@ -26,6 +26,7 @@ import Forums from './pages/Forums';
 import SavedProducts from './pages/SavedProducts';
 import Automation from './pages/Automation/Automation';
 import LogoGenerator from './pages/LogoGenerator';
+import Projects from './pages/Projects';
 import TrackingPage from './pages/TrackingPage';
 import AdminMembership from './pages/AdminMembership';
 import Notifications from './pages/Notifications';
@@ -95,6 +96,7 @@ function App() {
               <Route path="/automation" element={<Automation />} />
               <Route path="/social-links" element={<SocialLinks />} />
               <Route path="/logo-generator" element={<LogoGenerator />} />
+              <Route path="/projects" element={<Projects />} />
               <Route path="/admin/membership" element={<AdminMembership />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/invoice/:orderId" element={<Invoice />} />

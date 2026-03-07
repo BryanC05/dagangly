@@ -71,6 +71,7 @@ func main() {
 	promoHandler := handlers.NewPromoHandler()
 	analyticsHandler := handlers.NewAnalyticsHandler()
 	reportHandler := handlers.NewReportHandler()
+	projectHandler := handlers.NewProjectHandler()
 
 	api := r.Group("/api")
 	{
@@ -139,6 +140,16 @@ func main() {
 			products.DELETE("/:id", middleware.AuthRequired(cfg.JWTSecret), productHandler.DeleteProduct)
 
 			products.GET("/my-products", middleware.AuthRequired(cfg.JWTSecret), productHandler.GetMyProducts)
+		}
+
+		projects := api.Group("/projects")
+		{
+			projects.GET("", projectHandler.GetProjects)
+			projects.GET("/:id", projectHandler.GetProjectByID)
+			projects.POST("", middleware.AuthRequired(cfg.JWTSecret), projectHandler.CreateProject)
+			projects.PUT("/:id", middleware.AuthRequired(cfg.JWTSecret), projectHandler.UpdateProject)
+			projects.DELETE("/:id", middleware.AuthRequired(cfg.JWTSecret), projectHandler.DeleteProject)
+			projects.GET("/my-projects", middleware.AuthRequired(cfg.JWTSecret), projectHandler.GetMyProjects)
 		}
 
 		productImages := api.Group("/product-images")

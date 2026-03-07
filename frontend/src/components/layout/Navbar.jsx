@@ -22,6 +22,7 @@ import {
   Palette,
   Zap,
   Crown,
+  Folder,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,6 +106,7 @@ const Navbar = () => {
         { to: "/seller/product-tracking", label: "Product Tracker", icon: BarChart3 },
         { to: "/seller/add-product", label: "Tambah Produk", icon: PlusCircle },
         { to: "/logo-generator", label: "Logo Generator", icon: Palette, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
+        { to: "/projects", label: "Projects", icon: Folder },
         { to: "/automation", label: "Automations", icon: Zap, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
       ]
       : []),
