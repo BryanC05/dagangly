@@ -72,22 +72,30 @@ const Navbar = () => {
   const cartCount = getTotalItems();
 
   useEffect(() => {
-    if (isAuthenticated && localStorage.getItem("token")) {
-      api
-        .get("/orders/my-orders")
-        .then((res) => {
-          const active = (res.data || []).filter((o) => !["delivered", "cancelled"].includes(o.status));
-          setActiveOrderCount(active.length);
-        })
-        .catch(() => setActiveOrderCount(0));
+    if (!isAuthenticated || !localStorage.getItem("token")) {
       return;
     }
-    setActiveOrderCount(0);
+    
+    let isMounted = true;
+    
+    api
+      .get("/orders/my-orders")
+      .then((res) => {
+        if (isMounted) {
+          const active = (res.data || []).filter((o) => !["delivered", "cancelled"].includes(o.status));
+          setActiveOrderCount(active.length);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setActiveOrderCount(0);
+        }
+      });
+      
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthenticated, user]);
-
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
 
   const getProductsLabel = () => {
     if (location.pathname.startsWith('/projects')) {
@@ -142,6 +150,7 @@ const Navbar = () => {
   };
 
   const handleNavigate = (to) => {
+    setMobileOpen(false);
     navigate(to);
   };
 
