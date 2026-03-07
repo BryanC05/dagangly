@@ -13,9 +13,9 @@ import {
     ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeStore } from '../store/themeStore';
-import { useLanguageStore } from '../store/languageStore';
-import api from '../api';
+import { useThemeStore } from '../../store/themeStore';
+import { useLanguageStore } from '../../store/languageStore';
+import api from '../../api';
 
 const categories = [
     { id: 'all', icon: 'folder-outline', labelKey: 'allProjects' },
