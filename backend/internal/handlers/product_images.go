@@ -48,6 +48,12 @@ func (h *ProductImageHandler) ProcessImage(c *gin.Context) {
 		return
 	}
 
+	// Get image type - can be "product" or "project"
+	imageType := c.DefaultPostForm("type", "product")
+	if imageType != "product" && imageType != "project" {
+		imageType = "product"
+	}
+
 	maxBytes := int64(h.Config.ProductImageMaxSize) * 1024 * 1024
 	if maxBytes <= 0 {
 		maxBytes = 5 * 1024 * 1024
@@ -123,7 +129,14 @@ func (h *ProductImageHandler) ProcessImage(c *gin.Context) {
 
 	ext := services.ExtensionForContentType(detectedMime)
 	filename := userID + "-" + time.Now().Format("20060102-150405") + "-" + randomID(12) + ext
-	relativePath := filepath.Join("uploads", "products", filename)
+	
+	// Store in different directories based on image type
+	var relativePath string
+	if imageType == "project" {
+		relativePath = filepath.Join("uploads", "projects", filename)
+	} else {
+		relativePath = filepath.Join("uploads", "products", filename)
+	}
 	filePath := filepath.Join(".", relativePath)
 
 	if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
@@ -139,7 +152,7 @@ func (h *ProductImageHandler) ProcessImage(c *gin.Context) {
 	response := gin.H{
 		"success": true,
 		"image": gin.H{
-			"url":       "/uploads/products/" + filename,
+			"url":       "/uploads/" + imageType + "s/" + filename,
 			"enhanced":  enhanced,
 			"mimeType":  detectedMime,
 			"sizeBytes": len(fileBytes),

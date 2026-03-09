@@ -97,8 +97,9 @@ function App() {
               <Route path="/automation" element={<Automation />} />
               <Route path="/social-links" element={<SocialLinks />} />
               <Route path="/logo-generator" element={<LogoGenerator />} />
-              <Route path="/projects" element={<Projects />} />
-              <Route path="/projects/:id" element={<ProjectDetail />} />
+              {/* Projects routes disabled - uncomment to enable */}
+              {/* <Route path="/projects" element={<Projects />} /> */}
+              {/* <Route path="/projects/:id" element={<ProjectDetail />} /> */}
               <Route path="/admin/membership" element={<AdminMembership />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/invoice/:orderId" element={<Invoice />} />

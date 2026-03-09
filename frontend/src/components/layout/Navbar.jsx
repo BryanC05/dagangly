@@ -98,9 +98,7 @@ const Navbar = () => {
   }, [isAuthenticated, user]);
 
   const getProductsLabel = () => {
-    if (location.pathname.startsWith('/projects')) {
-      return t('nav.projects') || 'Projects';
-    }
+    // Projects disabled
     return t('nav.products') || 'Produk';
   };
 
@@ -121,7 +119,8 @@ const Navbar = () => {
         { to: "/seller/product-tracking", label: t("nav.productTracker"), icon: BarChart3 },
         { to: "/seller/add-product", label: t("nav.addProduct"), icon: PlusCircle },
         { to: "/logo-generator", label: t("nav.logoGenerator"), icon: Palette, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
-        { to: "/projects", label: t("nav.projects"), icon: Folder },
+        // Projects disabled
+        // { to: "/projects", label: t("nav.projects"), icon: Folder },
         { to: "/automation", label: t("nav.automations"), icon: Zap, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
       ]
       : []),
@@ -193,10 +192,11 @@ const Navbar = () => {
                     <ShoppingCart className="h-4 w-4 mr-2 text-foreground" />
                     {t('nav.products')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => navigate("/projects")} className="cursor-pointer focus:bg-accent focus:text-accent-foreground">
+                  {/* Projects disabled */}
+                  {/* <DropdownMenuItem onSelect={() => navigate("/projects")} className="cursor-pointer focus:bg-accent focus:text-accent-foreground">
                     <Folder className="h-4 w-4 mr-2 text-foreground" />
                     {t('nav.projects')}
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (

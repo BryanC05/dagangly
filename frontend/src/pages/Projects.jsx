@@ -106,6 +106,7 @@ function Projects() {
       for (const file of files) {
         const formData = new FormData();
         formData.append('image', file);
+        formData.append('type', 'project');
         
         const response = await api.post('/product-images/process', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },

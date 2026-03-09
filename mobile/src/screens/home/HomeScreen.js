@@ -592,7 +592,7 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.categorySection}>
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>{t('categories')}</Text>
-                        <TouchableOpacity onPress={() => navigation.navigate('Browse')}>
+                        <TouchableOpacity onPress={() => navigation.navigate('ProductsTab')}>
                             <Text style={styles.seeAll}>{t('seeAllLower')}</Text>
                         </TouchableOpacity>
                     </View>
@@ -618,7 +618,7 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.productsSection}>
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>{t('featuredProducts')}</Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('Browse')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('ProductsTab')}>
                         <Text style={styles.seeAll}>{t('seeAllLower')}</Text>
                     </TouchableOpacity>
                 </View>
