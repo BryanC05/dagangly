@@ -644,30 +644,6 @@ function BrowseTabButton({ navigation, isFocused, route }) {
     );
 }
 
-// Delivery badge component 
-                    activeOpacity={1}
-                    onPress={() => setShowDropdown(false)}
-                >
-                    <View style={[styles.dropdownMenu, { backgroundColor: colors.card }]}>
-                        {menuItems.map((item) => (
-                            <TouchableOpacity
-                                key={item.key}
-                                style={styles.dropdownItem}
-                                onPress={() => handleSelect(item)}
-                            >
-                                <Ionicons name={item.icon} size={20} color={colors.text} />
-                                <Text style={[styles.dropdownItemText, { color: colors.text }]}>
-                                    {item.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </TouchableOpacity>
-            </Modal>
-        </>
-    );
-}
-
 // Delivery badge component
 function DeliveryBadge() {
     const { isDriverMode, activeDelivery } = useDriverStore();
