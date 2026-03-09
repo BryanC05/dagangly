@@ -56,6 +56,16 @@ const Products = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  const [activeFilter, setActiveFilter] = useState("all");
+
+  // Quick filter options
+  const filterOptions = [
+    { id: 'all', name: 'Semua', nameEn: 'All', icon: 'apps' },
+    { id: 'price-low', name: 'Harga Rendah', nameEn: 'Price ↑', icon: 'arrow-up' },
+    { id: 'price-high', name: 'Harga Tinggi', nameEn: 'Price ↓', icon: 'arrow-down' },
+    { id: 'rating', name: 'Rating 4+', nameEn: '⭐ 4+', icon: 'star' },
+    { id: 'new', name: 'Terbaru', nameEn: 'New', icon: 'time' },
+  ];
 
   // Categories matching the seeded data
   const categories = [
@@ -199,6 +209,31 @@ const Products = () => {
             </Button>
           </div>
         </form>
+
+        {/* Quick Filter Chips */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {filterOptions.map((filter) => (
+            <button
+              key={filter.id}
+              onClick={() => {
+                setActiveFilter(filter.id);
+                // Apply filter
+                if (filter.id === 'price-low') setSortBy('price-asc');
+                else if (filter.id === 'price-high') setSortBy('price-desc');
+                else if (filter.id === 'rating') setSortBy('rating');
+                else if (filter.id === 'new') setSortBy('newest');
+                else setSortBy('newest');
+              }}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                activeFilter === filter.id
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {filter.nameEn}
+            </button>
+          ))}
+        </div>
 
         {/* Active Filters */}
         {activeFiltersCount > 0 && (
