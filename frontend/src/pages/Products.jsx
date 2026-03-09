@@ -316,7 +316,7 @@ const Products = () => {
               <p className="text-muted-foreground">
                 {loading ? t('common.loading') : `${t('products.showing')} ${products.length} ${t('products.of')} ${pagination.total} ${t('products.productsCount')}`}
               </p>
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={sortBy} onValueChange={setSortBy} disabled>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={t('products.sortBy')} />
                 </SelectTrigger>
