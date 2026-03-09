@@ -451,6 +451,11 @@ function ProfileStackNavigator() {
                 component={NotificationsScreen}
                 options={{ headerShown: false }}
             />
+            <ProfileStack.Screen
+                name="NearbySellers"
+                component={NearbySellersScreen}
+                options={{ headerShown: false }}
+            />
         </ProfileStack.Navigator>
     );
 }

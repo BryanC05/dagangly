@@ -530,7 +530,7 @@ export default function HomeScreen({ navigation }) {
                         </View>
                         <TouchableOpacity
                             style={styles.nearbyMapBtn}
-                            onPress={() => navigation.navigate('HomeTab', { screen: 'NearbySellers' })}
+                            onPress={() => navigation.navigate('NearbySellers')}
                         >
                             <Text style={styles.nearbyMapBtnText}>{t('seeAll')}</Text>
                             <Ionicons name="arrow-forward" size={12} color={colors.primary} />
@@ -551,7 +551,7 @@ export default function HomeScreen({ navigation }) {
                                 <TouchableOpacity
                                     key={seller._id}
                                     style={styles.nearbySellerItem}
-                                    onPress={() => navigation.navigate('HomeTab', { 
+                                    onPress={() => navigation.navigate('Home', { 
                                         screen: 'BusinessDetails', 
                                         params: { sellerId: seller._id } 
                                     })}
@@ -646,7 +646,7 @@ export default function HomeScreen({ navigation }) {
                     </Text>
                     <TouchableOpacity
                         style={styles.nearbyBtn}
-                        onPress={() => navigation.navigate('HomeTab', { screen: 'NearbySellers' })}
+                        onPress={() => navigation.navigate('NearbySellers')}
                     >
                         <Text style={styles.nearbyBtnText}>{t('openMap')}</Text>
                         <Ionicons name="arrow-forward" size={16} color="#fff" />
