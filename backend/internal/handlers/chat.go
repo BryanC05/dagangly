@@ -132,6 +132,7 @@ func (h *ChatHandler) CreateDirectChatRoom(c *gin.Context) {
 
 	var chatRoom models.ChatRoom
 	if err != nil {
+		// Create new chat room
 		chatRoom = models.ChatRoom{
 			Buyer:    userObjID,
 			Seller:   sellerObjID,
@@ -145,9 +146,41 @@ func (h *ChatHandler) CreateDirectChatRoom(c *gin.Context) {
 		chatRoom.ID = result.InsertedID.(primitive.ObjectID)
 	} else {
 		chatRoom = existingChatRoom
+
+		// Check if chat was hidden by this user - if so, unhide it
+		hiddenBy := chatRoom.HiddenBy
+		if hiddenBy == nil {
+			hiddenBy = []primitive.ObjectID{}
+		}
+		isHidden := false
+		for _, id := range hiddenBy {
+			if id == userObjID {
+				isHidden = true
+				break
+			}
+		}
+		if isHidden {
+			// Remove user from hiddenBy array
+			chatRoomsCollection.UpdateOne(context.Background(), bson.M{"_id": chatRoom.ID}, bson.M{
+				"$pull": bson.M{"hiddenBy": userObjID},
+			})
+		}
 	}
 
-	c.JSON(201, chatRoom)
+	// Populate buyer and seller info for response
+	var buyerInfo models.User
+	var sellerInfo models.User
+	usersCollection.FindOne(context.Background(), bson.M{"_id": chatRoom.Buyer}).Decode(&buyerInfo)
+	usersCollection.FindOne(context.Background(), bson.M{"_id": chatRoom.Seller}).Decode(&sellerInfo)
+
+	c.JSON(201, gin.H{
+		"_id":       chatRoom.ID,
+		"buyer":     gin.H{"_id": buyerInfo.ID, "name": buyerInfo.Name, "businessName": buyerInfo.BusinessName},
+		"seller":    gin.H{"_id": sellerInfo.ID, "name": sellerInfo.Name, "businessName": sellerInfo.BusinessName},
+		"chatType":  chatRoom.ChatType,
+		"createdAt": chatRoom.CreatedAt,
+		"updatedAt": chatRoom.UpdatedAt,
+	})
 }
 
 func (h *ChatHandler) GetChatRooms(c *gin.Context) {
