@@ -221,29 +221,37 @@ const Map = forwardRef(({
                     )}
 
                     {/* Custom Markers */}
-                    {markers.map((marker, index) => (
-                        Marker ? (
+                    {markers.map((marker, index) => {
+                        if (!Marker) return null;
+                        const isSelected = selectedMarkerId === marker.id;
+                        const markerColor = marker.color || (isSelected ? tokens.colors.accent || '#f59e0b' : colors.primary);
+
+                        return (
                             <Marker
                                 key={marker.id || index}
                                 coordinate={marker.coordinate}
-                                title={marker.title}
-                                description={marker.description}
                                 onPress={() => onMarkerPress?.(marker)}
+                                zIndex={isSelected ? 999 : index}
+                                hitSlop={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                                anchor={{ x: 0.5, y: 1 }} // Ensures tip points exactly at coordinate
                             >
                                 <View style={[
                                     dynamicStyles.markerContainer,
-                                    selectedMarkerId === marker.id && dynamicStyles.markerSelected
+                                    isSelected && dynamicStyles.markerSelected
                                 ]}>
-                                    <View style={dynamicStyles.markerBubble}>
+                                    <View style={[
+                                        dynamicStyles.markerBubble,
+                                        { backgroundColor: markerColor, borderColor: isSelected ? '#fff' : colors.card, borderWidth: isSelected ? 3 : 2 }
+                                    ]}>
                                         <Text style={dynamicStyles.markerText}>
-                                            {marker.number || index + 1}
+                                            {marker.icon || (marker.number || index + 1)}
                                         </Text>
                                     </View>
-                                    <View style={dynamicStyles.markerArrow} />
+                                    <View style={[dynamicStyles.markerArrow, { borderTopColor: markerColor }]} />
                                 </View>
                             </Marker>
-                        ) : null
-                    ))}
+                        );
+                    })}
 
                     {Polyline && Array.isArray(polylineCoordinates) && polylineCoordinates.length > 1 && (
                         <Polyline

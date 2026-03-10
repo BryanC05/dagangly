@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, FlatList, TouchableOpacity, Image, StyleSheet, RefreshControl,
+    View, Text, FlatList, TouchableOpacity, Image, StyleSheet, RefreshControl, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import api from '../../api/api';
 import { useAuthStore } from '../../store/authStore';
 import { formatRelativeTime } from '../../utils/helpers';
@@ -22,6 +23,7 @@ export default function MessagesScreen({ navigation }) {
     const fetchRooms = useCallback(async () => {
         try {
             const response = await api.get('/chat/rooms');
+            console.log('Chat rooms response:', JSON.stringify(response.data, null, 2));
             setRooms(response.data || []);
         } catch (error) {
             console.error('Failed to fetch chat rooms:', error);
@@ -30,7 +32,12 @@ export default function MessagesScreen({ navigation }) {
         }
     }, []);
 
-    useEffect(() => { fetchRooms(); }, [fetchRooms]);
+    // Refresh when screen is focused
+    useFocusEffect(
+        useCallback(() => {
+            fetchRooms();
+        }, [fetchRooms])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -38,9 +45,63 @@ export default function MessagesScreen({ navigation }) {
         setRefreshing(false);
     };
 
+    const handleDeleteChat = (room) => {
+        const other = getOtherParticipant(room);
+        Alert.alert(
+            'Delete Chat',
+            `Are you sure you want to delete this conversation with ${other?.name || 'this user'}?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            const response = await api.delete(`/chat/rooms/${room._id}`);
+                            if (response.status === 200) {
+                                setRooms((prev) => prev.filter((r) => r._id !== room._id));
+                            }
+                        } catch (error) {
+                            console.error('Failed to delete chat:', error.response || error);
+                            const errorMsg = error.response?.data?.message || 'Failed to delete chat';
+                            Alert.alert('Error', errorMsg);
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     const getOtherParticipant = (room) => {
         if (!user) return {};
-        return user.id === room.buyer?._id ? room.seller : room.buyer;
+        
+        // Get buyer and seller IDs - handle both populated and raw formats
+        const buyerId = room.buyer?._id || room.buyer;
+        const sellerId = room.seller?._id || room.seller;
+        
+        // Compare as strings
+        const isBuyerMe = String(buyerId) === String(user.id);
+        const isSellerMe = String(sellerId) === String(user.id);
+        
+        // If buyer is me, the other person is seller, and vice versa
+        let other;
+        if (isBuyerMe) {
+            other = room.seller;
+        } else if (isSellerMe) {
+            other = room.buyer;
+        } else {
+            // Fallback - just use seller
+            other = room.seller;
+        }
+        
+        // Get name - prefer businessName, fall back to name
+        const otherId = other?._id || other;
+        const otherName = other?.businessName || other?.name;
+        
+        return {
+            _id: otherId,
+            name: otherName || 'User'
+        };
     };
 
     if (loading) return <MessagesScreenSkeleton />;
@@ -81,20 +142,22 @@ export default function MessagesScreen({ navigation }) {
     const renderRoom = ({ item: room }) => {
         const other = getOtherParticipant(room);
         const lastMessage = room.lastMessage;
+        const displayName = other?.name || 'User';
         return (
             <TouchableOpacity
                 style={styles.roomCard}
                 onPress={() => navigation.navigate('Chat', { roomId: room._id, otherUser: other })}
+                onLongPress={() => handleDeleteChat(room)}
                 activeOpacity={0.7}
             >
                 <View style={styles.avatar}>
                     <Text style={styles.avatarText}>
-                        {(other?.name || 'U').charAt(0).toUpperCase()}
+                        {(displayName || 'U').charAt(0).toUpperCase()}
                     </Text>
                 </View>
                 <View style={styles.roomInfo}>
                     <View style={styles.roomHeader}>
-                        <Text style={styles.roomName} numberOfLines={1}>{other?.name || 'User'}</Text>
+                        <Text style={styles.roomName} numberOfLines={1}>{displayName}</Text>
                         {lastMessage && (
                             <Text style={styles.roomTime}>{formatRelativeTime(lastMessage.createdAt)}</Text>
                         )}
@@ -128,9 +191,18 @@ export default function MessagesScreen({ navigation }) {
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#14b8a6" />}
                 ListEmptyComponent={
                     <View style={styles.empty}>
-                        <Ionicons name="chatbubbles-outline" size={48} color="#d1d5db" />
-                        <Text style={styles.emptyTitle}>{t.noMessages}</Text>
-                        <Text style={styles.emptyText}>{t.noMessagesDesc}</Text>
+                        <View style={{
+                            width: 100, height: 100, borderRadius: 50,
+                            backgroundColor: colors.primary + '15',
+                            justifyContent: 'center', alignItems: 'center',
+                            marginBottom: 16
+                        }}>
+                            <Ionicons name="chatbubbles" size={50} color={colors.primary} />
+                        </View>
+                        <Text style={styles.emptyTitle}>{t.noMessages || 'No messages yet'}</Text>
+                        <Text style={styles.emptyText}>
+                            {t.noMessagesDesc || 'When you contact sellers about products, your conversations will appear here.'}
+                        </Text>
                     </View>
                 }
             />

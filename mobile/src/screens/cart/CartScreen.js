@@ -216,7 +216,7 @@ export default function CartScreen({ navigation }) {
             setShowCheckoutModal(false);
             setSelectedSeller(null);
             Alert.alert(t.orderPlaced, t.orderSuccess, [
-                { text: 'View Orders', onPress: () => navigation.navigate('ProfileTab', { screen: 'Orders' }) },
+                { text: 'View Orders', onPress: () => navigation.navigate('Profile', { screen: 'Orders' }) },
                 { text: 'OK' },
             ]);
         } catch (error) {
@@ -330,14 +330,23 @@ export default function CartScreen({ navigation }) {
     if (items.length === 0) {
         return (
             <View style={styles.empty}>
-                <Ionicons name="cart-outline" size={64} color="#d1d5db" />
-                <Text style={styles.emptyTitle}>{t.cartEmpty}</Text>
-                <Text style={styles.emptyText}>{t.cartEmptyDesc}</Text>
+                <View style={{
+                    width: 120, height: 120, borderRadius: 60,
+                    backgroundColor: colors.primary + '15',
+                    justifyContent: 'center', alignItems: 'center',
+                    marginBottom: 24
+                }}>
+                    <Ionicons name="cart" size={64} color={colors.primary} />
+                </View>
+                <Text style={styles.emptyTitle}>{t.cartEmpty || 'Your cart is empty'}</Text>
+                <Text style={styles.emptyText}>
+                    {t.cartEmptyDesc || 'Looks like you haven\'t added anything to your cart yet.'}
+                </Text>
                 <TouchableOpacity
                     style={styles.browseBtn}
                     onPress={() => navigation.navigate('ProductsTab')}
                 >
-                    <Text style={styles.browseBtnText}>{t.browseProducts}</Text>
+                    <Text style={styles.browseBtnText}>{t.browseProducts || 'Browse Products'}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -380,7 +389,7 @@ export default function CartScreen({ navigation }) {
 
                         {/* Pickup confirmation */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionLabel}>Pickup Details</Text>
+                            <Text style={styles.sectionLabel}>{t.pickupDetails || 'Pickup Details'}</Text>
                             <View style={{
                                 backgroundColor: '#ecfdf5',
                                 borderWidth: 1.5,
@@ -400,10 +409,10 @@ export default function CartScreen({ navigation }) {
                                 </View>
                                 <View style={{ flex: 1 }}>
                                     <Text style={{ fontSize: 15, fontWeight: '700', color: '#065f46' }}>
-                                        Pickup at {selectedSeller?.sellerName}
+                                        {t.pickupAtStore || 'Pickup at'} {selectedSeller?.sellerName}
                                     </Text>
                                     <Text style={{ fontSize: 12, color: '#047857', marginTop: 2 }}>
-                                        Collect your order from the store — no extra fees!
+                                        {t.pickupDesc || 'Collect your order from the store — no extra fees!'}
                                     </Text>
                                 </View>
                                 <Ionicons name="checkmark-circle" size={24} color="#10b981" />
@@ -413,7 +422,7 @@ export default function CartScreen({ navigation }) {
                         {/* Preorder Time */}
                         <View style={styles.section}>
                             <Text style={styles.sectionLabel}>
-                                Pickup Time
+                                {t.pickupTime || 'Pickup Time'}
                             </Text>
 
                             {/* Schedule for later toggle */}
@@ -426,10 +435,10 @@ export default function CartScreen({ navigation }) {
                                 </View>
                                 <View style={styles.optionInfo}>
                                     <Text style={[styles.optionName, { color: enableScheduledDelivery ? '#10b981' : colors.text }]}>
-                                        Schedule for another day
+                                        {t.scheduledDelivery || 'Schedule for another day'}
                                     </Text>
                                     <Text style={styles.optionDesc}>
-                                        Pick up on a specific date & time
+                                        {t.scheduledDesc || 'Pick up on a specific date & time'}
                                     </Text>
                                 </View>
                                 <View style={[
@@ -444,7 +453,7 @@ export default function CartScreen({ navigation }) {
                                 <View style={{ gap: 12 }}>
                                     {/* Date Selection */}
                                     <View style={styles.inputContainer}>
-                                        <Text style={styles.inputLabel}>Pickup Date</Text>
+                                        <Text style={styles.inputLabel}>{t.pickupDate || 'Pickup Date'}</Text>
                                         <TouchableOpacity
                                             style={styles.timeInput}
                                             onPress={() => {
@@ -461,18 +470,18 @@ export default function CartScreen({ navigation }) {
                                             }}
                                         >
                                             <Text style={{ fontSize: 16, color: scheduledDate ? colors.text : colors.textSecondary }}>
-                                                {scheduledDate || t.selectDate || 'Pilih Tanggal'}
+                                                {scheduledDate || t.selectDate || 'Select Date'}
                                             </Text>
                                             <Ionicons name="calendar-outline" size={20} color={colors.textSecondary} />
                                         </TouchableOpacity>
                                         <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>
-                                            Maximum 30 days ahead
+                                            {t.max30Days || 'Maximum 30 days ahead'}
                                         </Text>
                                     </View>
 
                                     {/* Time Selection */}
                                     <View style={styles.inputContainer}>
-                                        <Text style={styles.inputLabel}>Pickup Time</Text>
+                                        <Text style={styles.inputLabel}>{t.pickupTime || 'Pickup Time'}</Text>
                                         <TouchableOpacity
                                             style={styles.timeInput}
                                             onPress={() => {
@@ -481,7 +490,7 @@ export default function CartScreen({ navigation }) {
                                             }}
                                         >
                                             <Text style={{ fontSize: 16, color: scheduledTime ? colors.text : colors.textSecondary }}>
-                                                {scheduledTime || t.selectTime || 'Pilih Waktu'}
+                                                {scheduledTime || t.selectTime || 'Select Time'}
                                             </Text>
                                             <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
                                         </TouchableOpacity>
@@ -489,7 +498,7 @@ export default function CartScreen({ navigation }) {
 
                                     {/* Scheduled Delivery Notes */}
                                     <View style={styles.inputContainer}>
-                                        <Text style={styles.inputLabel}>Pickup Notes (optional)</Text>
+                                        <Text style={styles.inputLabel}>{t.pickupNotesOptional || 'Pickup Notes (optional)'}</Text>
                                         <TouchableOpacity
                                             style={styles.noteInput}
                                             onPress={() => {
@@ -497,7 +506,7 @@ export default function CartScreen({ navigation }) {
                                             }}
                                         >
                                             <Text style={{ fontSize: 14, color: scheduledNotes ? colors.text : colors.textSecondary }}>
-                                                {scheduledNotes || 'e.g., Leave at door, Ring bell...'}
+                                                {scheduledNotes || t.notePlaceholder || 'e.g., Leave at door, Ring bell...'}
                                             </Text>
                                         </TouchableOpacity>
                                     </View>
@@ -505,7 +514,7 @@ export default function CartScreen({ navigation }) {
                                     <View style={[styles.infoBox, { backgroundColor: '#cffafe' }]}>
                                         <Ionicons name="information-circle" size={20} color="#0891b2" />
                                         <Text style={[styles.infoText, { color: '#0e7490' }]}>
-                                            The seller will confirm your scheduled pickup before preparation
+                                            {t.sellerConfirmPickup || 'The seller will confirm your scheduled pickup before preparation'}
                                         </Text>
                                     </View>
                                 </View>
@@ -520,7 +529,7 @@ export default function CartScreen({ navigation }) {
                                         }}
                                     >
                                         <Text style={{ fontSize: 16, color: preorderTime ? colors.text : colors.textSecondary }}>
-                                            {preorderTime || 'Tap to select time'}
+                                            {preorderTime || t.selectTime || 'Select Time'}
                                         </Text>
                                         <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
                                     </TouchableOpacity>
@@ -530,18 +539,16 @@ export default function CartScreen({ navigation }) {
 
                         {/* Note for Seller */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionLabel}>Note for Seller (optional)</Text>
+                            <Text style={styles.sectionLabel}>{t.sellerNote || 'Note for Seller'}</Text>
                             <View style={styles.inputContainer}>
                                 <TouchableOpacity
                                     style={styles.noteInput}
                                     onPress={() => {
-                                        // In real app, show text input modal
-                                        // For now, set a sample note
                                         setNotes('');
                                     }}
                                 >
                                     <Text style={{ fontSize: 14, color: notes ? colors.text : colors.textSecondary }}>
-                                        {notes || 'Any special requests? e.g., extra spicy, no onions...'}
+                                        {notes || t.notePlaceholder || 'Any special requests?'}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
@@ -549,7 +556,7 @@ export default function CartScreen({ navigation }) {
 
                         {/* Payment Methods */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionLabel}>Payment Method</Text>
+                            <Text style={styles.sectionLabel}>{t.paymentMethod || 'Payment Method'}</Text>
                             {PAYMENT_METHODS.map((method) => (
                                 <TouchableOpacity
                                     key={method.id}
@@ -580,12 +587,12 @@ export default function CartScreen({ navigation }) {
                         {selectedSeller && (
                             <View style={styles.summaryBox}>
                                 <View style={styles.summaryRow}>
-                                    <Text style={styles.summaryLabel}>Items ({selectedSeller.items.length})</Text>
+                                    <Text style={styles.summaryLabel}>{t.items || 'Items'} ({selectedSeller.items.length})</Text>
                                     <Text style={styles.summaryValue}>{formatPrice(getSellerTotal(selectedSeller.sellerId))}</Text>
                                 </View>
                                 <View style={styles.summaryRow}>
-                                    <Text style={styles.summaryLabel}>Store Pickup</Text>
-                                    <Text style={[styles.summaryValue, { color: '#10b981' }]}>✓ Free</Text>
+                                    <Text style={styles.summaryLabel}>{t.pickupAtStore || 'Store Pickup'}</Text>
+                                    <Text style={[styles.summaryValue, { color: '#10b981' }]}>✓ {t.free || 'Free'}</Text>
                                 </View>
                                 <View style={[styles.summaryRow, styles.summaryTotal]}>
                                     <Text style={styles.summaryLabel}>{t.total}</Text>
@@ -604,10 +611,10 @@ export default function CartScreen({ navigation }) {
                         >
                             <Text style={styles.payBtnText}>
                                 {processing
-                                    ? 'Processing...'
+                                    ? (t.processingPayment || 'Processing...')
                                     : enableScheduledDelivery
-                                        ? 'Send Request'
-                                        : 'Place Order'
+                                        ? (t.sendRequest || 'Send Request')
+                                        : (t.placeOrder || 'Place Order')
                                 }
                             </Text>
                         </TouchableOpacity>

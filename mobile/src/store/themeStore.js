@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Appearance } from 'react-native';
 
-const lightColors = {
+export const lightColors = {
     background: '#f0f3f8',
     card: '#ffffff',
     text: '#1a1f2e',
@@ -28,7 +28,7 @@ const lightColors = {
     glow: 'rgba(20, 184, 166, 0.3)',
 };
 
-const darkColors = {
+export const darkColors = {
     background: '#0d1117',
     card: '#161b22',
     text: '#e6eaef',
@@ -72,14 +72,14 @@ export const useThemeStore = create((set, get) => ({
                     set({ isDarkMode: true, colors: darkColors, isReady: true });
                     await AsyncStorage.setItem('theme', 'dark');
                 } else {
-                    set({ isReady: true });
+                    set({ isDarkMode: false, colors: lightColors, isReady: true });
                 }
             } else {
-                set({ isReady: true });
+                set({ isDarkMode: false, colors: lightColors, isReady: true });
             }
         } catch (error) {
             console.error('Failed to load theme:', error);
-            set({ isReady: true });
+            set({ isDarkMode: false, colors: lightColors, isReady: true });
         }
     },
 

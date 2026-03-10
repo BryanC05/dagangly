@@ -3,7 +3,7 @@ import {
     View, Text, TouchableOpacity, FlatList, TextInput, ActivityIndicator, ScrollView, Dimensions, StyleSheet, Animated, PanResponder, Pressable, Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { useThemeStore } from '../../store/themeStore';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -49,6 +49,7 @@ const getSellerCoordinates = (seller) => {
 
 export default function NearbySellersScreen() {
     const navigation = useNavigation();
+    const route = useRoute();
     const insets = useSafeAreaInsets();
     const { colors } = useThemeStore();
     const { t } = useTranslation();
@@ -76,12 +77,12 @@ export default function NearbySellersScreen() {
                 navigation.goBack();
             } else {
                 // Fallback: navigate to Home if can't go back
-                navigation.navigate('HomeTab');
+                navigation.navigate('Home');
             }
         } catch (error) {
             console.warn('Navigation goBack error:', error);
             try {
-                navigation.navigate('HomeTab');
+                navigation.navigate('Home');
             } catch (e) {
                 console.warn('Fallback navigation failed:', e);
             }
@@ -151,6 +152,26 @@ export default function NearbySellersScreen() {
             }
         };
     }, []);
+
+    // Handle targetSeller from route params (e.g. from "View on Map" in product details)
+    useEffect(() => {
+        const targetSeller = route.params?.targetSeller;
+        if (targetSeller && location) {
+            setSelectedSeller(targetSeller);
+
+            const coords = getSellerCoordinates(targetSeller);
+            if (coords && mapRef.current) {
+                setTimeout(() => {
+                    mapRef.current?.animateToRegion({
+                        latitude: coords.lat,
+                        longitude: coords.lng,
+                        latitudeDelta: 0.002,
+                        longitudeDelta: 0.002,
+                    }, 1000);
+                }, 500);
+            }
+        }
+    }, [route.params?.targetSeller, location]);
 
     const getUserLocation = useCallback(async () => {
         try {
@@ -374,6 +395,20 @@ export default function NearbySellersScreen() {
     const mapRegion = useMemo(() => {
         if (!activeLocation) return null;
 
+        // If navigated with a targetSeller, center map on that seller
+        const targetSeller = route.params?.targetSeller;
+        if (targetSeller && !isNavigating) {
+            const targetCoords = getSellerCoordinates(targetSeller);
+            if (targetCoords) {
+                return {
+                    latitude: targetCoords.lat,
+                    longitude: targetCoords.lng,
+                    latitudeDelta: 0.008,
+                    longitudeDelta: 0.008,
+                };
+            }
+        }
+
         if (isNavigating && selectedSeller) {
             const destination = getSellerCoordinates(selectedSeller);
             if (destination) {
@@ -397,10 +432,10 @@ export default function NearbySellersScreen() {
             latitudeDelta: radiusInDegrees * 2.5,
             longitudeDelta: radiusInDegrees * 2.5 * (width / height),
         };
-    }, [activeLocation, radius, isNavigating, selectedSeller]);
+    }, [activeLocation, radius, isNavigating, selectedSeller, route.params?.targetSeller]);
 
     const mapMarkers = useMemo(() => {
-        return sellers
+        const markers = sellers
             .filter((s) => getSellerCoordinates(s) && getSellerId(s))
             .map((seller, index) => {
                 const sellerId = getSellerId(seller);
@@ -417,7 +452,36 @@ export default function NearbySellersScreen() {
                 };
             })
             .filter(Boolean);
-    }, [sellers, activeLocation, t.km]);
+
+        // Add or update targetSeller marker to make it stand out
+        const targetSeller = route.params?.targetSeller;
+        if (targetSeller) {
+            const targetId = targetSeller._id;
+            const existingIndex = markers.findIndex((m) => m.id === targetId);
+            const coords = getSellerCoordinates(targetSeller);
+            const distance = calculateDistance(targetSeller.location);
+
+            const targetMarker = {
+                id: targetId,
+                coordinate: coords ? { latitude: coords.lat, longitude: coords.lng } : (existingIndex >= 0 ? markers[existingIndex].coordinate : null),
+                title: targetSeller.businessName || targetSeller.name || 'Target Store',
+                description: distance ? `${distance} ${t.km || 'km'}` : '',
+                number: existingIndex >= 0 ? markers[existingIndex].number : markers.length + 1,
+                color: '#ef4444', // Red color to stand out
+                icon: '📍',
+            };
+
+            if (targetMarker.coordinate) {
+                if (existingIndex >= 0) {
+                    markers[existingIndex] = targetMarker; // Update existing
+                } else {
+                    markers.push(targetMarker); // Add new
+                }
+            }
+        }
+
+        return markers;
+    }, [sellers, activeLocation, t.km, route.params?.targetSeller]);
 
     const normalizedSearch = searchQuery.trim().toLowerCase();
     const filteredSellers = sellers.filter((seller) => {
@@ -495,14 +559,14 @@ export default function NearbySellersScreen() {
                     <View style={{ flexDirection: 'row', gap: 6 }}>
                         {/* Share Button */}
                         {item.location?.coordinates && (
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[styles.navigateBtn, { backgroundColor: '#6366f1' }]}
                                 onPress={() => {
                                     const coords = getSellerCoordinates(item);
                                     if (coords) {
                                         const mapUrl = `https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lng}&zoom=16`;
                                         const shareText = `${t.checkOutStore || 'Check out'} ${displayName}!\n${mapUrl}`;
-                                        
+
                                         // Try native share, fallback to clipboard
                                         if (navigator.share) {
                                             navigator.share({
@@ -521,7 +585,7 @@ export default function NearbySellersScreen() {
                                 <Ionicons name="share-social" size={16} color="#fff" />
                             </TouchableOpacity>
                         )}
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={[styles.navigateBtn, { backgroundColor: '#22c55e' }]}
                             onPress={() => startNavigation(item)}
                         >
@@ -631,6 +695,53 @@ export default function NearbySellersScreen() {
                         {navigationError && (
                             <Text style={styles.navigationWarning}>{navigationError}</Text>
                         )}
+                    </View>
+                )}
+
+                {/* Selected Seller Card (when not navigating) */}
+                {!isNavigating && selectedSeller && (
+                    <View style={[styles.selectedSellerCard, { backgroundColor: colors.card, bottom: 100 }]}>
+                        <View style={styles.selectedSellerHeader}>
+                            <View style={styles.selectedSellerInfo}>
+                                <Text style={[styles.selectedSellerName, { color: colors.text }]} numberOfLines={1}>
+                                    {getSellerDisplayName(selectedSeller)}
+                                </Text>
+                                <View style={styles.selectedSellerMeta}>
+                                    <Ionicons name="star" size={14} color="#f59e0b" />
+                                    <Text style={[styles.selectedSellerRating, { color: colors.textSecondary }]}>4.8</Text>
+                                    <Text style={[styles.selectedSellerDot, { color: colors.border }]}>•</Text>
+                                    <Text style={[styles.selectedSellerDistance, { color: colors.textSecondary }]}>
+                                        {calculateDistance(selectedSeller.location) || '--'} km
+                                    </Text>
+                                </View>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => setSelectedSeller(null)}
+                                style={[styles.selectedSellerClose, { backgroundColor: colors.input }]}
+                            >
+                                <Ionicons name="close" size={20} color={colors.textSecondary} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.selectedSellerActions}>
+                            <TouchableOpacity
+                                style={[styles.selectedSellerBtnSecondary, { backgroundColor: colors.input }]}
+                                onPress={() => {
+                                    navigation.getParent()?.navigate('Profile', {
+                                        screen: 'BusinessDetails',
+                                        params: { sellerId: getSellerId(selectedSeller) }
+                                    });
+                                }}
+                            >
+                                <Text style={[styles.selectedSellerBtnSecondaryText, { color: colors.textSecondary }]}>View Store</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.selectedSellerBtnPrimary, { backgroundColor: colors.primary }]}
+                                onPress={() => startNavigation(selectedSeller)}
+                            >
+                                <Ionicons name="navigate" size={16} color="#ffffff" />
+                                <Text style={styles.selectedSellerBtnPrimaryText}>Navigate Mode</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 )}
 
@@ -744,80 +855,53 @@ export default function NearbySellersScreen() {
                 </View>
             </View>
 
-            {/* Bottom Sheet - Dynamic height based on content */}
-            <Animated.View
-                style={[
-                    styles.bottomSheet,
-                    {
-                        backgroundColor: colors.card,
-                        height: sheetHeight,
-                    }
-                ]}
-            >
-                {/* Drag Handle */}
-                <View {...panResponder.panHandlers} style={styles.dragHandle}>
-                    <View style={[styles.dragIndicator, { backgroundColor: colors.textSecondary }]} />
-                    <Text style={[styles.dragText, { color: colors.textSecondary }]}>
-                        {sellers.length === 0
-                            ? (t.noNearbySellers || 'No sellers nearby')
-                            : `${t.swipeDownCollapse || 'Swipe down to collapse'} • ${sellers.length} ${t.foundLabel || 'found'}`}
-                    </Text>
+            {/* Search and Filter Section overlaid on map since bottom sheet is removed */}
+            <View style={[styles.searchSection, {
+                position: 'absolute',
+                top: insets.top + 72,
+                left: 16,
+                right: 16,
+                backgroundColor: colors.card,
+                borderRadius: 16,
+                padding: 12,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 6,
+                borderWidth: 0,
+            }]}>
+                <View style={[styles.searchBox, { backgroundColor: colors.input, marginBottom: 8 }]}>
+                    <Ionicons name="search" size={18} color={colors.textSecondary} />
+                    <TextInput
+                        style={[styles.searchInput, { color: colors.text }]}
+                        placeholder={t.searchSellers || 'Search sellers...'}
+                        placeholderTextColor={colors.textSecondary}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                    />
                 </View>
 
-                {/* Search and Filter Section - Always visible */}
-                <View style={[styles.searchSection, { borderColor: colors.border }]}>
-                    <View style={[styles.searchBox, { backgroundColor: colors.input }]}>
-                        <Ionicons name="search" size={18} color={colors.textSecondary} />
-                        <TextInput
-                            style={[styles.searchInput, { color: colors.text }]}
-                            placeholder={t.searchSellers || 'Search sellers...'}
-                            placeholderTextColor={colors.textSecondary}
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                        />
-                    </View>
-
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.radiusContainer}>
-                        {[5000, 10000, 25000, 50000].map((r) => (
-                            <TouchableOpacity
-                                key={`radius-${r}`}
-                                style={[
-                                    styles.radiusChip,
-                                    radius === r && { backgroundColor: colors.primary }
-                                ]}
-                                onPress={() => setRadius(r)}
-                            >
-                                <Text style={[
-                                    styles.radiusText,
-                                    { color: radius === r ? '#fff' : colors.text }
-                                ]}>
-                                    {(r / 1000)}km
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-
-                {/* Sellers List */}
-                <FlatList
-                    data={sortedSellers}
-                    renderItem={renderSeller}
-                    keyExtractor={(item, index) => getSellerId(item) || `seller-${index}`}
-                    contentContainerStyle={styles.list}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={
-                        <View style={styles.emptyContainer}>
-                            <Ionicons name="storefront-outline" size={48} color={colors.textSecondary} />
-                            <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>
-                                {t.noNearbySellers || 'No sellers found nearby'}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.radiusContainer}>
+                    {[5000, 10000, 25000, 50000].map((r) => (
+                        <TouchableOpacity
+                            key={`radius-${r}`}
+                            style={[
+                                styles.radiusChip,
+                                radius === r && { backgroundColor: colors.primary }
+                            ]}
+                            onPress={() => setRadius(r)}
+                        >
+                            <Text style={[
+                                styles.radiusText,
+                                { color: radius === r ? '#fff' : colors.text }
+                            ]}>
+                                {(r / 1000)}km
                             </Text>
-                            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                                {t.expandRadius || 'Try expanding the search radius'}
-                            </Text>
-                        </View>
-                    }
-                />
-            </Animated.View>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </View>
         </View>
     );
 }
@@ -995,6 +1079,93 @@ const styles = StyleSheet.create({
         elevation: 8,
         overflow: 'hidden',
     },
+    selectedSellerCard: {
+        position: 'absolute',
+        bottom: 24,
+        left: 16,
+        right: 16,
+        backgroundColor: '#ffffff',
+        borderRadius: 16,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 10,
+        zIndex: 100,
+    },
+    selectedSellerHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 16,
+    },
+    selectedSellerInfo: {
+        flex: 1,
+        marginRight: 12,
+    },
+    selectedSellerName: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#1f2937',
+        marginBottom: 6,
+    },
+    selectedSellerMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    selectedSellerRating: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#4b5563',
+        marginLeft: 4,
+    },
+    selectedSellerDot: {
+        fontSize: 14,
+        color: '#9ca3af',
+        marginHorizontal: 8,
+    },
+    selectedSellerDistance: {
+        fontSize: 14,
+        color: '#6b7280',
+    },
+    selectedSellerClose: {
+        padding: 4,
+        backgroundColor: '#f3f4f6',
+        borderRadius: 20,
+    },
+    selectedSellerActions: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    selectedSellerBtnSecondary: {
+        flex: 1,
+        paddingVertical: 12,
+        backgroundColor: '#f3f4f6',
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    selectedSellerBtnSecondaryText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#4b5563',
+    },
+    selectedSellerBtnPrimary: {
+        flex: 1,
+        flexDirection: 'row',
+        paddingVertical: 12,
+        backgroundColor: '#14b8a6', // App primary color
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+    },
+    selectedSellerBtnPrimaryText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#ffffff',
+    },
     dropdownScroll: {
         maxHeight: 250,
     },
@@ -1065,33 +1236,33 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     searchSection: {
-        padding: 12,
+        padding: 8,
         borderBottomWidth: 1,
     },
     searchBox: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderRadius: 12,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
     },
     searchInput: {
         flex: 1,
         marginLeft: 8,
-        fontSize: 15,
+        fontSize: 14,
     },
     radiusContainer: {
-        marginTop: 10,
+        marginTop: 4,
     },
     radiusChip: {
-        paddingHorizontal: 16,
-        paddingVertical: 6,
-        borderRadius: 20,
-        marginRight: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 16,
+        marginRight: 6,
         backgroundColor: 'rgba(0,0,0,0.05)',
     },
     radiusText: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '600',
     },
     list: {

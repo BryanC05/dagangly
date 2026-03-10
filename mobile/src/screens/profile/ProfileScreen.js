@@ -51,7 +51,7 @@ export default function ProfileScreen({ navigation, route }) {
     const { isDriverMode, stats, initDriverMode, toggleDriverMode } = useDriverStore();
     const unreadNotifCount = useNotificationStore((s) => s.unreadCount);
     const { colors } = useTheme();
-    
+
     // Determine if viewing own profile or another user's profile
     const isOwnProfile = !viewingUserId || viewingUserId === user?._id;
     const [viewedUser, setViewedUser] = useState(null);
@@ -282,6 +282,7 @@ export default function ProfileScreen({ navigation, route }) {
         : null;
 
     const menuItems = useMemo(() => [
+        { icon: 'cart-outline', label: t.cart || 'Cart', onPress: () => navigation.navigate('Cart'), color: '#3b82f6' },
         { icon: 'chatbubbles-outline', label: t.messages || 'Messages', onPress: () => navigation.navigate('Messages'), color: '#0ea5e9' },
         { icon: 'notifications-outline', label: t.notifications || 'Notifications', onPress: () => navigation.navigate('Notifications'), color: '#f43f5e', badge: unreadNotifCount > 0 ? (unreadNotifCount > 9 ? '9+' : String(unreadNotifCount)) : null },
         { icon: 'heart-outline', label: t.savedProducts || 'Saved Products', onPress: () => navigation.navigate('Wishlist'), color: '#ef4444' },
@@ -341,7 +342,7 @@ export default function ProfileScreen({ navigation, route }) {
                         {displayUser?.businessName && (
                             <Text style={styles.businessName}>{displayUser.businessName}</Text>
                         )}
-                        
+
                         {/* Social Links */}
                         {socialLinks.length > 0 && (
                             <View style={styles.socialIconsRow}>
@@ -358,7 +359,7 @@ export default function ProfileScreen({ navigation, route }) {
                                     );
                                 })}
                                 {isOwnProfile && (
-                                    <TouchableOpacity 
+                                    <TouchableOpacity
                                         style={[styles.socialIconBtn, { backgroundColor: colors.input }]}
                                         onPress={() => navigation.navigate('SocialLinks')}
                                     >
@@ -367,9 +368,9 @@ export default function ProfileScreen({ navigation, route }) {
                                 )}
                             </View>
                         )}
-                        
+
                         {isOwnProfile && socialLinks.length === 0 && (
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={styles.addSocialLinksBtn}
                                 onPress={() => navigation.navigate('SocialLinks')}
                             >

@@ -97,7 +97,7 @@ export default function WishlistScreen({ navigation }) {
                     <Text style={styles.emptyText}>Browse and save products you love!</Text>
                     <TouchableOpacity
                         style={styles.browseBtn}
-                        onPress={() => navigation.navigate('HomeTab')}
+                        onPress={() => navigation.navigate('Home')}
                     >
                         <Text style={styles.browseBtnText}>Browse Products</Text>
                     </TouchableOpacity>

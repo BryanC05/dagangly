@@ -210,6 +210,7 @@ func main() {
 			chat.POST("/rooms", chatHandler.CreateChatRoom)
 			chat.POST("/rooms/direct", chatHandler.CreateDirectChatRoom)
 			chat.GET("/rooms", chatHandler.GetChatRooms)
+			chat.DELETE("/rooms/:roomId", chatHandler.HideChatRoom)
 			chat.GET("/rooms/direct/my-stores", chatHandler.GetMyStores)
 			chat.GET("/rooms/direct/my-customers", chatHandler.GetMyCustomers)
 			chat.GET("/rooms/:roomId/messages", chatHandler.GetMessages)

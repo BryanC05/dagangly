@@ -19,20 +19,20 @@ const { width } = Dimensions.get('window');
 
 function parseMarkdown(text, textColor, fallbackColor) {
     if (!text) return [];
-    
+
     const paragraphs = text.split(/\n\n+/);
-    
+
     return paragraphs.map((paragraph, pIndex) => {
         const parts = [];
         let remaining = paragraph;
         let keyIndex = 0;
-        
+
         while (remaining) {
             const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
             const italicMatch = remaining.match(/^\*(.+?)\*/);
             const boldUnderMatch = remaining.match(/^__(.+?)__/);
             const italicUnderMatch = remaining.match(/^_(.+?)_/);
-            
+
             if (boldMatch) {
                 parts.push(<Text key={`${pIndex}-${keyIndex++}`} style={{ fontWeight: '700' }}>{boldMatch[1]}</Text>);
                 remaining = remaining.slice(boldMatch[0].length);
@@ -59,7 +59,7 @@ function parseMarkdown(text, textColor, fallbackColor) {
                 }
             }
         }
-        
+
         return <Text key={pIndex} style={{ fontSize: 14, lineHeight: 22, color: textColor || fallbackColor || '#64748b', marginBottom: 12 }}>{parts}</Text>;
     });
 }
@@ -254,9 +254,15 @@ export default function ProductDetailScreen({ route }) {
             Alert.alert(t.loginRequired || 'Login Required', t.loginRequiredChat || 'Please login to chat with seller');
             return;
         }
-        navigation.navigate('ProfileTab', {
+        const sellerName = product.business?.name || product.seller?.businessName || product.seller?.name;
+        navigation.navigate('Messages', {
             screen: 'Chat',
-            params: { sellerId: product.seller._id, productName: product.name, productId: product._id },
+            params: { 
+                sellerId: product.seller._id, 
+                productName: product.name, 
+                productId: product._id,
+                otherUser: { _id: product.seller._id, name: sellerName }
+            },
         });
     };
 
@@ -273,14 +279,14 @@ export default function ProductDetailScreen({ route }) {
         dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.5)' },
         dotActive: { backgroundColor: '#fff', width: 20 },
         backBtn: {
-            position: 'absolute', 
-            top: 50, 
+            position: 'absolute',
+            top: 50,
             left: 16,
-            width: 38, 
-            height: 38, 
+            width: 38,
+            height: 38,
             borderRadius: 12,
             backgroundColor: colors.card,
-            justifyContent: 'center', 
+            justifyContent: 'center',
             alignItems: 'center',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 2 },
@@ -289,52 +295,52 @@ export default function ProductDetailScreen({ route }) {
             elevation: 3,
         },
         infoContainer: { padding: 20 },
-        name: { 
-            fontSize: 22, 
-            fontWeight: '800', 
-            color: colors.text, 
-            lineHeight: 28, 
+        name: {
+            fontSize: 22,
+            fontWeight: '800',
+            color: colors.text,
+            lineHeight: 28,
             marginBottom: 8,
             letterSpacing: 0.3,
         },
-        price: { 
-            fontSize: 24, 
-            fontWeight: '700', 
-            color: colors.primary, 
+        price: {
+            fontSize: 24,
+            fontWeight: '700',
+            color: colors.primary,
             marginBottom: 12,
         },
         badge: {
-            alignSelf: 'flex-start', 
+            alignSelf: 'flex-start',
             backgroundColor: colors.primary + '15',
-            paddingHorizontal: 12, 
-            paddingVertical: 6, 
-            borderRadius: 8, 
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 8,
             marginBottom: 16,
             borderWidth: 1,
             borderColor: colors.primary + '30',
         },
-        badgeText: { 
-            fontSize: 12, 
-            color: colors.primary, 
-            fontWeight: '600' 
+        badgeText: {
+            fontSize: 12,
+            color: colors.primary,
+            fontWeight: '600'
         },
         sellerCard: {
-            flexDirection: 'row', 
-            alignItems: 'center', 
+            flexDirection: 'row',
+            alignItems: 'center',
             padding: 14,
-            backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc', 
-            borderRadius: 12, 
-            marginBottom: 20, 
+            backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc',
+            borderRadius: 12,
+            marginBottom: 20,
             gap: 12,
             borderWidth: 1,
             borderColor: colors.border,
         },
         sellerAvatar: {
-            width: 44, 
-            height: 44, 
+            width: 44,
+            height: 44,
             borderRadius: 12,
             backgroundColor: colors.primary + '15',
-            justifyContent: 'center', 
+            justifyContent: 'center',
             alignItems: 'center',
         },
         sellerName: { fontSize: 14, fontWeight: '700', color: colors.text },
@@ -354,10 +360,10 @@ export default function ProductDetailScreen({ route }) {
         },
         mapBtnText: { fontSize: 14, fontWeight: '600', color: colors.primary },
         section: { marginBottom: 20 },
-        sectionTitle: { 
-            fontSize: 16, 
-            fontWeight: '700', 
-            color: colors.text, 
+        sectionTitle: {
+            fontSize: 16,
+            fontWeight: '700',
+            color: colors.text,
             marginBottom: 12,
             letterSpacing: 0.3,
         },
@@ -369,42 +375,42 @@ export default function ProductDetailScreen({ route }) {
         quantityRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
         quantityLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
         quantityStepper: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-        stepperBtn: { 
-            width: 36, 
-            height: 36, 
-            borderRadius: 10, 
-            backgroundColor: isDarkMode ? '#1e293b' : '#f1f5f9', 
-            justifyContent: 'center', 
+        stepperBtn: {
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            backgroundColor: isDarkMode ? '#1e293b' : '#f1f5f9',
+            justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 1,
             borderColor: colors.border,
         },
         quantityValue: { fontSize: 16, fontWeight: '700', color: colors.text },
         bottomBar: {
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            padding: 16, 
-            paddingBottom: 32, 
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 16,
+            paddingBottom: 90, // Increased to safely clear the floating bottom navbar
             gap: 12,
             backgroundColor: colors.card,
             borderTopWidth: 1,
             borderTopColor: colors.border,
         },
         chatBtn: {
-            width: 50, 
-            height: 50, 
-            borderRadius: 12, 
-            backgroundColor: colors.primary + '15', 
-            justifyContent: 'center', 
+            width: 50,
+            height: 50,
+            borderRadius: 12,
+            backgroundColor: colors.primary + '15',
+            justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 1,
             borderColor: colors.primary + '30',
         },
-        addToCartBtn: { 
-            flex: 1, 
-            paddingVertical: 14, 
-            borderRadius: 10, 
-            backgroundColor: colors.primary, 
+        addToCartBtn: {
+            flex: 1,
+            paddingVertical: 14,
+            borderRadius: 10,
+            backgroundColor: colors.primary,
             alignItems: 'center',
             flexDirection: 'row',
             justifyContent: 'center',
@@ -415,9 +421,9 @@ export default function ProductDetailScreen({ route }) {
             shadowRadius: 8,
             elevation: 4,
         },
-        addToCartText: { 
-            color: '#fff', 
-            fontWeight: '700', 
+        addToCartText: {
+            color: '#fff',
+            fontWeight: '700',
             fontSize: 15,
         },
         btnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
@@ -513,16 +519,22 @@ export default function ProductDetailScreen({ route }) {
                     </TouchableOpacity>
 
                     {/* View on Map Button */}
-                    {product.location?.coordinates && (
+                    {(product.location?.coordinates || product.seller?.location) && (
                         <TouchableOpacity
                             style={styles.mapBtn}
-                            onPress={() => navigation.navigate('MapView', {
-                                location: product.location,
-                                title: product.name,
-                                subtitle: product.seller?.businessName
+                            onPress={() => navigation.navigate('NearbySellers', {
+                                targetSeller: {
+                                    _id: product.seller?._id,
+                                    name: product.seller?.name,
+                                    businessName: product.seller?.businessName || product.business?.name,
+                                    location: product.seller?.location || {
+                                        coordinates: product.location?.coordinates,
+                                        city: product.business?.city || product.seller?.location?.city,
+                                    },
+                                },
                             })}
                         >
-                            <Ionicons name="map" size={18} color={colors.primary} />
+                            <Ionicons name="navigate" size={18} color={colors.primary} style={{ marginRight: 6 }} />
                             <Text style={styles.mapBtnText}>{t.viewMap || 'View on Map'}</Text>
                         </TouchableOpacity>
                     )}
@@ -530,8 +542,8 @@ export default function ProductDetailScreen({ route }) {
                     {/* Description */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t.description || 'Deskripsi'}</Text>
-                        <ScrollView 
-                            style={{ maxHeight: 200 }} 
+                        <ScrollView
+                            style={{ maxHeight: 200 }}
                             showsVerticalScrollIndicator={true}
                             nestedScrollEnabled={true}
                         >

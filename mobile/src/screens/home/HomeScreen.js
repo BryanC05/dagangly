@@ -33,7 +33,7 @@ export default function HomeScreen({ navigation }) {
     const [nearbyLoading, setNearbyLoading] = useState(true);
     const [userLocation, setUserLocation] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    
+
     // Collapsible sections state
     const [collapsedSections, setCollapsedSections] = useState({
         nearby: false,
@@ -54,7 +54,7 @@ export default function HomeScreen({ navigation }) {
 
     const fetchData = useCallback(async () => {
         let coords = userLocation;
-        
+
         if (!coords) {
             try {
                 const { status } = await Location.requestForegroundPermissionsAsync();
@@ -70,13 +70,13 @@ export default function HomeScreen({ navigation }) {
                 console.log('Location error:', error);
             }
         }
-        
+
         if (!coords) {
             coords = { latitude: DEFAULT_LOCATION.Bekasi.lat, longitude: DEFAULT_LOCATION.Bekasi.lng };
         }
-        
+
         try {
-            
+
             const [productsRes, forumRes, countsRes, sellersRes, nearbyRes] = await Promise.allSettled([
                 api.get('/products?limit=6&sort=newest'),
                 api.get('/forum?limit=3'),
@@ -165,19 +165,19 @@ export default function HomeScreen({ navigation }) {
             fontWeight: '600',
             letterSpacing: 0.5,
         },
-        heroTitle: { 
-            fontSize: 32, 
-            fontWeight: '800', 
-            color: colors.text, 
-            lineHeight: 40, 
+        heroTitle: {
+            fontSize: 32,
+            fontWeight: '800',
+            color: colors.text,
+            lineHeight: 40,
             marginBottom: 8,
             textAlign: 'center',
         },
         heroHighlight: { color: colors.primary },
-        heroSubtitle: { 
-            fontSize: 15, 
-            color: colors.textSecondary, 
-            lineHeight: 22, 
+        heroSubtitle: {
+            fontSize: 15,
+            color: colors.textSecondary,
+            lineHeight: 22,
             marginBottom: 20,
             textAlign: 'center',
             maxWidth: '90%',
@@ -355,15 +355,15 @@ export default function HomeScreen({ navigation }) {
             alignItems: 'center',
             marginBottom: 16,
         },
-        sectionTitle: { 
-            fontSize: 20, 
-            fontWeight: '700', 
+        sectionTitle: {
+            fontSize: 20,
+            fontWeight: '700',
             color: colors.text,
             letterSpacing: 0.3,
         },
-        seeAll: { 
-            fontSize: 13, 
-            color: colors.primary, 
+        seeAll: {
+            fontSize: 13,
+            color: colors.primary,
             fontWeight: '600',
             flexDirection: 'row',
             alignItems: 'center',
@@ -383,23 +383,23 @@ export default function HomeScreen({ navigation }) {
             shadowRadius: 4,
             elevation: 2,
         },
-        catName: { 
-            fontSize: 11, 
-            fontWeight: '600', 
-            color: colors.text, 
-            textAlign: 'center', 
+        catName: {
+            fontSize: 11,
+            fontWeight: '600',
+            color: colors.text,
+            textAlign: 'center',
             marginTop: 6,
         },
-        catCount: { 
-            fontSize: 10, 
-            color: colors.textSecondary, 
-            marginTop: 2, 
+        catCount: {
+            fontSize: 10,
+            color: colors.textSecondary,
+            marginTop: 2,
         },
         catIcon: { fontSize: 28 },
         productsSection: { marginBottom: 24 },
         productScroll: { paddingHorizontal: 16 },
-        nearbySection: { 
-            marginBottom: 24, 
+        nearbySection: {
+            marginBottom: 24,
             paddingHorizontal: 20,
         },
         nearbyCard: {
@@ -453,8 +453,8 @@ export default function HomeScreen({ navigation }) {
             fontWeight: '600',
             fontSize: 14,
         },
-        ctaSection: { 
-            marginBottom: 32, 
+        ctaSection: {
+            marginBottom: 32,
             paddingHorizontal: 20,
         },
         ctaCard: {
@@ -516,12 +516,12 @@ export default function HomeScreen({ navigation }) {
                     <View style={styles.heroBadgeDot} />
                     <Text style={styles.heroBadgeText}>{t('heroBadge')}</Text>
                 </View>
-                
+
                 <Text style={styles.heroTitle}>
                     {t('heroTitle')}{'\n'}
                     <Text style={styles.heroHighlight}>{t('heroHighlight')}</Text>
                 </Text>
-                
+
                 <Text style={styles.heroSubtitle}>
                     {t('heroSubtitle')}
                 </Text>
@@ -552,43 +552,13 @@ export default function HomeScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                {/* Quick Actions Row */}
-                <View style={styles.quickActionsRow}>
-                    <TouchableOpacity 
-                        style={[styles.quickActionBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-                        onPress={() => navigation.navigate('ProductsTab', { screen: 'Products', params: { category: 'all' } })}
-                    >
-                        <Ionicons name="grid-outline" size={20} color={colors.primary} />
-                        <Text style={[styles.quickActionText, { color: colors.text }]}>Categories</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                        style={[styles.quickActionBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-                        onPress={() => navigation.navigate('NearbySellers')}
-                    >
-                        <Ionicons name="location-outline" size={20} color={colors.primary} />
-                        <Text style={[styles.quickActionText, { color: colors.text }]}>Nearby</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                        style={[styles.quickActionBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-                        onPress={() => navigation.navigate('ProductsTab', { screen: 'Products', params: { sort: 'popular' } })}
-                    >
-                        <Ionicons name="star-outline" size={20} color={colors.primary} />
-                        <Text style={[styles.quickActionText, { color: colors.text }]}>Featured</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                        style={[styles.quickActionBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-                        onPress={() => navigation.navigate('ProductsTab', { screen: 'Products', params: { filter: 'discount' } })}
-                    >
-                        <Ionicons name="pricetag-outline" size={20} color={colors.primary} />
-                        <Text style={[styles.quickActionText, { color: colors.text }]}>Deals</Text>
-                    </TouchableOpacity>
-                </View>
+
             </View>
 
             {/* Nearby Sellers Section - Collapsible */}
             <View style={styles.nearbyMapSection}>
-                <TouchableOpacity 
-                    style={styles.collapsibleHeader} 
+                <TouchableOpacity
+                    style={styles.collapsibleHeader}
                     onPress={() => toggleSection('nearby')}
                 >
                     <View style={styles.nearbyMapTitleRow}>
@@ -599,80 +569,80 @@ export default function HomeScreen({ navigation }) {
                         <Text style={styles.collapsibleToggleText}>
                             {collapsedSections.nearby ? t('expand') : t('collapse')}
                         </Text>
-                        <Ionicons 
-                            name={collapsedSections.nearby ? 'chevron-down' : 'chevron-up'} 
-                            size={16} 
-                            color={colors.textSecondary} 
+                        <Ionicons
+                            name={collapsedSections.nearby ? 'chevron-down' : 'chevron-up'}
+                            size={16}
+                            color={colors.textSecondary}
                         />
                     </View>
                 </TouchableOpacity>
-                
+
                 {!collapsedSections.nearby && (
                     <View style={styles.nearbyMapCard}>
-                    <View style={styles.nearbyMapHeader}>
-                        <View>
-                            <Text style={styles.nearbyMapSubtitle}>
-                                {nearbySellers.length} {t('nearbySellersCount')}
-                            </Text>
+                        <View style={styles.nearbyMapHeader}>
+                            <View>
+                                <Text style={styles.nearbyMapSubtitle}>
+                                    {nearbySellers.length} {t('nearbySellersCount')}
+                                </Text>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.nearbyMapBtn}
+                                onPress={() => navigation.navigate('NearbySellers')}
+                            >
+                                <Text style={styles.nearbyMapBtnText}>{t('seeAll')}</Text>
+                                <Ionicons name="arrow-forward" size={12} color={colors.primary} />
+                            </TouchableOpacity>
                         </View>
-                        <TouchableOpacity
-                            style={styles.nearbyMapBtn}
-                            onPress={() => navigation.navigate('NearbySellers')}
-                        >
-                            <Text style={styles.nearbyMapBtnText}>{t('seeAll')}</Text>
-                            <Ionicons name="arrow-forward" size={12} color={colors.primary} />
-                        </TouchableOpacity>
-                    </View>
-                    
-                    {nearbyLoading ? (
-                        <View style={{ padding: 20, alignItems: 'center' }}>
-                            <ActivityIndicator size="small" color={colors.primary} />
-                        </View>
-                    ) : nearbySellers.length > 0 ? (
-                        <ScrollView 
-                            horizontal 
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.nearbySellersRow}
-                        >
-                            {nearbySellers.slice(0, 5).map((seller) => (
-                                <TouchableOpacity
-                                    key={seller._id}
-                                    style={styles.nearbySellerItem}
-                                    onPress={() => navigation.navigate('Home', { 
-                                        screen: 'BusinessDetails', 
-                                        params: { sellerId: seller._id } 
-                                    })}
-                                >
-                                    <View style={styles.nearbySellerIcon}>
-                                        <Ionicons name="storefront" size={20} color={colors.primary} />
-                                    </View>
-                                    <View style={styles.nearbySellerInfo}>
-                                        <Text style={styles.nearbySellerName} numberOfLines={1}>
-                                            {seller.businessName || seller.name}
-                                        </Text>
-                                        <Text style={styles.nearbySellerLocation} numberOfLines={1}>
-                                            {seller.location?.city || t('nearby')}
-                                        </Text>
-                                    </View>
-                                    {seller.distanceKm && (
-                                        <View style={styles.nearbySellerDistance}>
-                                            <Ionicons name="navigate" size={10} color={colors.primary} />
-                                            <Text style={styles.nearbySellerDistanceText}>
-                                                {seller.distanceKm.toFixed(1)} km
+
+                        {nearbyLoading ? (
+                            <View style={{ padding: 20, alignItems: 'center' }}>
+                                <ActivityIndicator size="small" color={colors.primary} />
+                            </View>
+                        ) : nearbySellers.length > 0 ? (
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.nearbySellersRow}
+                            >
+                                {nearbySellers.slice(0, 5).map((seller) => (
+                                    <TouchableOpacity
+                                        key={seller._id}
+                                        style={styles.nearbySellerItem}
+                                        onPress={() => navigation.navigate('Home', {
+                                            screen: 'BusinessDetails',
+                                            params: { sellerId: seller._id }
+                                        })}
+                                    >
+                                        <View style={styles.nearbySellerIcon}>
+                                            <Ionicons name="storefront" size={20} color={colors.primary} />
+                                        </View>
+                                        <View style={styles.nearbySellerInfo}>
+                                            <Text style={styles.nearbySellerName} numberOfLines={1}>
+                                                {seller.businessName || seller.name}
+                                            </Text>
+                                            <Text style={styles.nearbySellerLocation} numberOfLines={1}>
+                                                {seller.location?.city || t('nearby')}
                                             </Text>
                                         </View>
-                                    )}
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    ) : (
-                        <View style={{ padding: 20, alignItems: 'center' }}>
-                            <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
-                                {t('noNearbySellersFound')}
-                            </Text>
-                        </View>
-                    )}
-                </View>
+                                        {seller.distanceKm && (
+                                            <View style={styles.nearbySellerDistance}>
+                                                <Ionicons name="navigate" size={10} color={colors.primary} />
+                                                <Text style={styles.nearbySellerDistanceText}>
+                                                    {seller.distanceKm.toFixed(1)} km
+                                                </Text>
+                                            </View>
+                                        )}
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        ) : (
+                            <View style={{ padding: 20, alignItems: 'center' }}>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
+                                    {t('noNearbySellersFound')}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
                 )}
             </View>
 
@@ -680,7 +650,7 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.categorySection}>
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>{t('categories')}</Text>
-                        <TouchableOpacity onPress={() => navigation.navigate('ProductsTab')}>
+                        <TouchableOpacity onPress={() => navigation.navigate('Products')}>
                             <Text style={styles.seeAll}>{t('seeAllLower')}</Text>
                         </TouchableOpacity>
                     </View>
@@ -706,7 +676,7 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.productsSection}>
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>{t('featuredProducts')}</Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('ProductsTab')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Products')}>
                         <Text style={styles.seeAll}>{t('seeAllLower')}</Text>
                     </TouchableOpacity>
                 </View>

@@ -62,6 +62,7 @@ const CartStack = createNativeStackNavigator();
 const AddStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
 const DeliveryStack = createNativeStackNavigator();
+const MessagesStack = createNativeStackNavigator();
 
 // Wrapper component to add floating cart button to HomeScreen
 function HomeScreenWithCart({ navigation, route }) {
@@ -163,6 +164,11 @@ function ProductsStackNavigator() {
                 component={BusinessDetailsScreen}
                 options={{ headerShown: false }}
             />
+            <ProductsStack.Screen
+                name="NearbySellers"
+                component={NearbySellersScreen}
+                options={{ headerShown: false }}
+            />
         </ProductsStack.Navigator>
     );
 }
@@ -210,15 +216,23 @@ function CartStackNavigator() {
             }}
         >
             <CartStack.Screen
-                name="CartMain"
+                name="CartScreen"
                 component={CartScreen}
-                options={{
-                    title: t.navCart,
+                options={({ navigation }) => ({
+                    title: t.navCart || 'Cart',
                     headerStyle: { backgroundColor: colors.card },
                     headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
                     headerShadowVisible: false,
                     headerTintColor: colors.text,
-                }}
+                    headerLeft: () => (
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={{ paddingHorizontal: 16, marginLeft: -16 }}
+                        >
+                            <Ionicons name="arrow-back" size={24} color={colors.text} />
+                        </TouchableOpacity>
+                    ),
+                })}
             />
         </CartStack.Navigator>
     );
@@ -263,6 +277,49 @@ function DeliveryStackNavigator() {
                 options={{ headerShown: false }}
             />
         </DeliveryStack.Navigator>
+    );
+}
+
+function MessagesStackNavigator() {
+    const { colors } = useThemeStore();
+    const { t, languageVersion } = useLanguageStore();
+    return (
+        <MessagesStack.Navigator
+            screenOptions={{
+                contentStyle: { backgroundColor: colors.background },
+                animation: 'slide_from_right',
+            }}
+        >
+            <MessagesStack.Screen
+                name="MessagesList"
+                component={MessagesScreen}
+                options={({ navigation }) => ({
+                    title: t.navMessages || 'Messages',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                    headerLeft: () => (
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={{ paddingHorizontal: 16, marginLeft: -16 }}
+                        >
+                            <Ionicons name="arrow-back" size={24} color={colors.text} />
+                        </TouchableOpacity>
+                    ),
+                })}
+            />
+            <MessagesStack.Screen
+                name="Chat"
+                component={ChatScreen}
+                options={{
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '600', fontSize: 16, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+        </MessagesStack.Navigator>
     );
 }
 
@@ -427,13 +484,12 @@ function ProfileStackNavigator() {
             <ProfileStack.Screen
                 name="Chat"
                 component={ChatScreen}
-                options={({ route }) => ({
-                    title: route.params?.otherUser?.name || t.navChat,
+                options={{
                     headerStyle: { backgroundColor: colors.card },
                     headerTitleStyle: { fontWeight: '600', fontSize: 16, color: colors.text },
                     headerShadowVisible: false,
                     headerTintColor: colors.text,
-                })}
+                }}
             />
             <ProfileStack.Screen
                 name="AdminMembership"
@@ -473,13 +529,11 @@ function FloatingCartButton({ navigation }) {
     const count = items.reduce((sum, item) => sum + item.quantity, 0);
     const { colors } = useThemeStore();
 
-    if (count === 0) return null;
-
     return (
         <TouchableOpacity
             style={{
                 position: 'absolute',
-                bottom: 20,
+                bottom: 90,
                 right: 20,
                 width: 56,
                 height: 56,
@@ -493,25 +547,27 @@ function FloatingCartButton({ navigation }) {
                 shadowRadius: 8,
                 elevation: 8,
             }}
-            onPress={() => navigation.navigate('Cart', { screen: 'CartMain' })}
+            onPress={() => navigation.navigate('Cart', { screen: 'CartScreen' })}
         >
             <Ionicons name="cart" size={24} color={colors.white} />
-            <View style={{
-                position: 'absolute',
-                top: -4,
-                right: -4,
-                backgroundColor: colors.danger,
-                borderRadius: 10,
-                minWidth: 20,
-                height: 20,
-                justifyContent: 'center',
-                alignItems: 'center',
-                paddingHorizontal: 4,
-            }}>
-                <Text style={{ color: colors.white, fontSize: 10, fontWeight: '700' }}>
-                    {count > 9 ? '9+' : count}
-                </Text>
-            </View>
+            {count > 0 && (
+                <View style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -4,
+                    backgroundColor: colors.danger,
+                    borderRadius: 10,
+                    minWidth: 20,
+                    height: 20,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingHorizontal: 4,
+                }}>
+                    <Text style={{ color: colors.white, fontSize: 10, fontWeight: '700' }}>
+                        {count > 9 ? '9+' : count}
+                    </Text>
+                </View>
+            )}
         </TouchableOpacity>
     );
 }
@@ -535,19 +591,19 @@ function BrowseTabButton({ navigation, isFocused, route }) {
     };
 
     const menuItems = [
-        { 
-            key: 'products', 
-            label: t.tabProducts || 'Products', 
+        {
+            key: 'products',
+            label: t.tabProducts || 'Products',
             icon: 'grid-outline',
             target: 'products',
-            screen: 'Products' 
+            screen: 'Products'
         },
-        { 
-            key: 'projects', 
-            label: t.projects || 'Projects', 
+        {
+            key: 'projects',
+            label: t.projects || 'Projects',
             icon: 'folder-outline',
             target: 'projects',
-            targetTab: 'Projects' 
+            targetTab: 'Projects'
         },
     ];
 
@@ -597,14 +653,14 @@ function BrowseTabButton({ navigation, isFocused, route }) {
                     }
                 }}
             >
-                <Ionicons 
-                    name={getIcon()} 
-                    size={22} 
-                    color={isFocused ? colors.primary : colors.textSecondary} 
+                <Ionicons
+                    name={getIcon()}
+                    size={22}
+                    color={isFocused ? colors.primary : colors.textSecondary}
                 />
-                <Text 
+                <Text
                     style={[
-                        styles.productsTabLabel, 
+                        styles.productsTabLabel,
                         { color: isFocused ? colors.primary : colors.textSecondary }
                     ]}
                     numberOfLines={1}
@@ -619,8 +675,8 @@ function BrowseTabButton({ navigation, isFocused, route }) {
                 animationType="fade"
                 onRequestClose={() => setShowDropdown(false)}
             >
-                <TouchableOpacity 
-                    style={styles.dropdownOverlay} 
+                <TouchableOpacity
+                    style={styles.dropdownOverlay}
                     activeOpacity={1}
                     onPress={() => setShowDropdown(false)}
                 >
@@ -687,14 +743,14 @@ function NotificationListener() {
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
                 wsRef.current.close();
             }
-            
+
             const wsProtocol = API_HOST.startsWith('https') ? 'wss' : 'ws';
             // Remove any trailing slashes and protocol
             const wsHost = API_HOST.replace(/^https?:\/\//, '').replace(/\/+$/, '');
             const wsUrl = `${wsProtocol}://${wsHost}/ws?token=${token}`;
-            
+
             console.log('🔌 [WebSocket] Attempting to connect to:', `${wsProtocol}://${wsHost}/ws`);
-            
+
             // First test if server is reachable
             fetch(`${API_HOST}/api/health`, { method: 'GET' })
                 .then(res => {
@@ -703,10 +759,10 @@ function NotificationListener() {
                 .catch(err => {
                     console.log('❌ [WebSocket] Server not reachable:', err.message);
                 });
-            
+
             try {
                 const ws = new WebSocket(wsUrl);
-                
+
                 // Add connection timeout
                 const connectionTimeout = setTimeout(() => {
                     if (ws.readyState !== WebSocket.OPEN) {
@@ -714,7 +770,7 @@ function NotificationListener() {
                         ws.close();
                     }
                 }, 10000);
-                
+
                 ws.onopen = () => {
                     clearTimeout(connectionTimeout);
                     console.log('🟢 [WebSocket] Connected successfully');
@@ -762,7 +818,7 @@ function NotificationListener() {
                                     console.error('🔔 [Notification] Failed:', err.message, err);
                                 });
                         }
-                        
+
                         // Handle new_order type
                         if (message.type === 'new_order' && message.data) {
                             const title = 'New Order Received!';
@@ -806,7 +862,7 @@ function NotificationListener() {
                     clearInterval(pingRef.current);
                     clearTimeout(connectionTimeout);
                     console.log('🔌 [WebSocket] Closed:', event.code, event.reason);
-                    
+
                     if (wsRef.current === ws) {
                         // Only reconnect if not a normal closure
                         if (event.code !== 1000) {
@@ -823,7 +879,7 @@ function NotificationListener() {
                     console.log('⚠️ [WebSocket] Error - readyState:', ws.readyState);
                     console.log('⚠️ [WebSocket] Error details:', error);
                 };
-                
+
                 wsRef.current = ws;
             } catch (e) {
                 console.error('🔴 [WebSocket] Failed to create:', e);
@@ -860,11 +916,11 @@ function NotificationListener() {
     // Fallback: Poll for notifications every 30 seconds if WebSocket fails
     useEffect(() => {
         if (!isAuthenticated) return;
-        
+
         const pollInterval = setInterval(() => {
             fetchUnreadCount();
         }, 30000);
-        
+
         return () => clearInterval(pollInterval);
     }, [isAuthenticated, fetchUnreadCount]);
 
@@ -930,15 +986,15 @@ const styles = StyleSheet.create({
         borderRadius: 29,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.primary,
-        shadowColor: colors.primary,
+        backgroundColor: '#14b8a6',
+        shadowColor: '#14b8a6',
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.4,
         shadowRadius: 12,
         elevation: 12,
         marginTop: -24,
         borderWidth: 3,
-        borderColor: colors.card,
+        borderColor: '#ffffff',
     },
     fabOverlay: {
         flex: 1,
@@ -970,68 +1026,30 @@ const styles = StyleSheet.create({
 // Floating Action Button Component
 function FloatingActionButton({ navigation }) {
     const { colors } = useThemeStore();
-    const { t } = useLanguageStore();
-    const [showMenu, setShowMenu] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
     const parentNav = useNavigation();
     const nav = navigation || parentNav;
 
-    const menuItems = [
-        { key: 'addProduct', label: t.addProduct || 'Add Product', icon: 'pricetag-outline', screen: 'AddProduct' },
-        { key: 'addProject', label: t.addProject || 'Add Project', icon: 'folder-outline', screen: 'AddProject' },
-    ];
-
-    const handleSelect = (item) => {
-        setShowMenu(false);
+    const handlePress = () => {
         if (nav?.navigate) {
-            nav.navigate('Add', { screen: item.screen, params: { reset: true } });
+            nav.navigate('Add', { screen: 'AddProduct', params: { reset: true } });
         }
     };
 
     return (
-        <>
-            <TouchableOpacity
-                style={[
-                    styles.fabButton, 
-                    { backgroundColor: colors.primary },
-                    { transform: [{ scale: isPressed ? 0.92 : 1 }] }
-                ]}
-                onPress={() => setShowMenu(true)}
-                onPressIn={() => setIsPressed(true)}
-                onPressOut={() => setIsPressed(false)}
-                activeOpacity={0.9}
-            >
-                <Ionicons name="add" size={28} color={colors.card} />
-            </TouchableOpacity>
-
-            <Modal
-                visible={showMenu}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setShowMenu(false)}
-            >
-                <TouchableOpacity 
-                    style={styles.fabOverlay} 
-                    activeOpacity={1}
-                    onPress={() => setShowMenu(false)}
-                >
-                    <View style={[styles.fabMenu, { backgroundColor: colors.card }]}>
-                        {menuItems.map((item) => (
-                            <TouchableOpacity
-                                key={item.key}
-                                style={styles.fabMenuItem}
-                                onPress={() => handleSelect(item)}
-                            >
-                                <Ionicons name={item.icon} size={22} color={colors.primary} />
-                                <Text style={[styles.fabMenuText, { color: colors.text }]}>
-                                    {item.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </TouchableOpacity>
-            </Modal>
-        </>
+        <TouchableOpacity
+            style={[
+                styles.fabButton,
+                { backgroundColor: colors.primary, shadowColor: colors.primary, borderColor: colors.card },
+                { transform: [{ scale: isPressed ? 0.92 : 1 }] }
+            ]}
+            onPress={handlePress}
+            onPressIn={() => setIsPressed(true)}
+            onPressOut={() => setIsPressed(false)}
+            activeOpacity={0.9}
+        >
+            <Ionicons name="add" size={28} color={colors.card} />
+        </TouchableOpacity>
     );
 }
 
@@ -1051,14 +1069,14 @@ export default function AppNavigator() {
                         const currentRoute = state.routes[state.index];
                         const currentScreenName = currentRoute?.state?.routes?.[currentRoute?.state?.index]?.name;
                         const isFocused = tabNavigation.isFocused();
-                        
+
                         // If on Products tab and tapping when already focused, reset to Products
                         if (route.name === 'Products') {
                             if (isFocused && currentScreenName !== 'Products') {
-                                tabNavigation.navigate('Products', { 
-                                    screen: 'Products', 
+                                tabNavigation.navigate('Products', {
+                                    screen: 'Products',
                                     params: { reset: true },
-                                    merge: true 
+                                    merge: true
                                 });
                             } else if (isFocused) {
                                 tabNavigation.navigate('Products', { screen: 'Products', params: { reset: true } });
@@ -1081,6 +1099,7 @@ export default function AppNavigator() {
                             case 'AddProject': iconName = focused ? 'add' : 'add-outline'; break;
                             case 'Delivery': iconName = focused ? 'bicycle' : 'bicycle-outline'; break;
                             case 'Add': iconName = focused ? 'add-circle' : 'add-circle-outline'; break;
+                            case 'Messages': iconName = focused ? 'chatbubbles' : 'chatbubbles-outline'; break;
                             case 'Profile': iconName = focused ? 'person' : 'person-outline'; break;
                             case 'Spacer': iconName = 'ellipse'; break;
                             default: iconName = 'ellipse';
@@ -1112,60 +1131,61 @@ export default function AppNavigator() {
                         shadowOpacity: isDarkMode ? 0.15 : 0.08,
                         shadowRadius: 12,
                         elevation: 8,
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
                     },
                     tabBarItemStyle: {
                         flex: 1,
-                        flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        paddingHorizontal: 4,
                         paddingVertical: 6,
                     },
                     tabBarLabelStyle: {
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: '500',
-                        marginTop: 4,
+                        marginTop: 3,
                     },
                 })}
                 sceneContainerStyle={{ backgroundColor: colors.background }}
             >
-                {/* FAB Button - Center */}
-                <Tab.Screen
-                    name="FAB"
-                    options={{
-                        tabBarLabel: '',
-                        tabBarIcon: ({ focused }) => (
-                            <FloatingActionButton navigation={navigation} />
-                        ),
-                        tabBarButton: () => null,
-                    }}
-                >
-                    {() => null}
-                </Tab.Screen>
                 <Tab.Screen name="Home" component={HomeStackNavigator} options={{ tabBarLabel: t.tabHome }} />
-                <Tab.Screen 
-                    name="Products" 
-                    component={ProductsStackNavigator} 
-                    options={{ 
+                <Tab.Screen
+                    name="Products"
+                    component={ProductsStackNavigator}
+                    options={{
                         tabBarLabel: t.tabProducts,
-                    }} 
+                    }}
                 />
-                {/* Add tab is now accessible via FAB */}
-                <Tab.Screen 
-                    name="Add" 
+                {/* Center FAB - Add Products */}
+                <Tab.Screen
+                    name="Add"
                     component={AddStackNavigator}
                     options={{
                         tabBarLabel: '',
-                        tabBarButton: () => null,
+                        tabBarButton: (props) => (
+                            <View style={[props.style, { justifyContent: 'center', alignItems: 'center' }]}>
+                                <FloatingActionButton navigation={props.navigation} />
+                            </View>
+                        ),
                     }}
                 />
                 <Tab.Screen name="Profile" component={ProfileStackNavigator} options={{ tabBarLabel: t.tabProfile }} />
+                <Tab.Screen
+                    name="Messages"
+                    component={MessagesStackNavigator}
+                    options={{
+                        tabBarLabel: t.tabMessages || 'Messages',
+                    }}
+                />
                 {/* Hidden Cart - not shown in tab bar */}
                 <Tab.Screen
                     name="Cart"
                     component={CartStackNavigator}
                     options={{
                         tabBarLabel: t.tabCart,
+                        tabBarItemStyle: { display: 'none' },
                         tabBarButton: () => null,
                     }}
                 />

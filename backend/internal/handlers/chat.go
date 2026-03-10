@@ -115,9 +115,9 @@ func (h *ChatHandler) CreateDirectChatRoom(c *gin.Context) {
 
 	usersCollection := database.GetDB().Collection("users")
 	var seller models.User
-	err = usersCollection.FindOne(context.Background(), bson.M{"_id": sellerObjID, "isSeller": true}).Decode(&seller)
+	err = usersCollection.FindOne(context.Background(), bson.M{"_id": sellerObjID}).Decode(&seller)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "Store not found"})
+		c.JSON(404, gin.H{"message": "User not found"})
 		return
 	}
 
@@ -165,6 +165,9 @@ func (h *ChatHandler) GetChatRooms(c *gin.Context) {
 			{"seller": userObjID},
 			{"buyer": userObjID},
 		},
+		"hiddenBy": bson.M{
+			"$ne": userObjID,
+		},
 	}
 	if chatType != "" {
 		filter["chatType"] = chatType
@@ -184,6 +187,9 @@ func (h *ChatHandler) GetChatRooms(c *gin.Context) {
 		return
 	}
 
+	usersCollection := database.GetDB().Collection("users")
+	messagesCollection := database.GetDB().Collection("messages")
+
 	var roomsWithUnread []gin.H
 	for _, room := range chatRooms {
 		isRoomSeller := room.Seller == userObjID
@@ -193,13 +199,34 @@ func (h *ChatHandler) GetChatRooms(c *gin.Context) {
 		} else {
 			unreadCount = room.UnreadCount.Buyer
 		}
+
+		// Populate buyer and seller info
+		var buyer models.User
+		var seller models.User
+		usersCollection.FindOne(context.Background(), bson.M{"_id": room.Buyer}).Decode(&buyer)
+		usersCollection.FindOne(context.Background(), bson.M{"_id": room.Seller}).Decode(&seller)
+
+		// Populate lastMessage content
+		var lastMsg models.Message
+		var lastMessageContent interface{}
+		if room.LastMessage != nil {
+			err := messagesCollection.FindOne(context.Background(), bson.M{"_id": *room.LastMessage}).Decode(&lastMsg)
+			if err == nil {
+				lastMessageContent = gin.H{
+					"_id":       lastMsg.ID,
+					"content":   lastMsg.Content,
+					"createdAt": lastMsg.CreatedAt,
+				}
+			}
+		}
+
 		roomsWithUnread = append(roomsWithUnread, gin.H{
 			"_id":         room.ID,
 			"order":       room.Order,
-			"buyer":       room.Buyer,
-			"seller":      room.Seller,
+			"buyer":       gin.H{"_id": buyer.ID, "name": buyer.Name, "businessName": buyer.BusinessName},
+			"seller":      gin.H{"_id": seller.ID, "name": seller.Name, "businessName": seller.BusinessName},
 			"chatType":    room.ChatType,
-			"lastMessage": room.LastMessage,
+			"lastMessage": lastMessageContent,
 			"unreadCount": unreadCount,
 			"createdAt":   room.CreatedAt,
 			"updatedAt":   room.UpdatedAt,
@@ -221,6 +248,9 @@ func (h *ChatHandler) GetMyStores(c *gin.Context) {
 	cursor, err := chatRoomsCollection.Find(context.Background(), bson.M{
 		"buyer":    userObjID,
 		"chatType": "direct",
+		"hiddenBy": bson.M{
+			"$ne": userObjID,
+		},
 	})
 	if err != nil {
 		c.JSON(500, gin.H{"message": err.Error()})
@@ -262,6 +292,9 @@ func (h *ChatHandler) GetMyCustomers(c *gin.Context) {
 	cursor, err := chatRoomsCollection.Find(context.Background(), bson.M{
 		"seller":   userObjID,
 		"chatType": "direct",
+		"hiddenBy": bson.M{
+			"$ne": userObjID,
+		},
 	})
 	if err != nil {
 		c.JSON(500, gin.H{"message": err.Error()})
@@ -289,6 +322,60 @@ func (h *ChatHandler) GetMyCustomers(c *gin.Context) {
 	}
 
 	c.JSON(200, roomsWithUnread)
+}
+
+func (h *ChatHandler) HideChatRoom(c *gin.Context) {
+	userID := c.GetString("userID")
+	roomID := c.Param("roomId")
+
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	roomObjID, err := primitive.ObjectIDFromHex(roomID)
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid room ID"})
+		return
+	}
+
+	chatRoomsCollection := database.GetDB().Collection("chatrooms")
+	var chatRoom models.ChatRoom
+	err = chatRoomsCollection.FindOne(context.Background(), bson.M{"_id": roomObjID}).Decode(&chatRoom)
+	if err != nil {
+		c.JSON(404, gin.H{"message": "Chat room not found"})
+		return
+	}
+
+	// Check if user is part of this chat
+	if chatRoom.Buyer != userObjID && chatRoom.Seller != userObjID {
+		c.JSON(403, gin.H{"message": "Not authorized for this chat"})
+		return
+	}
+
+	// Check if already hidden
+	hiddenBy := chatRoom.HiddenBy
+	if hiddenBy == nil {
+		hiddenBy = []primitive.ObjectID{}
+	}
+	for _, id := range hiddenBy {
+		if id == userObjID {
+			c.JSON(200, gin.H{"message": "Chat already hidden"})
+			return
+		}
+	}
+
+	// Add user to hiddenBy array using $addToSet to avoid duplicates
+	_, err = chatRoomsCollection.UpdateOne(context.Background(), bson.M{"_id": roomObjID}, bson.M{
+		"$addToSet": bson.M{"hiddenBy": userObjID},
+	})
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Failed to hide chat"})
+		return
+	}
+
+	c.JSON(200, gin.H{"message": "Chat hidden successfully"})
 }
 
 func (h *ChatHandler) GetMessages(c *gin.Context) {
@@ -356,9 +443,55 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 	update["updatedAt"] = time.Now()
 	chatRoomsCollection.UpdateOne(context.Background(), bson.M{"_id": roomObjID}, bson.M{"$set": update})
 
-	reversed := make([]models.Message, len(messages))
-	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
-		reversed[i], reversed[j] = messages[j], messages[i]
+	// Populate sender info for each message
+	usersCollection := database.GetDB().Collection("users")
+	type PopulatedMessage struct {
+		ID          primitive.ObjectID  `json:"_id"`
+		ChatRoom    primitive.ObjectID  `json:"chatRoom"`
+		Sender      interface{}         `json:"sender"`
+		Content     string              `json:"content"`
+		MessageType string              `json:"messageType"`
+		Attachments []models.Attachment `json:"attachments"`
+		IsRead      bool                `json:"isRead"`
+		ReadAt      *time.Time          `json:"readAt"`
+		CreatedAt   time.Time           `json:"createdAt"`
+	}
+
+	var populatedMessages []PopulatedMessage
+	for _, msg := range messages {
+		var sender models.User
+		senderErr := usersCollection.FindOne(context.Background(), bson.M{"_id": msg.Sender}).Decode(&sender)
+
+		var senderInfo interface{}
+		if senderErr == nil {
+			// Return both name and businessName for the mobile app
+			senderInfo = gin.H{
+				"_id":          sender.ID,
+				"name":         sender.Name,
+				"businessName": sender.BusinessName,
+			}
+		} else {
+			senderInfo = gin.H{
+				"_id": msg.Sender,
+			}
+		}
+
+		populatedMessages = append(populatedMessages, PopulatedMessage{
+			ID:          msg.ID,
+			ChatRoom:    msg.ChatRoom,
+			Sender:      senderInfo,
+			Content:     msg.Content,
+			MessageType: msg.MessageType,
+			Attachments: msg.Attachments,
+			IsRead:      msg.IsRead,
+			ReadAt:      msg.ReadAt,
+			CreatedAt:   msg.CreatedAt,
+		})
+	}
+
+	reversed := make([]PopulatedMessage, len(populatedMessages))
+	for i, j := 0, len(populatedMessages)-1; i < j; i, j = i+1, j-1 {
+		reversed[i], reversed[j] = populatedMessages[j], populatedMessages[i]
 	}
 
 	if len(reversed) > limit {
@@ -367,7 +500,7 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 	if skip > 0 && len(reversed) > skip {
 		reversed = reversed[skip:]
 	} else if skip > 0 {
-		reversed = []models.Message{}
+		reversed = []PopulatedMessage{}
 	}
 
 	c.JSON(200, reversed)
@@ -447,11 +580,12 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 	}
 	chatRoomsCollection.UpdateOne(context.Background(), bson.M{"_id": roomObjID}, bson.M{"$set": update})
 
-	// Notify the other participant
+	// Get sender info
 	usersCollection := database.GetDB().Collection("users")
 	var sender models.User
 	usersCollection.FindOne(context.Background(), bson.M{"_id": userObjID}).Decode(&sender)
 
+	// Notify the other participant
 	recipientID := chatRoom.Buyer
 	if chatRoom.Buyer == userObjID {
 		recipientID = chatRoom.Seller
@@ -466,7 +600,20 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 		map[string]interface{}{"chatRoomId": roomID},
 	)
 
-	c.JSON(201, message)
+	// Return message with populated sender info
+	response := gin.H{
+		"_id":         message.ID,
+		"chatRoom":    message.ChatRoom,
+		"sender":      gin.H{"_id": sender.ID, "name": sender.Name, "businessName": sender.BusinessName},
+		"content":     message.Content,
+		"messageType": message.MessageType,
+		"attachments": message.Attachments,
+		"isRead":      message.IsRead,
+		"readAt":      message.ReadAt,
+		"createdAt":   message.CreatedAt,
+	}
+
+	c.JSON(201, response)
 }
 
 func (h *ChatHandler) GetUnreadCount(c *gin.Context) {

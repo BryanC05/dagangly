@@ -7,6 +7,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import api from '../../api/api';
 import { getImageUrl, formatPrice } from '../../utils/helpers';
 import { useThemeStore } from '../../store/themeStore';
+import { useAuthStore } from '../../store/authStore';
+import { useTranslation } from '../../hooks/useTranslation';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { BusinessDetailSkeleton } from '../../components/LoadingSkeleton';
 
@@ -15,11 +17,25 @@ export default function BusinessDetailsScreen() {
     const route = useRoute();
     const { sellerId } = route.params;
     const { colors, isDarkMode } = useThemeStore();
+    const { t } = useTranslation();
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
     const [seller, setSeller] = useState(null);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('products');
+
+    const handleChat = () => {
+        if (!isAuthenticated) {
+            Alert.alert(t.loginRequired || 'Login Required', t.loginRequiredChat || 'Please login to chat with seller');
+            return;
+        }
+        const sellerName = seller.businessName || seller.name;
+        navigation.navigate('Messages', {
+            screen: 'Chat',
+            params: { sellerId: seller._id, otherUser: { _id: seller._id, name: sellerName } },
+        });
+    };
 
     useEffect(() => {
         fetchSellerDetails();
@@ -175,9 +191,14 @@ export default function BusinessDetailsScreen() {
                     <Ionicons name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle} numberOfLines={1}>{seller.businessName || seller.name}</Text>
-                <TouchableOpacity style={styles.shareBtn} onPress={handleShareStore}>
-                    <Ionicons name="share-social" size={22} color="#333" />
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <TouchableOpacity style={styles.shareBtn} onPress={handleChat}>
+                        <Ionicons name="chatbubble-outline" size={22} color={colors.primary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.shareBtn} onPress={handleShareStore}>
+                        <Ionicons name="share-social" size={22} color="#333" />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>

@@ -7,15 +7,16 @@ import (
 )
 
 type ChatRoom struct {
-	ID          primitive.ObjectID  `bson:"_id,omitempty" json:"_id"`
-	Order       *primitive.ObjectID `bson:"order" json:"order"`
-	Buyer       primitive.ObjectID  `bson:"buyer" json:"buyer"`
-	Seller      primitive.ObjectID  `bson:"seller" json:"seller"`
-	ChatType    string              `bson:"chatType" json:"chatType"`
-	LastMessage *primitive.ObjectID `bson:"lastMessage" json:"lastMessage"`
-	UnreadCount UnreadCount         `bson:"unreadCount" json:"unreadCount"`
-	CreatedAt   time.Time           `bson:"createdAt" json:"createdAt"`
-	UpdatedAt   time.Time           `bson:"updatedAt" json:"updatedAt"`
+	ID          primitive.ObjectID   `bson:"_id,omitempty" json:"_id"`
+	Order       *primitive.ObjectID  `bson:"order" json:"order"`
+	Buyer       primitive.ObjectID   `bson:"buyer" json:"buyer"`
+	Seller      primitive.ObjectID   `bson:"seller" json:"seller"`
+	ChatType    string               `bson:"chatType" json:"chatType"`
+	LastMessage *primitive.ObjectID  `bson:"lastMessage" json:"lastMessage"`
+	UnreadCount UnreadCount          `bson:"unreadCount" json:"unreadCount"`
+	HiddenBy    []primitive.ObjectID `bson:"hiddenBy" json:"hiddenBy"`
+	CreatedAt   time.Time            `bson:"createdAt" json:"createdAt"`
+	UpdatedAt   time.Time            `bson:"updatedAt" json:"updatedAt"`
 }
 
 type UnreadCount struct {

@@ -15,7 +15,7 @@ import { formatTime } from '../../utils/helpers';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function ChatScreen({ route, navigation }) {
-    const { roomId: initialRoomId, sellerId, otherUser } = route.params || {};
+    const { roomId: initialRoomId, sellerId, otherUser, productName, productId } = route.params || {};
     const { colors } = useThemeStore();
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState('');
@@ -25,35 +25,62 @@ export default function ChatScreen({ route, navigation }) {
     const flatListRef = useRef(null);
     const user = useAuthStore((s) => s.user);
 
-    // Set title
+    // Set title with subtitle
     useEffect(() => {
         navigation.setOptions({
             title: otherUser?.name || 'Chat',
+            headerTitle: () => (
+                <View style={{ alignItems: 'center' }}>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text }}>
+                        {otherUser?.name || 'Chat'}
+                    </Text>
+                    {productName && (
+                        <Text style={{ fontSize: 11, color: colors.textSecondary, marginTop: 1 }}>
+                            {productName}
+                        </Text>
+                    )}
+                </View>
+            ),
         });
-    }, [otherUser, navigation]);
+    }, [otherUser, productName, navigation, colors]);
 
-    // Create or join room
+    // Create room immediately if we have sellerId but no roomId
     useEffect(() => {
-        const initChat = async () => {
-            try {
-                let rid = roomId;
-                if (!rid && sellerId) {
-                    const response = await api.post('/chat/rooms/direct', { sellerId });
-                    rid = response.data._id;
-                    setRoomId(rid);
+        const createRoomIfNeeded = async () => {
+            // Only create room if we don't have one and we have a sellerId
+            if (!roomId && sellerId) {
+                try {
+                    const roomRes = await api.post('/chat/rooms/direct', { sellerId });
+                    if (roomRes.data?._id) {
+                        setRoomId(roomRes.data._id);
+                    }
+                } catch (error) {
+                    console.error('Failed to create chat room:', error);
+                    setLoading(false);
                 }
-                if (rid) {
-                    const msgResponse = await api.get(`/chat/rooms/${rid}/messages`);
-                    setMessages((msgResponse.data || []).reverse());
-                }
-            } catch (error) {
-                console.error('Failed to init chat:', error);
-            } finally {
+            } else if (roomId) {
+                // If we already have a roomId, just set loading to false
                 setLoading(false);
             }
         };
+        createRoomIfNeeded();
+    }, [sellerId, roomId]);
+
+    // Fetch initial messages if we already have a roomId
+    useEffect(() => {
+        const initChat = async () => {
+            if (roomId) {
+                try {
+                    const msgResponse = await api.get(`/chat/rooms/${roomId}/messages`);
+                    setMessages((msgResponse.data || []).reverse());
+                } catch (error) {
+                    console.error('Failed to init chat:', error);
+                }
+            }
+            setLoading(false);
+        };
         initChat();
-    }, [roomId, sellerId]);
+    }, [roomId]);
 
     // Socket.io connection
     useEffect(() => {
@@ -88,10 +115,21 @@ export default function ChatScreen({ route, navigation }) {
     }, [roomId]);
 
     const sendMessage = async () => {
-        if (!message.trim() || !roomId) return;
+        if (!message.trim()) return;
 
         try {
-            const response = await api.post(`/chat/room/${roomId}/message`, {
+            let currentRoomId = roomId;
+
+            // If we don't have a room yet, create one now with the seller
+            if (!currentRoomId && sellerId) {
+                const roomRes = await api.post('/chat/rooms/direct', { sellerId });
+                currentRoomId = roomRes.data._id;
+                setRoomId(currentRoomId);
+            }
+
+            if (!currentRoomId) return; // Still failed to get a room
+
+            const response = await api.post(`/chat/rooms/${currentRoomId}/messages`, {
                 content: message.trim(),
             });
 
@@ -101,7 +139,7 @@ export default function ChatScreen({ route, navigation }) {
             // Emit via socket for real-time delivery
             if (socketRef.current) {
                 socketRef.current.emit('send-message', {
-                    roomId,
+                    roomId: currentRoomId,
                     message: newMsg,
                 });
             }
@@ -112,8 +150,21 @@ export default function ChatScreen({ route, navigation }) {
         }
     };
 
+    const getSenderId = (msg) => {
+        if (!msg.sender) return null;
+        if (typeof msg.sender === 'object' && msg.sender._id) {
+            return msg.sender._id;
+        }
+        if (typeof msg.sender === 'string') {
+            return msg.sender;
+        }
+        return null;
+    };
+
     const renderMessage = ({ item: msg }) => {
-        const isMe = msg.sender?._id === user?.id || msg.sender === user?.id;
+        const senderId = getSenderId(msg);
+        const userId = user?.id;
+        const isMe = senderId === userId || senderId === String(userId);
         return (
             <View style={[styles.msgRow, isMe && styles.msgRowMe]}>
                 <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleOther]}>
@@ -147,7 +198,7 @@ export default function ChatScreen({ route, navigation }) {
         empty: { alignItems: 'center', justifyContent: 'center', paddingTop: 40, transform: [{ scaleY: -1 }] },
         emptyText: { fontSize: 14, color: colors.textTertiary },
         inputBar: {
-            flexDirection: 'row', alignItems: 'flex-end', padding: 12, paddingBottom: 28,
+            flexDirection: 'row', alignItems: 'flex-end', padding: 12, paddingBottom: 90,
             backgroundColor: colors.card, borderTopWidth: 1, borderColor: colors.border, gap: 10,
         },
         textInput: {

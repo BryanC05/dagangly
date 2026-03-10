@@ -1,8 +1,21 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { View, Text } from 'react-native';
-import { useThemeStore } from '../store/themeStore';
+import { useThemeStore, lightColors } from '../store/themeStore';
 
-const ThemeContext = createContext();
+// Provide a safe default so useTheme() never returns undefined
+const defaultTheme = {
+    isDarkMode: false,
+    colors: lightColors,
+    spacing: (n) => n * 4,
+    fonts: {
+        regular: { fontFamily: 'System', fontWeight: '400' },
+        medium: { fontFamily: 'System', fontWeight: '500' },
+        bold: { fontFamily: 'System', fontWeight: '700' },
+        display: { fontFamily: 'System', fontWeight: '700' },
+    },
+};
+
+const ThemeContext = createContext(defaultTheme);
 
 export function useTheme() {
     return useContext(ThemeContext);
@@ -10,7 +23,7 @@ export function useTheme() {
 
 export function ThemeProvider({ children }) {
     const { isDarkMode, colors } = useThemeStore();
-    
+
     const theme = useMemo(() => ({
         isDarkMode,
         colors,
