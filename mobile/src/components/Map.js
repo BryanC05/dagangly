@@ -1,5 +1,5 @@
-import React, { useRef, useImperativeHandle, forwardRef, Component } from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import React, { useRef, useImperativeHandle, forwardRef, Component, useState, useEffect } from 'react';
+import { View, Text, Dimensions, ActivityIndicator } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
 import { tokens } from '../theme/tokens';
 
@@ -21,6 +21,42 @@ try {
     Circle = null;
     Polyline = null;
     PROVIDER_GOOGLE = null;
+}
+
+// Loading timeout fallback
+function MapLoadingFallback({ colors }) {
+    const [showFallback, setShowFallback] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowFallback(true);
+        }, 10000); // Show fallback after 10 seconds
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (!showFallback) {
+        return (
+            <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                    Loading map...
+                </Text>
+            </View>
+        );
+    }
+
+    return (
+        <View style={[styles.fallbackContainer, { backgroundColor: colors.background }]}>
+            <Text style={styles.fallbackIcon}>🗺️</Text>
+            <Text style={[styles.fallbackTitle, { color: colors.text }]}>Map Unavailable</Text>
+            <Text style={[styles.fallbackText, { color: colors.textSecondary }]}>
+                Map is taking too long to load.{'\n'}
+                Please check your Google Maps API key.{'\n'}
+                Seller data is still shown in the list below.
+            </Text>
+        </View>
+    );
 }
 
 // Error boundary to catch runtime map crashes
@@ -45,7 +81,7 @@ class MapErrorBoundary extends Component {
                     <Text style={this.props.fallbackStyles.icon}>🗺️</Text>
                     <Text style={this.props.fallbackStyles.title}>Map Unavailable</Text>
                     <Text style={this.props.fallbackStyles.text}>
-                        Google Maps API key is not configured.{'\n'}
+                        Google Maps failed to load.{'\n'}
                         Seller data is still shown in the list below.
                     </Text>
                 </View>
@@ -93,6 +129,16 @@ const Map = forwardRef(({
             left: 0,
             right: 0,
             bottom: 0,
+        },
+        loadingContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.background,
+        },
+        loadingText: {
+            marginTop: 12,
+            fontSize: tokens.fontSize.sm,
         },
         fallbackContainer: {
             flex: 1,

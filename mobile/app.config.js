@@ -17,7 +17,7 @@ export default {
       bundleIdentifier: "com.msmemarketplace.mobile",
       
       config: {
-        googleMapsApiKey: process.env.GOOGLEMAPS_API_KEY
+        googleMapsApiKey: process.env.GOOGLEMAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY"
       },
       infoPlist: {
         NSLocationWhenInUseUsageDescription: "We need your location to show nearby sellers and products."
@@ -32,7 +32,7 @@ export default {
       package: "com.msmemarketplace.mobile",
       config: {
         googleMaps: {
-          apiKey: process.env.GOOGLEMAPS_API_KEY
+          apiKey: process.env.GOOGLEMAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY"
         }
       },
       permissions: [
@@ -46,7 +46,7 @@ export default {
     },
     extra: {
       eas: {
-        projectId: "034edfa1-ecd5-47df-b050-47725a620224"
+        projectId: "250c925f-4ff5-4b57-853b-44c64bc79328"
       }
     },
     updates: {
