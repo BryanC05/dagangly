@@ -511,7 +511,7 @@ maxLinksReached: 'Maksimal 5 tautan diperbolehkan',
 
 ## Phase 4: Integration ✅ COMPLETED
 1. ✅ Connect backend to n8n webhook
-2. ✅ Support TroliToko account (default) or user's own account
+2. ✅ Support Dagangly account (default) or user's own account
 3. ✅ Toggle state persistence
 
 ---

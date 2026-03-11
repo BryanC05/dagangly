@@ -715,7 +715,7 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.ctaSection}>
                 <View style={styles.ctaCard}>
                     <Text style={styles.ctaTitle}>
-                        {t('startSellingOn')} <Text style={styles.ctaHighlight}>TroliToko</Text>
+                        {t('startSellingOn')} <Text style={styles.ctaHighlight}>Dagangly</Text>
                     </Text>
                     <Text style={styles.ctaDesc}>
                         {t('registerBusinessDesc')}

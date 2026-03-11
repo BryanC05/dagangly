@@ -55,6 +55,6 @@ The issue might be that the image URL from your backend isn't accessible. Can yo
 Look at the webhook payload - what is `productImage` set to?
 
 It should be something like:
-`https://trolitoko.online/uploads/products/filename.jpg`
+`https://dagangly.online/uploads/products/filename.jpg`
 
 If that's blank or invalid, the download will fail.

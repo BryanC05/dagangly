@@ -82,7 +82,7 @@ const Footer = () => {
 
         <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} TroliToko. All rights reserved.
+            © {new Date().getFullYear()} Dagangly. All rights reserved.
           </p>
           <div className="flex items-center gap-1">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-glow" />

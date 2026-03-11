@@ -165,14 +165,14 @@ const InstagramConnect = () => {
                   <input
                     type="radio"
                     name="preference"
-                    checked={igPreference.preference === 'trolitoko'}
-                    onChange={() => handlePreferenceChange('trolitoko')}
+                    checked={igPreference.preference === 'dagangly'}
+                    onChange={() => handlePreferenceChange('dagangly')}
                     className="h-4 w-4"
                   />
                   <div>
-                    <p className="font-medium">TroliToko Official</p>
+                    <p className="font-medium">Dagangly Official</p>
                     <p className="text-xs text-muted-foreground">
-                      Products will be posted on TroliToko Instagram
+                      Products will be posted on Dagangly Instagram
                     </p>
                   </div>
                 </div>

@@ -227,13 +227,13 @@ npm run seed:food
 This will create 3 test seller accounts and 2 buyer accounts in the Bekasi area:
 
 **Seller Accounts:**
-- Dapur Summarecon (email: seller.summarecon@trolitoko.test, password: test123)
-- BINUS Student Kitchen (email: seller.binusbekasi@trolitoko.test, password: test123)
-- Warung Harapan Indah (email: seller.harapanindah@trolitoko.test, password: test123)
+- Dapur Summarecon (email: seller.summarecon@dagangly.test, password: test123)
+- BINUS Student Kitchen (email: seller.binusbekasi@dagangly.test, password: test123)
+- Warung Harapan Indah (email: seller.harapanindah@dagangly.test, password: test123)
 
 **Buyer Accounts:**
-- Budi Test Nearby (email: buyer.nearby1@trolitoko.test, password: test123)
-- Nadia Test Nearby (email: buyer.nearby2@trolitoko.test, password: test123)
+- Budi Test Nearby (email: buyer.nearby1@dagangly.test, password: test123)
+- Nadia Test Nearby (email: buyer.nearby2@dagangly.test, password: test123)
 
 ### Frontend Setup
 

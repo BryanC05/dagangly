@@ -19,7 +19,7 @@ export default function InstagramScreen({ navigation }) {
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [connecting, setConnecting] = useState(false);
-    const [preference, setPreference] = useState({ preference: 'trolitoko', hasOwnAccount: false });
+    const [preference, setPreference] = useState({ preference: 'dagangly', hasOwnAccount: false });
     const [preferenceLoading, setPreferenceLoading] = useState(false);
 
     useEffect(() => {
@@ -46,7 +46,7 @@ export default function InstagramScreen({ navigation }) {
             setPreference(response.data);
         } catch (error) {
             console.error('Failed to fetch preference:', error);
-            setPreference({ preference: 'trolitoko', hasOwnAccount: false });
+            setPreference({ preference: 'dagangly', hasOwnAccount: false });
         }
     };
 
@@ -286,18 +286,18 @@ export default function InstagramScreen({ navigation }) {
                     <View style={styles.preferenceCard}>
                         <TouchableOpacity 
                             style={[styles.preferenceOption, styles.preferenceOptionLast]}
-                            onPress={() => !preferenceLoading && handlePreferenceChange('trolitoko')}
+                            onPress={() => !preferenceLoading && handlePreferenceChange('dagangly')}
                             disabled={preferenceLoading}
                         >
                             <View style={styles.preferenceInfo}>
-                                <Text style={styles.preferenceLabel}>TroliToko Official</Text>
-                                <Text style={styles.preferenceDesc}>Products will be posted on TroliToko's Instagram</Text>
+                                <Text style={styles.preferenceLabel}>Dagangly Official</Text>
+                                <Text style={styles.preferenceDesc}>Products will be posted on Dagangly's Instagram</Text>
                             </View>
                             <View style={[
                                 styles.preferenceRadio,
-                                preference.preference === 'trolitoko' && styles.preferenceRadioSelected
+                                preference.preference === 'dagangly' && styles.preferenceRadioSelected
                             ]}>
-                                {preference.preference === 'trolitoko' && (
+                                {preference.preference === 'dagangly' && (
                                     <View style={styles.preferenceRadioInner} />
                                 )}
                             </View>

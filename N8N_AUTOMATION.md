@@ -150,7 +150,7 @@ The backend `webhooks.go` strictly validates `isActive: true` against the `selle
    - Check the backend console logs. Look for `[Webhook] Central webhook omitted: N8N_WEBHOOK_URL not set`.
    - Ensure the `.env` variable exactly matches the n8n Production Webhook URL.
 2. **Emails sending to fake accounts:**
-   - If you are simulation testing using dummy accounts (e.g., `buyer.nearby@trolitoko.test`), n8n will attempt to send real emails to `.test` domains. Use real Gmail accounts for testing.
+   - If you are simulation testing using dummy accounts (e.g., `buyer.nearby@dagangly.test`), n8n will attempt to send real emails to `.test` domains. Use real Gmail accounts for testing.
 3. **Instagram Auto-Post not appearing:**
    - Ensure the `IG_ACCESS_TOKEN` and `IG_ACCOUNT_ID` are set in the backend `.env`.
    - The toggle is located in the "Add New Product" page, just above the Submit button.

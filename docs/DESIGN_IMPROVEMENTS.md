@@ -1,8 +1,8 @@
-# UI/UX Design Improvement Ideas for TroliToko Marketplace
+# UI/UX Design Improvement Ideas for Dagangly Marketplace
 
 ## Overview
 
-This document outlines design improvement ideas for the TroliToko mobile app to enhance navigation, structure, usability, and visual appeal. The recommendations are based on analysis of the current codebase and modern mobile design best practices.
+This document outlines design improvement ideas for the Dagangly mobile app to enhance navigation, structure, usability, and visual appeal. The recommendations are based on analysis of the current codebase and modern mobile design best practices.
 
 ---
 
@@ -236,7 +236,7 @@ shadow: 0 2px 8px rgba(0,0,0,0.08)
 Customize the pull-to-refresh with branded animation.
 
 **Ideas:**
-- TroliToko logo animation
+- Dagangly logo animation
 - Shopping bag icon with items
 -印尼国旗 colors (red/white)
 
@@ -497,7 +497,7 @@ Before launching improvements:
 
 ## Conclusion
 
-These design improvements will significantly enhance the TroliToko user experience by:
+These design improvements will significantly enhance the Dagangly user experience by:
 
 - **Easier Navigation** - FAB, gestures, animated tabs
 - **Tidier Structure** - Collapsible sections, unified cards
@@ -510,4 +510,4 @@ Start with Phase 1 improvements for maximum impact with reasonable effort.
 
 *Document Version: 1.0*
 *Last Updated: March 2026*
-*Project: TroliToko Marketplace*
+*Project: Dagangly Marketplace*

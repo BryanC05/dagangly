@@ -763,11 +763,11 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 
 	preference := updatedUser.InstagramPostPreference
 	if preference == "" {
-		preference = "trolitoko" // Default to TroliToko account
+		preference = "dagangly" // Default to Dagangly account
 	}
 
 	// Build webhook payload
-	productLink := fmt.Sprintf("https://trolitoko.app/product/%s", product.ID.Hex())
+	productLink := fmt.Sprintf("https://dagangly.app/product/%s", product.ID.Hex())
 
 	// Ensure caption is never the literal string "empty" or completely blank
 	finalCaption := strings.TrimSpace(caption)
@@ -840,7 +840,7 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 		payload["instagramUserID"] = strings.TrimSpace(defaultAccount.InstagramUserID)
 		payload["accessToken"] = strings.TrimSpace(defaultAccount.AccessToken)
 	} else {
-		// Use platform TroliToko account — TrimSpace to remove any trailing newlines from env vars
+		// Use platform Dagangly account — TrimSpace to remove any trailing newlines from env vars
 		payload["instagramUserID"] = strings.TrimSpace(os.Getenv("IG_ACCOUNT_ID"))
 		payload["accessToken"] = strings.TrimSpace(os.Getenv("IG_ACCOUNT_TOKEN"))
 	}

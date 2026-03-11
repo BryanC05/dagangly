@@ -22,7 +22,7 @@ The current Instagram automation includes:
 
 3. **User Model** - `backend/internal/models/user.go`
    - `InstagramAccounts []InstagramAccount`
-   - `InstagramPostPreference` ("trolitoko" or "own")
+   - `InstagramPostPreference` ("dagangly" or "own")
 
 4. **Frontend UI**
    - Instagram connection in settings/profile
@@ -81,7 +81,7 @@ type User struct {
     
     // Facebook Accounts
     FacebookAccounts       []FacebookAccount `bson:"facebookAccounts" json:"facebookAccounts"`
-    FacebookPostPreference string           `bson:"facebookPostPreference" json:"facebookPostPreference"` // "trolitoko" (default) or "own"
+    FacebookPostPreference string           `bson:"facebookPostPreference" json:"facebookPostPreference"` // "dagangly" (default) or "own"
 }
 ```
 
@@ -138,7 +138,7 @@ Key functions to implement:
 - `FacebookStatus()` - Return connected accounts
 - `FacebookDisconnect()` - Remove account
 - `FacebookSetDefault()` - Set default account
-- `FacebookSetPostPreference()` - Set "trolitoko" or "own"
+- `FacebookSetPostPreference()` - Set "dagangly" or "own"
 - `GetFacebookPostPreference()` - Get current preference
 - `triggerFacebookPost()` - Trigger N8N webhook
 
@@ -212,7 +212,7 @@ Add Facebook connection section:
 - Connect Facebook button
 - List connected accounts
 - Set default account
-- Post preference toggle ("Use TroliToko account" vs "Use my account")
+- Post preference toggle ("Use Dagangly account" vs "Use my account")
 
 #### 3.3 Add Product Page Updates
 
@@ -272,11 +272,11 @@ The user will implement the N8N workflow that receives the webhook payload:
   "productImage": "https://...",
   "productLink": "https://...",
   "caption": "Optional caption",
-  "preference": "trolitoko",  // or "own"
+  "preference": "dagangly",  // or "own"
   "facebookUserID": "123456",  // if preference is "own"
   "accessToken": "token...",   // if preference is "own"
-  "troliTokoPageID": "page_id",  // if preference is "trolitoko"
-  "troliTokoAccessToken": "token..."  // if preference is "trolitoko"
+  "daganglyPageID": "page_id",  // if preference is "dagangly"
+  "daganglyAccessToken": "token..."  // if preference is "dagangly"
 }
 ```
 
@@ -285,8 +285,8 @@ The user will implement the N8N workflow that receives the webhook payload:
 1. Receive webhook
 2. If preference is "own":
    - Post to user's connected Facebook/. If preference isInstagram account
-3 "troliToko":
-   - Post to TroliToko official account
+3. If preference is "dagangly":
+   - Post to Dagangly official account
 4. Return success/failure response
 
 ---

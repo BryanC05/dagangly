@@ -63,7 +63,7 @@ export default function AddProductScreen({ navigation }) {
     // Instagram toggle state
     const [postToInstagram, setPostToInstagram] = useState(false);
     const [instagramCaption, setInstagramCaption] = useState('');
-    const [instagramStatus, setInstagramStatus] = useState({ preference: 'trolitoko', hasOwnAccount: false });
+    const [instagramStatus, setInstagramStatus] = useState({ preference: 'dagangly', hasOwnAccount: false });
     const [loadingInstagramStatus, setLoadingInstagramStatus] = useState(false);
     const [isPremium, setIsPremium] = useState(false);
 
@@ -689,8 +689,8 @@ export default function AddProductScreen({ navigation }) {
                                         <Text style={styles.toggleLabel}>{t.postToInstagram || 'Post to Instagram'}</Text>
                                     </View>
                                     <Text style={styles.toggleDesc}>
-                                        {instagramStatus.preference === 'trolitoko' 
-                                            ? 'Will post to TroliToko Instagram' 
+                                        {instagramStatus.preference === 'dagangly' 
+                                            ? 'Will post to Dagangly Instagram' 
                                             : 'Will post to your connected Instagram'}
                                     </Text>
                                 </View>

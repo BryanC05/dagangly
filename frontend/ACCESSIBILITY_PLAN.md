@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Transform TroliToko's web UI to be accessible for users with minimal digital literacy, focusing on **Visual Guidance** and **Simplified Navigation**.
+Transform Dagangly's web UI to be accessible for users with minimal digital literacy, focusing on **Visual Guidance** and **Simplified Navigation**.
 
 ---
 
@@ -117,7 +117,7 @@ Transform TroliToko's web UI to be accessible for users with minimal digital lit
 - [ ] Store completion status in localStorage
 
 **Tour Steps:**
-1. Welcome - "Here's how to shop on TroliToko"
+1. Welcome - "Here's how to shop on Dagangly"
 2. Search - "Find products using this search bar"
 3. Categories - "Browse by category"
 4. Cart - "Add items here to buy"

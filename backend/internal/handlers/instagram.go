@@ -357,7 +357,7 @@ func InstagramSetDefault(c *gin.Context) {
 	})
 }
 
-// InstagramSetPostPreference sets whether to use TroliToko account or user's own account
+// InstagramSetPostPreference sets whether to use Dagangly account or user's own account
 func InstagramSetPostPreference(c *gin.Context) {
 	userID := c.GetString("userID")
 	if userID == "" {
@@ -366,7 +366,7 @@ func InstagramSetPostPreference(c *gin.Context) {
 	}
 
 	var req struct {
-		Preference string `json:"preference"` // "trolitoko" or "own"
+		Preference string `json:"preference"` // "dagangly" or "own"
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
@@ -374,8 +374,8 @@ func InstagramSetPostPreference(c *gin.Context) {
 	}
 
 	// Validate preference
-	if req.Preference != "trolitoko" && req.Preference != "own" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid preference. Must be 'trolitoko' or 'own'"})
+	if req.Preference != "dagangly" && req.Preference != "own" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid preference. Must be 'dagangly' or 'own'"})
 		return
 	}
 
@@ -427,7 +427,7 @@ func InstagramSetPostPreference(c *gin.Context) {
 		return
 	}
 
-	preferenceLabel := "TroliToko Account"
+	preferenceLabel := "Dagangly Account"
 	if req.Preference == "own" {
 		preferenceLabel = "Your Instagram Account"
 	}
@@ -465,19 +465,19 @@ func GetInstagramPostPreference(c *gin.Context) {
 		return
 	}
 
-	// Default to "trolitoko"
+	// Default to "dagangly"
 	preference := user.InstagramPostPreference
 	if preference == "" {
-		preference = "trolitoko"
+		preference = "dagangly"
 	}
 
 	hasOwnAccount := len(user.InstagramAccounts) > 0
 
 	c.JSON(http.StatusOK, gin.H{
-		"preference":     preference,
-		"hasOwnAccount":  hasOwnAccount,
-		"troliTokoLabel": "TroliToko Official Account",
-		"ownLabel":       "Your Connected Instagram",
+		"preference":    preference,
+		"hasOwnAccount": hasOwnAccount,
+		"daganglyLabel": "Dagangly Official Account",
+		"ownLabel":      "Your Connected Instagram",
 	})
 }
 

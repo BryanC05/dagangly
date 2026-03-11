@@ -10,7 +10,7 @@ This feature automates publishing image posts directly to an Instagram Business 
 * **Secure Credential Management:** Utilizes `.env` files to keep Meta Access Tokens and Account IDs out of the source code.
 * **Two-Step API Pipeline:** Automatically handles container creation and asynchronous publishing.
 * **Dual Account Support:**
-  - **Platform Account** - Posts to TroliToko's official Instagram
+  - **Platform Account** - Posts to Dagangly's official Instagram
   - **User's Own Account** - Sellers can connect their personal Instagram Business account
 * **Smart Image Handling:** Supports both external URLs and uploaded product images
 
@@ -107,18 +107,18 @@ The backend sends this payload when a product is created with Instagram posting 
   "productName": "Kue Lapis Legit",
   "productPrice": "Rp 150000",
   "storeName": "Dapur Summarecon",
-  "productLink": "https://trolitoko.app/product/69aa637061b3016de9532c1f",
+  "productLink": "https://dagangly.app/product/69aa637061b3016de9532c1f",
   "productImage": "https://umkm-marketplace-production.up.railway.app/uploads/products/image.png",
   "instagramUserID": "17841443191636686",
   "accessToken": "EA...",
-  "preference": "trolitoko",
+  "preference": "dagangly",
   "caption": "Check out our new product!"
 }
 ```
 
 ## 🔧 How It Works
 
-1. **Seller creates a product** on TroliToko with "Post to Instagram" toggle enabled
+1. **Seller creates a product** on Dagangly with "Post to Instagram" toggle enabled
 2. **Backend processes** the product and extracts:
    - Product image (supports external URLs and uploaded images)
    - Product name, price, store name

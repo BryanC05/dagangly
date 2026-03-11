@@ -30,7 +30,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/">
-          <img src={`${getBackendUrl()}/uploads/TroliTokoLogo.png`} alt="TroliToko" className="logo-image" />
+          <img src={`${getBackendUrl()}/uploads/DaganglyLogo.png`} alt="Dagangly" className="logo-image" />
         </Link>
       </div>
 
