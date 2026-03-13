@@ -246,26 +246,6 @@ export default function HomeScreen({ navigation }) {
             shadowRadius: 8,
             elevation: 4,
         },
-        quickActionsRow: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            paddingHorizontal: 4,
-            marginBottom: 16,
-        },
-        quickActionBtn: {
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingVertical: 12,
-            marginHorizontal: 4,
-            borderRadius: 12,
-            borderWidth: 1,
-        },
-        quickActionText: {
-            fontSize: 11,
-            fontWeight: '600',
-            marginTop: 4,
-        },
         nearbyMapSection: {
             marginBottom: 24,
             paddingHorizontal: 20,
