@@ -17,8 +17,9 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 - Browse seller stores
 - Community forums for discussions
 - Real-time chat with sellers
-- Multi-language support (English/Hindi)
+- Multi-language support (English/Indonesian)
 - Dark/light theme support
+- **User Guide & Tutorials** - In-app help center with step-by-step tutorials for buyers and sellers
 
 ### For Sellers (MSMEs)
 - Register as Micro, Small, or Medium Enterprise
@@ -148,11 +149,14 @@ msme-marketplace/
 │   │   │   ├── ThreadDetail.jsx
 │   │   │   ├── NewThread.jsx
 │   │   │   ├── LogoGenerator.jsx
+│   │   │   ├── Guide.jsx
 │   │   │   └── EditThread.jsx
 │   │   ├── store/
 │   │   ├── hooks/
 │   │   ├── utils/
 │   │   ├── config/
+│   │   ├── data/
+│   │   │   └── guideData.js
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   ├── package.json

@@ -171,6 +171,7 @@ export default {
     sellerMode: 'Mode Penjual',
     logout: 'Keluar',
     logoutConfirm: 'Apakah Anda yakin ingin keluar?',
+    guide: 'Panduan',
     // Seller Menu
     sellerMenu: 'Menu Penjual',
     productTracker: 'Pelacakan Produk',

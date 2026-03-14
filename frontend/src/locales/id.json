@@ -51,7 +51,16 @@
         "help": "Bantuan",
         "language": "Bahasa",
         "darkMode": "Mode Gelap",
-        "lightMode": "Mode Terang"
+        "lightMode": "Mode Terang",
+        "guide": "Panduan"
+    },
+    "guide": {
+        "title": "Pusat Bantuan",
+        "subtitle": "Pelajari cara menggunakan semua fitur",
+        "search": "Cari panduan...",
+        "articles": "artikel",
+        "quickLinks": "Navigasi Cepat",
+        "relatedArticles": "Artikel Terkait"
     },
     "onboarding": {
         "welcome": "Selamat Datang di MARTKU!",

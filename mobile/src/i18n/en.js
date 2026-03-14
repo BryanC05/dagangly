@@ -142,6 +142,7 @@ export default {
     sellerMode: 'Switch to Seller',
     logout: 'Logout',
     logoutConfirm: 'Are you sure you want to logout?',
+    guide: 'Guide',
     // Seller Menu
     sellerMenu: 'Seller Menu',
     productTracker: 'Product Tracker',

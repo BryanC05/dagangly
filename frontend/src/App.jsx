@@ -32,6 +32,7 @@ import TrackingPage from './pages/TrackingPage';
 import AdminMembership from './pages/AdminMembership';
 import Notifications from './pages/Notifications';
 import Invoice from './pages/Invoice';
+import Guide from './pages/Guide';
 import NotFound from './pages/new-ui/NotFound';
 import ScrollToTop from './components/ScrollToTop';
 import { useAuthStore } from './store/authStore';
@@ -103,6 +104,7 @@ function App() {
               <Route path="/admin/membership" element={<AdminMembership />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/invoice/:orderId" element={<Invoice />} />
+              <Route path="/guide" element={<Guide />} />
               <Route path="*" element={<NotFound />} />
             </Route>
             <Route path="/login" element={<Login />} />

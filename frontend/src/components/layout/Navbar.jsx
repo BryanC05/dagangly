@@ -23,6 +23,7 @@ import {
   Zap,
   Crown,
   Folder,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -107,6 +108,7 @@ const Navbar = () => {
     { to: "/products", label: getProductsLabel(), isDropdown: false },
     { to: "/nearby", label: t('nav.nearby') },
     { to: "/forums", label: t('nav.forums') },
+    { to: "/guide", label: t('nav.guide') || 'Guide', icon: BookOpen },
   ];
 
   const accountLinks = [

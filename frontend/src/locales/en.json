@@ -46,7 +46,16 @@
     "help": "Help",
     "language": "Language",
     "darkMode": "Dark Mode",
-    "lightMode": "Light Mode"
+    "lightMode": "Light Mode",
+    "guide": "Guide"
+  },
+  "guide": {
+    "title": "Help Center",
+    "subtitle": "Learn how to use all features",
+    "search": "Search guides...",
+    "articles": "articles",
+    "quickLinks": "Quick Links",
+    "relatedArticles": "Related Articles"
   },
   "onboarding": {
     "welcome": "Welcome to MARTKU!",

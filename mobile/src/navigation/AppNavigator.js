@@ -53,6 +53,7 @@ import SocialLinksScreen from '../screens/profile/SocialLinksScreen';
 import ProjectsScreen from '../screens/projects/ProjectsScreen';
 import AddProjectScreen from '../screens/projects/AddProjectScreen';
 import ProjectDetailScreen from '../screens/projects/ProjectDetailScreen';
+import GuideScreen from '../screens/guide/GuideScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -505,6 +506,11 @@ function ProfileStackNavigator() {
             <ProfileStack.Screen
                 name="Notifications"
                 component={NotificationsScreen}
+                options={{ headerShown: false }}
+            />
+            <ProfileStack.Screen
+                name="Guide"
+                component={GuideScreen}
                 options={{ headerShown: false }}
             />
         </ProfileStack.Navigator>

@@ -292,6 +292,7 @@ export default function ProfileScreen({ navigation, route }) {
         { icon: 'storefront-outline', label: t.sellerDashboard || 'Seller Dashboard', onPress: () => navigation.navigate('SellerDashboard'), color: '#16a34a' },
         { icon: 'chatbubbles-outline', label: t.forum || 'Forum', onPress: () => navigation.navigate('Forum'), color: '#8b5cf6' },
         { icon: 'shield-checkmark-outline', label: t.membershipApprovals || 'Membership Approvals', onPress: () => navigation.navigate('AdminMembership'), color: '#f59e0b' },
+        { icon: 'book-outline', label: t.guide || 'Guide', onPress: () => navigation.navigate('Guide'), color: '#0ea5e9' },
         {
             icon: isDarkMode ? 'moon' : 'moon-outline', label: t.darkMode || 'Dark Mode',
             onPress: toggleTheme, color: '#6366f1', isToggle: true, toggleValue: isDarkMode,
