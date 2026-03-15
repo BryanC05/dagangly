@@ -7,7 +7,6 @@ import {
   ShoppingCart,
   User,
   MapPin,
-  Bell,
   Moon,
   Sun,
   Languages,
@@ -36,10 +35,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore, useCartStore } from "@/store/authStore";
+import { useAuthModalStore } from "@/store/authModalStore";
 import { useThemeStore } from "@/store/themeStore";
 import { useLanguageStore } from "@/store/languageStore";
 import { useTranslation } from "@/hooks/useTranslation";
 import api from "@/utils/api";
+import NotificationBell from "@/components/NotificationBell";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -51,6 +52,7 @@ const Navbar = () => {
 
   const { user, isAuthenticated, logout } = useAuthStore();
   const { getTotalItems } = useCartStore();
+  const { openLogin, openRegister } = useAuthModalStore();
   const { theme, toggleTheme } = useThemeStore();
   const { language, toggleLanguage } = useLanguageStore();
   const { t } = useTranslation();
@@ -205,24 +207,24 @@ const Navbar = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`relative px-3 py-2 text-sm font-medium rounded-sm transition-colors ${isActive(link.to) ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                className={`relative px-3 py-2 text-sm font-medium rounded-sm transition-colors ${isActive(link.to) ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                   }`}
               >
                 {link.label}
-                {isActive(link.to) && <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-primary" />}
               </Link>
             )
           ))}
         </nav>
 
         <div className="flex items-center gap-1 ml-auto">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/notifications">
-              <Bell className="h-5 w-5" />
-            </Link>
-          </Button>
+          <NotificationBell />
 
-          <Button variant="ghost" size="icon" asChild className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            asChild 
+            className={`relative ${isActive('/cart') ? 'text-primary bg-primary/10' : ''}`}
+          >
             <Link to="/cart">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
@@ -255,7 +257,7 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <Button variant="outline" size="sm" asChild>
-                  <Link to="/orders" className="relative">
+                  <Link to="/orders" className={`relative ${isActive('/orders') ? 'border-primary text-primary bg-primary/5' : ''}`}>
                     {t("nav.orders")}
                     {activeOrderCount > 0 && (
                       <span className="ml-1 inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
@@ -340,11 +342,11 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" className="text-foreground hover:text-primary" asChild>
-                  <Link to="/login">{t("nav.login")}</Link>
+                <Button variant="ghost" size="sm" className="text-foreground hover:text-primary" onClick={openLogin}>
+                  {t("nav.login")}
                 </Button>
-                <Button size="sm" className="font-display tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
-                  <Link to="/register">{t("nav.register")}</Link>
+                <Button size="sm" className="font-display tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground" onClick={openRegister}>
+                  {t("nav.register")}
                 </Button>
               </>
             )}
@@ -401,7 +403,11 @@ const Navbar = () => {
                       key={link.to}
                       to={link.to}
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-between px-3 py-3 rounded-sm text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      className={`flex items-center justify-between px-3 py-3 rounded-sm text-sm transition-colors ${
+                        isActive(link.to)
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
                     >
                       <span className="flex items-center gap-3">
                         <link.icon className="h-4 w-4" />
@@ -440,15 +446,11 @@ const Navbar = () => {
                 </Button>
               ) : (
                 <>
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link to="/login" onClick={() => setMobileOpen(false)}>
-                      Masuk
-                    </Link>
+                  <Button variant="outline" className="w-full" onClick={() => { openLogin(); setMobileOpen(false); }}>
+                    Masuk
                   </Button>
-                  <Button className="w-full font-display tracking-wide" asChild>
-                    <Link to="/register" onClick={() => setMobileOpen(false)}>
-                      Daftar
-                    </Link>
+                  <Button className="w-full font-display tracking-wide" onClick={() => { openRegister(); setMobileOpen(false); }}>
+                    Daftar
                   </Button>
                 </>
               )}

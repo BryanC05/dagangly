@@ -9,12 +9,14 @@ import {
     useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeStore } from '../store/themeStore';
-import { useLanguageStore } from '../store/languageStore';
-import { guideCategories } from '../data/guideData';
+import { useNavigation } from '@react-navigation/native';
+import { useThemeStore } from '../../store/themeStore';
+import { useLanguageStore } from '../../store/languageStore';
+import { guideCategories } from '../../data/guideData';
 
 const GuideScreen = () => {
     const { width } = useWindowDimensions();
+    const navigation = useNavigation();
     const { colors, isDarkMode, toggleTheme } = useThemeStore();
     const { language, toggleLanguage } = useLanguageStore();
     
@@ -175,12 +177,16 @@ const GuideScreen = () => {
             {/* Header */}
             <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
                 <View style={styles.headerTop}>
-                    {(selectedCategory || selectedArticle) && (
-                        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color={colors.text} />
-                        </TouchableOpacity>
-                    )}
-                    <View style={styles.headerTitleContainer}>
+                    <TouchableOpacity 
+                        onPress={() => (selectedCategory || selectedArticle) ? handleBack() : navigation.goBack()} 
+                        style={styles.backButtonArea}
+                    >
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={styles.headerTitleContainer}
+                        onPress={() => (selectedCategory || selectedArticle) ? handleBack() : navigation.goBack()}
+                    >
                         <Text style={[styles.headerTitle, { color: colors.text }]}>
                             {selectedArticle 
                                 ? getTitle(currentCategory?.articles?.find(a => a.id === selectedArticle)?.title)
@@ -194,7 +200,7 @@ const GuideScreen = () => {
                                 {language === 'id' ? 'Pelajari cara menggunakan semua fitur' : 'Learn how to use all features'}
                             </Text>
                         )}
-                    </View>
+                    </TouchableOpacity>
                     <View style={styles.headerActions}>
                         <TouchableOpacity onPress={toggleLanguage} style={styles.iconButton}>
                             <Ionicons name="language" size={20} color={colors.text} />
@@ -250,6 +256,12 @@ const styles = StyleSheet.create({
     },
     backButton: {
         marginRight: 12,
+        padding: 4,
+    },
+    backButtonArea: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 8,
         padding: 4,
     },
     headerTitleContainer: {

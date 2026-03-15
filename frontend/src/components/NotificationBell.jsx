@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bell, ShoppingBag, MessageCircle, Truck, CreditCard, Info, BellOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNotificationStore } from '../store/notificationStore';
 import './NotificationBell.css';
 
@@ -74,7 +75,7 @@ function NotificationBell() {
     return (
         <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button
-                className="notification-bell"
+                className={`notification-bell ${open ? 'notification-bell-active' : ''}`}
                 onClick={() => setOpen(!open)}
                 aria-label="Notifications"
             >
@@ -86,59 +87,72 @@ function NotificationBell() {
                 )}
             </button>
 
-            {open && (
-                <>
-                    <div className="notification-overlay" onClick={() => setOpen(false)} />
-                    <div className="notification-dropdown">
-                        <div className="notification-dropdown-header">
-                            <h3>Notifications</h3>
-                            {unreadCount > 0 && (
-                                <button onClick={() => markAllRead()}>Mark all read</button>
-                            )}
-                        </div>
-
-                        <div className="notification-dropdown-list">
-                            {displayNotifs.length === 0 ? (
-                                <div className="notification-empty">
-                                    <BellOff size={32} />
-                                    <p>No notifications yet</p>
-                                </div>
-                            ) : (
-                                displayNotifs.map((notif) => {
-                                    const { icon, className } = getNotifIcon(notif.type);
-                                    return (
-                                        <div
-                                            key={notif._id}
-                                            className={`notification-item ${!notif.isRead ? 'unread' : ''}`}
-                                            onClick={() => handleClickNotif(notif)}
-                                        >
-                                            <div className={`notification-icon ${className}`}>
-                                                {icon}
-                                            </div>
-                                            <div className="notification-content">
-                                                <p className="notification-title">{notif.title}</p>
-                                                <p className="notification-message">{notif.message}</p>
-                                                <span className="notification-time">
-                                                    {formatTimeAgo(notif.createdAt)}
-                                                </span>
-                                            </div>
-                                            {!notif.isRead && <div className="notification-unread-dot" />}
-                                        </div>
-                                    );
-                                })
-                            )}
-                        </div>
-
-                        {notifications.length > 0 && (
-                            <div className="notification-dropdown-footer">
-                                <Link to="/notifications" onClick={() => setOpen(false)}>
-                                    View all notifications
-                                </Link>
+            <AnimatePresence>
+                {open && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="notification-overlay"
+                            onClick={() => setOpen(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="notification-dropdown"
+                        >
+                            <div className="notification-dropdown-header">
+                                <h3>Notifications</h3>
+                                {unreadCount > 0 && (
+                                    <button onClick={() => markAllRead()}>Mark all read</button>
+                                )}
                             </div>
-                        )}
-                    </div>
-                </>
-            )}
+
+                            <div className="notification-dropdown-list">
+                                {displayNotifs.length === 0 ? (
+                                    <div className="notification-empty">
+                                        <BellOff size={32} />
+                                        <p>No notifications yet</p>
+                                    </div>
+                                ) : (
+                                    displayNotifs.map((notif) => {
+                                        const { icon, className } = getNotifIcon(notif.type);
+                                        return (
+                                            <div
+                                                key={notif._id}
+                                                className={`notification-item ${!notif.isRead ? 'unread' : ''}`}
+                                                onClick={() => handleClickNotif(notif)}
+                                            >
+                                                <div className={`notification-icon ${className}`}>
+                                                    {icon}
+                                                </div>
+                                                <div className="notification-content">
+                                                    <p className="notification-title">{notif.title}</p>
+                                                    <p className="notification-message">{notif.message}</p>
+                                                    <span className="notification-time">
+                                                        {formatTimeAgo(notif.createdAt)}
+                                                    </span>
+                                                </div>
+                                                {!notif.isRead && <div className="notification-unread-dot" />}
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+
+                            {notifications.length > 0 && (
+                                <div className="notification-dropdown-footer">
+                                    <Link to="/notifications" onClick={() => setOpen(false)}>
+                                        View all notifications
+                                    </Link>
+                                </div>
+                            )}
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

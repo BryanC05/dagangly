@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, ArrowRight, ArrowLeft, ShoppingBag, MapPin, Plus, Minus, CreditCard, Check, Store, ChevronDown, ChevronUp, Truck, Clock, Navigation, AlertCircle } from 'lucide-react';
 import { useCartStore, useAuthStore } from '../store/authStore';
+import { useAuthModalStore } from '../store/authModalStore';
 import { useTranslation } from '../hooks/useTranslation';
 import api from '../utils/api';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ function Cart() {
     const queryClient = useQueryClient();
     const { items, updateQuantity, removeFromCart, clearSellerCart, getTotalPrice, getItemsBySeller, getSellerTotal } = useCartStore();
     const { user, isAuthenticated } = useAuthStore();
+    const { openLogin } = useAuthModalStore();
     const { t } = useTranslation();
 
     const [expandedSellers, setExpandedSellers] = useState({});
@@ -134,7 +136,7 @@ function Cart() {
         e.preventDefault();
         if (!isAuthenticated) {
             alert(t('cart.loginRequired'));
-            navigate('/login');
+            openLogin('/cart');
             return;
         }
 
@@ -561,11 +563,19 @@ function Cart() {
     return (
         <>
             <div className="container py-8">
-                <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <ShoppingBag className="h-7 w-7" />
-                    {t('cart.title')}
-                    {items.length > 0 && <span className="text-muted-foreground text-lg font-normal">({items.length} {t('cart.items')})</span>}
-                </h1>
+                <div 
+                    className="flex items-center gap-4 mb-6 cursor-pointer"
+                    onClick={() => navigate(-1)}
+                >
+                    <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 shrink-0">
+                        <ArrowLeft className="h-5 w-5" />
+                    </button>
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                        <ShoppingBag className="h-7 w-7" />
+                        {t('cart.title')}
+                        {items.length > 0 && <span className="text-muted-foreground text-lg font-normal">({items.length} {t('cart.items')})</span>}
+                    </h1>
+                </div>
 
                 {items.length === 0 ? (
                     <Card className="py-16 text-center">

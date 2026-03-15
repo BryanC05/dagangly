@@ -6,15 +6,17 @@ import { ProductsGridSkeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useSavedProductsStore } from '@/store/savedProductsStore';
 import { useAuthStore } from '@/store/authStore';
+import { useAuthModalStore } from '@/store/authModalStore';
 
 function SavedProducts() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
+  const { openLogin } = useAuthModalStore();
   const { savedProducts, isLoading, fetchSavedProducts } = useSavedProductsStore();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: '/saved-products' } });
+      openLogin('/saved-products');
       return;
     }
     fetchSavedProducts();
@@ -24,11 +26,13 @@ function SavedProducts() {
     <>
       <div className="container py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
+        <div 
+          className="flex items-center gap-4 mb-8 cursor-pointer"
+          onClick={() => navigate(-1)}
+        >
+          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 shrink-0">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           <div className="flex items-center gap-3">
             <Heart className="h-6 w-6 text-red-500" />
             <div>

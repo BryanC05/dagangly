@@ -15,6 +15,7 @@ import {
   CheckCheck
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useAuthModalStore } from '../store/authModalStore';
 import api from '../utils/api';
 import { getBackendUrl } from '../config';
 import { ChatListSkeleton } from '@/components/ui/skeleton';
@@ -27,6 +28,7 @@ function Chat() {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+  const { openLogin } = useAuthModalStore();
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
   const timeoutRefs = useRef([]);
@@ -281,7 +283,7 @@ function Chat() {
             <MessageCircle size={48} className="mx-auto text-primary mb-4" />
             <h2 className="text-2xl font-bold mb-2">Please Login</h2>
             <p className="text-muted-foreground mb-6">You need to be logged in to access chat</p>
-            <button onClick={() => navigate('/login')} className="btn-primary w-full py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+            <button onClick={() => openLogin('/chat')} className="btn-primary w-full py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
               Login
             </button>
           </div>

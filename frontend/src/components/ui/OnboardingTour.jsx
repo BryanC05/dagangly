@@ -122,10 +122,8 @@ const OnboardingTour = () => {
 };
 
 export const OnboardingPrompt = () => {
-    const { startOnboarding, hasCompletedOnboarding } = useOnboardingStore();
+    const { startOnboarding, hasCompletedOnboarding, resetOnboarding } = useOnboardingStore();
     const { t } = useTranslation();
-
-    if (hasCompletedOnboarding) return null;
 
     return (
         <Card className="bg-primary/5 border-primary/20 mb-6">
@@ -143,6 +141,13 @@ export const OnboardingPrompt = () => {
                         <ArrowRight className="h-5 w-5" />
                     </Button>
                 </div>
+                {hasCompletedOnboarding && (
+                    <div className="mt-3 pt-3 border-t border-primary/20 text-center">
+                        <Button variant="link" size="sm" onClick={resetOnboarding} className="text-xs text-muted-foreground">
+                            {t('onboarding.restartTour') || 'Mulai ulang tur'}
+                        </Button>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

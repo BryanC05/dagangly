@@ -4,6 +4,7 @@
   "private": true,
   "description": "Helper scripts for backend data operations",
   "scripts": {
+    "start": "node ../run.js",
     "clear-db": "node clear-db.js",
     "seed:food": "node seed-food-simulation.js",
     "seed:business": "node seed-business-simulation.js"

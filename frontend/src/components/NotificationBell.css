@@ -15,6 +15,11 @@
   background: var(--color-surface, rgba(0, 0, 0, 0.05));
 }
 
+.notification-bell-active {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
+  color: var(--color-primary, #3b82f6);
+}
+
 .notification-badge {
   position: absolute;
   top: 0;
@@ -45,7 +50,78 @@
 .notification-overlay {
   position: fixed;
   inset: 0;
-  z-index: 998;
+  z-index: 40;
+}
+
+/* Dropdown - positioned below bell icon */
+.notification-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: 380px;
+  max-height: 480px;
+  background: var(--color-card, #fff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.notification-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.notification-dropdown-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.notification-dropdown-header button {
+  background: none;
+  border: none;
+  color: var(--color-primary, #3b82f6);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.notification-dropdown-header button:hover {
+  background: var(--color-surface, rgba(59, 130, 246, 0.08));
+}
+
+.notification-dropdown-list {
+  overflow-y: auto;
+  flex: 1;
+  max-height: 360px;
+}
+
+.notification-dropdown-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  text-align: center;
+}
+
+.notification-dropdown-footer a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary, #3b82f6);
+  text-decoration: none;
+}
+
+.notification-dropdown-footer a:hover {
+  text-decoration: underline;
 }
 
 /* Dropdown */

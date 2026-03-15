@@ -80,13 +80,13 @@ export default function WishlistScreen({ navigation }) {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <TouchableOpacity style={styles.header} onPress={() => navigation.goBack()}>
+                <View style={styles.backBtn}>
                     <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
+                </View>
                 <Ionicons name="heart" size={20} color="#ef4444" />
                 <Text style={styles.headerTitle}>Saved Products</Text>
-            </View>
+            </TouchableOpacity>
 
             {loading ? (
                 <WishlistScreenSkeleton count={4} />

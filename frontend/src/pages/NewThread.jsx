@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { ArrowLeft, Send, Paperclip, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useAuthModalStore } from '../store/authModalStore';
 import api from '../utils/api';
 import './Forum.css';
 
@@ -16,6 +17,7 @@ const categories = [
 function NewThread() {
     const navigate = useNavigate();
     const { user } = useAuthStore();
+    const { openLogin } = useAuthModalStore();
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -62,7 +64,7 @@ function NewThread() {
     };
 
     if (!user) {
-        navigate('/login');
+        openLogin('/forum');
         return null;
     }
 

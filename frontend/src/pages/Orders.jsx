@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Package, Clock, CheckCircle, XCircle, MapPin, Phone,
   ShoppingBag, Truck, ChefHat, CreditCard, Banknote, Store,
   Smartphone, Building2, ChevronDown, ChevronUp, Calendar,
-  Navigation, FileText, Flag, User
+  Navigation, FileText, Flag, User, ArrowLeft
 } from 'lucide-react';
 import api from '../utils/api';
 import { useAuthStore } from '../store/authStore';
@@ -75,6 +75,7 @@ const resolveOrderId = (order, fallback = '') => {
 };
 
 function Orders() {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -183,7 +184,13 @@ function Orders() {
     <>
       <div className="orders-page container py-8">
         {/* Header */}
-        <div className="orders-header">
+        <div 
+          className="orders-header flex items-center gap-4 mb-6 cursor-pointer"
+          onClick={() => navigate(-1)}
+        >
+          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 shrink-0">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           <div>
             <h1>{t('orders.title')}</h1>
             <p className="orders-subtitle">{orders.length} {t('orders.totalOrders')}</p>

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Send, Paperclip, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useAuthModalStore } from '../store/authModalStore';
 import api from '../utils/api';
 import './Forum.css';
 
@@ -17,6 +18,7 @@ function EditThread() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuthStore();
+    const { openLogin } = useAuthModalStore();
     const queryClient = useQueryClient();
 
     const { data: thread, isLoading } = useQuery({
@@ -65,7 +67,7 @@ function EditThread() {
     };
 
     if (!user) {
-        navigate('/login');
+        openLogin();
         return null;
     }
 

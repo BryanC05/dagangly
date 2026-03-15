@@ -51,6 +51,7 @@ import {
   Instagram,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { useAuthModalStore } from "@/store/authModalStore";
 import { useTranslation } from "@/hooks/useTranslation";
 import api from "@/utils/api";
 import { resolveImageUrl } from "@/utils/imageUrl";
@@ -236,6 +237,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user, isAuthenticated, setUser } = useAuthStore();
+  const { openLogin } = useAuthModalStore();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -259,7 +261,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (!isAuthenticated && !id) {
-      navigate("/login");
+      openLogin('/profile');
       return;
     }
     fetchProfile();

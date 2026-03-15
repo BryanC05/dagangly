@@ -71,7 +71,8 @@
     "skip": "Skip",
     "next": "Next",
     "gotIt": "Got it!",
-    "startTour": "Start Tour"
+    "startTour": "Start Tour",
+    "restartTour": "Restart tour"
   },
   "help": {
     "searchTip": "Type what you're looking for here",

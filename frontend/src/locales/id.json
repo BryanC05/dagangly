@@ -76,7 +76,8 @@
         "skip": "Lewati",
         "next": "Lanjut",
         "gotIt": "Mengerti!",
-        "startTour": "Mulai Tur"
+        "startTour": "Mulai Tur",
+        "restartTour": "Mulai ulang tur"
     },
     "help": {
         "searchTip": "Ketik yang Anda cari di sini",

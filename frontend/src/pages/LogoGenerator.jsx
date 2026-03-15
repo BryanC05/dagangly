@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { useLogoGenerator } from '@/hooks/useLogoGenerator';
 import { useAuthStore } from '@/store/authStore';
+import { useAuthModalStore } from '@/store/authModalStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { getBackendUrl } from '@/config';
 import api from '@/utils/api';
@@ -28,6 +29,7 @@ function LogoGenerator() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuthStore();
+  const { openLogin, openRegister } = useAuthModalStore();
   const { t } = useTranslation();
 
   const [prompt, setPrompt] = useState('');
@@ -75,7 +77,7 @@ function LogoGenerator() {
   // Gate: Must be authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: '/logo-generator' } });
+      openLogin('/logo-generator');
       return;
     }
   }, [isAuthenticated, navigate]);
@@ -217,7 +219,7 @@ function LogoGenerator() {
 
   const handleContinue = () => {
     if (fromRegistration) {
-      navigate('/register', { state: { businessLogo: currentBusinessLogo } });
+      openRegister();
     } else {
       navigate('/profile');
     }
@@ -247,7 +249,7 @@ function LogoGenerator() {
               <Button
                 variant="ghost"
                 className="mb-2 -ml-2"
-                onClick={() => navigate('/register')}
+                onClick={openRegister}
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 {t('common.back')} Registration

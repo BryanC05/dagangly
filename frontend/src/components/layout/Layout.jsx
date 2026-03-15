@@ -1,6 +1,7 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import AnimatedOutlet from "./AnimatedOutlet";
+import AuthModal from "../ui/AuthModal";
 
 const Layout = () => {
   return (
@@ -10,6 +11,7 @@ const Layout = () => {
         <AnimatedOutlet />
       </main>
       <Footer />
+      <AuthModal />
     </div>
   );
 };

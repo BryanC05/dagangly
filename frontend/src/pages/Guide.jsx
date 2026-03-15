@@ -6,8 +6,8 @@ import {
   ChevronDown, 
   BookOpen,
   Rocket,
-  Cart,
-  Storefront,
+  ShoppingCart,
+  Store,
   MapPin,
   User,
   Star,
@@ -81,8 +81,8 @@ const Guide = () => {
   const getIconComponent = (iconName) => {
     const icons = {
       'rocket-outline': Rocket,
-      'cart-outline': Cart,
-      'storefront-outline': Storefront,
+      'cart-outline': ShoppingCart,
+      'storefront-outline': Store,
       'map-outline': MapPin,
       'person-outline': User,
       'star-outline': Star,
@@ -127,17 +127,13 @@ const Guide = () => {
       <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container py-4">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              {(selectedCategory || selectedArticle) && (
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={handleBack}
-                  className="shrink-0"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              )}
+            <div 
+              className="flex items-center gap-4 cursor-pointer"
+              onClick={() => (selectedCategory || selectedArticle) ? handleBack() : navigate(-1)}
+            >
+              <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 shrink-0">
+                <ArrowLeft className="h-5 w-5" />
+              </button>
               <div>
                 <h1 className="text-2xl font-bold">
                   {selectedArticle 

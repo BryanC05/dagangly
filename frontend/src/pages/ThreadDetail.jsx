@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Heart, MessageSquare, Clock, Edit2, Trash2, Paperclip, Send, Image, File, ThumbsUp } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useAuthModalStore } from '../store/authModalStore';
 import api from '../utils/api';
 import { getBackendUrl } from '../config';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,6 +13,7 @@ function ThreadDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuthStore();
+    const { openLogin } = useAuthModalStore();
     const queryClient = useQueryClient();
 
     const [replyContent, setReplyContent] = useState('');
@@ -328,7 +330,7 @@ function ThreadDetail() {
                         </form>
                     ) : (
                         <div className="login-prompt p-6 bg-muted/50 rounded-lg text-center">
-                            <p>Please <Link to="/login" className="text-primary hover:underline font-medium">log in</Link> to reply to this thread.</p>
+                            <p>Please <button onClick={openLogin} className="text-primary hover:underline font-medium">log in</button> to reply to this thread.</p>
                         </div>
                     )}
                 </section>

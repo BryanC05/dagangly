@@ -137,9 +137,19 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="container py-20 text-center">
-        <p className="text-muted-foreground mb-4">{t("productDetail.productNotFound")}</p>
-        <Button variant="outline" asChild>
-          <Link to="/products"><ArrowLeft className="h-4 w-4 mr-2" /> {t("productDetail.backToProducts")}</Link>
+        <div 
+          className="flex items-center gap-4 justify-center mb-6 cursor-pointer"
+          onClick={() => navigate(-1)}
+        >
+          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 shrink-0">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold">{t("productDetail.productNotFound")}</h1>
+          </div>
+        </div>
+        <Button variant="outline" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t("productDetail.backToProducts")}
         </Button>
       </div>
     );
@@ -157,14 +167,18 @@ export default function ProductDetail() {
 
   return (
     <div className="container py-8">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:text-primary">{t("nav.home")}</Link>
-        <ChevronRight className="h-3 w-3" />
-        <Link to="/products" className="hover:text-primary">{t("nav.products")}</Link>
-        <ChevronRight className="h-3 w-3" />
-        <span className="text-foreground truncate">{product.name}</span>
-      </nav>
+      {/* Clickable Back Header */}
+      <div 
+        className="flex items-center gap-4 mb-6 cursor-pointer"
+        onClick={() => navigate(-1)}
+      >
+        <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 shrink-0">
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold">{product.name}</h1>
+        </div>
+      </div>
 
       <div className="grid md:grid-cols-2 gap-8 mb-12">
         {/* Images */}

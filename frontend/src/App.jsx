@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAuthModalStore } from './store/authModalStore';
+import { useAuthStore } from './store/authStore';
+import { useThemeStore } from './store/themeStore';
+import { useLanguageStore } from './store/languageStore';
 import SocialLinks from './pages/SocialLinks';
 import Home from './pages/new-ui/Index';
 import Products from './pages/new-ui/Products';
 import ProductDetail from './pages/new-ui/ProductDetail';
-import Login from './pages/new-ui/Login';
-import Register from './pages/new-ui/Register';
 import SellerDashboard from './pages/SellerDashboard';
 import AddProduct from './pages/AddProduct';
 import SellerProductTracking from './pages/SellerProductTracking';
@@ -35,9 +37,6 @@ import Invoice from './pages/Invoice';
 import Guide from './pages/Guide';
 import NotFound from './pages/new-ui/NotFound';
 import ScrollToTop from './components/ScrollToTop';
-import { useAuthStore } from './store/authStore';
-import { useThemeStore } from './store/themeStore';
-import { useLanguageStore } from './store/languageStore';
 import Layout from './components/layout/Layout';
 
 const queryClient = new QueryClient({
@@ -48,6 +47,24 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+function AuthRouteHandler() {
+  const navigate = useNavigate();
+  const { openLogin, openRegister } = useAuthModalStore();
+  
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/login') {
+      openLogin();
+      navigate('/');
+    } else if (path === '/register') {
+      openRegister();
+      navigate('/');
+    }
+  }, [navigate, openLogin, openRegister]);
+  
+  return null;
+}
 
 function App() {
   const { initializeAuth } = useAuthStore();
@@ -70,6 +87,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <ScrollToTop />
+        <AuthRouteHandler />
         <div className="min-h-screen bg-background text-foreground font-sans antialiased">
           <Routes>
             <Route element={<Layout />}>
@@ -107,8 +125,6 @@ function App() {
               <Route path="/guide" element={<Guide />} />
               <Route path="*" element={<NotFound />} />
             </Route>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
           </Routes>
         </div>
       </Router>
