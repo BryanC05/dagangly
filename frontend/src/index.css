@@ -66,6 +66,8 @@
   --shadow-color: rgba(0, 0, 0, 0.15);
   --white: #ffffff;
 
+  --font-size-scale: 1;
+
   /* Legacy token aliases for old CSS files/components */
   --color-primary: hsl(var(--primary));
   --color-primary-light: hsl(var(--primary) / 0.1);
@@ -157,6 +159,23 @@
   --color-text-muted: hsl(215 15% 62%);
 }
 
+/* Font Size Scaling */
+html {
+  --font-size-base: calc(1rem * var(--font-size-scale, 1));
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !true;
+  }
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -174,6 +193,7 @@
     background: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: var(--font-size-base, 1rem);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -197,6 +217,60 @@
   a {
     color: inherit;
     text-decoration: none;
+  }
+
+  /* Skip Link for Accessibility */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px 16px;
+    z-index: 100;
+    transition: top 0.2s;
+    font-weight: 600;
+    border-radius: 0 0 4px 0;
+  }
+
+  .skip-link:focus {
+    top: 0;
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Enhanced Focus States */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Screen Reader Only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Reduced Motion Utility */
+  .reduce-motion {
+    animation: none !important;
+    transition: none !important;
   }
 }
 

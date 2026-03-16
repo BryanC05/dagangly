@@ -23,6 +23,10 @@ import {
   Crown,
   Folder,
   BookOpen,
+  Wallet,
+  Shield,
+  Video,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,15 +121,18 @@ const Navbar = () => {
     { to: "/profile", label: t("nav.profile") || "Profil", icon: User },
     { to: "/orders", label: t("nav.orders") || "Pesanan", icon: Package, badge: activeOrderCount },
     { to: "/saved-products", label: t("nav.savedProducts") || "Tersimpan", icon: Heart },
+    { to: "/wallet", label: t("wallet.title") || "Dompet", icon: Wallet },
     ...(isSeller
       ? [
         { to: "/seller/dashboard", label: t("nav.dashboard"), icon: Store },
         { to: "/seller/product-tracking", label: t("nav.productTracker"), icon: BarChart3 },
         { to: "/seller/add-product", label: t("nav.addProduct"), icon: PlusCircle },
         { to: "/logo-generator", label: t("nav.logoGenerator"), icon: Palette, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
-        // Projects disabled
-        // { to: "/projects", label: t("nav.projects"), icon: Folder },
         { to: "/automation", label: t("nav.automations"), icon: Zap, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
+        { to: "/seller-analytics", label: t("analytics.title") || "Analitik", icon: BarChart3 },
+        { to: "/inventory", label: t("inventory.title") || "Inventori", icon: Package },
+        { to: "/video-call", label: t("videoCall.title") || "Video Call", icon: Video },
+        { to: "/installments", label: t("installment.title") || "Cicilan", icon: CreditCard },
       ]
       : []),
   ];
@@ -324,14 +331,20 @@ const Navbar = () => {
                       <User className="h-4 w-4 mr-2" />
                       {t("nav.profile")}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleNavigate("/saved-products")}>
+<DropdownMenuItem onSelect={() => handleNavigate("/saved-products")}>
                       <Heart className="h-4 w-4 mr-2" />
                       {t("nav.savedProducts")}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleNavigate("/notifications")}>
-                      <Bell className="h-4 w-4 mr-2" />
-                      {t("nav.notifications")}
+                    <DropdownMenuItem onSelect={() => handleNavigate("/wallet")}>
+                      <Wallet className="h-4 w-4 mr-2" />
+                      {t("wallet.title")}
                     </DropdownMenuItem>
+                    {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                      <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard")}>
+                        <Shield className="h-4 w-4 mr-2" />
+                        {t("admin.title")}
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onSelect={handleLogout} className="text-destructive focus:text-destructive">
                       <LogOut className="h-4 w-4 mr-2" />

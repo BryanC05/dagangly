@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, ScrollView, Image, TouchableOpacity, StyleSheet,
-    Dimensions, Alert, ActivityIndicator, TextInput, Share,
+    Dimensions, Alert, ActivityIndicator, TextInput, Share, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -87,12 +87,24 @@ export default function ProductDetailScreen({ route }) {
     const [newComment, setNewComment] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
+    const [whatsappUrl, setWhatsappUrl] = useState(null);
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 const response = await api.get(`/products/${productId}`);
                 setProduct(response.data);
+                
+                // Fetch seller's WhatsApp
+                const sellerId = response.data.seller?._id;
+                if (sellerId) {
+                    try {
+                        const waRes = await api.get(`/whatsapp/seller/${sellerId}`);
+                        setWhatsappUrl(waRes.data.whatsappUrl);
+                    } catch (e) {
+                        // WhatsApp not available
+                    }
+                }
             } catch (error) {
                 console.error('Failed to fetch product:', error);
                 Alert.alert(t.error || 'Error', t.failedLoadProduct || 'Failed to load product');
@@ -736,9 +748,18 @@ export default function ProductDetailScreen({ route }) {
 
             {/* Bottom Actions */}
             <View style={styles.bottomBar}>
-                <TouchableOpacity style={styles.chatBtn} onPress={handleChat}>
-                    <Ionicons name="chatbubble-outline" size={22} color={colors.primary} />
-                </TouchableOpacity>
+                {whatsappUrl ? (
+                    <TouchableOpacity 
+                        style={[styles.chatBtn, { backgroundColor: '#25D366' }]} 
+                        onPress={() => Linking.openURL(whatsappUrl)}
+                    >
+                        <Ionicons name="logo-whatsapp" size={22} color="#fff" />
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity style={styles.chatBtn} onPress={handleChat}>
+                        <Ionicons name="chatbubble-outline" size={22} color={colors.primary} />
+                    </TouchableOpacity>
+                )}
                 <TouchableOpacity
                     style={[styles.addToCartBtn, getAvailableStock() === 0 && styles.disabledBtn]}
                     onPress={handleAddToCart}

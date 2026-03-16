@@ -150,3 +150,93 @@
   background: hsl(0 40% 18%);
   color: hsl(0 70% 65%);
 }
+
+/* Wishlist Button Overlay */
+.wishlist-overlay-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.wishlist-overlay-btn:hover {
+  background: white;
+  transform: scale(1.1);
+  color: #ef4444;
+}
+
+.wishlist-overlay-btn.active {
+  color: #ef4444;
+}
+
+.dark .wishlist-overlay-btn {
+  background: rgba(30, 30, 30, 0.9);
+  color: #9ca3af;
+}
+
+.dark .wishlist-overlay-btn:hover {
+  background: hsl(var(--card));
+  color: #ef4444;
+}
+
+/* Wishlist Button Component Styles */
+.wishlist-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+}
+
+.wishlist-btn:hover {
+  background: hsl(var(--accent) / 0.1);
+  border-color: hsl(var(--accent));
+  color: hsl(var(--accent));
+}
+
+.wishlist-btn.in-wishlist {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: hsl(0 84% 96%);
+}
+
+.dark .wishlist-btn.in-wishlist {
+  background: hsl(0 40% 20%);
+}
+
+.wishlist-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wishlist-btn.size-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.wishlist-btn.size-large {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
+.wishlist-label {
+  font-weight: 500;
+}

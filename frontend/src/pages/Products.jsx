@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import VoiceSearchInput from "@/components/VoiceSearchInput";
 import {
   Select,
   SelectContent,
@@ -162,13 +163,11 @@ const Products = () => {
         {/* Search and Filters */}
         <form onSubmit={handleSearch} className="flex flex-col lg:flex-row gap-4 mb-8">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-            <Input
-              type="search"
+            <VoiceSearchInput
+              onSearch={(query) => {
+                setSearchQuery(query);
+              }}
               placeholder={t('products.searchPlaceholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div className="flex gap-2">

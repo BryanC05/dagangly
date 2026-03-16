@@ -88,6 +88,83 @@ func createIndexes(ctx context.Context) {
 	} else {
 		fmt.Println("✅ Created index on notifications.userId,isRead")
 	}
+
+	wishlists := DB.Collection("wishlists")
+	_, err = wishlists.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "userId", Value: 1}, {Key: "updatedAt", Value: -1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on wishlists.userId,updatedAt: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on wishlists.userId,updatedAt")
+	}
+
+	_, err = wishlists.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "shareLink", Value: 1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on wishlists.shareLink: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on wishlists.shareLink")
+	}
+
+	devices := DB.Collection("device_tokens")
+	_, err = devices.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "userId", Value: 1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on device_tokens.userId: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on device_tokens.userId")
+	}
+
+	_, err = devices.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "token", Value: 1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on device_tokens.token: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on device_tokens.token")
+	}
+
+	cartAbandonments := DB.Collection("cart_abandonments")
+	_, err = cartAbandonments.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "userId", Value: 1}, {Key: "status", Value: 1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on cart_abandonments.userId,status: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on cart_abandonments.userId,status")
+	}
+
+	wallets := DB.Collection("wallets")
+	_, err = wallets.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "userId", Value: 1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on wallets.userId: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on wallets.userId")
+	}
+
+	videoRooms := DB.Collection("video_rooms")
+	_, err = videoRooms.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "hostId", Value: 1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on video_rooms.hostId: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on video_rooms.hostId")
+	}
+
+	_, err = videoRooms.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "participantId", Value: 1}},
+	})
+	if err != nil {
+		fmt.Printf("Warning: failed to create index on video_rooms.participantId: %v\n", err)
+	} else {
+		fmt.Println("✅ Created index on video_rooms.participantId")
+	}
 }
 
 func GetDB() *mongo.Database {

@@ -46,6 +46,9 @@ type User struct {
 	InstagramAccounts       []InstagramAccount `bson:"instagramAccounts" json:"instagramAccounts"`
 	InstagramPostPreference string             `bson:"instagramPostPreference" json:"instagramPostPreference"` // "dagangly" (default) or "own"
 
+	// View History
+	ViewHistory []ViewHistoryEntry `bson:"viewHistory" json:"viewHistory"`
+
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 	UpdatedAt time.Time `bson:"updatedAt" json:"updatedAt"`
 }
@@ -77,6 +80,11 @@ type GeneratedLogo struct {
 	FilePath  string             `bson:"filePath" json:"filePath"`
 	CreatedAt time.Time          `bson:"createdAt" json:"createdAt"`
 	ExpiresAt time.Time          `bson:"expiresAt" json:"expiresAt"`
+}
+
+type ViewHistoryEntry struct {
+	ProductID primitive.ObjectID `bson:"productId" json:"productId"`
+	ViewedAt  time.Time          `bson:"viewedAt" json:"viewedAt"`
 }
 
 // InstagramAccount represents a connected Instagram account

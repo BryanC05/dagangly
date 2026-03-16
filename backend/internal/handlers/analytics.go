@@ -184,3 +184,237 @@ func (h *AnalyticsHandler) GetRecommended(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, products)
 }
+
+func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	period := c.DefaultQuery("period", "30")
+	var days int
+	switch period {
+	case "7":
+		days = 7
+	case "30":
+		days = 30
+	case "90":
+		days = 90
+	default:
+		days = 30
+	}
+
+	startDate := time.Now().AddDate(0, 0, -days)
+
+	ordersColl := database.GetDB().Collection("orders")
+	productsColl := database.GetDB().Collection("products")
+	reviewsColl := database.GetDB().Collection("reviews")
+
+	totalRevenue := 0.0
+	orderCount := int64(0)
+	productCount := int64(0)
+	avgRating := 0.0
+	totalReviews := int64(0)
+
+	orderCursor, _ := ordersColl.Find(context.Background(), bson.M{
+		"seller":    userObjID,
+		"createdAt": bson.M{"$gte": startDate},
+		"status":    bson.M{"$in": []string{"completed", "delivered"}},
+	})
+	var orders []bson.M
+	orderCursor.All(context.Background(), &orders)
+
+	for _, order := range orders {
+		if total, ok := order["totalAmount"].(float64); ok {
+			totalRevenue += total
+		}
+		orderCount++
+	}
+
+	productCount, _ = productsColl.CountDocuments(context.Background(), bson.M{
+		"seller": userObjID,
+		"status": "active",
+	})
+
+	reviewsFilter := bson.M{"sellerId": userObjID}
+	reviewsCursor, _ := reviewsColl.Find(context.Background(), reviewsFilter)
+	var reviews []bson.M
+	reviewsCursor.All(context.Background(), &reviews)
+
+	var sumRating float64
+	for _, review := range reviews {
+		if rating, ok := review["rating"].(float64); ok {
+			sumRating += rating
+		}
+	}
+	totalReviews = int64(len(reviews))
+	if totalReviews > 0 {
+		avgRating = sumRating / float64(totalReviews)
+	}
+
+	revenueByDay := make(map[string]float64)
+	for _, order := range orders {
+		if createdAt, ok := order["createdAt"].(time.Time); ok {
+			dayKey := createdAt.Format("2006-01-02")
+			if total, ok := order["totalAmount"].(float64); ok {
+				revenueByDay[dayKey] += total
+			}
+		}
+	}
+
+	ordersByStatus := make(map[string]int64)
+	statusCursor, _ := ordersColl.Find(context.Background(), bson.M{"seller": userObjID})
+	var allOrders []bson.M
+	statusCursor.All(context.Background(), &allOrders)
+	for _, order := range allOrders {
+		if status, ok := order["status"].(string); ok {
+			ordersByStatus[status]++
+		}
+	}
+
+	topProductsCursor, _ := ordersColl.Aggregate(context.Background(), []bson.M{
+		{"$match": bson.M{"seller": userObjID}},
+		{"$unwind": "$products"},
+		{"$group": bson.M{
+			"_id":       "$products.productId",
+			"name":      bson.M{"$first": "$products.name"},
+			"totalSold": bson.M{"$sum": "$products.quantity"},
+			"revenue":   bson.M{"$sum": bson.M{"$multiply": []interface{}{"$products.price", "$products.quantity"}}},
+		}},
+		{"$sort": bson.M{"revenue": -1}},
+		{"$limit": 5},
+	})
+	var topProducts []bson.M
+	topProductsCursor.All(context.Background(), &topProducts)
+
+	c.JSON(http.StatusOK, gin.H{
+		"period":         period,
+		"totalRevenue":   totalRevenue,
+		"orderCount":     orderCount,
+		"productCount":   productCount,
+		"avgRating":      avgRating,
+		"totalReviews":   totalReviews,
+		"revenueByDay":   revenueByDay,
+		"ordersByStatus": ordersByStatus,
+		"topProducts":    topProducts,
+	})
+}
+
+func (h *AnalyticsHandler) GetCustomerInsights(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	ordersColl := database.GetDB().Collection("orders")
+
+	pipeline := []bson.M{
+		{"$match": bson.M{"seller": userObjID}},
+		{"$group": bson.M{
+			"_id":        "$buyer",
+			"orderCount": bson.M{"$sum": 1},
+			"totalSpent": bson.M{"$sum": "$totalAmount"},
+		}},
+		{"$sort": bson.M{"totalSpent": -1}},
+		{"$limit": 10},
+	}
+
+	cursor, err := ordersColl.Aggregate(context.Background(), pipeline)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var customers []bson.M
+	cursor.All(context.Background(), &customers)
+
+	var newCustomers, returningCustomers int64
+	for _, ct := range customers {
+		if orderCount, ok := ct["orderCount"].(int32); ok {
+			if orderCount == 1 {
+				newCustomers++
+			} else {
+				returningCustomers++
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"topCustomers":       customers,
+		"newCustomers":       newCustomers,
+		"returningCustomers": returningCustomers,
+	})
+}
+
+func (h *AnalyticsHandler) GetProductPerformance(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	productsColl := database.GetDB().Collection("products")
+	ordersColl := database.GetDB().Collection("orders")
+
+	productsCursor, _ := productsColl.Find(context.Background(), bson.M{
+		"seller": userObjID,
+		"status": "active",
+	})
+	var products []bson.M
+	productsCursor.All(context.Background(), &products)
+
+	var productPerformance []map[string]interface{}
+	for _, p := range products {
+		productID := p["_id"]
+
+		soldCount := int64(0)
+		revenue := 0.0
+
+		orderPipeline := []bson.M{
+			{"$match": bson.M{"seller": userObjID}},
+			{"$unwind": "$products"},
+			{"$match": bson.M{"products.productId": productID}},
+			{"$group": bson.M{
+				"_id":       nil,
+				"soldCount": bson.M{"$sum": "$products.quantity"},
+				"revenue":   bson.M{"$sum": bson.M{"$multiply": []interface{}{"$products.price", "$products.quantity"}}},
+			}},
+		}
+
+		orderCursor, _ := ordersColl.Aggregate(context.Background(), orderPipeline)
+		var orderResults []bson.M
+		orderCursor.All(context.Background(), &orderResults)
+
+		if len(orderResults) > 0 {
+			if sc, ok := orderResults[0]["soldCount"].(int32); ok {
+				soldCount = int64(sc)
+			}
+			if rev, ok := orderResults[0]["revenue"].(float64); ok {
+				revenue = rev
+			}
+		}
+
+		viewCount := 0
+		if views, ok := p["viewCount"].(int32); ok {
+			viewCount = int(views)
+		}
+
+		productPerformance = append(productPerformance, map[string]interface{}{
+			"_id":       productID,
+			"name":      p["name"],
+			"price":     p["price"],
+			"soldCount": soldCount,
+			"revenue":   revenue,
+			"viewCount": viewCount,
+			"stock":     p["stock"],
+			"category":  p["category"],
+		})
+	}
+
+	c.JSON(http.StatusOK, productPerformance)
+}

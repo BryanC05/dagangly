@@ -927,3 +927,103 @@ func uploadToImgBB(imagePath string) string {
 	fmt.Printf("[ImgBB] Upload failed: %v\n", result)
 	return ""
 }
+
+func (h *ProductHandler) GetLowStockProducts(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	threshold, _ := strconv.Atoi(c.DefaultQuery("threshold", "10"))
+
+	collection := database.GetDB().Collection("products")
+	filter := bson.M{
+		"seller": userObjID,
+		"stock":  bson.M{"$lte": threshold},
+	}
+
+	cursor, err := collection.Find(context.Background(), filter)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var products []models.Product
+	if err := cursor.All(context.Background(), &products); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, products)
+}
+
+func (h *ProductHandler) AdjustStock(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	productID := c.Param("id")
+	productObjID, err := primitive.ObjectIDFromHex(productID)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid product ID"})
+		return
+	}
+
+	var req struct {
+		Adjustment int    `json:"adjustment" binding:"required"`
+		Reason     string `json:"reason"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	collection := database.GetDB().Collection("products")
+
+	var product models.Product
+	err = collection.FindOne(context.Background(), bson.M{"_id": productObjID, "seller": userObjID}).Decode(&product)
+	if err != nil {
+		c.JSON(404, gin.H{"error": "Product not found"})
+		return
+	}
+
+	newStock := product.Stock + req.Adjustment
+	if newStock < 0 {
+		c.JSON(400, gin.H{"error": "Insufficient stock"})
+		return
+	}
+
+	_, err = collection.UpdateOne(
+		context.Background(),
+		bson.M{"_id": productObjID},
+		bson.M{"$set": bson.M{"stock": newStock}},
+	)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to update stock"})
+		return
+	}
+
+	inventoryCollection := database.GetDB().Collection("inventory_adjustments")
+	inventoryCollection.InsertOne(context.Background(), bson.M{
+		"productId":  productObjID,
+		"userId":     userObjID,
+		"adjustment": req.Adjustment,
+		"reason":     req.Reason,
+		"oldStock":   product.Stock,
+		"newStock":   newStock,
+		"createdAt":  time.Now(),
+	})
+
+	c.JSON(200, gin.H{
+		"message":  "Stock adjusted successfully",
+		"oldStock": product.Stock,
+		"newStock": newStock,
+	})
+}

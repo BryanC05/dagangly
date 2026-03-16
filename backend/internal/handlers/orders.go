@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"net/http"
 	"time"
 
 	"msme-marketplace/internal/database"
@@ -1266,4 +1267,141 @@ func (h *OrderHandler) CleanupExpiredRequests() {
 
 		// TODO: Send notification to buyer about auto-decline
 	}
+}
+
+// GetOrderTimeline returns the order timeline with all status changes
+func (h *OrderHandler) GetOrderTimeline(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	orderID := c.Param("id")
+	orderObjID, err := primitive.ObjectIDFromHex(orderID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("orders")
+
+	var order models.Order
+	err = collection.FindOne(context.Background(), bson.M{
+		"_id": orderObjID,
+		"$or": []bson.M{{"buyer": userObjID}, {"seller": userObjID}},
+	}).Decode(&order)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	timeline := []OrderTimelineEvent{}
+
+	createdAt := order.CreatedAt
+	timeline = append(timeline, OrderTimelineEvent{
+		Status:    "order_placed",
+		Label:     "Order Placed",
+		Completed: true,
+		Timestamp: &createdAt,
+	})
+
+	if order.PaymentStatus == "paid" || order.PaymentStatus == "success" {
+		if order.PaymentDetails.PaidAt != nil {
+			timeline = append(timeline, OrderTimelineEvent{
+				Status:    "payment_confirmed",
+				Label:     "Payment Confirmed",
+				Completed: true,
+				Timestamp: order.PaymentDetails.PaidAt,
+			})
+		}
+	}
+
+	completedStatuses := []string{"confirmed", "preparing", "ready", "delivered", "picked_up", "cancelled"}
+	isCompleted := func(status string) bool {
+		for _, s := range completedStatuses {
+			if s == status {
+				return true
+			}
+		}
+		return false
+	}
+
+	currentStatus := order.Status
+	for _, status := range []string{"confirmed", "preparing", "ready", "delivered", "picked_up"} {
+		completed := false
+		if isCompleted(currentStatus) {
+			completed = true
+			if currentStatus == "cancelled" {
+				break
+			}
+		}
+
+		label := status
+		switch status {
+		case "confirmed":
+			label = "Order Confirmed"
+		case "preparing":
+			label = "Preparing"
+		case "ready":
+			if order.DeliveryType == "pickup" {
+				label = "Ready for Pickup"
+			} else {
+				label = "Ready for Delivery"
+			}
+		case "delivered":
+			label = "Delivered"
+		case "picked_up":
+			label = "Picked Up"
+		}
+
+		timeline = append(timeline, OrderTimelineEvent{
+			Status:    status,
+			Label:     label,
+			Completed: completed,
+		})
+
+		if status == currentStatus {
+			break
+		}
+	}
+
+	if order.Status == "cancelled" {
+		timeline = append(timeline, OrderTimelineEvent{
+			Status:    "cancelled",
+			Label:     "Order Cancelled",
+			Completed: true,
+		})
+	}
+
+	if order.DeliveryProgress != nil && len(order.DeliveryProgress) > 0 {
+		for _, dp := range order.DeliveryProgress {
+			ts := dp.Timestamp
+			timeline = append(timeline, OrderTimelineEvent{
+				Status:    dp.Status,
+				Label:     dp.Status,
+				Completed: true,
+				Timestamp: &ts,
+				Note:      dp.Note,
+			})
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"orderId":   order.ID,
+		"status":    order.Status,
+		"timeline":  timeline,
+		"createdAt": order.CreatedAt,
+		"updatedAt": order.UpdatedAt,
+	})
+}
+
+type OrderTimelineEvent struct {
+	Status    string     `json:"status"`
+	Label     string     `json:"label"`
+	Completed bool       `json:"completed"`
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+	Note      string     `json:"note,omitempty"`
 }

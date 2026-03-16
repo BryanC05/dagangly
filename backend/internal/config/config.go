@@ -19,6 +19,9 @@ type Config struct {
 	ProductImageMaxSize  int
 	ProductImageMaxCount int
 	ProductEnhanceLimit  int
+	MidtransServerKey    string
+	MidtransClientKey    string
+	MidtransIsProduction bool
 }
 
 func Load() (*Config, error) {
@@ -65,6 +68,9 @@ func Load() (*Config, error) {
 		ProductImageMaxSize:  getEnvInt("PRODUCT_IMAGE_MAX_SIZE_MB", 5),
 		ProductImageMaxCount: getEnvInt("PRODUCT_IMAGE_MAX_COUNT", 4),
 		ProductEnhanceLimit:  getEnvInt("PRODUCT_ENHANCE_DAILY_LIMIT", 20),
+		MidtransServerKey:    getEnv("MIDTRANS_SERVER_KEY", ""),
+		MidtransClientKey:    getEnv("MIDTRANS_CLIENT_KEY", ""),
+		MidtransIsProduction: getEnv("MIDTRANS_IS_PRODUCTION", "false") == "true",
 	}, nil
 }
 

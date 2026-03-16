@@ -118,6 +118,7 @@ type PaymentDetails struct {
 	CashReceived    float64    `bson:"cashReceived" json:"cashReceived"`
 	CashChange      float64    `bson:"cashChange" json:"cashChange"`
 	BankName        *string    `bson:"bankName" json:"bankName"`
+	VaNumber        *string    `bson:"vaNumber" json:"vaNumber"`
 	AccountNumber   *string    `bson:"accountNumber" json:"accountNumber"`
 	AccountHolder   *string    `bson:"accountHolder" json:"accountHolder"`
 	TransferProof   *string    `bson:"transferProof" json:"transferProof"`

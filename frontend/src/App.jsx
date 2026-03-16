@@ -32,9 +32,15 @@ import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import TrackingPage from './pages/TrackingPage';
 import AdminMembership from './pages/AdminMembership';
+import AdminDashboard from './pages/AdminDashboard';
 import Notifications from './pages/Notifications';
 import Invoice from './pages/Invoice';
 import Guide from './pages/Guide';
+import Wallet from './pages/Wallet';
+import VideoCallPage from './pages/VideoCall';
+import InstallmentsPage from './pages/Installments';
+import SellerAnalyticsPage from './pages/SellerAnalytics';
+import InventoryPage from './pages/Inventory';
 import NotFound from './pages/new-ui/NotFound';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/layout/Layout';
@@ -120,6 +126,12 @@ function App() {
               {/* <Route path="/projects" element={<Projects />} /> */}
               {/* <Route path="/projects/:id" element={<ProjectDetail />} /> */}
               <Route path="/admin/membership" element={<AdminMembership />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/wallet" element={<Wallet />} />
+              <Route path="/video-call" element={<VideoCallPage />} />
+              <Route path="/installments" element={<InstallmentsPage />} />
+              <Route path="/seller-analytics" element={<SellerAnalyticsPage />} />
+              <Route path="/inventory" element={<InventoryPage />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/invoice/:orderId" element={<Invoice />} />
               <Route path="/guide" element={<Guide />} />

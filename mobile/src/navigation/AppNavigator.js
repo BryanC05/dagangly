@@ -54,6 +54,11 @@ import ProjectsScreen from '../screens/projects/ProjectsScreen';
 import AddProjectScreen from '../screens/projects/AddProjectScreen';
 import ProjectDetailScreen from '../screens/projects/ProjectDetailScreen';
 import GuideScreen from '../screens/guide/GuideScreen';
+import WalletScreen from '../screens/wallet/WalletScreen';
+import InstallmentsScreen from '../screens/installments/InstallmentsScreen';
+import VideoCallScreen from '../screens/videoCall/VideoCallScreen';
+import SellerAnalyticsScreen from '../screens/seller/SellerAnalyticsScreen';
+import InventoryScreen from '../screens/seller/InventoryScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -511,6 +516,31 @@ function ProfileStackNavigator() {
             <ProfileStack.Screen
                 name="Guide"
                 component={GuideScreen}
+                options={{ headerShown: false }}
+            />
+            <ProfileStack.Screen
+                name="Wallet"
+                component={WalletScreen}
+                options={{ headerShown: false }}
+            />
+            <ProfileStack.Screen
+                name="Installments"
+                component={InstallmentsScreen}
+                options={{ headerShown: false }}
+            />
+            <ProfileStack.Screen
+                name="VideoCall"
+                component={VideoCallScreen}
+                options={{ headerShown: false }}
+            />
+            <ProfileStack.Screen
+                name="SellerAnalytics"
+                component={SellerAnalyticsScreen}
+                options={{ headerShown: false }}
+            />
+            <ProfileStack.Screen
+                name="Inventory"
+                component={InventoryScreen}
                 options={{ headerShown: false }}
             />
         </ProfileStack.Navigator>
