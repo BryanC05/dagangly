@@ -508,6 +508,58 @@ Start with Phase 1 improvements for maximum impact with reasonable effort.
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: March 2026*
+*Document Version: 1.1*
+*Last Updated: April 2026*
 *Project: Dagangly Marketplace*
+
+---
+
+## Dynamic UI Components (April 2026)
+
+### Implemented Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| LiveStockBadge | `components/LiveStockBadge.js` | Stock urgency indicator |
+| OrderStatusCountdown | `components/OrderStatusCountdown.js` | Order time remaining |
+| BalanceAnimation | `components/BalanceAnimation.js` | Animated wallet balance |
+| TypingIndicator | `components/TypingIndicator.js` | Chat typing indicator |
+| OrderProgressStepper | `components/OrderProgressStepper.js` | Order status steps |
+
+### LiveStockBadge Behavior
+
+```
+Stock ≤ 3:   🔴 "Hanya 3!" + pulse animation (red)
+Stock ≤ 10: 🟡 "X tersisa" (yellow)
+Stock 0:    🔴 "Habis" (out of stock)
+```
+
+### OrderStatusCountdown Features
+
+- Time remaining per status (based on average processing time)
+- Progress bar showing completion
+- Color-coded urgency:
+  - Green: > 5 minutes remaining
+  - Orange: ≤ 5 minutes
+  - Red: Time expired
+- Bilingual (EN/ID)
+
+### BalanceAnimation Features
+
+- Count-up animation on value change
+- Scale bounce effect
+- Color indicates positive/negative:
+  - Green: positive amount
+  - Red: negative amount
+- WalletBalanceCard component included
+
+### Performance
+
+- All animations use `useNativeDriver: true`
+- Interval cleanup in useEffect
+- Conditional rendering for low stock only
+
+*Document Version: 1.1*
+*Last Updated: April 2026*
+*Project: Dagangly Marketplace*
+*Dynamic UI Components Added: April 16, 2026*

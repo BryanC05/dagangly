@@ -7,6 +7,7 @@ import { getImageUrl, formatPrice } from '../utils/helpers';
 import api from '../api/api';
 import { particleEvents } from './BackgroundEffect';
 import { tokens } from '../theme/tokens';
+import LiveStockBadge from './LiveStockBadge';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
@@ -219,6 +220,7 @@ export default function ProductCard({ product, onPress }) {
                         {product.rating ? product.rating.toFixed(1) : '4.5'} ({product.reviewCount || 0})
                     </Text>
                 </View>
+                <LiveStockBadge stock={product.stock || 0} />
             </View>
         </TouchableOpacity>
     );

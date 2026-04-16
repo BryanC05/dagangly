@@ -14,6 +14,7 @@ import { useAuthStore } from '../../store/authStore';
 import { getImageUrl, formatPrice } from '../../utils/helpers';
 import { ProductDetailSkeleton } from '../../components/LoadingSkeleton';
 import { particleEvents } from '../../components/BackgroundEffect';
+import LiveStockBadge from '../../components/LiveStockBadge';
 import { API_HOST } from '../../config';
 
 const { width } = Dimensions.get('window');
@@ -668,7 +669,7 @@ export default function ProductDetailScreen({ route }) {
 
                     {/* Stock */}
                     <View style={styles.stockRow}>
-                        <Text style={styles.stockLabel}>{t.stock || 'Stock'}:</Text>
+                        <LiveStockBadge stock={getAvailableStock()} lowStockThreshold={10} />
                         <Text style={[styles.stockValue, getAvailableStock() < 5 && { color: '#ef4444' }]}>
                             {getAvailableStock() > 0 ? `${getAvailableStock()} ${t.availableLabel || 'available'}` : (t.outOfStock || 'Out of stock')}
                         </Text>

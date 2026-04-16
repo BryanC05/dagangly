@@ -13,6 +13,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import DriverRatingModal from '../../components/DriverRatingModal';
 import { OrdersListSkeleton } from '../../components/LoadingSkeleton';
 import OrderProgressStepper from '../../components/OrderProgressStepper';
+import OrderStatusCountdown from '../../components/OrderStatusCountdown';
 
 const STATUS_FLOW = ['pending', 'payment_pending', 'confirmed', 'preparing', 'ready', 'delivered'];
 
@@ -171,6 +172,12 @@ export default function OrdersScreen({ navigation }) {
                         </View>
                     </View>
                 </View>
+                
+                {!['delivered', 'cancelled'].includes(order.status) && (
+                    <View style={{ marginVertical: 8 }}>
+                        <OrderStatusCountdown status={order.status} orderDate={order.createdAt} />
+                    </View>
+                )}
                 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                     {order.seller?.profileImage ? (

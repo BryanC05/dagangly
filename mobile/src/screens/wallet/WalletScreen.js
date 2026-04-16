@@ -11,9 +11,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTranslation } from '../hooks/useTranslation';
-import { useThemeStore } from '../theme/ThemeContext';
-import api from '../api/api';
+import { useTranslation } from '../../hooks/useTranslation';
+import { useThemeStore } from '../../store/themeStore';
+import api from '../../api/api';
+import { BalanceAnimation } from '../../components/BalanceAnimation';
 
 const WalletScreen = () => {
   const { t } = useTranslation();
@@ -55,7 +56,7 @@ const WalletScreen = () => {
 
   const handleAddFunds = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount');
+      Alert.alert(t.error, t.pleaseEnterValidAmount);
       return;
     }
     try {
@@ -63,23 +64,23 @@ const WalletScreen = () => {
         amount: parseFloat(amount),
         paymentId: 'mobile-' + Date.now(),
       });
-      Alert.alert('Success', t('addFundsSuccess'));
+      Alert.alert(t.success, t.addFundsSuccess);
       setShowAddFunds(false);
       setAmount('');
       fetchWallet();
       fetchTransactions();
     } catch (err) {
-      Alert.alert('Error', err.response?.data?.error || 'Failed to add funds');
+      Alert.alert(t.error, err.response?.data?.error || t.failedToAddFunds);
     }
   };
 
   const handleTransfer = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount');
+      Alert.alert(t.error, t.pleaseEnterValidAmount);
       return;
     }
     if (!bankName || !accountNumber || !accountHolder) {
-      Alert.alert('Error', 'Please fill all fields');
+      Alert.alert(t.error, t.pleaseFillAllFields);
       return;
     }
     try {
@@ -89,7 +90,7 @@ const WalletScreen = () => {
         accountNumber,
         accountHolder,
       });
-      Alert.alert('Success', t('transferSuccess'));
+      Alert.alert(t.success, t.transferSuccess);
       setShowTransfer(false);
       setAmount('');
       setBankName('');
@@ -98,7 +99,7 @@ const WalletScreen = () => {
       fetchWallet();
       fetchTransactions();
     } catch (err) {
-      Alert.alert('Error', err.response?.data?.error || 'Failed to transfer');
+      Alert.alert(t.error, err.response?.data?.error || t.failedToTransfer);
     }
   };
 
@@ -132,9 +133,7 @@ const WalletScreen = () => {
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
         <Text style={styles.headerTitle}>{t('myWallet')}</Text>
         <Text style={styles.balanceLabel}>{t('walletBalance')}</Text>
-        <Text style={styles.balance}>
-          {formatCurrency(wallet?.balance)}
-        </Text>
+        <BalanceAnimation amount={wallet?.balance || 0} previousAmount={null} />
       </View>
 
       <View style={styles.buttonContainer}>

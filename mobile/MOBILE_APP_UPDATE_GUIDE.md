@@ -8,7 +8,8 @@ For Play Store publishing, use:
 ### Prerequisites
 - Node.js installed
 - MongoDB running (local or Atlas)
-- Expo Go app on your phone (same WiFi network as your computer)
+- Expo Go app on your phone for basic UI testing only
+- Development build on your phone for push notifications and native module testing
 
 ### Running Locally
 
@@ -24,7 +25,7 @@ npm install
 npx expo start --clear
 ```
 
-Scan the QR code with Expo Go (Android) or Camera app (iOS).
+For native features such as push notifications, open the installed development build instead of Expo Go.
 
 ### Updating After Code Changes
 
@@ -33,7 +34,7 @@ Scan the QR code with Expo Go (Android) or Camera app (iOS).
 cd mobile && npm install && npx expo start --clear
 ```
 
-If you're using Expo Go on a physical device, simply restart the app after the server restarts.
+If you're using Expo Go on a physical device, simply restart the app after the server restarts. For notification testing on Android, use the development build because Expo Go no longer includes remote push support for `expo-notifications`.
 
 ---
 
@@ -179,3 +180,20 @@ After deploying, verify these features work:
 | Logo generator fails | Check that the deployed backend has outbound internet access |
 | Location not working | Grant location permissions in phone settings |
 | Images not uploading | Check backend has enough memory/storage for base64 processing |
+
+---
+
+## New Features (April 2026)
+
+### Dynamic UI Components
+
+The app now includes animated UI components that automatically update:
+
+- **LiveStockBadge** - Shows stock urgency on product cards and detail pages
+- **OrderStatusCountdown** - Shows time remaining for each order status
+- **BalanceAnimation** - Animated wallet balance with count-up effect
+
+These are automatically enabled when viewing:
+- Products with low stock
+- Active orders in Orders tab
+- Wallet balance in Wallet tab
