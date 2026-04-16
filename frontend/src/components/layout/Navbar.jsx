@@ -114,7 +114,6 @@ const Navbar = () => {
     { to: "/products", label: getProductsLabel(), isDropdown: false },
     { to: "/nearby", label: t('nav.nearby') },
     { to: "/forums", label: t('nav.forums') },
-    { to: "/guide", label: t('nav.guide') || 'Guide', icon: BookOpen },
   ];
 
   const accountLinks = [
@@ -165,30 +164,40 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
-      <div className="container flex h-16 items-center gap-4">
+    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/88 backdrop-blur-2xl">
+      <div className="container flex h-20 items-center gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 rounded bg-primary flex items-center justify-center">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-emerald-400 shadow-[0_12px_24px_-14px_hsl(var(--primary))]">
             <span className="text-primary-foreground font-display font-bold text-lg">T</span>
           </div>
-          <span className="font-display text-xl font-bold tracking-wider hidden sm:block">
-            Troli<span className="text-primary">Toko</span>
-          </span>
+          <div className="hidden sm:block">
+            <span className="block font-display text-xl font-bold tracking-wider leading-none">
+              Troli<span className="text-primary">Toko</span>
+            </span>
+            <span className="mt-1 block text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
+              Belanja UMKM lebih dekat
+            </span>
+          </div>
         </Link>
 
-        <form onSubmit={submitSearch} className="flex-1 max-w-md hidden lg:block">
-          <div className="relative">
+        
+
+        <form onSubmit={submitSearch} className="hidden flex-1 lg:block">
+          <div className="relative max-w-xl">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
               placeholder={t("nav.searchPlaceholder") || "Cari produk UMKM..."}
-              className="pl-9 bg-muted border-border text-foreground placeholder:text-muted-foreground"
+              className="h-11 rounded-full border-border/70 bg-muted/70 pl-9 pr-24 text-foreground placeholder:text-muted-foreground shadow-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+            <Button type="submit" size="sm" className="absolute right-1.5 top-1/2 h-8 -translate-y-1/2 rounded-full px-4">
+              Cari
+            </Button>
           </div>
         </form>
 
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-1 rounded-full border border-border/70 bg-background/80 px-2 py-1 shadow-sm">
           {navLinks.map((link) => (
             link.isDropdown ? (
               <DropdownMenu key={link.to}>
@@ -214,7 +223,7 @@ const Navbar = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`relative px-3 py-2 text-sm font-medium rounded-sm transition-colors ${isActive(link.to) ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
+                className={`relative rounded-full px-3 py-2 text-sm font-medium transition-colors ${isActive(link.to) ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                   }`}
               >
                 {link.label}
@@ -327,11 +336,19 @@ const Navbar = () => {
                   <DropdownMenuContent align="end" className="w-52 bg-white/50 dark:bg-black/50 backdrop-blur-sm border-border">
                     <DropdownMenuLabel>{t("nav.myAccount")}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => handleNavigate("/guide")}>
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      {t("nav.guide")}
+                    </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => handleNavigate("/profile")}>
                       <User className="h-4 w-4 mr-2" />
                       {t("nav.profile")}
                     </DropdownMenuItem>
-<DropdownMenuItem onSelect={() => handleNavigate("/saved-products")}>
+                    <DropdownMenuItem onSelect={() => handleNavigate("/orders")}>
+                      <Package className="h-4 w-4 mr-2" />
+                      {t("nav.orders")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleNavigate("/saved-products")}>
                       <Heart className="h-4 w-4 mr-2" />
                       {t("nav.savedProducts")}
                     </DropdownMenuItem>
@@ -370,11 +387,14 @@ const Navbar = () => {
       {mobileOpen && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="fixed top-16 right-0 z-50 h-[calc(100%-4rem)] w-80 max-w-[90vw] bg-card border-l border-border p-6 overflow-y-auto">
+          <aside className="fixed top-16 right-0 z-50 h-[calc(100%-4rem)] w-80 max-w-[90vw] bg-card/95 border-l border-border p-6 overflow-y-auto backdrop-blur-xl">
             <div className="flex justify-between items-center mb-6">
-              <span className="font-display text-lg font-bold tracking-wider">
-                MART<span className="text-primary">KU</span>
-              </span>
+              <div>
+                <span className="font-display text-lg font-bold tracking-wider">
+                  Troli<span className="text-primary">Toko</span>
+                </span>
+                <p className="mt-1 text-xs text-muted-foreground">Navigasi ringkas untuk belanja dan jualan</p>
+              </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
                 <X className="h-5 w-5" />
               </Button>
