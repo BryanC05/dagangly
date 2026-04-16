@@ -28,6 +28,7 @@ import BackgroundEffect from '../components/BackgroundEffect';
 import HomeScreen from '../screens/home/HomeScreen';
 import ProductsScreen from '../screens/products/ProductsScreen';
 import ProductDetailScreen from '../screens/products/ProductDetailScreen';
+import BarcodeScannerScreen from '../screens/products/BarcodeScannerScreen';
 import CartScreen from '../screens/cart/CartScreen';
 import MessagesScreen from '../screens/chat/MessagesScreen';
 import ChatScreen from '../screens/chat/ChatScreen';
@@ -158,6 +159,11 @@ function ProductsStackNavigator() {
             <ProductsStack.Screen
                 name="ProductDetail"
                 component={ProductDetailScreen}
+                options={{ headerShown: false }}
+            />
+            <ProductsStack.Screen
+                name="BarcodeScanner"
+                component={BarcodeScannerScreen}
                 options={{ headerShown: false }}
             />
             <ProductsStack.Screen
@@ -299,20 +305,14 @@ function MessagesStackNavigator() {
             <MessagesStack.Screen
                 name="MessagesList"
                 component={MessagesScreen}
-                options={({ navigation }) => ({
+                options={({
                     title: t.navMessages || 'Messages',
                     headerStyle: { backgroundColor: colors.card },
                     headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
                     headerShadowVisible: false,
                     headerTintColor: colors.text,
-                    headerLeft: () => (
-                        <TouchableOpacity
-                            onPress={() => navigation.goBack()}
-                            style={{ paddingHorizontal: 16, marginLeft: -16 }}
-                        >
-                            <Ionicons name="arrow-back" size={24} color={colors.text} />
-                        </TouchableOpacity>
-                    ),
+                    headerLeft: () => null,
+                    headerBackVisible: false,
                 })}
             />
             <MessagesStack.Screen
@@ -1157,11 +1157,11 @@ export default function AppNavigator() {
                     tabBarStyle: {
                         backgroundColor: colors.card,
                         borderTopWidth: 0,
-                        height: 75,
-                        paddingTop: 8,
-                        paddingBottom: 8,
-                        borderTopLeftRadius: 20,
-                        borderTopRightRadius: 20,
+                        height: 82,
+                        paddingTop: 10,
+                        paddingBottom: 10,
+                        borderTopLeftRadius: 26,
+                        borderTopRightRadius: 26,
                         shadowColor: isDarkMode ? colors.primary : '#000',
                         shadowOffset: { width: 0, height: -4 },
                         shadowOpacity: isDarkMode ? 0.15 : 0.08,
@@ -1176,12 +1176,12 @@ export default function AppNavigator() {
                         flex: 1,
                         justifyContent: 'center',
                         alignItems: 'center',
-                        paddingVertical: 6,
+                        paddingVertical: 8,
                     },
                     tabBarLabelStyle: {
-                        fontSize: 10,
-                        fontWeight: '500',
-                        marginTop: 3,
+                        fontSize: 11,
+                        fontWeight: '600',
+                        marginTop: 4,
                     },
                 })}
                 sceneContainerStyle={{ backgroundColor: colors.background }}

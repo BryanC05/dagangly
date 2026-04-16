@@ -1027,3 +1027,29 @@ func (h *ProductHandler) AdjustStock(c *gin.Context) {
 		"newStock": newStock,
 	})
 }
+
+func (h *ProductHandler) GetProductByBarcode(c *gin.Context) {
+	barcode := c.Param("barcode")
+
+	if barcode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Barcode is required"})
+		return
+	}
+
+	collection := database.GetDB().Collection("products")
+
+	var product models.Product
+	err := collection.FindOne(context.Background(), bson.M{
+		"$or": []bson.M{
+			{"barcode": barcode},
+			{"sku": barcode},
+		},
+	}).Decode(&product)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found", "barcode": barcode})
+		return
+	}
+
+	c.JSON(http.StatusOK, product)
+}

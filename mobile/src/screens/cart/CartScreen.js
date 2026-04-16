@@ -45,6 +45,35 @@ export default function CartScreen({ navigation }) {
         if (!isLoaded) loadCart();
     }, [isLoaded]);
 
+    // Track cart abandonment when items exist
+    useEffect(() => {
+        if (!isAuthenticated || items.length === 0) return;
+        
+        const trackAbandonedCart = async () => {
+            try {
+                const products = items.map(item => ({
+                    productId: item.product._id || item.product.id,
+                    quantity: item.quantity,
+                    price: (item.variant?.price || item.product.price) * item.quantity,
+                }));
+                const totalAmount = items.reduce((sum, item) => {
+                    const price = item.variant?.price || item.product.price;
+                    return sum + (price * item.quantity);
+                }, 0);
+                
+                await api.post('/cart-abandonment/track', {
+                    products,
+                    totalAmount,
+                });
+            } catch (e) {
+                // Silent fail
+            }
+        };
+        
+        const timer = setTimeout(trackAbandonedCart, 2000);
+        return () => clearTimeout(timer);
+    }, [items.length, isAuthenticated]);
+
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
     const styles = {
@@ -209,6 +238,12 @@ export default function CartScreen({ navigation }) {
             };
 
             await api.post('/orders', orderData);
+            
+            // Track cart abandonment - mark as recovered after successful order
+            try {
+                await api.post('/cart-abandonment/mark-recovered');
+            } catch (e) { /* ignore */ }
+            
             await clearSellerCart(selectedSeller.sellerId);
             // 🎉 Checkout celebration burst
             const { width: W, height: H } = require('react-native').Dimensions.get('window');

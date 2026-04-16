@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet,
     FlatList, RefreshControl, Dimensions, ActivityIndicator, Platform,
@@ -205,6 +205,22 @@ export default function ProductsScreen({ navigation, route }) {
             borderWidth: 1,
             borderColor: colors.primary + '30',
         },
+    };
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <TouchableOpacity
+                    style={{ padding: 8 }}
+                    onPress={() => navigation.navigate('BarcodeScanner')}
+                >
+                    <Ionicons name="qr-code" size={24} color={colors.text} />
+                </TouchableOpacity>
+            ),
+        });
+    }, [navigation, colors]);
+
+    const renderHeader = () => (
         sortDropdown: {
             marginHorizontal: 16, 
             backgroundColor: colors.card, 

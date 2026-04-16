@@ -116,6 +116,12 @@ export default {
     subtotal: 'Subtotal',
     total: 'Total',
     checkout: 'Checkout',
+    cartAbandonment: {
+        title: 'Forgot something?',
+        message: 'You have items left in your cart',
+        reminder: 'Complete your order!',
+        recoverCart: 'Complete Purchase',
+    },
     removeItem: 'Remove Item',
     removeItemConfirm: 'Remove this item from cart?',
     orderPlaced: 'Order Placed!',

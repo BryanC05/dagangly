@@ -141,6 +141,12 @@ export default {
     subtotal: 'Subtotal',
     total: 'Total',
     checkout: 'Bayar',
+    cartAbandonment: {
+        title: 'Lupa sesuatu?',
+        message: 'Anda memiliki barang di keranjang',
+        reminder: 'Selesaikan pesanan Anda!',
+        recoverCart: 'Selesaikan Pembelian',
+    },
     removeItem: 'Hapus Barang',
     removeItemConfirm: 'Hapus barang ini dari keranjang?',
     orderPlaced: 'Pesanan Dibuat!',
