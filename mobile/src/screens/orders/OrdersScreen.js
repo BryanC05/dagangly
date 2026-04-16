@@ -12,6 +12,7 @@ import { getImageUrl, formatPrice, formatDate } from '../../utils/helpers';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import DriverRatingModal from '../../components/DriverRatingModal';
 import { OrdersListSkeleton } from '../../components/LoadingSkeleton';
+import OrderProgressStepper from '../../components/OrderProgressStepper';
 
 const STATUS_FLOW = ['pending', 'payment_pending', 'confirmed', 'preparing', 'ready', 'delivered'];
 
@@ -101,12 +102,12 @@ export default function OrdersScreen({ navigation }) {
         setUpdatingStatus(true);
         try {
             await api.put(`/orders/${orderId}/status`, { status: newStatus });
-            Alert.alert('Success', `Order status updated to ${STATUS_LABELS[newStatus]}`);
+            Alert.alert(t.success, t.orderStatusUpdated?.replace('{status}', STATUS_LABELS[newStatus]));
             fetchOrders();
             setShowOrderModal(false);
         } catch (error) {
             console.error('Failed to update status:', error);
-            Alert.alert('Error', 'Failed to update order status');
+            Alert.alert(t.error, t.failedToUpdateOrderStatus);
         } finally {
             setUpdatingStatus(false);
         }
@@ -303,6 +304,9 @@ export default function OrdersScreen({ navigation }) {
                             </View>
                         </View>
 
+                        {/* Order Progress Stepper */}
+                        <OrderProgressStepper currentStatus={order.status} cancelled={order.status === 'cancelled'} />
+
                         {/* Store Info */}
                         <View style={{ marginBottom: 16 }}>
                             <Text style={{ fontSize: 12, color: colors?.textSecondary, marginBottom: 4 }}>Store</Text>
@@ -462,10 +466,33 @@ export default function OrdersScreen({ navigation }) {
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors?.primary} />}
                 ListEmptyComponent={
                     <View style={{ alignItems: 'center', paddingTop: 60 }}>
-                        <Ionicons name="receipt-outline" size={48} color={colors?.textSecondary} />
+                        <View style={{ 
+                            width: 100, height: 100, borderRadius: 50, 
+                            backgroundColor: colors?.primary + '15',
+                            justifyContent: 'center', alignItems: 'center',
+                            marginBottom: 16
+                        }}>
+                            <Ionicons name="receipt-outline" size={48} color={colors?.primary} />
+                        </View>
                         <Text style={{ fontSize: 16, fontWeight: '600', color: colors?.textSecondary, marginTop: 12 }}>
                             {t.noOrders || 'No orders yet'}
                         </Text>
+                        <Text style={{ fontSize: 13, color: colors?.textTertiary, marginTop: 4, textAlign: 'center', paddingHorizontal: 32 }}>
+                            {t.noOrdersDesc || 'When you place orders, they will appear here'}
+                        </Text>
+                        <TouchableOpacity
+                            style={{ 
+                                marginTop: 20, 
+                                backgroundColor: colors?.primary,
+                                paddingHorizontal: 24, paddingVertical: 12,
+                                borderRadius: 12,
+                            }}
+                            onPress={() => navigation.navigate('ProductsTab')}
+                        >
+                            <Text style={{ color: '#fff', fontWeight: '600' }}>
+                                {t.browseProducts || 'Browse Products'}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 }
             />

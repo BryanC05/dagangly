@@ -3,10 +3,13 @@
     "name": "MSME Marketplace",
     "slug": "msme-marketplace-mobile",
     "version": "1.0.0",
+    "platforms": ["ios", "android", "web"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "msme-marketplace",
+    "hostUri": "192.168.0.171:8081",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -15,6 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.msmemarketplace.mobile",
+      "allowHttpRequests": true,
       "config": {
         "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
       },
@@ -28,6 +32,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
+      "allowHttp": true,
       "package": "com.msmemarketplace.mobile",
       "config": {
         "googleMaps": {
@@ -37,7 +42,8 @@
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "VIBRATE"
+        "VIBRATE",
+        "POST_NOTIFICATIONS"
       ]
     },
     "web": {
@@ -53,7 +59,9 @@
       "checkAutomatically": "ON_ERROR_RECOVERY"
     },
     "plugins": [
+      "expo-dev-client",
       "expo-web-browser",
+      "expo-notifications",
       [
         "expo-location",
         {

@@ -284,6 +284,12 @@ export default function ProductsScreen({ navigation, route }) {
             alignItems: 'center', 
             paddingTop: 60 
         },
+        emptyIconContainer: {
+            width: 100, height: 100, borderRadius: 50,
+            backgroundColor: colors.primary + '15',
+            justifyContent: 'center', alignItems: 'center',
+            marginBottom: 16,
+        },
         emptyTitle: { 
             fontSize: 16, 
             fontWeight: '600', 
@@ -293,7 +299,18 @@ export default function ProductsScreen({ navigation, route }) {
         emptyText: { 
             fontSize: 13, 
             color: colors.textTertiary, 
-            marginTop: 4 
+            marginTop: 4,
+            textAlign: 'center',
+            paddingHorizontal: 32,
+        },
+        emptyBtn: {
+            marginTop: 20,
+            backgroundColor: colors.primary,
+            paddingHorizontal: 24, paddingVertical: 12,
+            borderRadius: 12,
+        },
+        emptyBtnText: {
+            color: '#fff', fontWeight: '600',
         },
     };
 
@@ -417,9 +434,24 @@ export default function ProductsScreen({ navigation, route }) {
 
     const renderEmpty = () => (
         <View style={styles.empty}>
-            <Ionicons name="cube-outline" size={48} color={colors.textTertiary} />
+            <View style={styles.emptyIconContainer}>
+                <Ionicons name="cube-outline" size={48} color={colors.primary} />
+            </View>
             <Text style={styles.emptyTitle}>{t('noProducts')}</Text>
             <Text style={styles.emptyText}>{t('adjustFilters')}</Text>
+            {(searchQuery || activeCategory || minPrice || maxPrice) && (
+                <TouchableOpacity
+                    style={styles.emptyBtn}
+                    onPress={() => {
+                        setSearchQuery('');
+                        setActiveCategory(null);
+                        setMinPrice(null);
+                        setMaxPrice(null);
+                    }}
+                >
+                    <Text style={styles.emptyBtnText}>{t('clearFilters')}</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 

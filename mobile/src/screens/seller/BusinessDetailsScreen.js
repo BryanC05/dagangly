@@ -13,11 +13,11 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { BusinessDetailSkeleton } from '../../components/LoadingSkeleton';
 
 export default function BusinessDetailsScreen() {
+    const { t } = useTranslation();
     const navigation = useNavigation();
     const route = useRoute();
     const { sellerId } = route.params;
     const { colors, isDarkMode } = useThemeStore();
-    const { t } = useTranslation();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
     const [seller, setSeller] = useState(null);
@@ -76,7 +76,8 @@ export default function BusinessDetailsScreen() {
         headerTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: colors.text, textAlign: 'center' },
         errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
         errorText: { fontSize: 16, color: colors.textSecondary },
-        businessHeader: { alignItems: 'center', padding: 24, backgroundColor: colors.card, marginBottom: 8 },
+        businessHeader: { alignItems: 'center', padding: 24 },
+        banner: { width: '100%', height: 140, backgroundColor: colors.primary },
         businessImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 12 },
         businessImagePlaceholder: {
             width: 100, height: 100, borderRadius: 50, backgroundColor: colors.input,
@@ -167,7 +168,7 @@ export default function BusinessDetailsScreen() {
 
     const handleShareStore = () => {
         if (!seller?.location?.coordinates) {
-            Alert.alert('Error', 'Store location not available');
+            Alert.alert(t.error, t.storeLocationNotAvailable);
             return;
         }
 
@@ -202,8 +203,19 @@ export default function BusinessDetailsScreen() {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-                {/* Business Header */}
-                <View style={styles.businessHeader}>
+                {/* Banner Image */}
+                {seller.bannerImage ? (
+                    <Image source={{ uri: getImageUrl(seller.bannerImage) }} style={styles.banner} />
+                ) : (
+                    <View style={styles.banner}>
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <Ionicons name="storefront" size={48} color="rgba(255,255,255,0.3)" />
+                        </View>
+                    </View>
+                )}
+
+                {/* Business Header - positioned lower to overlap banner */}
+                <View style={[styles.businessHeader, { marginTop: -50 }]}>
                     {seller.profileImage ? (
                         <Image source={{ uri: getImageUrl(seller.profileImage) }} style={styles.businessImage} />
                     ) : (
@@ -216,7 +228,12 @@ export default function BusinessDetailsScreen() {
                         <View style={styles.badge}>
                             <Text style={styles.badgeText}>{businessTypeLabel}</Text>
                         </View>
-                        {/* Account status badges removed - all users are equal */}
+                        {seller.verified && (
+                            <View style={styles.verifiedBadge}>
+                                <Ionicons name="checkmark-circle" size={12} color="#fff" />
+                                <Text style={styles.verifiedText}>Verified</Text>
+                            </View>
+                        )}
                     </View>
                 </View>
 
@@ -313,6 +330,26 @@ export default function BusinessDetailsScreen() {
                                 {seller.createdAt ? new Date(seller.createdAt).toLocaleDateString() : 'N/A'}
                             </Text>
                         </View>
+
+                        {/* Shipping & Policies */}
+                        {seller.shippingInfo && (
+                            <View style={[styles.infoItem, { flexDirection: 'column', alignItems: 'flex-start' }]}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                                    <Ionicons name="airplane-outline" size={20} color="#6b7280" />
+                                    <Text style={[styles.infoLabel, { marginLeft: 8 }]}>Shipping:</Text>
+                                </View>
+                                <Text style={[styles.infoValue, { marginLeft: 28 }]}>{seller.shippingInfo}</Text>
+                            </View>
+                        )}
+                        {seller.returnPolicy && (
+                            <View style={[styles.infoItem, { flexDirection: 'column', alignItems: 'flex-start' }]}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                                    <Ionicons name="refresh-outline" size={20} color="#6b7280" />
+                                    <Text style={[styles.infoLabel, { marginLeft: 8 }]}>Return Policy:</Text>
+                                </View>
+                                <Text style={[styles.infoValue, { marginLeft: 28 }]}>{seller.returnPolicy}</Text>
+                            </View>
+                        )}
                     </View>
                 )}
             </ScrollView>

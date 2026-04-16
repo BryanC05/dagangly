@@ -16,6 +16,7 @@ import { HomeScreenSkeleton } from '../../components/LoadingSkeleton';
 import { CATEGORIES_EN, CATEGORIES_ID } from '../../config';
 import { DEFAULT_LOCATION } from '../../utils/constants';
 import * as Location from 'expo-location';
+import { useResponsive } from '../../hooks/useResponsive';
 
 const { width } = Dimensions.get('window');
 
@@ -23,10 +24,13 @@ export default function HomeScreen({ navigation }) {
     const { colors, isDarkMode } = useThemeStore();
     const { t, language } = useTranslation();
     const insets = useSafeAreaInsets();
+    const { width: screenWidth, isMobile, isTablet, isDesktop } = useResponsive();
     const [refreshing, setRefreshing] = useState(false);
     const [stats, setStats] = useState({ sellers: 0, products: 0 });
     const [categoryCounts, setCategoryCounts] = useState({});
     const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [trendingProducts, setTrendingProducts] = useState([]);
+    const [dailyDeals, setDailyDeals] = useState([]);
     const [forumPosts, setForumPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [nearbySellers, setNearbySellers] = useState([]);
@@ -77,8 +81,10 @@ export default function HomeScreen({ navigation }) {
 
         try {
 
-            const [productsRes, forumRes, countsRes, sellersRes, nearbyRes] = await Promise.allSettled([
+            const [productsRes, trendingRes, dealsRes, forumRes, countsRes, sellersRes, nearbyRes] = await Promise.allSettled([
                 api.get('/products?limit=6&sort=newest'),
+                api.get('/products?limit=6&sort=trending'),
+                api.get('/products?limit=6&sort=deals'),
                 api.get('/forum?limit=3'),
                 api.get('/products/categories/counts'),
                 api.get('/users/sellers/count'),
@@ -95,6 +101,12 @@ export default function HomeScreen({ navigation }) {
             if (productsRes.status === 'fulfilled') {
                 setFeaturedProducts(productsRes.value.data.products || []);
                 setStats((p) => ({ ...p, products: productsRes.value.data.pagination?.total || 0 }));
+            }
+            if (trendingRes.status === 'fulfilled') {
+                setTrendingProducts(trendingRes.value.data.products || []);
+            }
+            if (dealsRes.status === 'fulfilled') {
+                setDailyDeals(dealsRes.value.data.products || []);
             }
             if (forumRes.status === 'fulfilled') {
                 setForumPosts(forumRes.value.data.threads || []);
@@ -135,10 +147,35 @@ export default function HomeScreen({ navigation }) {
         hero: {
             paddingHorizontal: 20,
             paddingTop: insets.top + 16,
-            paddingBottom: 32,
-            backgroundColor: isDarkMode ? '#0f172a' : '#f3f5f7',
+            paddingBottom: 24,
+            backgroundColor: isDarkMode ? '#0f172a' : '#eef7f5',
             borderBottomLeftRadius: 0,
             borderBottomRightRadius: 0,
+        },
+        statRow: {
+            flexDirection: 'row',
+            gap: 10,
+            marginBottom: 18,
+        },
+        statCard: {
+            flex: 1,
+            backgroundColor: colors.card,
+            borderRadius: 18,
+            padding: 14,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        statValue: {
+            fontSize: 18,
+            fontWeight: '800',
+            color: colors.text,
+        },
+        statLabel: {
+            marginTop: 4,
+            fontSize: 11,
+            color: colors.textSecondary,
+            textTransform: 'uppercase',
+            letterSpacing: 0.6,
         },
         heroBadge: {
             flexDirection: 'row',
@@ -166,10 +203,10 @@ export default function HomeScreen({ navigation }) {
             letterSpacing: 0.5,
         },
         heroTitle: {
-            fontSize: 32,
+            fontSize: isMobile ? 28 : isTablet ? 34 : 38,
             fontWeight: '800',
             color: colors.text,
-            lineHeight: 40,
+            lineHeight: isMobile ? 36 : 42,
             marginBottom: 8,
             textAlign: 'center',
         },
@@ -252,7 +289,7 @@ export default function HomeScreen({ navigation }) {
         },
         nearbyMapCard: {
             backgroundColor: colors.card,
-            borderRadius: 12,
+            borderRadius: 20,
             overflow: 'hidden',
             borderWidth: 1,
             borderColor: colors.border,
@@ -356,7 +393,7 @@ export default function HomeScreen({ navigation }) {
             marginBottom: 16,
         },
         sectionTitle: {
-            fontSize: 20,
+            fontSize: isMobile ? 18 : isTablet ? 20 : 22,
             fontWeight: '700',
             color: colors.text,
             letterSpacing: 0.3,
@@ -371,7 +408,7 @@ export default function HomeScreen({ navigation }) {
         catScroll: { gap: 12 },
         catCard: {
             backgroundColor: colors.card,
-            borderRadius: 10,
+            borderRadius: 18,
             padding: 16,
             alignItems: 'center',
             width: 90,
@@ -398,13 +435,23 @@ export default function HomeScreen({ navigation }) {
         catIcon: { fontSize: 28 },
         productsSection: { marginBottom: 24 },
         productScroll: { paddingHorizontal: 16 },
+        sectionFrame: {
+            marginHorizontal: 20,
+            marginBottom: 24,
+            paddingVertical: 18,
+            borderRadius: 22,
+            backgroundColor: colors.card,
+            borderWidth: 1,
+            borderColor: colors.border,
+            overflow: 'hidden',
+        },
         nearbySection: {
             marginBottom: 24,
             paddingHorizontal: 20,
         },
         nearbyCard: {
             backgroundColor: colors.card,
-            borderRadius: 12,
+            borderRadius: 22,
             padding: 20,
             borderWidth: 1,
             borderColor: colors.border,
@@ -459,7 +506,7 @@ export default function HomeScreen({ navigation }) {
         },
         ctaCard: {
             backgroundColor: colors.card,
-            borderRadius: 12,
+            borderRadius: 24,
             padding: 24,
             alignItems: 'center',
             borderWidth: 1,
@@ -550,6 +597,21 @@ export default function HomeScreen({ navigation }) {
                     >
                         <Ionicons name="arrow-forward" size={18} color="#fff" />
                     </TouchableOpacity>
+                </View>
+
+                <View style={styles.statRow}>
+                    <View style={styles.statCard}>
+                        <Text style={styles.statValue}>{stats.sellers}+</Text>
+                        <Text style={styles.statLabel}>Seller aktif</Text>
+                    </View>
+                    <View style={styles.statCard}>
+                        <Text style={styles.statValue}>{stats.products}+</Text>
+                        <Text style={styles.statLabel}>Produk tercatat</Text>
+                    </View>
+                    <View style={styles.statCard}>
+                        <Text style={styles.statValue}>{nearbySellers.length}</Text>
+                        <Text style={styles.statLabel}>Terdekat</Text>
+                    </View>
                 </View>
 
 
@@ -647,6 +709,7 @@ export default function HomeScreen({ navigation }) {
             </View>
 
             {categories.filter((cat) => (categoryCounts[cat.id] || 0) > 0).length > 0 && (
+                <View style={styles.sectionFrame}>
                 <View style={styles.categorySection}>
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>{t('categories')}</Text>
@@ -671,8 +734,10 @@ export default function HomeScreen({ navigation }) {
                             ))}
                     </ScrollView>
                 </View>
+                </View>
             )}
 
+            <View style={styles.sectionFrame}>
             <View style={styles.productsSection}>
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>{t('featuredProducts')}</Text>
@@ -691,6 +756,55 @@ export default function HomeScreen({ navigation }) {
                     ))}
                 </ScrollView>
             </View>
+            </View>
+
+            {/* Trending Products Section */}
+            {trendingProducts.length > 0 && (
+                <View style={styles.sectionFrame}>
+                <View style={styles.productsSection}>
+                    <View style={styles.sectionHeader}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <Ionicons name="trending-up" size={20} color="#ef4444" />
+                            <Text style={styles.sectionTitle}>{t('trendingProducts')}</Text>
+                        </View>
+                    </View>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
+                        {trendingProducts.map((item) => (
+                            <View key={item._id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
+                                <ProductCard
+                                    product={item}
+                                    onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
+                                />
+                            </View>
+                        ))}
+                    </ScrollView>
+                </View>
+                </View>
+            )}
+
+            {/* Daily Deals Section */}
+            {dailyDeals.length > 0 && (
+                <View style={styles.sectionFrame}>
+                <View style={styles.productsSection}>
+                    <View style={styles.sectionHeader}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <Ionicons name="flash" size={20} color="#f59e0b" />
+                            <Text style={styles.sectionTitle}>{t('dailyDeals')}</Text>
+                        </View>
+                    </View>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
+                        {dailyDeals.map((item) => (
+                            <View key={item._id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
+                                <ProductCard
+                                    product={item}
+                                    onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
+                                />
+                            </View>
+                        ))}
+                    </ScrollView>
+                </View>
+                </View>
+            )}
 
             <View style={styles.nearbySection}>
                 <View style={styles.nearbyCard}>

@@ -3,6 +3,7 @@ import {
     View, Text, ScrollView, Image, TouchableOpacity, StyleSheet,
     Dimensions, Alert, ActivityIndicator, TextInput, Share, Linking,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeStore } from '../../store/themeStore';
@@ -86,6 +87,7 @@ export default function ProductDetailScreen({ route }) {
     const [newRating, setNewRating] = useState(0);
     const [newComment, setNewComment] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
+    const [reviewPhotos, setReviewPhotos] = useState([]);
     const [isSaved, setIsSaved] = useState(false);
     const [whatsappUrl, setWhatsappUrl] = useState(null);
 
@@ -133,36 +135,73 @@ export default function ProductDetailScreen({ route }) {
 
     useEffect(() => { fetchReviews(); }, [productId]);
 
-    const handleSubmitReview = async () => {
-        if (!newRating) { Alert.alert('Error', 'Please select a rating'); return; }
-        setSubmittingReview(true);
-        try {
-            await api.post('/reviews/', { productId, rating: newRating, comment: newComment });
-            setNewRating(0);
-            setNewComment('');
-            fetchReviews();
-        } catch (err) {
-            Alert.alert('Error', err.response?.data?.error || 'Failed to submit review');
-        }
-        setSubmittingReview(false);
-    };
-
     const handleDeleteReview = (reviewId) => {
-        Alert.alert('Delete Review', 'Are you sure?', [
-            { text: 'Cancel' },
+        Alert.alert(t.deleteReview, t.areYouSure, [
+            { text: t.cancel },
             {
-                text: 'Delete', style: 'destructive', onPress: async () => {
+                text: t.delete, style: 'destructive', onPress: async () => {
                     try { await api.delete(`/reviews/${reviewId}`); fetchReviews(); }
-                    catch (e) { Alert.alert('Error', 'Failed to delete'); }
+                    catch (e) { Alert.alert(t.error, t.failedToDeleteReview); }
                 }
             },
         ]);
     };
 
+    const handlePickReviewPhoto = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.5,
+        });
+        if (!result.canceled) {
+            setReviewPhotos([...reviewPhotos, result.assets[0].uri]);
+        }
+    };
+
+    const handleRemoveReviewPhoto = (index) => {
+        setReviewPhotos(reviewPhotos.filter((_, i) => i !== index));
+    };
+
+    const handleSubmitReview = async () => {
+        if (!newRating) { Alert.alert(t.error, t.pleaseSelectRating); return; }
+        setSubmittingReview(true);
+        try {
+            let photoUrls = [];
+            if (reviewPhotos.length > 0) {
+                for (const photo of reviewPhotos) {
+                    const formData = new FormData();
+                    formData.append('image', {
+                        uri: photo,
+                        type: 'image/jpeg',
+                        name: 'review.jpg',
+                    });
+                    const uploadRes = await api.post('/upload/image', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    photoUrls.push(uploadRes.data.url);
+                }
+            }
+            await api.post('/reviews/', { 
+                productId, 
+                rating: newRating, 
+                comment: newComment,
+                photos: photoUrls,
+            });
+            setNewRating(0);
+            setNewComment('');
+            setReviewPhotos([]);
+            fetchReviews();
+        } catch (err) {
+            Alert.alert(t.error, err.response?.data?.error || t.failedToSubmitReview);
+        }
+        setSubmittingReview(false);
+    };
+
     const hasUserReview = reviews.some((r) => r.user === user?._id);
 
     const handleToggleSave = async (evt) => {
-        if (!isAuthenticated) { Alert.alert('Login Required', 'Please login to save products'); return; }
+        if (!isAuthenticated) { Alert.alert(t.loginRequired, t.loginRequiredAddCart); return; }
         // Only burst when SAVING, not unsaving
         if (!isSaved && evt?.nativeEvent) {
             particleEvents.emit('particle-burst', {
@@ -692,6 +731,33 @@ export default function ProductDetailScreen({ route }) {
                                     onChangeText={setNewComment}
                                     multiline
                                 />
+                                {/* Review Photos */}
+                                <View style={{ marginBottom: 10 }}>
+                                    <TouchableOpacity 
+                                        onPress={handlePickReviewPhoto}
+                                        style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8 }}
+                                    >
+                                        <Ionicons name="camera-outline" size={20} color={colors.primary} />
+                                        <Text style={{ color: colors.primary, fontWeight: '500', fontSize: 13 }}>
+                                            {t.addPhotos || 'Add Photos'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {reviewPhotos.length > 0 && (
+                                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+                                            {reviewPhotos.map((photo, index) => (
+                                                <View key={index} style={{ position: 'relative' }}>
+                                                    <Image source={{ uri: photo }} style={{ width: 60, height: 60, borderRadius: 8 }} />
+                                                    <TouchableOpacity
+                                                        onPress={() => handleRemoveReviewPhoto(index)}
+                                                        style={{ position: 'absolute', top: -8, right: -8, backgroundColor: '#ef4444', borderRadius: 10, width: 20, height: 20, justifyContent: 'center', alignItems: 'center' }}
+                                                    >
+                                                        <Ionicons name="close" size={12} color="#fff" />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            ))}
+                                        </View>
+                                    )}
+                                </View>
                                 <TouchableOpacity
                                     onPress={handleSubmitReview}
                                     disabled={!newRating || submittingReview}
@@ -739,6 +805,17 @@ export default function ProductDetailScreen({ route }) {
                                     {review.comment ? (
                                         <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>{review.comment}</Text>
                                     ) : null}
+                                    {review.photos && review.photos.length > 0 && (
+                                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                                            {review.photos.map((photo, pIndex) => (
+                                                <Image 
+                                                    key={pIndex}
+                                                    source={{ uri: getImageUrl(photo) }} 
+                                                    style={{ width: 56, height: 56, borderRadius: 8 }} 
+                                                />
+                                            ))}
+                                        </View>
+                                    )}
                                 </View>
                             ))
                         )}
