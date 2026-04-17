@@ -1,6 +1,6 @@
 // EXPO_PUBLIC_API_HOST should be set per environment/build profile.
 // Example: https://umkm-marketplace-production.up.railway.app
-const DEFAULT_API_HOST = 'https://umkm-marketplace-production.up.railway.app';
+const DEFAULT_API_HOST = 'https://dagangly-production.up.railway.app';
 const RAW_API_HOST = process.env.EXPO_PUBLIC_API_HOST || DEFAULT_API_HOST;
 export const API_HOST = RAW_API_HOST.replace(/\/+$/, '');
 export const API_URL = `${API_HOST}/api`;

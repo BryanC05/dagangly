@@ -12,9 +12,9 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTranslation } from '../hooks/useTranslation';
-import { useThemeStore } from '../theme/ThemeContext';
-import api from '../api/api';
+import { useTranslation } from '../../hooks/useTranslation';
+import { useThemeStore } from '../../theme/ThemeContext';
+import api from '../../api/api';
 
 const VideoCallScreen = () => {
   const { t } = useTranslation();

@@ -33,8 +33,10 @@ export const useDriverStore = create((set, get) => ({
             const savedMode = await AsyncStorage.getItem('driverMode');
             if (savedMode === 'true') {
                 set({ isDriverMode: true });
-                await get().fetchDriverProfile();
-                await get().fetchDriverStats();
+                Promise.all([
+                    get().fetchDriverProfile().catch(() => {}),
+                    get().fetchDriverStats().catch(() => {})
+                ]);
             }
         } catch (error) {
             console.error('Failed to init driver mode:', error);

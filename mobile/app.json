@@ -1,13 +1,13 @@
 {
   "expo": {
     "name": "MSME Marketplace",
-    "slug": "msme-marketplace-mobile",
+    "slug": "mobile",
     "version": "1.0.0",
     "platforms": ["ios", "android", "web"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "scheme": "msme-marketplace",
     "hostUri": "192.168.0.171:8081",
     "splash": {
@@ -49,11 +49,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "034edfa1-ecd5-47df-b050-47725a620224"
-      }
-    },
     "updates": {
       "enabled": false,
       "checkAutomatically": "ON_ERROR_RECOVERY"
@@ -61,7 +56,6 @@
     "plugins": [
       "expo-dev-client",
       "expo-web-browser",
-      "expo-notifications",
       [
         "expo-location",
         {

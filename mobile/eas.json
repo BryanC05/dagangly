@@ -8,7 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_HOST": "https://umkm-marketplace-production.up.railway.app"
+        "EXPO_PUBLIC_API_HOST": "https://dagangly-production.up.railway.app"
       }
     },
     "preview": {
@@ -17,13 +17,13 @@
       },
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_HOST": "https://umkm-marketplace-production.up.railway.app"
+        "EXPO_PUBLIC_API_HOST": "https://dagangly-production.up.railway.app"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_HOST": "https://umkm-marketplace-production.up.railway.app"
+        "EXPO_PUBLIC_API_HOST": "https://dagangly-production.up.railway.app"
       }
     }
   },

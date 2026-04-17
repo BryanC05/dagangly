@@ -28,12 +28,24 @@ export default function App() {
   const safeColors = colors || lightColors;
 
   useEffect(() => {
-    initializeAuth();
-    loadCart();
-    initTheme();
-    initLanguage();
-    initDriverMode();
-    notificationService.initialize().catch(() => { });
+    const init = async () => {
+      initializeAuth();
+      loadCart();
+      initTheme();
+      initLanguage();
+      initDriverMode();
+      
+      try {
+        await notificationService.initialize();
+      } catch (e) {
+        console.log('Notifications not available');
+      }
+      
+      setTimeout(() => {
+        useThemeStore.getState().isReady || useThemeStore.setState({ isReady: true });
+      }, 3000);
+    };
+    init();
   }, []);
 
   const navigationTheme = {

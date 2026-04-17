@@ -43,35 +43,47 @@ export const useAuthStore = create((set, get) => ({
     },
 
     initializeAuth: async () => {
-        try {
-            const token = await SecureStore.getItemAsync('token');
-            if (token) {
-                // Decode JWT to check expiry
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeBase64(base64);
-                const payload = JSON.parse(jsonPayload);
+        const timeoutMs = 5000;
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ timedOut: true }), timeoutMs));
+        
+        const authPromise = (async () => {
+            try {
+                const token = await SecureStore.getItemAsync('token');
+                if (token) {
+                    const base64Url = token.split('.')[1];
+                    if (!base64Url) {
+                        await SecureStore.deleteItemAsync('token');
+                        set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+                        return;
+                    }
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeBase64(base64);
+                    const payload = JSON.parse(jsonPayload);
 
-                if (payload.exp * 1000 > Date.now()) {
-                    // Token is valid, fetch user profile
-                    try {
-                        const response = await api.get('/users/profile');
-                        set({ user: response.data, token, isAuthenticated: true, isLoading: false });
-                    } catch {
-                        // Token rejected by server (e.g. revoked/invalid) -> force fresh login
+                    if (payload.exp * 1000 > Date.now()) {
+                        try {
+                            const response = await api.get('/users/profile');
+                            set({ user: response.data, token, isAuthenticated: true, isLoading: false });
+                        } catch {
+                            await SecureStore.deleteItemAsync('token');
+                            set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+                        }
+                    } else {
                         await SecureStore.deleteItemAsync('token');
                         set({ user: null, token: null, isAuthenticated: false, isLoading: false });
                     }
                 } else {
-                    await SecureStore.deleteItemAsync('token');
                     set({ user: null, token: null, isAuthenticated: false, isLoading: false });
                 }
-            } else {
+            } catch {
+                await SecureStore.deleteItemAsync('token');
                 set({ user: null, token: null, isAuthenticated: false, isLoading: false });
             }
-        } catch {
-            await SecureStore.deleteItemAsync('token');
-            set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+        })();
+
+        const result = await Promise.race([authPromise, timeoutPromise]);
+        if (result?.timedOut) {
+            set({ isLoading: false });
         }
     },
 

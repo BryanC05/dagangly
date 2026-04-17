@@ -1,12 +1,11 @@
 import React from 'react';
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import api from '../api/api';
 
 let notificationHandlerSet = false;
+let isExpoGo = Constants.appOwnership === 'expo';
 
 class NotificationService {
     constructor() {
@@ -14,14 +13,53 @@ class NotificationService {
         this.notificationListener = null;
         this.responseListener = null;
         this.initialized = false;
+        this._notifications = null;
+        this._device = null;
     }
 
-    // Initialize notification handler - call this before using notifications
+    get Notifications() {
+        if (isExpoGo) return null;
+        if (!this._notifications) {
+            try {
+                this._notifications = require('expo-notifications');
+                this._device = require('expo-device');
+            } catch (e) {
+                console.log('📱 Notifications module failed to load:', e.message);
+                this._notifications = null;
+            }
+        }
+        return this._notifications;
+    }
+
+    get Device() {
+        if (isExpoGo) return null;
+        if (!this._device) {
+            try {
+                this._device = require('expo-device');
+            } catch (e) {
+                this._device = null;
+            }
+        }
+        return this._device;
+    }
+
     async initialize() {
         if (this.initialized) return true;
 
+        if (isExpoGo) {
+            console.log('📱 Running in Expo Go - notifications skipped');
+            this.initialized = true;
+            return true;
+        }
+
+        const Notifications = this.Notifications;
+        if (!Notifications) {
+            console.log('📱 Notifications not available');
+            this.initialized = true;
+            return true;
+        }
+
         try {
-            // Set up the notification handler first
             await Notifications.setNotificationHandler({
                 handleNotification: async () => ({
                     shouldShowAlert: true,
@@ -31,8 +69,8 @@ class NotificationService {
                 }),
             });
 
-            // Request permissions for local notifications (required on iOS)
-            if (Device.isDevice) {
+            const Device = this.Device;
+            if (Device?.isDevice) {
                 const { status: existingStatus } = await Notifications.getPermissionsAsync();
                 console.log('📱 Current notification permission status:', existingStatus);
 
@@ -58,22 +96,34 @@ class NotificationService {
             console.log('✅ Notification handler initialized successfully');
             return true;
         } catch (error) {
-            console.error('❌ Notification handler initialization failed:', error.message);
-            return false;
+            console.log('📱 Notifications init failed:', error.message);
+            this.initialized = true;
+            return true;
         }
     }
 
     async registerForPushNotifications() {
-        let token;
+        if (isExpoGo) {
+            console.log('📱 Push notifications not available in Expo Go');
+            return null;
+        }
 
-        // Initialize notification handler first
+        const Notifications = this.Notifications;
+        if (!Notifications) {
+            console.log('📱 Notifications not available');
+            return null;
+        }
+
         const initialized = await this.initialize();
         if (!initialized) {
             console.log('Notifications not supported in this environment');
             return null;
         }
 
+        let token;
+
         try {
+            const Device = this.Device;
             if (Platform.OS === 'android') {
                 await Notifications.setNotificationChannelAsync('high_importance_channel', {
                     name: 'High Importance Notifications',
@@ -83,7 +133,7 @@ class NotificationService {
                 });
             }
 
-            if (Device.isDevice) {
+            if (Device?.isDevice) {
                 const { status: existingStatus } = await Notifications.getPermissionsAsync();
                 let finalStatus = existingStatus;
 
@@ -97,11 +147,9 @@ class NotificationService {
                     return null;
                 }
 
-                // Skip remote push token fetching inside Expo Go as SDK 53 removed support
                 if (Constants.appOwnership !== 'expo') {
                     try {
                         const tokenData = await Notifications.getExpoPushTokenAsync({
-                            // Only pass projectId if you have a valid UUID from EAS Config
                             projectId: Constants?.expoConfig?.extra?.eas?.projectId,
                         });
                         token = tokenData.data;
@@ -111,8 +159,6 @@ class NotificationService {
                     } catch (error) {
                         console.log('Skipped fetching push token:', error.message);
                     }
-                } else {
-                    console.log('Skipping remote push token fetch for Expo Go');
                 }
             } else {
                 console.log('Must use physical device for Push Notifications');
@@ -142,6 +188,8 @@ class NotificationService {
 
     setupNotificationListeners(onNotification, onResponse) {
         if (!notificationHandlerSet) return () => { };
+        const Notifications = this.Notifications;
+        if (!Notifications) return () => { };
 
         try {
             this.notificationListener = Notifications.addNotificationReceivedListener(notification => {
@@ -174,7 +222,12 @@ class NotificationService {
     async scheduleLocalNotification(title, body, data = {}, seconds = 1) {
         console.log('🔔 [LocalNotification] Triggering locally:', title, body);
 
-        // Try to initialize if not already done
+        const Notifications = this.Notifications;
+        if (!Notifications) {
+            console.log('📱 Notifications not available');
+            return;
+        }
+
         if (!notificationHandlerSet) {
             console.log('🔔 [LocalNotification] Initializing notification handler...');
             const initialized = await this.initialize();
@@ -185,7 +238,6 @@ class NotificationService {
             console.log('🔔 [LocalNotification] Handler initialized');
         }
 
-        // Ensure Android notification channel exists
         if (Platform.OS === 'android') {
             try {
                 await Notifications.setNotificationChannelAsync('default', {
@@ -201,7 +253,6 @@ class NotificationService {
 
         try {
             console.log('🔔 [LocalNotification] Scheduling notification...');
-            // Use null trigger for immediate delivery
             const notificationId = await Notifications.scheduleNotificationAsync({
                 content: {
                     title,
@@ -210,7 +261,7 @@ class NotificationService {
                     sound: 'default',
                     priority: Platform.OS === 'android' ? Notifications.AndroidNotificationPriority.MAX : undefined,
                 },
-                trigger: null, // Immediate delivery
+                trigger: null,
             });
             console.log('🔔 [LocalNotification] Scheduled successfully, ID:', notificationId);
         } catch (error) {
@@ -249,7 +300,8 @@ class NotificationService {
     }
 
     async clearAllNotifications() {
-        if (!notificationHandlerSet) return;
+        const Notifications = this.Notifications;
+        if (!Notifications) return;
         try {
             await Notifications.cancelAllScheduledNotificationsAsync();
             await Notifications.dismissAllNotificationsAsync();
@@ -259,7 +311,8 @@ class NotificationService {
     }
 
     async setBadgeCount(count) {
-        if (!notificationHandlerSet) return;
+        const Notifications = this.Notifications;
+        if (!Notifications) return;
         try {
             await Notifications.setBadgeCountAsync(count);
         } catch (error) {
@@ -280,7 +333,6 @@ export function usePushNotifications() {
         let cleanup = null;
 
         const init = async () => {
-            // Try to initialize notification handler
             try {
                 const isInitialized = await notificationService.initialize();
                 setInitialized(isInitialized);
@@ -303,7 +355,6 @@ export function usePushNotifications() {
 
         init();
 
-        // Setup listeners only after initialization succeeds
         return () => {
             if (cleanup) {
                 cleanup();
@@ -311,7 +362,6 @@ export function usePushNotifications() {
         };
     }, []);
 
-    // Separate effect for setting up listeners after initialization
     React.useEffect(() => {
         if (!initialized) return;
 
@@ -327,7 +377,6 @@ export function usePushNotifications() {
                 try {
                     const data = response.notification.request.content.data;
                     if (data?.type === 'new_order' && data?.orderId) {
-                        // Navigate to order details or available orders
                     }
                 } catch (e) {
                     console.log('Notification response error:', e.message);
