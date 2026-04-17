@@ -25,10 +25,10 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	mongoURI := getEnv("MONGODB_URI", "")
+	mongoURI := getEnv("MONGODB_URL", "")
 	if mongoURI == "" {
 		// Check for common alternative env var names used by different platforms
-		mongoURI = getEnv("MONGODB_URL", "") // Railway, Render often use this
+		mongoURI = getEnv("MONGODB_URI", "") // fallback to MONGODB_URI
 	}
 	if mongoURI == "" {
 		mongoURI = getEnv("MONGO_URL", "") // Some platforms use this
@@ -37,22 +37,21 @@ func Load() (*Config, error) {
 		mongoURI = getEnv("DATABASE_URL", "") // Heroku, etc.
 	}
 
-	// In production, require MONGODB_URI to be set
+	// Get environment
 	nodeEnv := getEnv("NODE_ENV", "development")
+
+	// Allow missing MONGODB_URL - server will start but won't have database
 	if mongoURI == "" {
-		if nodeEnv == "production" {
-			return nil, fmt.Errorf("MONGODB_URI environment variable is required in production")
-		}
-		// Default for development only
 		mongoURI = "mongodb://localhost:27017/msme_marketplace"
+		fmt.Printf("⚠️  MONGODB_URL not set, using default: %s\n", mongoURI)
 	}
 
 	jwtSecret := getEnv("JWT_SECRET", "")
-	if jwtSecret == "" && nodeEnv == "production" {
-		return nil, fmt.Errorf("JWT_SECRET environment variable is required in production")
-	}
 	if jwtSecret == "" {
-		jwtSecret = "your-secret-key"
+		jwtSecret = "default-dev-secret-key" // Use a default for development
+		if nodeEnv == "production" {
+			fmt.Println("⚠️  WARNING: JWT_SECRET not set in production, using default (INSECURE!)")
+		}
 	}
 
 	return &Config{

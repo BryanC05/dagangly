@@ -28,13 +28,21 @@ func main() {
 		log.Fatalf("Configuration error: %v", err)
 	}
 
+	log.Printf("🚀 Starting Dagangly API Server")
+	log.Printf("📋 Configuration loaded:")
+	log.Printf("   - Port: %s", cfg.Port)
+	log.Printf("   - NodeEnv: %s", cfg.NodeEnv)
+	log.Printf("   - MongoDB: %s", maskURI(cfg.MongoDBURI))
+
 	// Log connection info (without exposing credentials)
-	log.Printf("Connecting to MongoDB (NodeEnv: %s)...", cfg.NodeEnv)
+	log.Printf("🔗 Connecting to MongoDB...")
 
 	err = database.Connect(cfg.MongoDBURI, "msme_marketplace")
 	if err != nil {
 		log.Printf("⚠️ Warning: MongoDB connection failed: %v", err)
 		log.Printf("⚠️ Server will start without database (limited functionality)")
+	} else {
+		log.Printf("✅ MongoDB connected successfully")
 	}
 
 	r := gin.Default()
