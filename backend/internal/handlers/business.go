@@ -446,6 +446,11 @@ func (h *BusinessHandler) GetBusinessByID(c *gin.Context) {
 
 // EnsureIndexes creates necessary indexes for business collection
 func (h *BusinessHandler) EnsureIndexes() {
+	// Skip index creation if database is not connected
+	if h.businessCollection == nil {
+		return
+	}
+
 	ctx := context.Background()
 
 	// Index on ownerId for quick lookups

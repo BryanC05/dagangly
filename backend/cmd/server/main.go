@@ -66,9 +66,11 @@ func main() {
 	})
 
 	websocket.Init(cfg.JWTSecret)
+	log.Printf("✅ Websocket initialized")
 
 	r.GET("/ws", websocket.GetHub().HandleWebSocket)
 
+	log.Printf("🔧 Initializing handlers...")
 	authHandler := handlers.NewAuthHandler(cfg)
 	userHandler := handlers.NewUserHandler()
 	productHandler := handlers.NewProductHandler()
@@ -94,6 +96,7 @@ func main() {
 	adminHandler := handlers.NewAdminHandler()
 	videoCallHandler := handlers.NewVideoCallHandler()
 	installmentHandler := handlers.NewInstallmentHandler()
+	log.Printf("✅ Handlers initialized")
 
 	api := r.Group("/api")
 	{
@@ -380,13 +383,13 @@ func main() {
 			promos.DELETE("/:id", promoHandler.DeletePromo)
 		}
 
-		// Analytics
-		analytics := api.Group("/analytics")
+		// Recommendations
+		recommendations := api.Group("/recommendations")
 		{
-			analytics.GET("/recommended", recommendationHandler.GetRecommendations)
-			analytics.GET("/trending", recommendationHandler.GetTrendingProducts)
-			analytics.GET("/similar/:id", recommendationHandler.GetSimilarProducts)
-			analytics.GET("/frequently-bought/:id", recommendationHandler.GetFrequentlyBoughtTogether)
+			recommendations.GET("/recommended", recommendationHandler.GetRecommendations)
+			recommendations.GET("/trending", recommendationHandler.GetTrendingProducts)
+			recommendations.GET("/similar/:id", recommendationHandler.GetSimilarProducts)
+			recommendations.GET("/frequently-bought/:id", recommendationHandler.GetFrequentlyBoughtTogether)
 		}
 
 		// User history (authenticated)
@@ -495,7 +498,8 @@ func main() {
 	}
 
 	// Ensure database indexes
-	businessHandler.EnsureIndexes()
+	// businessHandler.EnsureIndexes() // Temporarily disabled
+	log.Printf("✅ Database indexes ensured")
 
 	os.MkdirAll("./uploads/logos", 0755)
 	os.MkdirAll("./uploads/products", 0755)
@@ -509,8 +513,9 @@ func main() {
 		}
 	}
 
+	log.Printf("🚀 About to start server on port %s", port)
 	fmt.Printf("🚀 Server running on port %s\n", port)
-	r.Run("0.0.0.0:" + port)
+	r.Run(":" + port)
 }
 
 // maskURI hides credentials in MongoDB connection string for logging
