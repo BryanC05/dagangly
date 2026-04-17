@@ -28,6 +28,7 @@ export default function ProductsScreen({ navigation, route }) {
     const [category, setCategory] = useState(initialCategory);
     const [sortBy, setSortBy] = useState('newest');
     const [showSort, setShowSort] = useState(false);
+    const [showFilter, setShowFilter] = useState(false);
     const [activeFilter, setActiveFilter] = useState('all');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -58,11 +59,13 @@ export default function ProductsScreen({ navigation, route }) {
             if (category && category !== 'all') params.category = category;
 
             // Apply quick filters
-            if (activeFilter === 'price-low') params.sort = 'price-asc';
-            else if (activeFilter === 'price-high') params.sort = 'price-desc';
-            else if (activeFilter === 'rating') { params.minRating = 4; params.sort = 'rating'; }
+            if (activeFilter === 'price-low') params.sort = 'price-low';
+            else if (activeFilter === 'price-high') params.sort = 'price-high';
+            else if (activeFilter === 'rating') params.sort = 'rating';
             else if (activeFilter === 'new') params.sort = 'newest';
-            else if (activeFilter === 'nearby') params.sort = 'distance';
+            else if (activeFilter === 'nearby') { 
+                // Nearby requires location coordinates
+            }
 
             const response = await api.get('/products', { params });
             const newProducts = response.data.products || [];
@@ -205,6 +208,153 @@ export default function ProductsScreen({ navigation, route }) {
             borderWidth: 1,
             borderColor: colors.primary + '30',
         },
+        sortDropdown: {
+            position: 'absolute',
+            top: 56,
+            right: 16,
+            backgroundColor: colors.card,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            zIndex: 100,
+            minWidth: 160,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 4,
+        },
+        sortOption: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+        },
+        sortOptionText: {
+            fontSize: 14,
+            color: colors.text,
+        },
+        sortOptionTextActive: {
+            color: colors.primary,
+            fontWeight: '600',
+        },
+        filterDropdownRow: {
+            flexDirection: 'row',
+            paddingHorizontal: 16,
+            paddingBottom: 12,
+            gap: 10,
+        },
+        filterDropdownBtn: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 14,
+            height: 42,
+            backgroundColor: colors.card,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        filterDropdownText: {
+            fontSize: 13,
+            color: colors.text,
+        },
+        filterDropdown: {
+            backgroundColor: colors.card,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            overflow: 'hidden',
+        },
+        overlay: {
+            ...StyleSheet.absoluteFillObject,
+            zIndex: 200,
+        },
+        filterDropdownOverlay: {
+            position: 'absolute',
+            top: 100,
+            left: 16,
+            right: 16,
+            backgroundColor: colors.card,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 8,
+        },
+        sortDropdownOverlay: {
+            position: 'absolute',
+            top: 100,
+            right: 16,
+            backgroundColor: colors.card,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            minWidth: 180,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 8,
+        },
+        filterOption: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+        },
+        filterOptionText: {
+            flex: 1,
+            marginLeft: 10,
+            fontSize: 14,
+            color: colors.text,
+        },
+        empty: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 60,
+        },
+        emptyIconContainer: {
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: colors.primary + '15',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 16,
+        },
+        emptyTitle: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: colors.text,
+            marginBottom: 4,
+        },
+        emptyText: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            marginBottom: 20,
+        },
+        emptyBtn: {
+            paddingVertical: 10,
+            paddingHorizontal: 24,
+            backgroundColor: colors.primary + '15',
+            borderRadius: 8,
+        },
+        emptyBtnText: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: colors.primary,
+        },
     };
 
     useLayoutEffect(() => {
@@ -255,85 +405,29 @@ export default function ProductsScreen({ navigation, route }) {
                 </TouchableOpacity>
             </View>
 
-            {showSort && (
-                <View style={styles.sortDropdown}>
-                    {sortOptions.map((opt) => (
-                        <TouchableOpacity
-                            key={opt.id}
-                            style={[
-                                styles.sortOption, 
-                                sortBy === opt.id && { backgroundColor: colors.primary + '10' },
-                            ]}
-                            onPress={() => { setSortBy(opt.id); setShowSort(false); }}
-                        >
-                            <Text style={[
-                                styles.sortOptionText, 
-                                sortBy === opt.id && styles.sortOptionTextActive
-                            ]}>
-                                {opt.name}
-                            </Text>
-                            {sortBy === opt.id && (
-                                <Ionicons name="checkmark" size={16} color={colors.primary} />
-                            )}
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            )}
+            
 
-            <FlatList
-                data={categories}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.catRow}
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        style={[
-                            styles.catChip, 
-                            category === item.id && styles.catChipActive
-                        ]}
-                        onPress={() => setCategory(item.id)}
-                    >
-                        <Text style={[
-                            styles.catChipText, 
-                            category === item.id && styles.catChipTextActive
-                        ]}>
-                            {item.icon} {item.name}
-                        </Text>
-                    </TouchableOpacity>
-                )}
-            />
-
-            {/* Quick Filter Chips */}
-            <View style={styles.filterChipsContainer}>
-                <FlatList
-                    data={filterOptions}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.filterRow}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            style={[
-                                styles.filterChip,
-                                activeFilter === item.id && { backgroundColor: colors.primary, borderColor: colors.primary }
-                            ]}
-                            onPress={() => { setActiveFilter(item.id); setLoading(true); fetchProducts(1); }}
-                        >
-                            <Ionicons 
-                                name={item.icon} 
-                                size={14} 
-                                color={activeFilter === item.id ? '#fff' : colors.primary} 
-                            />
-                            <Text style={[
-                                styles.filterChipText,
-                                activeFilter === item.id && { color: '#fff' }
-                            ]}>
-                                {item.name}
-                            </Text>
-                        </TouchableOpacity>
-                    )}
-                />
+            <View style={styles.filterDropdownRow}>
+                <TouchableOpacity 
+                    style={styles.filterDropdownBtn}
+                    onPress={() => setShowFilter(!showFilter)}
+                >
+                    <Ionicons name="filter" size={16} color={colors.primary} />
+                    <Text style={styles.filterDropdownText}>
+                        {activeFilter === 'all' ? (language === 'id' ? 'Filter' : 'Filter') : filterOptions.find(f => f.id === activeFilter)?.name}
+                    </Text>
+                    <Ionicons name={showFilter ? 'chevron-up' : 'chevron-down'} size={16} color={colors.textSecondary} />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={styles.filterDropdownBtn}
+                    onPress={() => setShowSort(!showSort)}
+                >
+                    <Ionicons name="swap-vertical" size={16} color={colors.primary} />
+                    <Text style={styles.filterDropdownText}>
+                        {sortOptions.find(s => s.id === sortBy)?.name || (language === 'id' ? 'Urutkan' : 'Sort')}
+                    </Text>
+                    <Ionicons name={showSort ? 'chevron-up' : 'chevron-down'} size={16} color={colors.textSecondary} />
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -398,6 +492,71 @@ export default function ProductsScreen({ navigation, route }) {
                         />
                     )}
                 />
+            )}
+            
+            {/* Filter Dropdown Overlay */}
+            {showFilter && (
+                <TouchableOpacity 
+                    style={styles.overlay} 
+                    activeOpacity={1} 
+                    onPress={() => setShowFilter(false)}
+                >
+                    <View style={styles.filterDropdownOverlay}>
+                        {filterOptions.map((item) => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={[
+                                    styles.filterOption, 
+                                    activeFilter === item.id && { backgroundColor: colors.primary + '10' },
+                                ]}
+                                onPress={() => { setActiveFilter(item.id); setShowFilter(false); setLoading(true); fetchProducts(1); }}
+                            >
+                                <Ionicons name={item.icon} size={18} color={activeFilter === item.id ? colors.primary : colors.textSecondary} />
+                                <Text style={[
+                                    styles.filterOptionText, 
+                                    activeFilter === item.id && { color: colors.primary, fontWeight: '600' }
+                                ]}>
+                                    {item.name}
+                                </Text>
+                                {activeFilter === item.id && (
+                                    <Ionicons name="checkmark" size={18} color={colors.primary} />
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
+            )}
+
+            {/* Sort Dropdown Overlay */}
+            {showSort && (
+                <TouchableOpacity 
+                    style={styles.overlay} 
+                    activeOpacity={1} 
+                    onPress={() => setShowSort(false)}
+                >
+                    <View style={styles.sortDropdownOverlay}>
+                        {sortOptions.map((opt) => (
+                            <TouchableOpacity
+                                key={opt.id}
+                                style={[
+                                    styles.sortOption, 
+                                    sortBy === opt.id && { backgroundColor: colors.primary + '10' },
+                                ]}
+                                onPress={() => { setSortBy(opt.id); setShowSort(false); }}
+                            >
+                                <Text style={[
+                                    styles.sortOptionText, 
+                                    sortBy === opt.id && styles.sortOptionTextActive
+                                ]}>
+                                    {opt.name}
+                                </Text>
+                                {sortBy === opt.id && (
+                                    <Ionicons name="checkmark" size={18} color={colors.primary} />
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
             )}
         </View>
     );

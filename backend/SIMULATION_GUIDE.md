@@ -54,7 +54,7 @@ The simulation data creates realistic user/business/product scenarios for testin
 ## Loading Simulation Data
 
 ### Prerequisites
-- MongoDB running locally or accessible via `MONGODB_URI`
+- MongoDB running locally or accessible via `MONGODB_URL`
 - Node.js installed
 - Backend dependencies installed (`npm install` in backend directory)
 

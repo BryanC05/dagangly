@@ -189,7 +189,7 @@ export default function ProfileScreen({ navigation, route }) {
         },
         saveBtnText: { fontSize: 14, fontWeight: '700', color: colors.white },
         menuSection: {
-            marginHorizontal: 16, backgroundColor: colors.card, borderRadius: 16,
+            marginHorizontal: 16, marginTop: 24, backgroundColor: colors.card, borderRadius: 16,
             overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.04, shadowRadius: 4, elevation: 2,
         },
@@ -201,7 +201,7 @@ export default function ProfileScreen({ navigation, route }) {
         menuLabel: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
         logoutBtn: {
             flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-            marginHorizontal: 16, marginTop: 20, paddingVertical: 14,
+            marginHorizontal: 16, marginTop: 32, paddingVertical: 14,
             borderRadius: 14, borderWidth: 1.5, borderColor: isDarkMode ? '#7f1d1d' : '#fecaca',
             backgroundColor: colors.card,
         },
@@ -310,7 +310,7 @@ export default function ProfileScreen({ navigation, route }) {
     ], [t, navigation, unreadNotifCount, isDarkMode, language]);
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
             <View style={styles.profileCard}>
                 {/* Avatar with camera button */}
                 <View style={styles.avatarContainer}>
@@ -529,8 +529,6 @@ export default function ProfileScreen({ navigation, route }) {
                 <Text style={styles.logoutText}>{t.logout || 'Logout'}</Text>
                 <Ionicons name="log-out-outline" size={20} color={colors.danger} />
             </TouchableOpacity>
-
-            <View style={{ height: 40 }} />
         </ScrollView>
     );
 }

@@ -54,6 +54,12 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 	limit, _ := strconv.Atoi(limitStr)
 	skip := (page - 1) * limit
 
+	isGeoQuery := lat != "" && lng != ""
+	var radius int
+	if isGeoQuery {
+		radius, _ = strconv.Atoi(radiusStr)
+	}
+
 	query := bson.M{"isAvailable": true}
 
 	if category != "" {
@@ -104,15 +110,20 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 		SetSkip(int64(skip)).
 		SetLimit(int64(limit))
 
-	if lat != "" && lng != "" {
-		query["location"] = bson.M{
-			"$near": bson.M{
-				"$geometry": bson.M{
-					"type":        "Point",
-					"coordinates": []interface{}{lng, lat},
+	if isGeoQuery {
+		geoQuery := bson.M{
+			"location": bson.M{
+				"$near": bson.M{
+					"$geometry": bson.M{
+						"type":        "Point",
+						"coordinates": []interface{}{lng, lat},
+					},
+					"$maxDistance": radius,
 				},
-				"$maxDistance": radiusStr,
 			},
+		}
+		for k, v := range geoQuery {
+			query[k] = v
 		}
 	}
 
