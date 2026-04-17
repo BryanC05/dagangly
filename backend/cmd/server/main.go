@@ -33,7 +33,8 @@ func main() {
 
 	err = database.Connect(cfg.MongoDBURI, "msme_marketplace")
 	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
+		log.Printf("⚠️ Warning: MongoDB connection failed: %v", err)
+		log.Printf("⚠️ Server will start without database (limited functionality)")
 	}
 
 	r := gin.Default()
@@ -42,10 +43,17 @@ func main() {
 
 	r.Static("/uploads", "./uploads")
 
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "OK",
+			"message": "Dagangly API is running",
+		})
+	})
+
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "OK",
-			"message": "MSME Marketplace API is running",
+			"message": "Dagangly API is running",
 		})
 	})
 
