@@ -495,7 +495,10 @@ func main() {
 
 	port := cfg.Port
 	if port == "" {
-		port = "5000"
+		port = os.Getenv("PORT")
+		if port == "" {
+			port = "8080"
+		}
 	}
 
 	fmt.Printf("🚀 Server running on port %s\n", port)
