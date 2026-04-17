@@ -512,3 +512,11 @@ func main() {
 	fmt.Printf("🚀 Server running on port %s\n", port)
 	r.Run("0.0.0.0:" + port)
 }
+
+// maskURI hides credentials in MongoDB connection string for logging
+func maskURI(uri string) string {
+	if len(uri) > 20 {
+		return uri[:10] + "***" + uri[len(uri)-10:]
+	}
+	return "***"
+}
