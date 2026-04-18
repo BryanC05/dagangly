@@ -65,6 +65,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		// Allow specific origins
 		allowedOrigins := []string{
 			"http://localhost:5173",
+			"https://dagangly.pages.dev",
 			"https://umkm-marketplace.pages.dev",
 			"https://258fd25d.umkm-marketplace.pages.dev",
 		}
