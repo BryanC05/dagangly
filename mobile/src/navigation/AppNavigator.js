@@ -64,6 +64,7 @@ import FinanceDashboardScreen from '../screens/finance/DashboardScreen';
 import FinanceExpensesScreen from '../screens/finance/ExpensesScreen';
 import FinanceCalculatorScreen from '../screens/finance/CalculatorScreen';
 import FinanceCashFlowScreen from '../screens/finance/CashFlowScreen';
+import FinanceInvoicesScreen from '../screens/finance/InvoicesScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -240,6 +241,17 @@ function FinanceStackNavigator() {
                 component={FinanceCashFlowScreen}
                 options={{
                     title: t.cashFlow || 'Cash Flow',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+            <FinanceStack.Screen
+                name="FinanceInvoices"
+                component={FinanceInvoicesScreen}
+                options={{
+                    title: t.invoices || 'Invoices',
                     headerStyle: { backgroundColor: colors.card },
                     headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
                     headerShadowVisible: false,

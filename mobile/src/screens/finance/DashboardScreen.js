@@ -184,6 +184,15 @@ export default function FinanceDashboardScreen({ navigation }) {
                         {language === 'id' ? 'Kalkulator' : 'Calculator'}
                     </Text>
                 </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[styles.quickAction, { backgroundColor: colors.card }]}
+                    onPress={() => navigation.navigate('FinanceInvoices')}
+                >
+                    <Ionicons name="document-text-outline" size={24} color={colors.primary} />
+                    <Text style={[styles.quickActionText, { color: colors.text }]}>
+                        {language === 'id' ? 'Invoice' : 'Invoices'}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <View style={styles.section}>
@@ -294,7 +303,7 @@ const styles = StyleSheet.create({
     orderStatus: { fontSize: 12 },
     orderCustomer: { fontSize: 12, marginTop: 2 },
     orderTotal: { fontSize: 16, fontWeight: '600', marginTop: 8 },
-    quickActions: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-    quickAction: { flex: 1, borderRadius: 12, padding: 16, alignItems: 'center' },
+    quickActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+    quickAction: { width: '31%', borderRadius: 12, padding: 16, alignItems: 'center' },
     quickActionText: { fontSize: 11, marginTop: 6, textAlign: 'center' },
 });
