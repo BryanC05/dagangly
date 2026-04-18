@@ -156,7 +156,10 @@ export default function ProductAnalysisScreen({ navigation }) {
         setProducts(updatedProducts);
     };
 
-    const formatCurrency = (amount) => 'Rp ' + ((amount || 0)).toLocaleString('id-ID');
+    const formatCurrency = (amount) => {
+        const formatted = (amount || 0).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        return language === 'id' ? 'Rp ' + formatted : 'Rp ' + formatted;
+    };
 
     const renderProductItem = ({ item }) => (
         <TouchableOpacity
@@ -195,7 +198,7 @@ export default function ProductAnalysisScreen({ navigation }) {
             <ScrollView contentContainerStyle={styles.content}>
                 <View style={styles.header}>
                     <Text style={[styles.title, { color: colors.text }]}>
-                        {language === 'id' ? 'Analisis Produk' : 'Product Analysis'}
+                        {t.productAnalysis}
                     </Text>
                     <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                         {language === 'id' 
@@ -211,7 +214,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                             onPress={() => setShowProductList(true)}
                         >
                             <Text style={{ color: colors.text }}>
-                                {language === 'id' ? 'Pilih Produk' : 'Select Product'}
+                                {t.selectProduct}
                             </Text>
                             <Ionicons name="chevron-down" size={20} color={colors.textSecondary} />
                         </TouchableOpacity>
@@ -223,7 +226,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                             style={styles.productList}
                             ListEmptyComponent={
                                 <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 20 }}>
-                                    {language === 'id' ? 'Tidak ada produk' : 'No products'}
+                                    {t.noProducts}
                                 </Text>
                             }
                         />
@@ -247,13 +250,13 @@ export default function ProductAnalysisScreen({ navigation }) {
 
                         <View style={[styles.section, { backgroundColor: colors.card }]}>
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                                {language === 'id' ? 'Biaya per Unit' : 'Cost per Unit'}
+                                {t.costPerUnit}
                             </Text>
                             
                             <View style={styles.inputRow}>
                                 <View style={styles.inputGroup}>
                                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                                        {language === 'id' ? 'Bahan Baku' : 'Material'}
+                                        {t.material}
                                     </Text>
                                     <TextInput
                                         style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
@@ -266,7 +269,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                                 </View>
                                 <View style={styles.inputGroup}>
                                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                                        {language === 'id' ? 'Tenaga Kerja' : 'Labor'}
+                                        {t.labor}
                                     </Text>
                                     <TextInput
                                         style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
@@ -282,7 +285,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                             <View style={styles.inputRow}>
                                 <View style={styles.inputGroup}>
                                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                                        {language === 'id' ? 'Pengiriman' : 'Shipping'}
+                                        {t.shipping}
                                     </Text>
                                     <TextInput
                                         style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
@@ -308,10 +311,10 @@ export default function ProductAnalysisScreen({ navigation }) {
                                 </View>
                             </View>
                             
-                            <View style={styles.inputRow}>
-                                <View style={styles.inputGroupExtra}>
+<View style={styles.inputRow}>
+                                <View style={styles.inputGroup}>
                                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                                        {language === 'id' ? 'Fee Platform (%)' : 'Platform Fee (%)'}
+                                        {t.otherCosts}
                                     </Text>
                                     <View style={styles.feeRow}>
                                         <TextInput
@@ -350,10 +353,26 @@ export default function ProductAnalysisScreen({ navigation }) {
                                 {language === 'id' ? 'Penjualan' : 'Sales'}
                             </Text>
                             
-                            <View style={styles.inputRow}>
+<View style={styles.inputRow}>
                                 <View style={styles.inputGroup}>
                                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                                        {language === 'id' ? 'Harga Jual' : 'Selling Price'}
+                                        {t.otherCosts}
+                                    </Text>
+                                    <TextInput
+                                        style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                                        placeholder="0"
+                                        placeholderTextColor={colors.textSecondary}
+                                        keyboardType="numeric"
+                                        value={form.otherCosts}
+                                        onChangeText={(text) => setForm({ ...form, otherCosts: text })}
+                                    />
+                                </View>
+                            </View>
+                            
+                            <View style={styles.inputRow}>
+                                <View style={styles.inputGroupExtra}>
+                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
+                                        {t.platformFee}
                                     </Text>
                                     <TextInput
                                         style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
@@ -392,13 +411,13 @@ export default function ProductAnalysisScreen({ navigation }) {
                         {hasFormData && (
                             <View style={[styles.resultsSection, { backgroundColor: colors.card }]}>
                                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                                    {language === 'id' ? 'Hasil Analisis' : 'Analysis Results'}
+                                    {t.resultsSection}
                                 </Text>
                                 
                                 <View style={styles.resultsGrid}>
                                     <View style={styles.resultItem}>
                                         <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>
-                                            {language === 'id' ? 'Total Biaya/Unit' : 'Cost/Unit'}
+                                            {t.totalCostUnit}
                                         </Text>
                                         <Text style={[styles.resultValue, { color: colors.text }]}>
                                             {formatCurrency(totalCost())}
@@ -406,7 +425,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                                     </View>
                                     <View style={styles.resultItem}>
                                         <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>
-                                            {language === 'id' ? 'Revenue' : 'Revenue'}
+                                            {t.revenue}
                                         </Text>
                                         <Text style={[styles.resultValue, { color: colors.text }]}>
                                             {formatCurrency(revenue())}
@@ -414,7 +433,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                                     </View>
                                     <View style={styles.resultItem}>
                                         <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>
-                                            {language === 'id' ? 'Laba Kotor' : 'Gross Profit'}
+                                            {t.grossProfit}
                                         </Text>
                                         <Text style={[
                                             styles.resultValue, 
@@ -425,7 +444,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                                     </View>
                                     <View style={styles.resultItem}>
                                         <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>
-                                            {language === 'id' ? 'Margin' : 'Margin'}
+                                            {t.margin}
                                         </Text>
                                         <Text style={[
                                             styles.resultValue, 
@@ -436,7 +455,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                                     </View>
                                     <View style={styles.resultItem}>
                                         <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>
-                                            {language === 'id' ? 'Laba/Unit' : 'Profit/Unit'}
+                                            {t.profitUnit}
                                         </Text>
                                         <Text style={[
                                             styles.resultValue, 
@@ -447,10 +466,10 @@ export default function ProductAnalysisScreen({ navigation }) {
                                     </View>
                                     <View style={styles.resultItem}>
                                         <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>
-                                            {language === 'id' ? 'Break-even' : 'Break-even'}
+                                            {t.breakEven}
                                         </Text>
                                         <Text style={[styles.resultValue, { color: colors.text }]}>
-                                            {breakEvenUnits()} {language === 'id' ? 'unit' : 'units'}
+                                            {breakEvenUnits()} {t.units}
                                         </Text>
                                     </View>
                                 </View>
@@ -459,9 +478,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                                     <View style={[styles.warningBox, { backgroundColor: '#fef2f2' }]}>
                                         <Ionicons name="warning" size={20} color="#ef4444" />
                                         <Text style={[styles.warningText, { color: '#ef4444' }]}>
-                                            {language === 'id' 
-                                                ? 'Rug! Naikkan harga atau kurangi biaya.' 
-                                                : 'Loss! Increase price or reduce costs.'}
+                                            {t.profitLossWarning}
                                         </Text>
                                     </View>
                                 )}
