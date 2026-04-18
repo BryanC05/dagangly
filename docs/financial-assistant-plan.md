@@ -6,6 +6,10 @@ A financial management tool for MSME sellers to track sales, expenses, generate 
 
 ---
 
+## Status: ✅ COMPLETED (Phases 1-6)
+
+---
+
 ## Architecture: Local + Optional Sync
 
 ```
@@ -46,12 +50,12 @@ A financial management tool for MSME sellers to track sales, expenses, generate 
 
 ```
 FinanceTab/
-├── DashboardScreen    ← Pulls sales from orders + local expenses
-├── ExpensesScreen     ← Add/edit expenses (local + sync)
-├── InvoicesScreen    ← Generate from orders (local + sync)
-├── CalculatorScreen  ← Price calculator (local only)
-├── CashFlowScreen    ← income - expenses (local + sync)
-├── SettingsScreen   ← Enable/disable sync
+├── DashboardScreen    ✅ Sales overview + quick links
+├── ExpensesScreen     ✅ Add/edit/delete local expenses
+├── CalculatorScreen  ✅ Price calculator (cost + margin)
+├── CashFlowScreen    ✅ Income vs expenses chart
+├── InvoicesScreen    ✅ Generate from orders
+├── SettingsScreen   ✅ Sync toggle + export
 └── (Future) AIChatScreen
 ```
 
@@ -102,10 +106,11 @@ CREATE TABLE settings (
 {
   _id: ObjectId,
   userId: ObjectId,
+  localId: String,
   amount: Number,
   category: String,
   description: String,
-  date: Date,
+  date: String,
   createdAt: Date,
   updatedAt: Date,
   source: 'mobile'
@@ -115,6 +120,7 @@ CREATE TABLE settings (
 {
   _id: ObjectId,
   userId: ObjectId,
+  localId: String,
   orderId: ObjectId,
   invoiceNumber: String,
   customerName: String,
@@ -127,44 +133,51 @@ CREATE TABLE settings (
 
 ---
 
-## Features & Priority
+## Implemented Features
 
-| Phase | Feature | Description |
-|-------|---------|-------------|
-| 1 | **Dashboard** | Sales overview from orders + local expenses summary |
-| 2 | **Expenses Screen** | Add/edit/delete local expenses |
-| 3 | **Calculator** | Price calculator (cost + margin → selling price) |
-| 4 | **Invoices** | Generate invoice from orders |
-| 5 | **Cash Flow** | Income vs expenses chart |
-| 6 | **Backend Sync** | MongoDB sync + settings |
-| 7 | **AI Chat** | Financial assistant chat |
-
----
-
-## Integration Points
-
-| Source | Data |
-|--------|------|
-| Backend | `orders` collection → sales data |
-| Backend | `products` → cost data |
-| New | `expenses` table (local) |
-| New | `invoices` table (local) |
+| Phase | Feature | Status | Description |
+|-------|---------|--------|-------------|
+| 1 | **Dashboard** | ✅ | Sales overview from orders + local expenses summary |
+| 2 | **Expenses Screen** | ✅ | Add/edit/delete local expenses |
+| 3 | **Calculator** | ✅ | Price calculator (cost + margin → selling price) |
+| 4 | **Invoices** | ✅ | Generate invoice from orders |
+| 5 | **Cash Flow** | ✅ | Income vs expenses chart |
+| 6 | **Backend Sync** | ✅ | MongoDB sync + settings |
+| 7 | **AI Chat** | ⏳ | Financial assistant chat |
 
 ---
 
 ## API Endpoints (Backend)
 
-```javascript
-// POST /finance/expenses/sync
-// GET /finance/expenses
-// POST /finance/expenses
-// PUT /finance/expenses/:id
-// DELETE /finance/expenses/:id
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/finance/expenses/sync` | POST | Sync local expenses to server |
+| `/finance/expenses` | GET | Get expense summary by category |
+| `/finance/invoices/sync` | POST | Sync local invoices to server |
+| `/finance/summary` | GET | Dashboard summary (sales, expenses, profit) |
 
-// GET /finance/invoices
-// POST /finance/invoices
-// GET /finance/invoices/:id
-// GET /finance/summary
+---
+
+## Files Created
+
+```
+mobile/src/
+├── services/
+│   ├── FinanceDB.js        # SQLite database helper
+│   └── FinanceSync.js      # Backend sync service
+└── screens/finance/
+    ├── DashboardScreen.js  # Main dashboard with stats
+    ├── ExpensesScreen.js   # Expense management
+    ├── CalculatorScreen.js  # Price calculator
+    ├── CashFlowScreen.js   # Cash flow analysis
+    ├── InvoicesScreen.js  # Invoice generation
+    └── SettingsScreen.js  # Sync settings
+
+backend/internal/
+├── handlers/
+│   └── finance.go        # Finance API handlers
+└── models/
+    └── expense.go       # Expense model
 ```
 
 ---
@@ -172,14 +185,26 @@ CREATE TABLE settings (
 ## Dependencies
 
 ```bash
+# Mobile
 npx expo install expo-sqlite
+
+# Backend (already have MongoDB)
 ```
+
+---
+
+## Next: AI Chat (Phase 7)
+
+Research AI model for financial advice. Options:
+- Custom LLM fine-tuned on financial data
+- OpenAI API with financial system prompt
+- Local rules-based for simple advice
 
 ---
 
 ## Build Notes
 
-- Research AI model for chat assistant before Phase 7
-- Start with SQLite for offline-first experience
-- Add sync option as toggle in settings
-- Export data as JSON/CSV for manual backup
+- SQLite for offline-first experience
+- Sync as optional toggle in settings
+- Export data as JSON for manual backup
+- All finance screens accessible from Dashboard
