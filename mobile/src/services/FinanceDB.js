@@ -41,6 +41,20 @@ class FinanceDB {
                 key TEXT PRIMARY KEY,
                 value TEXT
             );
+            
+            CREATE TABLE IF NOT EXISTS product_costs (
+                id TEXT PRIMARY KEY,
+                productId TEXT,
+                productName TEXT,
+                materialCost REAL DEFAULT 0,
+                laborCost REAL DEFAULT 0,
+                shippingCost REAL DEFAULT 0,
+                platformFee REAL DEFAULT 0,
+                platformFeeType TEXT DEFAULT 'percent',
+                otherCosts REAL DEFAULT 0,
+                createdAt TEXT,
+                updatedAt TEXT
+            );
         `);
         
         console.log('✅ Finance DB initialized');
@@ -160,6 +174,53 @@ class FinanceDB {
         const db = await this.init();
         const result = await db.getFirstAsync('SELECT value FROM finance_settings WHERE key = ?', [key]);
         return result?.value;
+    }
+
+    // Product Costs
+    async saveProductCosts(costs) {
+        const db = await this.init();
+        const now = new Date().toISOString();
+        
+        if (costs.id) {
+            await db.runAsync(
+                `UPDATE product_costs SET 
+                    productName = ?, materialCost = ?, laborCost = ?, shippingCost = ?,
+                    platformFee = ?, platformFeeType = ?, otherCosts = ?, updatedAt = ?
+                WHERE id = ?`,
+                [costs.productName, costs.materialCost, costs.laborCost, costs.shippingCost,
+                costs.platformFee, costs.platformFeeType || 'percent', costs.otherCosts, now, costs.id]
+            );
+            return costs.id;
+        } else {
+            const id = this.generateId();
+            await db.runAsync(
+                `INSERT INTO product_costs 
+                    (id, productId, productName, materialCost, laborCost, shippingCost, platformFee, platformFeeType, otherCosts, createdAt, updatedAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [id, costs.productId, costs.productName, costs.materialCost, costs.laborCost, costs.shippingCost,
+                costs.platformFee, costs.platformFeeType || 'percent', costs.otherCosts, now, now]
+            );
+            return id;
+        }
+    }
+
+    async getProductCosts() {
+        const db = await this.init();
+        return await db.getAllAsync('SELECT * FROM product_costs ORDER BY updatedAt DESC');
+    }
+
+    async getProductCostsById(productId) {
+        const db = await this.init();
+        const result = await db.getFirstAsync(
+            'SELECT * FROM product_costs WHERE productId = ? OR id = ?',
+            [productId, productId]
+        );
+        return result;
+    }
+
+    async deleteProductCosts(id) {
+        const db = await this.init();
+        await db.runAsync('DELETE FROM product_costs WHERE id = ?', [id]);
     }
 
     // Export data

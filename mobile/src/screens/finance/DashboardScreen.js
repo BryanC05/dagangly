@@ -195,6 +195,15 @@ export default function FinanceDashboardScreen({ navigation }) {
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={[styles.quickAction, { backgroundColor: colors.card }]}
+                    onPress={() => navigation.navigate('ProductAnalysis')}
+                >
+                    <Ionicons name="analytics-outline" size={24} color={colors.primary} />
+                    <Text style={[styles.quickActionText, { color: colors.text }]}>
+                        {language === 'id' ? 'Produk' : 'Product'}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[styles.quickAction, { backgroundColor: colors.card }]}
                     onPress={() => navigation.navigate('FinanceSettings')}
                 >
                     <Ionicons name="settings-outline" size={24} color={colors.primary} />
@@ -312,7 +321,7 @@ const styles = StyleSheet.create({
     orderStatus: { fontSize: 12 },
     orderCustomer: { fontSize: 12, marginTop: 2 },
     orderTotal: { fontSize: 16, fontWeight: '600', marginTop: 8 },
-    quickActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
-    quickAction: { width: '31%', borderRadius: 12, padding: 16, alignItems: 'center' },
-    quickActionText: { fontSize: 11, marginTop: 6, textAlign: 'center' },
+    quickActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
+    quickAction: { width: '18%', borderRadius: 12, padding: 12, alignItems: 'center', minWidth: 70 },
+    quickActionText: { fontSize: 10, marginTop: 4, textAlign: 'center' },
 });

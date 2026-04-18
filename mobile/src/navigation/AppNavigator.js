@@ -66,6 +66,7 @@ import FinanceCalculatorScreen from '../screens/finance/CalculatorScreen';
 import FinanceCashFlowScreen from '../screens/finance/CashFlowScreen';
 import FinanceInvoicesScreen from '../screens/finance/InvoicesScreen';
 import FinanceSettingsScreen from '../screens/finance/SettingsScreen';
+import ProductAnalysisScreen from '../screens/finance/ProductAnalysisScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -264,6 +265,17 @@ function FinanceStackNavigator() {
                 component={FinanceSettingsScreen}
                 options={{
                     title: language === 'id' ? 'Pengaturan' : 'Settings',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+            <FinanceStack.Screen
+                name="ProductAnalysis"
+                component={ProductAnalysisScreen}
+                options={{
+                    title: language === 'id' ? 'Analisis Produk' : 'Product Analysis',
                     headerStyle: { backgroundColor: colors.card },
                     headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
                     headerShadowVisible: false,
