@@ -1,6 +1,8 @@
 import React, { useRef, useImperativeHandle, forwardRef, Component } from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Text, Dimensions, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
+import { useTranslation } from '../hooks/useTranslation';
+import { Ionicons } from '@expo/vector-icons';
 import { tokens } from '../theme/tokens';
 
 const { width, height } = Dimensions.get('window');
@@ -117,6 +119,22 @@ const Map = forwardRef(({
             lineHeight: tokens.lineHeight.normal * tokens.fontSize.sm,
             paddingHorizontal: tokens.spacing[10],
         },
+        osmButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            backgroundColor: colors.primary,
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            borderRadius: tokens.radius.md,
+            marginTop: tokens.spacing[4],
+        },
+        osmButtonText: {
+            color: '#fff',
+            fontSize: tokens.fontSize.sm,
+            fontWeight: tokens.fontWeight.semibold,
+        },
         markerContainer: {
             alignItems: 'center',
         },
@@ -154,14 +172,35 @@ const Map = forwardRef(({
         },
     };
 
-    if (!MapView) {
+if (!MapView) {
+        const { colors } = useThemeStore();
+        const { t, language } = useTranslation();
+        
         return (
             <View style={[dynamicStyles.fallbackContainer, style]}>
                 <Text style={dynamicStyles.fallbackIcon}>🗺️</Text>
-                <Text style={dynamicStyles.fallbackTitle}>Map Unavailable</Text>
-                <Text style={dynamicStyles.fallbackText}>
-                    Google Maps API key is not configured.
+                <Text style={dynamicStyles.fallbackTitle}>
+                    {language === 'id' ? 'Peta Tidak Tersedia' : 'Map Unavailable'}
                 </Text>
+                <Text style={dynamicStyles.fallbackText}>
+                    {language === 'id' 
+                        ? 'Google Maps API belum dikonfigurasi.\nCek app.json untuk menambahkan API key.'
+                        : 'Google Maps API not configured.\nAdd your API key in app.json.'}
+                </Text>
+                
+                {/* OpenStreetMap Fallback Button */}
+                {region && (
+                    <TouchableOpacity 
+                        style={styles.osmButton}
+                        onPress={() => {
+                            const url = `https://www.openstreetmap.org/?mlat=${region.latitude}&mlon=${region.longitude}&zoom=14`;
+                            Linking.openURL(url);
+                        }}
+                    >
+                        <Ionicons name="globe-outline" size={18} color="#fff" />
+                        <Text style={styles.osmButtonText}>OpenStreetMap</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         );
     }
