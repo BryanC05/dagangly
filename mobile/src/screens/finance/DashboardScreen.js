@@ -156,6 +156,36 @@ export default function FinanceDashboardScreen({ navigation }) {
                 )}
             </View>
 
+            <View style={styles.quickActions}>
+                <TouchableOpacity 
+                    style={[styles.quickAction, { backgroundColor: colors.card }]}
+                    onPress={() => navigation.navigate('FinanceExpenses')}
+                >
+                    <Ionicons name="receipt-outline" size={24} color={colors.primary} />
+                    <Text style={[styles.quickActionText, { color: colors.text }]}>
+                        {language === 'id' ? 'Pengeluaran' : 'Expenses'}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[styles.quickAction, { backgroundColor: colors.card }]}
+                    onPress={() => navigation.navigate('FinanceCashFlow')}
+                >
+                    <Ionicons name="trending-up-outline" size={24} color={colors.primary} />
+                    <Text style={[styles.quickActionText, { color: colors.text }]}>
+                        {language === 'id' ? 'Aliran Dana' : 'Cash Flow'}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[styles.quickAction, { backgroundColor: colors.card }]}
+                    onPress={() => navigation.navigate('FinanceCalculator')}
+                >
+                    <Ionicons name="calculator-outline" size={24} color={colors.primary} />
+                    <Text style={[styles.quickActionText, { color: colors.text }]}>
+                        {language === 'id' ? 'Kalkulator' : 'Calculator'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
             <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
                     {language === 'id' ? 'Bulan Ini' : 'This Month'}
@@ -264,4 +294,7 @@ const styles = StyleSheet.create({
     orderStatus: { fontSize: 12 },
     orderCustomer: { fontSize: 12, marginTop: 2 },
     orderTotal: { fontSize: 16, fontWeight: '600', marginTop: 8 },
+    quickActions: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+    quickAction: { flex: 1, borderRadius: 12, padding: 16, alignItems: 'center' },
+    quickActionText: { fontSize: 11, marginTop: 6, textAlign: 'center' },
 });
