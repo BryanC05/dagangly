@@ -473,6 +473,17 @@ func main() {
 			whatsapp.GET("/seller/:sellerId", whatsAppHandler.GetSellerWhatsApp)
 		}
 
+		// Finance
+		financeHandler := handlers.NewFinanceHandler()
+		finance := api.Group("/finance")
+		finance.Use(middleware.AuthRequired(cfg.JWTSecret))
+		{
+			finance.POST("/expenses/sync", financeHandler.SyncExpenses)
+			finance.GET("/expenses", financeHandler.GetExpenses)
+			finance.POST("/invoices/sync", financeHandler.SyncInvoices)
+			finance.GET("/summary", financeHandler.GetFinanceSummary)
+		}
+
 		// Video Call Integration
 		videoCall := api.Group("/video-call")
 		videoCall.Use(middleware.AuthRequired(cfg.JWTSecret))

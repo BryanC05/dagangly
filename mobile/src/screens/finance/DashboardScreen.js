@@ -193,6 +193,15 @@ export default function FinanceDashboardScreen({ navigation }) {
                         {language === 'id' ? 'Invoice' : 'Invoices'}
                     </Text>
                 </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[styles.quickAction, { backgroundColor: colors.card }]}
+                    onPress={() => navigation.navigate('FinanceSettings')}
+                >
+                    <Ionicons name="settings-outline" size={24} color={colors.primary} />
+                    <Text style={[styles.quickActionText, { color: colors.text }]}>
+                        {language === 'id' ? 'Setelan' : 'Settings'}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <View style={styles.section}>
