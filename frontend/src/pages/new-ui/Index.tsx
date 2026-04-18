@@ -38,26 +38,31 @@ export default function Index() {
   ];
 
   useEffect(() => {
-    const fetchCategoryCounts = async () => {
-      try {
-        const response = await api.get("/products/categories/counts");
-        setCategoryCounts(response.data);
-      } catch (error) {
-        console.error("Failed to fetch category counts:", error);
-      }
-    };
-    const fetchFeaturedProducts = async () => {
-      try {
-        const response = await api.get("/products?limit=6&sort=newest");
-        const normalized = normalizeProductsPayload(response.data);
-        setFeaturedProducts(normalized.products || []);
-      } catch (error) {
-        console.error("Failed to fetch featured products:", error);
-        setFeaturedProducts([]);
-      }
-    };
-    fetchCategoryCounts();
-    fetchFeaturedProducts();
+    // Delay initial fetch slightly to improve perceived performance
+    const timer = setTimeout(async () => {
+      const fetchCategoryCounts = async () => {
+        try {
+          const response = await api.get("/products/categories/counts");
+          setCategoryCounts(response.data);
+        } catch (error) {
+          console.error("Failed to fetch category counts:", error);
+        }
+      };
+      const fetchFeaturedProducts = async () => {
+        try {
+          const response = await api.get("/products?limit=6&sort=newest");
+          const normalized = normalizeProductsPayload(response.data);
+          setFeaturedProducts(normalized.products || []);
+        } catch (error) {
+          console.error("Failed to fetch featured products:", error);
+          setFeaturedProducts([]);
+        }
+      };
+      fetchCategoryCounts();
+      fetchFeaturedProducts();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {

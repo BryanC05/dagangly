@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthModalStore } from './store/authModalStore';
@@ -6,9 +6,6 @@ import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import { useLanguageStore } from './store/languageStore';
 import SocialLinks from './pages/SocialLinks';
-import Home from './pages/new-ui/Index';
-import Products from './pages/new-ui/Products';
-import ProductDetail from './pages/new-ui/ProductDetail';
 import SellerDashboard from './pages/SellerDashboard';
 import AddProduct from './pages/AddProduct';
 import SellerProductTracking from './pages/SellerProductTracking';
@@ -41,18 +38,31 @@ import VideoCallPage from './pages/VideoCall';
 import InstallmentsPage from './pages/Installments';
 import SellerAnalyticsPage from './pages/SellerAnalytics';
 import InventoryPage from './pages/Inventory';
-import NotFound from './pages/new-ui/NotFound';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/layout/Layout';
+
+const Home = lazy(() => import('./pages/new-ui/Index'));
+const Products = lazy(() => import('./pages/new-ui/Products'));
+const ProductDetail = lazy(() => import('./pages/new-ui/ProductDetail'));
+const NotFound = lazy(() => import('./pages/new-ui/NotFound'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
       retry: 1,
+      refetchOnWindowFocus: false,
     },
   },
 });
+
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  );
+}
 
 function AuthRouteHandler() {
   const navigate = useNavigate();
@@ -97,9 +107,9 @@ function App() {
         <div className="min-h-screen bg-background text-foreground font-sans antialiased">
           <Routes>
             <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/" element={<Suspense fallback={<LoadingFallback />}><Home /></Suspense>} />
+              <Route path="/products" element={<Suspense fallback={<LoadingFallback />}><Products /></Suspense>} />
+              <Route path="/product/:id" element={<Suspense fallback={<LoadingFallback />}><ProductDetail /></Suspense>} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/nearby" element={<NearbyMap />} />
               <Route path="/store/:id" element={<SellerStore />} />
@@ -122,9 +132,6 @@ function App() {
               <Route path="/automation" element={<Automation />} />
               <Route path="/social-links" element={<SocialLinks />} />
               <Route path="/logo-generator" element={<LogoGenerator />} />
-              {/* Projects routes disabled - uncomment to enable */}
-              {/* <Route path="/projects" element={<Projects />} /> */}
-              {/* <Route path="/projects/:id" element={<ProjectDetail />} /> */}
               <Route path="/admin/membership" element={<AdminMembership />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/wallet" element={<Wallet />} />
@@ -135,7 +142,7 @@ function App() {
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/invoice/:orderId" element={<Invoice />} />
               <Route path="/guide" element={<Guide />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFound /></Suspense>} />
             </Route>
           </Routes>
         </div>
