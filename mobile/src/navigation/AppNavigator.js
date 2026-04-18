@@ -60,6 +60,9 @@ import InstallmentsScreen from '../screens/installments/InstallmentsScreen';
 import VideoCallScreen from '../screens/videoCall/VideoCallScreen';
 import SellerAnalyticsScreen from '../screens/seller/SellerAnalyticsScreen';
 import InventoryScreen from '../screens/seller/InventoryScreen';
+import FinanceDashboardScreen from '../screens/finance/DashboardScreen';
+import FinanceExpensesScreen from '../screens/finance/ExpensesScreen';
+import FinanceCalculatorScreen from '../screens/finance/CalculatorScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -67,6 +70,7 @@ const ProductsStack = createNativeStackNavigator();
 const ProjectsStack = createNativeStackNavigator();
 const CartStack = createNativeStackNavigator();
 const AddStack = createNativeStackNavigator();
+const FinanceStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
 const DeliveryStack = createNativeStackNavigator();
 const MessagesStack = createNativeStackNavigator();
@@ -182,6 +186,55 @@ function ProductsStackNavigator() {
                 options={{ headerShown: false }}
             />
         </ProductsStack.Navigator>
+    );
+}
+
+// Finance Stack Navigator
+function FinanceStackNavigator() {
+    const { colors } = useThemeStore();
+    const { t, language } = useLanguageStore();
+
+    return (
+        <FinanceStack.Navigator
+            screenOptions={{
+                contentStyle: { backgroundColor: colors.background },
+                animation: 'slide_from_right',
+            }}
+        >
+            <FinanceStack.Screen
+                name="FinanceDashboard"
+                component={FinanceDashboardScreen}
+                options={{
+                    title: t.finance || 'Finance',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+            <FinanceStack.Screen
+                name="FinanceExpenses"
+                component={FinanceExpensesScreen}
+                options={{
+                    title: t.expenses || 'Expenses',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+            <FinanceStack.Screen
+                name="FinanceCalculator"
+                component={FinanceCalculatorScreen}
+                options={{
+                    title: t.calculator || 'Calculator',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+        </FinanceStack.Navigator>
     );
 }
 
@@ -1137,6 +1190,7 @@ export default function AppNavigator() {
                             case 'Add': iconName = focused ? 'add-circle' : 'add-circle-outline'; break;
                             case 'Messages': iconName = focused ? 'chatbubbles' : 'chatbubbles-outline'; break;
                             case 'Profile': iconName = focused ? 'person' : 'person-outline'; break;
+                            case 'Finance': iconName = focused ? 'wallet' : 'wallet-outline'; break;
                             case 'Spacer': iconName = 'ellipse'; break;
                             default: iconName = 'ellipse';
                         }
@@ -1213,6 +1267,13 @@ export default function AppNavigator() {
                     component={MessagesStackNavigator}
                     options={{
                         tabBarLabel: t.tabMessages || 'Messages',
+                    }}
+                />
+                <Tab.Screen
+                    name="Finance"
+                    component={FinanceStackNavigator}
+                    options={{
+                        tabBarLabel: t.finance || 'Finance',
                     }}
                 />
                 {/* Hidden Cart - not shown in tab bar */}
