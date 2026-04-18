@@ -5,7 +5,6 @@ import Constants from 'expo-constants';
 import api from '../api/api';
 
 let notificationHandlerSet = false;
-let isExpoGo = Constants.appOwnership === 'expo';
 
 class NotificationService {
     constructor() {
@@ -18,11 +17,9 @@ class NotificationService {
     }
 
     get Notifications() {
-        if (isExpoGo) return null;
         if (!this._notifications) {
             try {
                 this._notifications = require('expo-notifications');
-                this._device = require('expo-device');
             } catch (e) {
                 console.log('📱 Notifications module failed to load:', e.message);
                 this._notifications = null;
@@ -32,7 +29,6 @@ class NotificationService {
     }
 
     get Device() {
-        if (isExpoGo) return null;
         if (!this._device) {
             try {
                 this._device = require('expo-device');
@@ -46,17 +42,11 @@ class NotificationService {
     async initialize() {
         if (this.initialized) return true;
 
-        if (isExpoGo) {
-            console.log('📱 Running in Expo Go - notifications skipped');
-            this.initialized = true;
-            return true;
-        }
-
         const Notifications = this.Notifications;
         if (!Notifications) {
             console.log('📱 Notifications not available');
             this.initialized = true;
-            return true;
+            return false;
         }
 
         try {
@@ -98,16 +88,11 @@ class NotificationService {
         } catch (error) {
             console.log('📱 Notifications init failed:', error.message);
             this.initialized = true;
-            return true;
+            return false;
         }
     }
 
     async registerForPushNotifications() {
-        if (isExpoGo) {
-            console.log('📱 Push notifications not available in Expo Go');
-            return null;
-        }
-
         const Notifications = this.Notifications;
         if (!Notifications) {
             console.log('📱 Notifications not available');
@@ -222,20 +207,22 @@ class NotificationService {
     async scheduleLocalNotification(title, body, data = {}, seconds = 1) {
         console.log('🔔 [LocalNotification] Triggering locally:', title, body);
 
-        const Notifications = this.Notifications;
-        if (!Notifications) {
-            console.log('📱 Notifications not available');
-            return;
-        }
-
         if (!notificationHandlerSet) {
             console.log('🔔 [LocalNotification] Initializing notification handler...');
             const initialized = await this.initialize();
             if (!initialized) {
                 console.log('❌ Notifications not available - handler could not be initialized');
+                Alert.alert(title, body);
                 return;
             }
             console.log('🔔 [LocalNotification] Handler initialized');
+        }
+
+        const Notifications = this.Notifications;
+        if (!Notifications) {
+            console.log('📱 Notifications not available, showing alert instead');
+            Alert.alert(title, body);
+            return;
         }
 
         if (Platform.OS === 'android') {
@@ -317,6 +304,21 @@ class NotificationService {
             await Notifications.setBadgeCountAsync(count);
         } catch (error) {
             console.log('Set badge count failed:', error.message);
+        }
+    }
+
+    async requestPermission() {
+        const Notifications = this.Notifications;
+        if (!Notifications) {
+            console.log('📱 Notifications not available');
+            return false;
+        }
+        try {
+            const { status } = await Notifications.requestPermissionsAsync();
+            return status === 'granted';
+        } catch (error) {
+            console.log('📱 Permission request failed:', error.message);
+            return false;
         }
     }
 }
