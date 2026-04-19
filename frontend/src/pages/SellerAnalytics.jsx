@@ -199,7 +199,7 @@ const SellerAnalyticsPage = () => {
               {t('analytics.revenueChart')}
             </h2>
             <div className="space-y-2">
-              {(sales || []).slice(0, 7).map((day, index) => (
+              {(sales?.recentDays || []).slice(0, 7).map((day, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <span className="text-sm text-gray-500 dark:text-gray-400 w-20">
                     {day._id?.month}/{day._id?.day}
@@ -217,7 +217,7 @@ const SellerAnalyticsPage = () => {
                   </span>
                 </div>
               ))}
-              {(!sales || sales.length === 0) && (
+              {(!sales?.recentDays || sales.recentDays.length === 0) && (
                 <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                   {t('analytics.noData')}
                 </p>
