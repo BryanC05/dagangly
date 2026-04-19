@@ -36,7 +36,6 @@ import Guide from './pages/Guide';
 import Wallet from './pages/Wallet';
 import VideoCallPage from './pages/VideoCall';
 import InstallmentsPage from './pages/Installments';
-import SellerAnalyticsPage from './pages/SellerAnalytics';
 import InventoryPage from './pages/Inventory';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/layout/Layout';
@@ -143,7 +142,6 @@ function App() {
               <Route path="/wallet" element={<Wallet />} />
               <Route path="/video-call" element={<VideoCallPage />} />
               <Route path="/installments" element={<InstallmentsPage />} />
-              <Route path="/seller-analytics" element={<SellerAnalyticsPage />} />
               <Route path="/inventory" element={<InventoryPage />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/invoice/:orderId" element={<Invoice />} />

@@ -1,16 +1,154 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit2, Trash2, Package, TrendingUp, DollarSign, ShoppingBag, Save, X, AlertTriangle, BarChart3, Crown, CreditCard, CheckCircle, Clock, Sparkles } from 'lucide-react';
+import { 
+  Plus, Edit2, Trash2, Package, TrendingUp, DollarSign, ShoppingBag, Save, X, AlertTriangle, 
+  BarChart3, Crown, CreditCard, CheckCircle, Clock, Sparkles, Send, Bot, Calendar, ArrowUpRight, 
+  ChevronDown, Activity, Terminal, Star, Users 
+} from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useTranslation } from '../hooks/useTranslation';
+import { useSellerAnalyticsStore } from '../store/sellerAnalyticsStore';
 import api from '../utils/api';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import AnalyticsSection from '@/components/AnalyticsSection';
 import PromoManager from '@/components/PromoManager';
+import ReactMarkdown from 'react-markdown';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
+};
+
+const AIConsultantWidget = ({ period, analytics, sales, customers, products }) => {
+  const [chatQuery, setChatQuery] = useState('');
+  const [chatHistory, setChatHistory] = useState([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [chatHistory, isChatLoading]);
+
+  const handleAskAI = async () => {
+    if (!chatQuery.trim()) return;
+
+    const userMsg = { role: 'user', content: chatQuery };
+    setChatHistory((prev) => [...prev, userMsg]);
+    setChatQuery('');
+    setIsChatLoading(true);
+
+    try {
+      const analyticsContext = { period, analytics, sales, customers, products };
+      const res = await api.post('/ai/financial-consultant', {
+        query: userMsg.content,
+        analytics: analyticsContext
+      });
+      setChatHistory((prev) => [...prev, { role: 'ai', content: res.data.response }]);
+    } catch (err) {
+      console.error('Failed to ask AI:', err);
+      setChatHistory((prev) => [...prev, { role: 'ai', content: 'Connection Error: API Unreachable.' }]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  return (
+    <motion.div variants={itemVariants} className="bg-[#1e1e1e] rounded-xl overflow-hidden mb-8 border border-gray-800 shadow-xl flex flex-col h-[500px] text-gray-300 font-mono">
+      <div className="bg-[#121212] px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Terminal className="h-5 w-5 text-emerald-500" />
+          <h2 className="text-sm font-semibold text-white tracking-widest uppercase">AI Financial Advisor</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-xs text-gray-500 uppercase tracking-widest">System Online</span>
+        </div>
+      </div>
+
+      <div 
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar bg-[#1a1a1a]"
+      >
+        {chatHistory.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center opacity-50">
+            <Bot className="h-10 w-10 mb-3" />
+            <p className="text-sm uppercase tracking-widest">Awaiting Query Input...</p>
+          </div>
+        ) : (
+          <AnimatePresence initial={false}>
+            {chatHistory.map((msg, idx) => (
+              <motion.div 
+                key={idx}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`max-w-[90%] md:max-w-[80%] p-4 rounded-lg ${
+                  msg.role === 'user' 
+                    ? 'bg-blue-600/20 border border-blue-500/30 text-blue-100' 
+                    : 'bg-[#252525] border border-gray-700 text-gray-300'
+                }`}>
+                  {msg.role === 'user' ? (
+                    <p className="text-sm">{msg.content}</p>
+                  ) : (
+                    <div className="prose prose-sm prose-invert max-w-none text-sm prose-p:leading-relaxed prose-pre:bg-black/50 prose-pre:border prose-pre:border-gray-700 font-sans">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
+        
+        {isChatLoading && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex justify-start"
+          >
+            <div className="bg-[#252525] border border-gray-700 p-4 rounded-lg text-xs uppercase tracking-widest text-emerald-500">
+              Processing data...
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      <div className="p-4 bg-[#121212] border-t border-gray-800">
+        <div className="relative flex items-center">
+          <span className="absolute left-4 text-emerald-500">{">"}</span>
+          <input
+            type="text"
+            value={chatQuery}
+            onChange={(e) => setChatQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAskAI()}
+            placeholder="Enter analysis query..."
+            className="w-full bg-[#1a1a1a] border border-gray-700 text-white rounded-md pl-10 pr-12 py-3 focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-gray-600 text-sm"
+          />
+          <button
+            onClick={handleAskAI}
+            disabled={isChatLoading || !chatQuery.trim()}
+            className="absolute right-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white p-2 rounded transition-colors"
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 function SellerDashboard() {
   const { user } = useAuthStore();
@@ -18,11 +156,30 @@ function SellerDashboard() {
   const queryClient = useQueryClient();
   const sellerId = user?._id || user?.id;
 
-  // Edit state - stores product id being edited and its temp values
+  const [period, setPeriod] = useState('30');
+  const {
+    analytics,
+    sales,
+    customers,
+    products: analyticsProducts,
+    fetchSellerAnalytics,
+    fetchSales,
+    fetchCustomers,
+    fetchProductPerformance,
+  } = useSellerAnalyticsStore();
+
+  useEffect(() => {
+    if (sellerId) {
+      fetchSellerAnalytics(period);
+      fetchSales(period);
+      fetchCustomers();
+      fetchProductPerformance();
+    }
+  }, [period, sellerId]);
+
+  // Edit state
   const [editingProduct, setEditingProduct] = useState(null);
   const [editValues, setEditValues] = useState({ price: 0, stock: 0 });
-
-  // Confirmation modal state
   const [confirmModal, setConfirmModal] = useState({ show: false, productId: null, productName: '' });
 
   const { data: products, isLoading: productsLoading } = useQuery({
@@ -44,7 +201,6 @@ function SellerDashboard() {
     enabled: !!sellerId,
   });
 
-  // Membership query
   const { data: membership, refetch: refetchMembership } = useQuery({
     queryKey: ['membership'],
     queryFn: async () => {
@@ -169,160 +325,156 @@ function SellerDashboard() {
 
   if (!user) {
     return (
-      <>
-        <div className="access-denied container py-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">{t('seller.pleaseLogin')}</h2>
-          <p className="mb-4">{t('seller.loginRequired')}</p>
-          <Link to="/login" className="inline-flex items-center px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">
-            {t('auth.login')}
-          </Link>
-        </div>
-      </>
+      <div className="access-denied container py-12 text-center">
+        <h2 className="text-2xl font-bold mb-4">{t('seller.pleaseLogin')}</h2>
+        <p className="mb-4">{t('seller.loginRequired')}</p>
+        <Link to="/login" className="inline-flex items-center px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">
+          {t('auth.login')}
+        </Link>
+      </div>
     );
   }
 
-  const totalSales = orders?.reduce((sum, order) =>
-    order.status === 'delivered' ? sum + order.totalAmount : sum, 0
-  ) || 0;
-
-  const pendingOrders = orders?.filter(order =>
-    ['pending', 'confirmed', 'preparing'].includes(order.status)
-  ).length || 0;
   const formatCurrency = (amount) =>
-    `Rp ${Number(amount || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
+    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount || 0);
+
+  const chartData = (sales?.recentDays || []).slice(0, 7).reverse().map(day => ({
+    name: `${day._id?.day}/${day._id?.month}`,
+    revenue: day.revenue || 0
+  }));
+
+  const stats = [
+    {
+      label: t('analytics.totalRevenue') || 'Gross Volume',
+      value: analytics?.totalRevenue ? formatCurrency(analytics.totalRevenue) : formatCurrency(0),
+      icon: DollarSign,
+      color: 'text-emerald-500',
+      bgClass: 'bg-emerald-500/10'
+    },
+    {
+      label: t('analytics.orders') || 'Total Orders',
+      value: analytics?.orderCount || 0,
+      icon: ShoppingBag,
+      color: 'text-blue-500',
+      bgClass: 'bg-blue-500/10'
+    },
+    {
+      label: t('analytics.products') || 'Active SKUs',
+      value: analytics?.productCount || 0,
+      icon: Package,
+      color: 'text-purple-500',
+      bgClass: 'bg-purple-500/10'
+    },
+    {
+      label: t('analytics.rating') || 'Avg Rating',
+      value: analytics?.avgRating ? analytics.avgRating.toFixed(1) : '0.0',
+      icon: Star,
+      color: 'text-amber-500',
+      bgClass: 'bg-amber-500/10'
+    },
+  ];
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 p-3 rounded shadow-lg">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{label}</p>
+          <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+            {formatCurrency(payload[0].value)}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <>
-      <div className="container py-8 md:py-10">
-        {/* Confirmation Modal */}
-        {confirmModal.show && (
-          <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-            <div className="confirm-modal bg-card border rounded-lg p-6 max-w-md w-full shadow-lg">
-              <div className="modal-icon warning flex justify-center mb-4 text-warning">
-                <AlertTriangle size={48} />
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 pb-20 font-sans">
+      {/* Confirmation Modal */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-6 max-w-md w-full shadow-2xl">
+            <div className="flex justify-center mb-4 text-orange-500">
+              <AlertTriangle size={48} />
+            </div>
+            <h3 className="text-xl font-bold text-center mb-2">{t('seller.confirmChanges')}</h3>
+            <p className="text-center text-gray-500 dark:text-gray-400 mb-4">{t('seller.aboutToUpdate')} <strong className="text-gray-900 dark:text-white">{confirmModal.productName}</strong>:</p>
+            <div className="bg-gray-100 dark:bg-[#121212] p-4 rounded-md mb-4 space-y-2 border border-gray-200 dark:border-gray-800">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Price:</span>
+                <strong className="font-mono text-emerald-600">{formatCurrency(editValues.price)}</strong>
               </div>
-              <h3 className="text-xl font-bold text-center mb-2">{t('seller.confirmChanges')}</h3>
-              <p className="text-center text-muted-foreground mb-4">{t('seller.aboutToUpdate')} <strong>{confirmModal.productName}</strong>:</p>
-              <div className="change-summary bg-muted p-4 rounded-md mb-4 space-y-2">
-                <div className="change-item flex justify-between">
-                  <span>{t('seller.newPrice')}:</span>
-                  <strong>Rp {editValues.price}</strong>
-                </div>
-                <div className="change-item flex justify-between">
-                  <span>{t('seller.newStock')}:</span>
-                  <strong>{editValues.stock} {t('seller.units')}</strong>
-                </div>
-              </div>
-              <p className="warning-text text-sm text-muted-foreground text-center mb-6">{t('seller.updateWarning')}</p>
-              <div className="modal-actions flex gap-4">
-                <button
-                  className="btn-cancel flex-1 py-2 border rounded-md hover:bg-muted"
-                  onClick={() => setConfirmModal({ show: false, productId: null, productName: '' })}
-                  disabled={updateMutation.isPending}
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  className="btn-confirm flex-1 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-                  onClick={confirmUpdate}
-                  disabled={updateMutation.isPending}
-                >
-                  {updateMutation.isPending ? t('seller.updating') : t('seller.confirmUpdate')}
-                </button>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Stock:</span>
+                <strong className="font-mono text-blue-500">{editValues.stock} units</strong>
               </div>
             </div>
+            <p className="text-sm text-gray-500 text-center mb-6">{t('seller.updateWarning')}</p>
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setConfirmModal({ show: false, productId: null, productName: '' })}
+                disabled={updateMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white"
+                onClick={confirmUpdate}
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending ? 'Updating...' : 'Confirm'}
+              </Button>
+            </div>
           </div>
-        )}
+        </div>
+      )}
 
-        <div className="endfield-card endfield-gradient p-5 md:p-7 mb-8">
-          <div className="dashboard-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="max-w-7xl mx-auto p-4 md:p-8">
+        
+        {/* Header & Membership */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-primary mb-2">Seller Console</p>
-              <h1 className="text-3xl font-bold">{t('seller.dashboard')}</h1>
-              <p className="text-muted-foreground">{t('seller.welcomeBack')}, {user.businessName || user.name}!</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-500 mb-1">Seller Command Center</p>
+              <h1 className="text-3xl font-bold tracking-tight">Welcome, {user.businessName || user.name}!</h1>
             </div>
-            <div className="flex gap-3 flex-wrap">
-              <Link
-                to="/seller/product-tracking"
-                className="inline-flex items-center gap-2 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
-              >
-                <BarChart3 size={20} />
-                {t('seller.productTracking')}
+            <div className="flex gap-2 flex-wrap">
+              <Link to="/seller/product-tracking" className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-[#252525] rounded-md transition-colors shadow-sm">
+                <BarChart3 size={16} /> Deliveries
               </Link>
-              <Link
-                to="/logo-generator"
-                className="inline-flex items-center gap-2 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
-              >
-                <Sparkles size={18} />
-                Logo Generator
-                {!membership?.isMember && <Crown size={14} className="text-yellow-500" />}
+              <Link to="/logo-generator" className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-[#252525] rounded-md transition-colors shadow-sm">
+                <Sparkles size={16} /> Logo
+                {!membership?.isMember && <Crown size={12} className="text-amber-500" />}
               </Link>
-              <Link to="/seller/add-product" className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-                <Plus size={20} />
-                {t('seller.addProduct')}
+              <Link to="/automation" className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-[#252525] rounded-md transition-colors shadow-sm">
+                <Activity size={16} /> Automation
+                {!membership?.isMember && <Crown size={12} className="text-amber-500" />}
               </Link>
-              <Link
-                to="/automation"
-                className="inline-flex items-center gap-2 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
-              >
-                <Sparkles size={18} />
-                Automations
-                {!membership?.isMember && <Crown size={14} className="text-yellow-500" />}
+              <Link to="/seller/add-product" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-md hover:bg-blue-500 shadow-sm transition-colors">
+                <Plus size={16} /> Add Product
               </Link>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Link to="/seller/product-tracking" className="endfield-card p-4 hover:border-primary/60 transition-colors">
-            <p className="text-sm font-semibold">Track Deliveries</p>
-            <p className="text-xs text-muted-foreground mt-1">Monitor buyer status and delivery locations.</p>
-          </Link>
-          <Link to="/logo-generator" className="endfield-card p-4 hover:border-primary/60 transition-colors">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold">Generate Brand Logo</p>
-              {!membership?.isMember && <Crown className="h-3.5 w-3.5 text-yellow-500" />}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Create and apply AI logos for your store profile.</p>
-          </Link>
-          <Link to="/orders" className="endfield-card p-4 hover:border-primary/60 transition-colors">
-            <p className="text-sm font-semibold">Manage Orders</p>
-            <p className="text-xs text-muted-foreground mt-1">Review new orders and payment status.</p>
-          </Link>
-          <Link to="/automation" className="endfield-card p-4 hover:border-primary/60 transition-colors">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold">⚡ Automations</p>
-              {!membership?.isMember && <Crown className="h-3.5 w-3.5 text-yellow-500" />}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Connect n8n workflows for emails & alerts.</p>
-          </Link>
-        </div>
-
-        {/* Membership Section */}
-        <div className="mb-8">
-          <Card className={membership?.isMember ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" : "border-red-300 bg-red-50 dark:bg-red-900/20"}>
+          <Card className={membership?.isMember ? "border-amber-500/50 bg-amber-50 dark:bg-amber-900/10 shadow-sm" : "border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 shadow-sm"}>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {membership?.isMember ? (
-                    <Crown className="h-6 w-6 text-yellow-500" />
-                  ) : (
-                    <Crown className="h-6 w-6 text-gray-400" />
-                  )}
+                  <Crown className={`h-6 w-6 ${membership?.isMember ? 'text-amber-500' : 'text-gray-400'}`} />
                   <CardTitle className="text-lg">
                     {membership?.isMember ? 'Premium Member' : 'Upgrade to Premium'}
                   </CardTitle>
                 </div>
                 {membership?.isMember && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
-                    <CheckCircle className="h-4 w-4" />
-                    Active
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500 text-white shadow-sm">
+                    <CheckCircle className="h-3 w-3" /> Active
                   </span>
                 )}
                 {!membership?.isMember && membership?.membershipStatus === 'pending' && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-medium">
-                    <Clock className="h-4 w-4" />
-                    Pending Approval
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-bold bg-orange-500 text-white shadow-sm">
+                    <Clock className="h-3 w-3" /> Pending Approval
                   </span>
                 )}
               </div>
@@ -331,69 +483,38 @@ function SellerDashboard() {
               {membership?.isMember ? (
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">
-                      Your membership is active until{' '}
-                      <span className="font-medium text-foreground">
-                        {new Date(membership.memberExpiry).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                      </span>
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Member since {new Date(membership.memberSince).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      Your membership is active until <span className="font-bold">{new Date(membership.memberExpiry).toLocaleDateString()}</span>
                     </p>
                   </div>
-                  <div className="text-sm text-yellow-600 dark:text-yellow-400">
+                  <div className="text-sm font-bold text-amber-600 dark:text-amber-500">
                     Unlimited product listings enabled
                   </div>
                 </div>
               ) : (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Upgrade to premium for <span className="font-bold text-lg">Rp 10.000/month</span> to unlock:
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Upgrade to premium for <span className="font-bold text-gray-900 dark:text-white">Rp 10.000/month</span> to unlock unlimited listings and priority search.
                   </p>
-                  <ul className="text-sm space-y-1 mb-4">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      Unlimited product listings
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      Priority in search results
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      Verified seller badge
-                    </li>
-                  </ul>
                   <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
                     <DialogTrigger asChild>
-                      <Button className="gap-2">
-                        <CreditCard className="h-4 w-4" />
-                        Pay Rp 10.000
+                      <Button className="gap-2 bg-blue-600 hover:bg-blue-500 text-white">
+                        <CreditCard className="h-4 w-4" /> Pay Rp 10.000
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="dark:bg-[#1a1a1a] dark:border-gray-800">
                       <DialogHeader>
                         <DialogTitle>Submit Payment Proof</DialogTitle>
                       </DialogHeader>
                       <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
-                          <p className="text-sm font-medium mb-2">Transfer to:</p>
-                          <p className="text-lg font-bold">Bank BCA</p>
-                          <p className="text-lg">1234567890</p>
-                          <p className="text-sm text-muted-foreground">a/n MSME Marketplace</p>
-                          <p className="mt-2 font-bold">Amount: Rp 10.000</p>
+                        <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50">
+                          <p className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Transfer to:</p>
+                          <p className="text-xl font-bold font-mono text-gray-900 dark:text-white">Bank BCA 1234567890</p>
+                          <p className="text-sm text-gray-500">a/n MSME Marketplace</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Upload Payment Proof
-                          </label>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setPaymentFile(e.target.files[0])}
-                            className="w-full border rounded-md p-2"
-                            required
-                          />
+                          <label className="block text-sm font-medium mb-2">Upload Payment Proof</label>
+                          <input type="file" accept="image/*" onChange={(e) => setPaymentFile(e.target.files[0])} className="w-full border dark:border-gray-700 rounded-md p-2 bg-transparent" required />
                         </div>
                         <Button type="submit" className="w-full" disabled={uploadPaymentMutation.isPending}>
                           {uploadPaymentMutation.isPending ? 'Submitting...' : 'Submit Payment Proof'}
@@ -405,160 +526,206 @@ function SellerDashboard() {
               )}
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
-            <div className="stat-icon products mb-2 text-primary">
-              <Package size={24} />
-            </div>
-            <div className="stat-info">
-              <h3 className="text-2xl font-bold">{products?.length || 0}</h3>
-              <p className="text-sm text-muted-foreground">{t('seller.products')}</p>
-            </div>
-          </div>
-          <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
-            <div className="stat-icon orders mb-2 text-blue-500">
-              <ShoppingBag size={24} />
-            </div>
-            <div className="stat-info">
-              <h3 className="text-2xl font-bold">{orders?.length || 0}</h3>
-              <p className="text-sm text-muted-foreground">{t('seller.totalOrders')}</p>
-            </div>
-          </div>
-          <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
-            <div className="stat-icon pending mb-2 text-orange-500">
-              <TrendingUp size={24} />
-            </div>
-            <div className="stat-info">
-              <h3 className="text-2xl font-bold">{pendingOrders}</h3>
-              <p className="text-sm text-muted-foreground">{t('seller.pendingOrders')}</p>
-            </div>
-          </div>
-          <div className="stat-card p-6 border rounded-lg bg-card shadow-sm">
-            <div className="stat-icon revenue mb-2 text-green-500">
-              <DollarSign size={24} />
-            </div>
-            <div className="stat-info">
-              <h3 className="text-2xl font-bold">{formatCurrency(totalSales)}</h3>
-              <p className="text-sm text-muted-foreground">{t('seller.totalRevenue')}</p>
-            </div>
+        {/* Unified Analytics Section */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Activity className="h-5 w-5 text-emerald-500" /> Financial Overview
+          </h2>
+          <div className="relative inline-flex items-center bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-md p-1 shadow-sm">
+            <Calendar className="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" />
+            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="appearance-none bg-transparent pl-9 pr-10 py-1 text-sm font-semibold focus:outline-none cursor-pointer dark:text-white">
+              <option value="7">7 Days</option>
+              <option value="30">30 Days</option>
+              <option value="90">90 Days</option>
+            </select>
+            <ChevronDown className="absolute right-3 h-4 w-4 text-gray-400 pointer-events-none" />
           </div>
         </div>
 
-        {/* Analytics & Promos */}
-        <AnalyticsSection />
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6 mb-8">
+          {/* Top Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {stats.map((stat, index) => (
+              <motion.div key={index} variants={itemVariants} className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{stat.label}</p>
+                  <div className={`p-2 rounded-lg ${stat.bgClass}`}>
+                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                  </div>
+                </div>
+                <div className="flex items-end gap-2">
+                  <h3 className="text-2xl font-bold font-mono tracking-tight">{stat.value}</h3>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Revenue Chart */}
+            <motion.div variants={itemVariants} className="lg:col-span-2 bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm flex flex-col min-h-[350px]">
+              <div className="flex items-center gap-2 mb-6">
+                <TrendingUp className="h-5 w-5 text-emerald-500" />
+                <h3 className="text-lg font-bold">Revenue Trend</h3>
+              </div>
+              <div className="flex-1 w-full h-full">
+                {chartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" opacity={0.2} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#888' }} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#888' }} tickFormatter={(val) => `Rp${(val/1000).toFixed(0)}k`} />
+                      <RechartsTooltip content={<CustomTooltip />} />
+                      <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full opacity-50">
+                    <BarChart3 className="h-10 w-10 text-gray-500 mb-3" />
+                    <p className="text-sm">No data available for this period.</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Customer Breakdown */}
+            <motion.div variants={itemVariants} className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm flex flex-col">
+              <div className="flex items-center gap-2 mb-6">
+                <Users className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-bold">Customer Retention</h3>
+              </div>
+              <div className="space-y-4 flex-1 flex flex-col justify-center">
+                <div className="bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 p-5 rounded-lg flex flex-col items-center">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">New Customers</p>
+                  <p className="text-3xl font-mono font-bold text-gray-900 dark:text-white">
+                    {customers?.newCustomers || 0}
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 p-5 rounded-lg flex flex-col items-center relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-2 opacity-20"><Star className="h-12 w-12 text-emerald-500" /></div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Returning Customers</p>
+                  <p className="text-3xl font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                    {customers?.returningCustomers || 0}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* AI Financial Consultant */}
+        <AIConsultantWidget period={period} analytics={analytics} sales={sales} customers={customers} products={analyticsProducts} />
+
         <PromoManager />
 
-        <div className="endfield-card p-4 md:p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">{t('seller.myProducts')}</h2>
+        {/* Active Products Management */}
+        <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden mb-8 mt-8">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <Package className="h-5 w-5 text-gray-400" />
+              Inventory Management
+            </h2>
+          </div>
+          
           {productsLoading ? (
-            <div className="py-6 text-sm text-muted-foreground">{t('seller.loadingProducts')}</div>
+            <div className="py-12 text-center text-sm text-gray-500">Loading inventory data...</div>
           ) : products?.length === 0 ? (
-            <div className="empty-state text-center py-12 border rounded-lg">
-              <p className="mb-4 text-muted-foreground">{t('seller.noProductsEmpty')}</p>
-              <Link to="/seller/add-product" className="btn-primary px-4 py-2 bg-primary text-primary-foreground rounded-md">
-                {t('seller.addProduct')}
+            <div className="text-center py-12">
+              <p className="mb-4 text-gray-500">No active products found.</p>
+              <Link to="/seller/add-product" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 text-sm font-semibold">
+                <Plus size={16} /> Add First Product
               </Link>
             </div>
           ) : (
-            <div className="products-table-container overflow-x-auto border rounded-lg">
-              <table className="products-table w-full text-left">
-                <thead className="bg-muted text-muted-foreground">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-50 dark:bg-[#1a1a1a] text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
                   <tr>
-                    <th className="p-4 font-medium">{t('seller.product')}</th>
-                    <th className="p-4 font-medium">{t('seller.category')}</th>
-                    <th className="p-4 font-medium">{t('seller.price')}</th>
-                    <th className="p-4 font-medium">{t('seller.stock')}</th>
-                    <th className="p-4 font-medium">{t('seller.status')}</th>
-                    <th className="p-4 font-medium">{t('seller.actions')}</th>
+                    <th className="px-6 py-4">Item</th>
+                    <th className="px-6 py-4">Price</th>
+                    <th className="px-6 py-4">Stock</th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                   {products?.map((product) => (
-                    <tr key={product._id} className={editingProduct === product._id ? 'bg-primary/5' : ''}>
-                      <td className="product-cell p-4">
+                    <tr key={product._id} className={`hover:bg-gray-50 dark:hover:bg-[#161616] transition-colors ${editingProduct === product._id ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="product-thumbnail w-12 h-12 rounded border overflow-hidden shrink-0">
+                          <div className="w-10 h-10 rounded border dark:border-gray-700 overflow-hidden shrink-0 bg-gray-100 dark:bg-gray-800">
                             {product.images?.[0] ? (
                               <img src={resolveImageUrl(product.images[0])} alt={product.name} className="w-full h-full object-cover" />
                             ) : (
-                              <div className="placeholder w-full h-full bg-muted flex items-center justify-center text-xs">No image</div>
+                              <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">N/A</div>
                             )}
                           </div>
-                          <span className="font-medium">{product.name}</span>
+                          <span className="font-semibold text-gray-900 dark:text-gray-100">{product.name}</span>
                         </div>
                       </td>
-                      <td className="p-4 capitalize">{product.category}</td>
-                      <td className="p-4">
+                      <td className="px-6 py-4 font-mono">
                         {editingProduct === product._id ? (
                           <input
                             type="number"
-                            className="edit-input w-24 p-1 border rounded bg-background text-foreground"
+                            className="w-24 p-1 border dark:border-gray-600 rounded bg-white dark:bg-[#252525] text-gray-900 dark:text-white"
                             value={editValues.price}
                             onChange={(e) => setEditValues({ ...editValues, price: e.target.value })}
-                            min="0"
-                            step="0.01"
+                            min="0" step="0.01"
                           />
                         ) : (
-                          `Rp ${product.price}`
+                          formatCurrency(product.price)
                         )}
                       </td>
-                      <td className="p-4">
+                      <td className="px-6 py-4">
                         {editingProduct === product._id ? (
                           <input
                             type="number"
-                            className="edit-input w-20 p-1 border rounded bg-background text-foreground"
+                            className="w-20 p-1 border dark:border-gray-600 rounded bg-white dark:bg-[#252525] text-gray-900 dark:text-white"
                             value={editValues.stock}
                             onChange={(e) => setEditValues({ ...editValues, stock: e.target.value })}
                             min="0"
                           />
                         ) : (
-                          product.stock
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
+                            product.stock > 10 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 
+                            product.stock > 0 ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 
+                            'bg-red-500/10 text-red-600 dark:text-red-400'
+                          }`}>
+                            {product.stock} Units
+                          </span>
                         )}
                       </td>
-                      <td className="p-4">
-                        <span className={`status-badge px-2 py-1 rounded-full text-xs font-medium ${product.isAvailable ? 'bg-green-500/15 text-green-600 dark:bg-green-500/20 dark:text-green-400' : 'bg-red-500/15 text-red-600 dark:bg-red-500/20 dark:text-red-400'}`}>
-                          {product.isAvailable ? t('seller.active') : t('seller.inactive')}
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${product.isAvailable ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                          {product.isAvailable ? 'Active' : 'Inactive'}
                         </span>
                       </td>
-                      <td className="p-4">
-                        <div className="action-buttons flex gap-2">
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
                           {editingProduct === product._id ? (
                             <>
-                              <button
-                                className="btn-save p-1 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 rounded"
-                                onClick={() => showConfirmation(product._id, product.name)}
-                                title="Save changes"
-                              >
+                              <button className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded transition-colors" onClick={() => showConfirmation(product._id, product.name)}>
                                 <Save size={16} />
                               </button>
-                              <button
-                                className="btn-cancel-edit p-1 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded"
-                                onClick={cancelEditing}
-                                title="Cancel editing"
-                              >
+                              <button className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors" onClick={cancelEditing}>
                                 <X size={16} />
                               </button>
                             </>
                           ) : (
                             <>
-                              <button
-                                className="btn-edit p-1 text-primary hover:text-primary/80 rounded"
-                                onClick={() => startEditing(product)}
-                                title="Edit price & stock"
-                              >
+                              <button className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors" onClick={() => startEditing(product)}>
                                 <Edit2 size={16} />
                               </button>
-                              <button
-                                className="btn-delete p-1 text-destructive hover:text-destructive/80 rounded"
-                                onClick={() => {
-                                  if (confirm('Are you sure you want to delete this product?')) {
-                                    deleteMutation.mutate(product._id);
-                                  }
-                                }}
-                                title="Delete product"
-                              >
+                              <button className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors" onClick={() => {
+                                if (confirm('Delete this product?')) deleteMutation.mutate(product._id);
+                              }}>
                                 <Trash2 size={16} />
                               </button>
                             </>
@@ -573,40 +740,47 @@ function SellerDashboard() {
           )}
         </div>
 
+        {/* Recent Orders Action List */}
         {orders && orders.length > 0 && (
-          <div className="endfield-card p-4 md:p-6">
-            <h2 className="text-xl font-semibold mb-4">{t('seller.recentOrders')}</h2>
-            <div className="orders-list space-y-4">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <ShoppingBag className="h-5 w-5 text-gray-400" /> Recent Orders
+            </h2>
+            <div className="space-y-3">
               {orders.slice(0, 5).map((order) => (
-                <div key={order._id} className="order-card p-4 border rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center bg-card gap-4">
-                  <div className="order-info">
-                    <span className="order-id font-medium block">Order #{order._id.slice(-8)}</span>
-                    <span className={`order-status text-sm ${order.status === 'delivered' ? 'text-green-600 dark:text-green-400' :
-                      order.status === 'cancelled' ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'
-                      }`}>{t(`orders.status.${order.status}`) || getStatusLabel(order.status)}</span>
+                <div key={order._id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-[#1a1a1a] gap-4">
+                  <div>
+                    <span className="font-mono text-sm font-bold block">ORD-{order._id.slice(-8).toUpperCase()}</span>
+                    <span className={`text-xs font-bold uppercase tracking-wider ${
+                      order.status === 'delivered' ? 'text-emerald-500' :
+                      order.status === 'cancelled' ? 'text-red-500' : 'text-amber-500'
+                    }`}>
+                      {getStatusLabel(order.status)}
+                    </span>
                   </div>
-                  <div className="order-details text-left md:text-right flex-1 md:flex-none">
-                    <span className="block">{order.products.length} {t('seller.items')}</span>
-                    <span className="order-amount font-bold text-primary">{formatCurrency(order.totalAmount)}</span>
+                  <div className="text-left md:text-right flex-1 md:flex-none">
+                    <span className="block text-sm text-gray-500">{order.products.length} Items</span>
+                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(order.totalAmount)}</span>
                   </div>
                   {getNextStatus(order.status) && (
                     <Button
                       size="sm"
+                      variant="outline"
+                      className="w-full md:w-auto text-xs font-semibold"
                       onClick={() => updateStatusMutation.mutate({ orderId: order._id, status: getNextStatus(order.status) })}
                       disabled={updateStatusMutation.isPending}
-                      className="w-full md:w-auto mt-2 md:mt-0"
                     >
-                      {t('orders.markAs') || 'Mark As'} {getStatusLabel(getNextStatus(order.status))}
+                      Mark {getStatusLabel(getNextStatus(order.status))}
                     </Button>
                   )}
                 </div>
               ))}
             </div>
-            <Link to="/orders" className="view-all block mt-4 text-center text-primary hover:underline">{t('seller.viewAllOrders')}</Link>
+            <Link to="/orders" className="block mt-6 text-center text-sm font-semibold text-blue-600 hover:text-blue-500">View All Order History &rarr;</Link>
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

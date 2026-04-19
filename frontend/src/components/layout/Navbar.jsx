@@ -128,7 +128,6 @@ const Navbar = () => {
         { to: "/seller/add-product", label: t("nav.addProduct"), icon: PlusCircle },
         { to: "/logo-generator", label: t("nav.logoGenerator"), icon: Palette, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
         { to: "/automation", label: t("nav.automations"), icon: Zap, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
-        { to: "/seller-analytics", label: t("analytics.title") || "Analitik", icon: BarChart3 },
         { to: "/inventory", label: t("inventory.title") || "Inventori", icon: Package },
         { to: "/video-call", label: t("videoCall.title") || "Video Call", icon: Video },
         { to: "/installments", label: t("installment.title") || "Cicilan", icon: CreditCard },
@@ -302,10 +301,6 @@ const Navbar = () => {
                       <DropdownMenuItem onSelect={() => handleNavigate("/seller/add-product")}>
                         <PlusCircle className="h-4 w-4 mr-2" />
                         {t("nav.addProduct")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => handleNavigate("/seller-analytics")}>
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        {t("analytics.title") || "Analitik"}
                       </DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => handleNavigate("/logo-generator")}>
                         <Palette className="h-4 w-4 mr-2" />
