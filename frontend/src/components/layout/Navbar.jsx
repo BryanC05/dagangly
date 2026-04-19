@@ -356,6 +356,10 @@ const Navbar = () => {
                       <Wallet className="h-4 w-4 mr-2" />
                       {t("wallet.title")}
                     </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleNavigate("/finance")}>
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      {t("finance")}
+                    </DropdownMenuItem>
                     {(user?.role === 'admin' || user?.role === 'superadmin') && (
                       <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard")}>
                         <Shield className="h-4 w-4 mr-2" />

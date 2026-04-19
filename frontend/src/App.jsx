@@ -40,11 +40,17 @@ import SellerAnalyticsPage from './pages/SellerAnalytics';
 import InventoryPage from './pages/Inventory';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/layout/Layout';
+import FinanceDashboard from './pages/FinanceDashboard';
+import FinanceExpenses from './pages/FinanceExpenses';
+import FinanceCalculator from './pages/FinanceCalculator';
 
 const Home = lazy(() => import('./pages/new-ui/Index'));
 const Products = lazy(() => import('./pages/new-ui/Products'));
 const ProductDetail = lazy(() => import('./pages/new-ui/ProductDetail'));
 const NotFound = lazy(() => import('./pages/new-ui/NotFound'));
+const Finance = lazy(() => import('./pages/FinanceDashboard'));
+const FinanceExp = lazy(() => import('./pages/FinanceExpenses'));
+const FinanceCalc = lazy(() => import('./pages/FinanceCalculator'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -142,6 +148,9 @@ function App() {
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/invoice/:orderId" element={<Invoice />} />
               <Route path="/guide" element={<Guide />} />
+              <Route path="/finance" element={<Suspense fallback={<LoadingFallback />}><Finance /></Suspense>} />
+              <Route path="/finance/expenses" element={<Suspense fallback={<LoadingFallback />}><FinanceExp /></Suspense>} />
+              <Route path="/finance/calculator" element={<Suspense fallback={<LoadingFallback />}><FinanceCalc /></Suspense>} />
               <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFound /></Suspense>} />
             </Route>
           </Routes>
