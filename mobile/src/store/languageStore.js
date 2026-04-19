@@ -30,9 +30,14 @@ export const useLanguageStore = create((set, get) => ({
             const saved = await AsyncStorage.getItem('language');
             if (saved && translations[saved]) {
                 set({ language: saved, t: createT(translations[saved]), languageVersion: get().languageVersion + 1 });
+            } else {
+                // Also load translations to have all keys
+                set({ language: saved || 'id', t: createT(translations[saved || 'id']), languageVersion: 1 });
             }
         } catch (error) {
             console.error('Failed to load language:', error);
+            // Fallback to default language
+            set({ language: 'id', t: createT(id), languageVersion: 1 });
         }
     },
 
