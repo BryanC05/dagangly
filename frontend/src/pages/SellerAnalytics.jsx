@@ -199,7 +199,7 @@ const SellerAnalyticsPage = () => {
               {t('analytics.revenueChart')}
             </h2>
             <div className="space-y-2">
-              {sales.slice(0, 7).map((day, index) => (
+              {(sales || []).slice(0, 7).map((day, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <span className="text-sm text-gray-500 dark:text-gray-400 w-20">
                     {day._id?.month}/{day._id?.day}
@@ -287,7 +287,7 @@ const SellerAnalyticsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product, index) => (
+                {(products || []).map((product, index) => (
                   <tr
                     key={index}
                     className="border-t border-gray-100 dark:border-gray-700"
