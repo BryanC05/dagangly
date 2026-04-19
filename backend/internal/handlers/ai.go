@@ -152,7 +152,7 @@ Here is the seller's current dashboard data for the selected period:
 %s`, string(analyticsJSON))
 
 	groqReq := GroqRequest{
-		Model: "llama-3.1-70b-versatile", // Using smarter 70B model specifically for financial analysis
+		Model: "llama-3.3-70b-versatile", // Using smarter 70B model specifically for financial analysis
 		Messages: []GroqMessage{
 			{
 				Role:    "system",
