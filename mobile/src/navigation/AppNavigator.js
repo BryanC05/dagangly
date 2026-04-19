@@ -59,6 +59,7 @@ import WalletScreen from '../screens/wallet/WalletScreen';
 import InstallmentsScreen from '../screens/installments/InstallmentsScreen';
 import VideoCallScreen from '../screens/videoCall/VideoCallScreen';
 import SellerAnalyticsScreen from '../screens/seller/SellerAnalyticsScreen';
+import AIConsultantScreen from '../screens/seller/AIConsultantScreen';
 import InventoryScreen from '../screens/seller/InventoryScreen';
 import FinanceDashboardScreen from '../screens/finance/DashboardScreen';
 import FinanceExpensesScreen from '../screens/finance/ExpensesScreen';
@@ -637,6 +638,11 @@ function ProfileStackNavigator() {
             <ProfileStack.Screen
                 name="SellerAnalytics"
                 component={SellerAnalyticsScreen}
+                options={{ headerShown: false }}
+            />
+            <ProfileStack.Screen
+                name="AIConsultant"
+                component={AIConsultantScreen}
                 options={{ headerShown: false }}
             />
             <ProfileStack.Screen

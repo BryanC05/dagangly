@@ -435,6 +435,7 @@ func main() {
 		ai.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
 			ai.POST("/generate-description", aiHandler.GenerateDescription)
+			ai.POST("/financial-consultant", aiHandler.FinancialConsultant)
 		}
 
 		// Wishlists

@@ -1,11 +1,110 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSellerAnalyticsStore } from '../store/sellerAnalyticsStore';
-import { BarChart3, TrendingUp, DollarSign, Package, Star, Users, ShoppingBag } from 'lucide-react';
+import { BarChart3, TrendingUp, DollarSign, Package, Star, Users, ShoppingBag, MessageSquare, Send, Bot } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import api from '../utils/api';
+
+const AIConsultantWidget = ({ period, analytics, sales, customers, products }) => {
+  const [chatQuery, setChatQuery] = useState('');
+  const [chatHistory, setChatHistory] = useState([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+
+  const handleAskAI = async () => {
+    if (!chatQuery.trim()) return;
+
+    const userMsg = { role: 'user', content: chatQuery };
+    setChatHistory((prev) => [...prev, userMsg]);
+    setChatQuery('');
+    setIsChatLoading(true);
+
+    try {
+      const analyticsContext = { period, analytics, sales, customers, products };
+      const res = await api.post('/ai/financial-consultant', {
+        query: userMsg.content,
+        analytics: analyticsContext
+      });
+      setChatHistory((prev) => [...prev, { role: 'ai', content: res.data.response }]);
+    } catch (err) {
+      console.error('Failed to ask AI:', err);
+      setChatHistory((prev) => [...prev, { role: 'ai', content: 'Sorry, I am having trouble connecting right now. Please try again later.' }]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  return (
+    <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+          <Bot className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">AI Financial Consultant</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Ask questions about your sales, margins, or inventory.</p>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 h-80 overflow-y-auto mb-4 border border-gray-200 dark:border-gray-700 flex flex-col gap-4">
+        {chatHistory.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400">
+            <MessageSquare className="h-10 w-10 mb-2 opacity-20" />
+            <p>Hello! I am your AI Business Analyst.</p>
+            <p className="text-sm">Try asking: "What was my most profitable product this month?"</p>
+          </div>
+        ) : (
+          chatHistory.map((msg, idx) => (
+            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[80%] p-3 rounded-2xl ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-bl-none shadow-sm'}`}>
+                {msg.role === 'user' ? (
+                  msg.content
+                ) : (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+        {isChatLoading && (
+          <div className="flex justify-start">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-2xl rounded-bl-none shadow-sm">
+              <div className="flex gap-1 items-center">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={chatQuery}
+          onChange={(e) => setChatQuery(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleAskAI()}
+          placeholder="Ask me anything about your business..."
+          className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={handleAskAI}
+          disabled={isChatLoading || !chatQuery.trim()}
+          className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white p-3 rounded-lg flex items-center justify-center transition-colors"
+        >
+          <Send className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const SellerAnalyticsPage = () => {
   const { t } = useTranslation();
   const [period, setPeriod] = useState('30');
+
   const {
     analytics,
     sales,
@@ -256,6 +355,10 @@ const SellerAnalyticsPage = () => {
             </div>
           </div>
         </div>
+
+        {/* AI Financial Consultant Section */}
+        <AIConsultantWidget period={period} analytics={analytics} sales={sales} customers={customers} products={products} />
+
       </div>
     </div>
   );

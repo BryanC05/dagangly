@@ -12,7 +12,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { useThemeStore } from '../../theme/ThemeContext';
 import api from '../../api/api';
 
-const SellerAnalyticsScreen = () => {
+const SellerAnalyticsScreen = ({ navigation }) => {
   const { t } = useTranslation();
   const { colors } = useThemeStore();
   const [analytics, setAnalytics] = useState(null);
@@ -110,6 +110,18 @@ const SellerAnalyticsScreen = () => {
           </TouchableOpacity>
         ))}
       </View>
+
+      <TouchableOpacity
+        style={[styles.aiButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+        onPress={() => navigation.navigate('AIConsultant', { period })}
+      >
+        <Ionicons name="sparkles" size={24} color={colors.primary} />
+        <View style={styles.aiButtonTextContainer}>
+          <Text style={[styles.aiButtonTitle, { color: colors.text }]}>AI Financial Consultant</Text>
+          <Text style={[styles.aiButtonSub, { color: colors.textSecondary }]}>Get personalized business insights</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
+      </TouchableOpacity>
 
       <View style={styles.statsGrid}>
         {stats.map((stat, index) => (
@@ -211,6 +223,27 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  aiButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  aiButtonTextContainer: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  aiButtonTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  aiButtonSub: {
+    fontSize: 12,
+    marginTop: 2,
   },
   statsGrid: {
     flexDirection: 'row',

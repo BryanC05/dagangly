@@ -68,6 +68,7 @@ func CORSMiddleware() gin.HandlerFunc {
 			"https://dagangly.pages.dev",
 			"https://umkm-marketplace.pages.dev",
 			"https://258fd25d.umkm-marketplace.pages.dev",
+			"https://dagangly.vercel.app",
 		}
 
 		for _, allowed := range allowedOrigins {

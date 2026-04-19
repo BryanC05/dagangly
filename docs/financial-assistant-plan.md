@@ -299,3 +299,22 @@ npx expo install expo-sqlite
 - Export data as JSON for manual backup
 - Product costs stored locally, can pre-fill from orders
 - Recurring costs excluded (focus on product-level costs only)
+
+---
+
+## AI Consultant API Limits (Groq)
+
+The AI Financial Consultant uses the Groq API (free tier). Please be aware of the following rate limits to ensure stable performance in production:
+
+### Llama 3.1 70B (Financial Consultant)
+* **Requests Per Minute (RPM)**: 30
+* **Requests Per Day (RPD)**: 14,400
+* **Tokens Per Minute (TPM)**: 6,000
+
+### Llama 3.1 8B (Product Description Generator)
+* **Requests Per Minute (RPM)**: 30
+* **Requests Per Day (RPD)**: 14,400
+* **Tokens Per Minute (TPM)**: 30,000
+
+> [!WARNING]
+> If more than 30 sellers try to use the AI features within a 60-second window, the API will return a rate-limit error. For a high volume of active users, you must upgrade to a paid Groq plan.

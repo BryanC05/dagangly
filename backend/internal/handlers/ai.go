@@ -23,6 +23,11 @@ type GenerateDescRequest struct {
 	Keywords string `json:"keywords"`
 }
 
+type FinancialConsultantRequest struct {
+	Query     string                 `json:"query" binding:"required"`
+	Analytics map[string]interface{} `json:"analytics" binding:"required"`
+}
+
 type GroqRequest struct {
 	Model    string        `json:"model"`
 	Messages []GroqMessage `json:"messages"`
@@ -121,3 +126,90 @@ func (h *AIHandler) GenerateDescription(c *gin.Context) {
 		"description": generatedText,
 	})
 }
+
+func (h *AIHandler) FinancialConsultant(c *gin.Context) {
+	var req FinancialConsultantRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	apiKey := os.Getenv("GROQ_API_KEY")
+	if apiKey == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "API key not configured"})
+		return
+	}
+
+	analyticsJSON, _ := json.MarshalIndent(req.Analytics, "", "  ")
+
+	systemPrompt := fmt.Sprintf(`You are an expert AI financial consultant and business analyst for an e-commerce seller on the MSME Marketplace.
+You are chatting directly with the seller to help them grow their business. 
+Analyze the provided dashboard data and answer their query accurately, professionally, and concisely.
+Use formatting (bullet points, bold text) to make your response easy to read.
+Do not use markdown headers (#), just bold text and bullet points.
+
+Here is the seller's current dashboard data for the selected period:
+%s`, string(analyticsJSON))
+
+	groqReq := GroqRequest{
+		Model: "llama-3.1-70b-versatile", // Using smarter 70B model specifically for financial analysis
+		Messages: []GroqMessage{
+			{
+				Role:    "system",
+				Content: systemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: req.Query,
+			},
+		},
+	}
+
+	jsonData, err := json.Marshal(groqReq)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+		return
+	}
+
+	httpReq, err := http.NewRequest("POST", "https://api.groq.com/openai/v1/chat/completions", bytes.NewBuffer(jsonData))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create HTTP request"})
+		return
+	}
+
+	httpReq.Header.Set("Authorization", "Bearer "+apiKey)
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to call AI API"})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		fmt.Printf("Groq API Error: %s\n", string(bodyBytes))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "AI provider refused the request. Please check API key/quota."})
+		return
+	}
+
+	var groqResp GroqResponse
+	if err := json.NewDecoder(resp.Body).Decode(&groqResp); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse AI response"})
+		return
+	}
+
+	if len(groqResp.Choices) == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No response choice from AI"})
+		return
+	}
+
+	generatedText := strings.TrimSpace(groqResp.Choices[0].Message.Content)
+
+	c.JSON(http.StatusOK, gin.H{
+		"response": generatedText,
+	})
+}
+
