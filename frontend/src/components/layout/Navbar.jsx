@@ -394,8 +394,8 @@ const Navbar = () => {
 
       {mobileOpen && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="fixed top-16 right-0 z-50 h-[calc(100%-4rem)] w-80 max-w-[90vw] bg-card/95 border-l border-border p-6 overflow-y-auto backdrop-blur-xl">
+          <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setMobileOpen(false)} />
+          <aside className="fixed top-16 right-0 z-50 h-[calc(100%-4rem)] w-80 max-w-[90vw] bg-card border-l border-border p-6 overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <span className="font-display text-lg font-bold tracking-wider">

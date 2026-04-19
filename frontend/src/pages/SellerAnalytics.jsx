@@ -217,7 +217,7 @@ const SellerAnalyticsPage = () => {
                   </span>
                 </div>
               ))}
-              {sales.length === 0 && (
+              {(!sales || sales.length === 0) && (
                 <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                   {t('analytics.noData')}
                 </p>
@@ -312,7 +312,7 @@ const SellerAnalyticsPage = () => {
                     </td>
                   </tr>
                 ))}
-                {products.length === 0 && (
+                {(!products || products.length === 0) && (
                   <tr>
                     <td colSpan={6} className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
                       {t('analytics.noData')}
