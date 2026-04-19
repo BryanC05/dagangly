@@ -303,6 +303,10 @@ const Navbar = () => {
                         <PlusCircle className="h-4 w-4 mr-2" />
                         {t("nav.addProduct")}
                       </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => handleNavigate("/seller-analytics")}>
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        {t("analytics.title") || "Analitik"}
+                      </DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => handleNavigate("/logo-generator")}>
                         <Palette className="h-4 w-4 mr-2" />
                         {t("nav.logoGenerator")}
