@@ -8,9 +8,12 @@ export const getSellers = () => {
   }));
 };
 
-export const loadMockFinanceData = (sellerId) => {
-  if (sellerId) {
-    const seller = mockData.sellers.find(s => s.sellerId === sellerId);
+export const loadMockFinanceData = (sellerIdOrEmail) => {
+  if (sellerIdOrEmail) {
+    // Try to find by sellerId or email
+    const seller = mockData.sellers.find(s => 
+      s.sellerId === sellerIdOrEmail || s.email === sellerIdOrEmail
+    );
     if (!seller) return null;
     
     const completedOrders = seller.orders.filter(
@@ -20,6 +23,7 @@ export const loadMockFinanceData = (sellerId) => {
     return {
       sellerId: seller.sellerId,
       sellerName: seller.sellerName,
+      email: seller.email,
       summary: {
         totalSales: seller.totalRevenue,
         totalExpenses: seller.totalExpense,

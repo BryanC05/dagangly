@@ -170,10 +170,10 @@ function SellerDashboard() {
 
   useEffect(() => {
     // Always fetch analytics - use mock data if not logged in as seller
-    fetchSellerAnalytics(period);
-    fetchSales(period);
-    fetchCustomers();
-    fetchProductPerformance();
+    fetchSellerAnalytics(period, 'rani.summarecon@marketplace.test');
+    fetchSales(period, 'rani.summarecon@marketplace.test');
+    fetchCustomers('rani.summarecon@marketplace.test');
+    fetchProductPerformance('rani.summarecon@marketplace.test');
   }, [period]);
 
   // Edit state

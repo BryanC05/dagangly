@@ -1,14 +1,28 @@
 import { create } from 'zustand';
 import api from '../utils/api';
-import { loadMockFinanceData, getSellers, getRevenueTrend } from '../utils/mockFinance';
+import { loadMockFinanceData, getRevenueTrend } from '../utils/mockFinance';
 
-const generateMockAnalytics = (period) => {
-  const mockData = loadMockFinanceData();
+const RANI_SELLER_EMAIL = 'rani.summarecon@marketplace.test';
+
+const generateMockAnalytics = (period, sellerEmail = RANI_SELLER_EMAIL) => {
+  const mockData = loadMockFinanceData(sellerEmail);
   const days = parseInt(period) || 30;
+  
+  const sellerData = mockData?.sellerId ? mockData : (() => {
+    // Fallback to all data if specific seller not found
+    return {
+      summary: mockData.summary,
+      products: mockData.products,
+      orders: mockData.orders,
+      revenueTrend: mockData.revenueTrend
+    };
+  })();
   
   // Generate revenue by day based on period
   const revenueByDay = {};
-  const trendData = days <= 7 ? getRevenueTrend(undefined, 'weekly') : getRevenueTrend(undefined, 'monthly');
+  const trendData = days <= 7 
+    ? (sellerData.revenueTrend?.weekly || [])
+    : (sellerData.revenueTrend?.monthly || []);
   
   if (trendData && trendData.length > 0) {
     trendData.slice(0, Math.min(days, trendData.length)).forEach(d => {
@@ -17,23 +31,25 @@ const generateMockAnalytics = (period) => {
     });
   }
 
+  const completedOrders = sellerData.orders?.filter(o => o.status === 'delivered' || o.status === 'completed').length || 0;
+  
   // Generate realistic mock data
   const mockAnalytics = {
     period: period,
-    totalRevenue: mockData.summary.totalSales,
-    orderCount: mockData.summary.orderCount,
-    productCount: mockData.products.length,
-    avgRating: 4.5,
-    totalReviews: 128,
+    totalRevenue: sellerData.summary?.totalSales || mockData.summary.totalSales,
+    orderCount: completedOrders || sellerData.summary?.orderCount || 10,
+    productCount: sellerData.products?.length || 4,
+    avgRating: 4.7,
+    totalReviews: 92,
     revenueByDay,
     ordersByStatus: { 
-      delivered: Math.floor(mockData.summary.orderCount * 0.6), 
-      completed: Math.floor(mockData.summary.orderCount * 0.15),
-      pending: Math.floor(mockData.summary.orderCount * 0.15),
-      cancelled: Math.floor(mockData.summary.orderCount * 0.1)
+      delivered: Math.floor((completedOrders || 10) * 0.6),
+      completed: Math.floor((completedOrders || 10) * 0.15),
+      pending: Math.floor((completedOrders || 10) * 0.15),
+      cancelled: Math.floor((completedOrders || 10) * 0.1)
     },
-    topProducts: mockData.products.slice(0, 5).map((p, i) => ({
-      _id: `mock-prod-${i}`,
+    topProducts: (sellerData.products || []).slice(0, 5).map((p, i) => ({
+      _id: `prod-${i}`,
       name: p.name,
       totalSold: Math.floor(Math.random() * 30) + 15,
       revenue: p.price * (Math.floor(Math.random() * 30) + 15),
@@ -43,21 +59,24 @@ const generateMockAnalytics = (period) => {
   return mockAnalytics;
 };
 
-const generateMockSales = (period) => {
-  const mockData = loadMockFinanceData();
-  const trendData = getRevenueTrend(undefined, 'weekly');
+const generateMockSales = (period, sellerEmail = RANI_SELLER_EMAIL) => {
+  const mockData = loadMockFinanceData(sellerEmail);
+  const sellerData = mockData?.sellerId ? mockData : { orders: mockData.orders, revenueTrend: mockData.revenueTrend };
+  
+  const completedOrders = sellerData.orders?.filter(o => o.status === 'delivered' || o.status === 'completed') || [];
+  const trendData = sellerData.revenueTrend?.weekly || [];
   
   const mockSales = {
     period: period,
-    totalRevenue: mockData.summary.totalSales,
-    completedOrders: Math.floor(mockData.summary.orderCount * 0.75),
-    pendingOrders: Math.floor(mockData.summary.orderCount * 0.25),
+    totalRevenue: sellerData.summary?.totalSales || mockData.summary.totalSales,
+    completedOrders: completedOrders.length || 10,
+    pendingOrders: Math.floor((completedOrders.length || 10) * 0.25),
     recentDays: trendData.slice(0, 7).map(d => ({
       date: d.day,
       label: new Date(d.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       revenue: d.revenue || 0,
     })),
-    topProducts: mockData.products.slice(0, 5).map((p, i) => ({
+    topProducts: (sellerData.products || []).slice(0, 5).map((p, i) => ({
       name: p.name,
       totalSold: Math.floor(Math.random() * 30) + 15,
       revenue: p.price * (Math.floor(Math.random() * 30) + 15),
@@ -69,17 +88,19 @@ const generateMockSales = (period) => {
 
 const generateMockCustomers = () => {
   return {
-    newCustomers: 24,
-    returningCustomers: 12,
-    totalSpent: 3250000,
-    avgOrderValue: 125000,
+    newCustomers: 18,
+    returningCustomers: 8,
+    totalSpent: 4250000,
+    avgOrderValue: 145000,
   };
 };
 
-const generateMockProducts = () => {
-  const mockData = loadMockFinanceData();
-  return mockData.products.map((p, i) => ({
-    _id: `mock-prod-${i}`,
+const generateMockProducts = (sellerEmail = RANI_SELLER_EMAIL) => {
+  const mockData = loadMockFinanceData(sellerEmail);
+  const products = mockData.products || mockData.products || [];
+  
+  return products.map((p, i) => ({
+    _id: `prod-${i}`,
     name: p.name,
     price: p.price,
     stock: Math.floor(Math.random() * 80) + 20,
@@ -89,7 +110,7 @@ const generateMockProducts = () => {
   }));
 };
 
-export const useSellerAnalyticsStore = create((set, get) => ({
+export const useSellerAnalyticsStore = create((set) => ({
   analytics: null,
   sales: [],
   customers: [],
@@ -97,56 +118,57 @@ export const useSellerAnalyticsStore = create((set, get) => ({
   loading: false,
   error: null,
   useMockData: false,
+  mockSellerEmail: RANI_SELLER_EMAIL,
 
-  fetchSellerAnalytics: async (period = '30', sellerId = null) => {
+  fetchSellerAnalytics: async (period = '30', sellerEmail = RANI_SELLER_EMAIL) => {
     set({ loading: true, error: null });
     try {
-      const params = sellerId ? `?period=${period}&sellerId=${sellerId}` : `?period=${period}`;
+      const params = sellerEmail ? `?period=${period}&email=${encodeURIComponent(sellerEmail)}` : `?period=${period}`;
       const res = await api.get(`/analytics/seller${params}`);
       set({ analytics: res.data, loading: false, useMockData: false });
     } catch (err) {
-      console.log('Analytics API failed, using mock data:', err.message);
-      const mockAnalytics = generateMockAnalytics(period);
+      console.log('Using mock analytics for Rani (Dapur Summarecon)');
+      const mockAnalytics = generateMockAnalytics(period, sellerEmail);
       set({ analytics: mockAnalytics, loading: false, useMockData: true });
     }
   },
 
-  fetchSales: async (period = '30', sellerId = null) => {
+  fetchSales: async (period = '30', sellerEmail = RANI_SELLER_EMAIL) => {
     set({ loading: true });
     try {
-      const params = sellerId ? `?period=${period}&sellerId=${sellerId}` : `?period=${period}`;
+      const params = sellerEmail ? `?period=${period}&email=${encodeURIComponent(sellerEmail)}` : `?period=${period}`;
       const res = await api.get(`/analytics/sales${params}`);
       set({ sales: res.data, loading: false });
     } catch (err) {
-      console.log('Sales API failed, using mock data:', err.message);
-      const mockSales = generateMockSales(period);
+      console.log('Using mock sales for Rani (Dapur Summarecon)');
+      const mockSales = generateMockSales(period, sellerEmail);
       set({ sales: mockSales, loading: false });
     }
   },
 
-  fetchCustomers: async (sellerId = null) => {
+  fetchCustomers: async (sellerEmail = RANI_SELLER_EMAIL) => {
     set({ loading: true, error: null });
     try {
-      const params = sellerId ? `?sellerId=${sellerId}` : '';
+      const params = sellerEmail ? `?email=${encodeURIComponent(sellerEmail)}` : '';
       const res = await api.get(`/analytics/customers${params}`);
       set({ customers: res.data, loading: false });
     } catch (err) {
-      console.log('Customers API failed, using mock data:', err.message);
+      console.log('Using mock customers for Rani (Dapur Summarecon)');
       const mockCustomers = generateMockCustomers();
       set({ customers: mockCustomers, loading: false });
     }
   },
 
-  fetchProductPerformance: async (sellerId = null) => {
+  fetchProductPerformance: async (sellerEmail = RANI_SELLER_EMAIL) => {
     set({ loading: true, error: null });
     try {
-      const params = sellerId ? `?sellerId=${sellerId}` : '';
+      const params = sellerEmail ? `?email=${encodeURIComponent(sellerEmail)}` : '';
       const res = await api.get(`/analytics/products${params}`);
       set({ products: res.data, loading: false });
     } catch (err) {
-      console.log('Products API failed, using mock data:', err.message);
-      const mockProducts = generateMockProducts();
-      set({ products: mockProducts, length: 0 });
+      console.log('Using mock products for Rani (Dapur Summarecon)');
+      const mockProducts = generateMockProducts(sellerEmail);
+      set({ products: mockProducts, loading: false });
     }
   },
 }));
