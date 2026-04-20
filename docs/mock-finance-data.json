@@ -1,0 +1,288 @@
+{
+  "products": [
+    {
+      "name": "Kopi Luwak Premium 100g",
+      "price": 85000,
+      "cost": {
+        "material": 35000,
+        "labor": 5000,
+        "shipping": 8000,
+        "platformFee": 5,
+        "other": 2000
+      }
+    },
+    {
+      "name": "Keripik Singkong Original",
+      "price": 25000,
+      "cost": {
+        "material": 8000,
+        "labor": 3000,
+        "shipping": 3000,
+        "platformFee": 5,
+        "other": 1000
+      }
+    },
+    {
+      "name": "Sambal Terasi Pedas",
+      "price": 35000,
+      "cost": {
+        "material": 15000,
+        "labor": 4000,
+        "shipping": 4000,
+        "platformFee": 5,
+        "other": 1500
+      }
+    },
+    {
+      "name": "Batik Pattern Kain 2m",
+      "price": 275000,
+      "cost": {
+        "material": 120000,
+        "labor": 45000,
+        "shipping": 15000,
+        "platformFee": 5,
+        "other": 10000
+      }
+    },
+    {
+      "name": "Sabun Kopra Organik",
+      "price": 45000,
+      "cost": {
+        "material": 18000,
+        "labor": 6000,
+        "shipping": 5000,
+        "platformFee": 5,
+        "other": 2000
+      }
+    },
+    {
+      "name": "Pakaian adat Jawa Kain",
+      "price": 550000,
+      "cost": {
+        "material": 250000,
+        "labor": 80000,
+        "shipping": 25000,
+        "platformFee": 5,
+        "other": 15000
+      }
+    },
+    {
+      "name": "Kerajinan Rotan Kursi",
+      "price": 450000,
+      "cost": {
+        "material": 180000,
+        "labor": 100000,
+        "shipping": 40000,
+        "platformFee": 5,
+        "other": 20000
+      }
+    },
+    {
+      "name": "Madu Hutan Asli 500ml",
+      "price": 125000,
+      "cost": {
+        "material": 55000,
+        "labor": 8000,
+        "shipping": 12000,
+        "platformFee": 5,
+        "other": 5000
+      }
+    }
+  ],
+  "orders": [
+    {
+      "orderId": "ORD-001",
+      "product": "Kopi Luwak Premium 100g",
+      "quantity": 15,
+      "total": 1275000,
+      "status": "delivered",
+      "customer": "Budi Santoso",
+      "date": "2026-04-15"
+    },
+    {
+      "orderId": "ORD-002", 
+      "product": "Keripik Singkong Original",
+      "quantity": 25,
+      "total": 625000,
+      "status": "delivered",
+      "customer": "Siti Aminah",
+      "date": "2026-04-14"
+    },
+    {
+      "orderId": "ORD-003",
+      "product": "Sambal Terasi Pedas",
+      "quantity": 30,
+      "total": 1050000,
+      "status": "delivered",
+      "customer": "Ahmad Wijaya",
+      "date": "2026-04-13"
+    },
+    {
+      "orderId": "ORD-004",
+      "product": "Batik Pattern Kain 2m",
+      "quantity": 5,
+      "total": 1375000,
+      "status": "delivered",
+      "customer": "Dewi Lestari",
+      "date": "2026-04-12"
+    },
+    {
+      "orderId": "ORD-005",
+      "product": "Sabun Kopra Organik",
+      "quantity": 20,
+      "total": 900000,
+      "status": "completed",
+      "customer": "Rudi Hermawan",
+      "date": "2026-04-11"
+    },
+    {
+      "orderId": "ORD-006",
+      "product": "Pakaian adat Jawa Kain",
+      "quantity": 3,
+      "total": 1650000,
+      "status": "delivered",
+      "customer": "Kartika Sari",
+      "date": "2026-04-10"
+    },
+    {
+      "orderId": "ORD-007",
+      "product": "Kerajinan Rotan Kursi",
+      "quantity": 2,
+      "total": 900000,
+      "status": "delivered",
+      "customer": "Hendra Gunawan",
+      "date": "2026-04-09"
+    },
+    {
+      "orderId": "ORD-008",
+      "product": "Madu Hutan Asli 500ml",
+      "quantity": 12,
+      "total": 1500000,
+      "status": "completed",
+      "customer": "Lisa Permata",
+      "date": "2026-04-08"
+    },
+    {
+      "orderId": "ORD-009",
+      "product": "Kopi Luwak Premium 100g",
+      "quantity": 10,
+      "total": 850000,
+      "status": "delivered",
+      "customer": "Budi Santoso",
+      "date": "2026-04-07"
+    },
+    {
+      "orderId": "ORD-010",
+      "product": "Keripik Singkong Original",
+      "quantity": 40,
+      "total": 1000000,
+      "status": "delivered",
+      "customer": "Joko Pramono",
+      "date": "2026-04-06"
+    },
+    {
+      "orderId": "ORD-011",
+      "product": "Sambal Terasi Pedas",
+      "quantity": 20,
+      "total": 700000,
+      "status": "pending",
+      "customer": "Rina Susilowati",
+      "date": "2026-04-05"
+    },
+    {
+      "orderId": "ORD-012",
+      "product": "Batik Pattern Kain 2m",
+      "quantity": 3,
+      "total": 825000,
+      "status": "delivered",
+      "customer": "Tuti Handayani",
+      "date": "2026-03-28"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "EXP-001",
+      "amount": 500000,
+      "category": "supplies",
+      "description": "Beli biji kopi Mentawai",
+      "date": "2026-04-10"
+    },
+    {
+      "id": "EXP-002",
+      "amount": 150000,
+      "category": "supplies",
+      "description": "Bahan baku singkong 20kg",
+      "date": "2026-04-08"
+    },
+    {
+      "id": "EXP-003",
+      "amount": 350000,
+      "category": "marketing",
+      "description": "Iklan Facebook Ads",
+      "date": "2026-04-05"
+    },
+    {
+      "id": "EXP-004",
+      "amount": 200000,
+      "category": "transport",
+      "description": "Ongkir delivery ke customer",
+      "date": "2026-04-03"
+    },
+    {
+      "id": "EXP-005",
+      "amount": 75000,
+      "category": "utilities",
+      "description": "Listrik bulan April",
+      "date": "2026-04-01"
+    },
+    {
+      "id": "EXP-006",
+      "amount": 2500000,
+      "category": "equipment",
+      "description": "Mesin packing vacuum",
+      "date": "2026-03-25"
+    },
+    {
+      "id": "EXP-007",
+      "amount": 120000,
+      "category": "supplies",
+      "description": "Kemasan dus + label",
+      "date": "2026-03-20"
+    },
+    {
+      "id": "EXP-008",
+      "amount": 180000,
+      "category": "rent",
+      "description": "Sewa kios Pasar Minggu",
+      "date": "2026-03-15"
+    },
+    {
+      "id": "EXP-009",
+      "amount": 95000,
+      "category": "marketing",
+      "description": "Promo Instagram",
+      "date": "2026-03-10"
+    },
+    {
+      "id": "EXP-010",
+      "amount": 450000,
+      "category": "supplies",
+      "description": "Bahan baku cabe rawit 10kg",
+      "date": "2026-03-05"
+    }
+  ],
+  "monthlySummary": {
+    "march": {
+      "sales": 8500000,
+      "expenses": 3200000,
+      "profit": 5300000,
+      "orders": 45
+    },
+    "april": {
+      "sales": 10795000,
+      "expenses": 4150000,
+      "profit": 6645000,
+      "orders": 62
+    }
+  }
+}

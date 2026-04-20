@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
+import { loadMockFinanceData } from "@/utils/mockFinance";
 
 function FinanceDashboard() {
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ function FinanceDashboard() {
     netProfit: 0,
     orderCount: 0,
   });
+  const [useMockData, setUseMockData] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,23 +39,10 @@ function FinanceDashboard() {
           orderCount: response.data.orderCount || 0,
         });
       } catch (error) {
-        console.error("Failed to fetch finance summary:", error);
-        // Try orders endpoint as fallback
-        try {
-          const ordersRes = await api.get("/orders/my-orders", { params: { limit: 100 } });
-          const orders = ordersRes.data.orders || [];
-          const totalSales = orders
-            .filter(o => o.status === "delivered" || o.status === "completed")
-            .reduce((sum, o) => sum + (o.total || 0), 0);
-          setStats({
-            totalSales,
-            totalExpenses: 0,
-            netProfit: totalSales,
-            orderCount: orders.filter(o => o.status === "delivered" || o.status === "completed").length,
-          });
-        } catch (err) {
-          console.error("Failed to fetch orders:", err);
-        }
+        console.log("Using mock finance data for demo");
+        const mockData = loadMockFinanceData();
+        setStats(mockData.summary);
+        setUseMockData(true);
       } finally {
         setLoading(false);
       }
@@ -148,6 +137,21 @@ function FinanceDashboard() {
           {t("financeSubtitle") || "Manage your business finances"}
         </p>
       </div>
+
+      {/* Demo Banner */}
+      {useMockData && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 flex items-center gap-3">
+          <div className="bg-amber-100 p-2 rounded-full">
+            <span className="text-xl">📊</span>
+          </div>
+          <div>
+            <p className="font-medium text-amber-800">Demo Mode - Mock Data</p>
+            <p className="text-sm text-amber-600">
+              Showing sample data for testing. Connect backend to see real data.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

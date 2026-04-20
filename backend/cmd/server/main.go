@@ -465,6 +465,8 @@ func main() {
 			wallet.POST("/deduct", walletHandler.DeductFunds)
 			wallet.GET("/transactions", walletHandler.GetTransactions)
 			wallet.POST("/transfer-bank", walletHandler.TransferToBank)
+			wallet.PUT("/bank-account", walletHandler.UpdateBankAccount)
+			wallet.DELETE("/bank-account", walletHandler.DeleteBankAccount)
 		}
 
 		// WhatsApp Integration

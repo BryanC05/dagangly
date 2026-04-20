@@ -260,3 +260,58 @@ func (h *WalletHandler) TransferToBank(c *gin.Context) {
 		"transactionId": transaction.ID,
 	})
 }
+
+func (h *WalletHandler) UpdateBankAccount(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	var req models.BankAccount
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	collection := database.GetDB().Collection("wallets")
+	_, err = collection.UpdateOne(
+		context.Background(),
+		bson.M{"userId": userObjID},
+		bson.M{"$set": bson.M{
+			"bankAccount": req,
+			"updatedAt":   time.Now(),
+		}},
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bank account"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Bank account updated successfully", "bankAccount": req})
+}
+
+func (h *WalletHandler) DeleteBankAccount(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("wallets")
+	_, err = collection.UpdateOne(
+		context.Background(),
+		bson.M{"userId": userObjID},
+		bson.M{"$unset": bson.M{"bankAccount": ""}},
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete bank account"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Bank account deleted successfully"})
+}

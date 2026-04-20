@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Plus, Edit2, Trash2, Package, TrendingUp, DollarSign, ShoppingBag, Save, X, AlertTriangle, 
   BarChart3, Crown, CreditCard, CheckCircle, Clock, Sparkles, Send, Bot, Calendar, ArrowUpRight, 
-  ChevronDown, Activity, Terminal, Star, Users 
+  ChevronDown, Activity, Terminal, Star, Users, Building2
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useTranslation } from '../hooks/useTranslation';
@@ -208,6 +208,49 @@ function SellerDashboard() {
       return response.data;
     },
   });
+
+  const { data: wallet, refetch: refetchWallet } = useQuery({
+    queryKey: ['wallet'],
+    queryFn: async () => {
+      const response = await api.get('/wallet');
+      return response.data;
+    },
+  });
+
+  const [showBankDialog, setShowBankDialog] = useState(false);
+  const [bankDetails, setBankDetails] = useState({ bankName: '', accountNumber: '', accountHolder: '' });
+
+  const updateBankMutation = useMutation({
+    mutationFn: async (data) => {
+      const response = await api.put('/wallet/bank-account', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      setShowBankDialog(false);
+      refetchWallet();
+      setBankDetails({ bankName: '', accountNumber: '', accountHolder: '' });
+    },
+    onError: (error) => {
+      alert(`Failed to save bank details: ${error.response?.data?.error || error.message}`);
+    },
+  });
+
+  const deleteBankMutation = useMutation({
+    mutationFn: async () => {
+      await api.delete('/wallet/bank-account');
+    },
+    onSuccess: () => {
+      refetchWallet();
+    },
+    onError: (error) => {
+      alert(`Failed to remove bank details: ${error.response?.data?.error || error.message}`);
+    },
+  });
+
+  const handleBankSubmit = (e) => {
+    e.preventDefault();
+    updateBankMutation.mutate(bankDetails);
+  };
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [paymentFile, setPaymentFile] = useState(null);
@@ -618,6 +661,99 @@ function SellerDashboard() {
               </div>
             </motion.div>
           </div>
+          </div>
+
+          {/* Payout Settings */}
+          <motion.div variants={itemVariants} className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-bold">Payout Settings</h3>
+              </div>
+              {wallet?.bankAccount ? (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => {
+                    setBankDetails(wallet.bankAccount);
+                    setShowBankDialog(true);
+                  }}>Edit</Button>
+                  <Button variant="destructive" size="sm" onClick={() => {
+                    if (confirm('Are you sure you want to remove your payout details?')) {
+                      deleteBankMutation.mutate();
+                    }
+                  }}>Remove</Button>
+                </div>
+              ) : (
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white" onClick={() => setShowBankDialog(true)}>Add Details</Button>
+              )}
+            </div>
+
+            {wallet?.bankAccount ? (
+              <div className="bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 p-4 rounded-lg flex items-center gap-4">
+                <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded flex items-center justify-center shrink-0">
+                  <CreditCard className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900 dark:text-white uppercase">{wallet.bankAccount.bankName}</p>
+                  <p className="font-mono text-gray-600 dark:text-gray-400">{wallet.bankAccount.accountNumber}</p>
+                  <p className="text-sm text-gray-500 mt-1">A/N: {wallet.bankAccount.accountHolder}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 p-6 rounded-lg text-center">
+                <p className="text-sm text-gray-500">No payout details added. Add your bank account to receive withdrawals.</p>
+              </div>
+            )}
+
+            <Dialog open={showBankDialog} onOpenChange={setShowBankDialog}>
+              <DialogContent className="dark:bg-[#1a1a1a] dark:border-gray-800">
+                <DialogHeader>
+                  <DialogTitle>Payout Settings</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleBankSubmit} className="space-y-4 mt-2">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Bank Name</label>
+                    <select
+                      className="w-full border dark:border-gray-700 rounded-md p-2 bg-transparent focus:outline-none focus:border-blue-500 uppercase"
+                      value={bankDetails.bankName}
+                      onChange={(e) => setBankDetails({...bankDetails, bankName: e.target.value})}
+                      required
+                    >
+                      <option value="">Select Bank</option>
+                      <option value="BCA">BCA</option>
+                      <option value="BNI">BNI</option>
+                      <option value="BRI">BRI</option>
+                      <option value="Mandiri">Mandiri</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Account Number</label>
+                    <input
+                      type="text"
+                      className="w-full border dark:border-gray-700 rounded-md p-2 bg-transparent focus:outline-none focus:border-blue-500 font-mono"
+                      value={bankDetails.accountNumber}
+                      onChange={(e) => setBankDetails({...bankDetails, accountNumber: e.target.value})}
+                      required
+                      placeholder="e.g. 1234567890"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Account Holder Name</label>
+                    <input
+                      type="text"
+                      className="w-full border dark:border-gray-700 rounded-md p-2 bg-transparent focus:outline-none focus:border-blue-500"
+                      value={bankDetails.accountHolder}
+                      onChange={(e) => setBankDetails({...bankDetails, accountHolder: e.target.value})}
+                      required
+                      placeholder="e.g. John Doe"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white" disabled={updateBankMutation.isPending}>
+                    {updateBankMutation.isPending ? 'Saving...' : 'Save Payout Details'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </motion.div>
         </motion.div>
 
         {/* AI Financial Consultant */}
