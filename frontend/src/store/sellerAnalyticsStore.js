@@ -98,10 +98,11 @@ export const useSellerAnalyticsStore = create((set, get) => ({
   error: null,
   useMockData: false,
 
-  fetchSellerAnalytics: async (period = '30') => {
+  fetchSellerAnalytics: async (period = '30', sellerId = null) => {
     set({ loading: true, error: null });
     try {
-      const res = await api.get(`/analytics/seller?period=${period}`);
+      const params = sellerId ? `?period=${period}&sellerId=${sellerId}` : `?period=${period}`;
+      const res = await api.get(`/analytics/seller${params}`);
       set({ analytics: res.data, loading: false, useMockData: false });
     } catch (err) {
       console.log('Analytics API failed, using mock data:', err.message);
@@ -110,10 +111,11 @@ export const useSellerAnalyticsStore = create((set, get) => ({
     }
   },
 
-  fetchSales: async (period = '30') => {
+  fetchSales: async (period = '30', sellerId = null) => {
     set({ loading: true });
     try {
-      const res = await api.get(`/analytics/sales?period=${period}`);
+      const params = sellerId ? `?period=${period}&sellerId=${sellerId}` : `?period=${period}`;
+      const res = await api.get(`/analytics/sales${params}`);
       set({ sales: res.data, loading: false });
     } catch (err) {
       console.log('Sales API failed, using mock data:', err.message);
@@ -122,10 +124,11 @@ export const useSellerAnalyticsStore = create((set, get) => ({
     }
   },
 
-  fetchCustomers: async () => {
+  fetchCustomers: async (sellerId = null) => {
     set({ loading: true, error: null });
     try {
-      const res = await api.get('/analytics/customers');
+      const params = sellerId ? `?sellerId=${sellerId}` : '';
+      const res = await api.get(`/analytics/customers${params}`);
       set({ customers: res.data, loading: false });
     } catch (err) {
       console.log('Customers API failed, using mock data:', err.message);
@@ -134,15 +137,16 @@ export const useSellerAnalyticsStore = create((set, get) => ({
     }
   },
 
-  fetchProductPerformance: async () => {
+  fetchProductPerformance: async (sellerId = null) => {
     set({ loading: true, error: null });
     try {
-      const res = await api.get('/analytics/products');
+      const params = sellerId ? `?sellerId=${sellerId}` : '';
+      const res = await api.get(`/analytics/products${params}`);
       set({ products: res.data, loading: false });
     } catch (err) {
       console.log('Products API failed, using mock data:', err.message);
       const mockProducts = generateMockProducts();
-      set({ products: mockProducts, loading: false });
+      set({ products: mockProducts, length: 0 });
     }
   },
 }));

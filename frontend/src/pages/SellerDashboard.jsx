@@ -169,13 +169,12 @@ function SellerDashboard() {
   } = useSellerAnalyticsStore();
 
   useEffect(() => {
-    if (sellerId) {
-      fetchSellerAnalytics(period);
-      fetchSales(period);
-      fetchCustomers();
-      fetchProductPerformance();
-    }
-  }, [period, sellerId]);
+    // Always fetch analytics - use mock data if not logged in as seller
+    fetchSellerAnalytics(period);
+    fetchSales(period);
+    fetchCustomers();
+    fetchProductPerformance();
+  }, [period]);
 
   // Edit state
   const [editingProduct, setEditingProduct] = useState(null);
