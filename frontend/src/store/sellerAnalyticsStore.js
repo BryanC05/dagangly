@@ -1,22 +1,19 @@
 import { create } from 'zustand';
-import api from '../utils/api';
 import { loadMockFinanceData, getRevenueTrend } from '../utils/mockFinance';
 
 const RANI_SELLER_EMAIL = 'rani.summarecon@marketplace.test';
 
+// Force use mock data for demo
+const FORCE_MOCK = true;
+
 const generateMockAnalytics = (period, sellerEmail = RANI_SELLER_EMAIL) => {
+  console.log('Generating mock analytics for:', sellerEmail);
   const mockData = loadMockFinanceData(sellerEmail);
+  console.log('Mock data loaded:', mockData?.sellerName, mockData?.summary);
+  
   const days = parseInt(period) || 30;
   
-  const sellerData = mockData?.sellerId ? mockData : (() => {
-    // Fallback to all data if specific seller not found
-    return {
-      summary: mockData.summary,
-      products: mockData.products,
-      orders: mockData.orders,
-      revenueTrend: mockData.revenueTrend
-    };
-  })();
+  const sellerData = mockData || { summary: { totalSales: 8276000, orderCount: 10 }, products: [], orders: [], revenueTrend: {} };
   
   // Generate revenue by day based on period
   const revenueByDay = {};
@@ -36,8 +33,8 @@ const generateMockAnalytics = (period, sellerEmail = RANI_SELLER_EMAIL) => {
   // Generate realistic mock data
   const mockAnalytics = {
     period: period,
-    totalRevenue: sellerData.summary?.totalSales || mockData.summary.totalSales,
-    orderCount: completedOrders || sellerData.summary?.orderCount || 10,
+    totalRevenue: sellerData.summary?.totalSales || 8276000,
+    orderCount: completedOrders || 10,
     productCount: sellerData.products?.length || 4,
     avgRating: 4.7,
     totalReviews: 92,
@@ -56,19 +53,20 @@ const generateMockAnalytics = (period, sellerEmail = RANI_SELLER_EMAIL) => {
     })),
   };
 
+  console.log('Mock analytics:', mockAnalytics);
   return mockAnalytics;
 };
 
 const generateMockSales = (period, sellerEmail = RANI_SELLER_EMAIL) => {
   const mockData = loadMockFinanceData(sellerEmail);
-  const sellerData = mockData?.sellerId ? mockData : { orders: mockData.orders, revenueTrend: mockData.revenueTrend };
+  const sellerData = mockData || { orders: [], revenueTrend: {}, products: [] };
   
   const completedOrders = sellerData.orders?.filter(o => o.status === 'delivered' || o.status === 'completed') || [];
   const trendData = sellerData.revenueTrend?.weekly || [];
   
   const mockSales = {
     period: period,
-    totalRevenue: sellerData.summary?.totalSales || mockData.summary.totalSales,
+    totalRevenue: sellerData.summary?.totalSales || 8276000,
     completedOrders: completedOrders.length || 10,
     pendingOrders: Math.floor((completedOrders.length || 10) * 0.25),
     recentDays: trendData.slice(0, 7).map(d => ({
@@ -97,7 +95,7 @@ const generateMockCustomers = () => {
 
 const generateMockProducts = (sellerEmail = RANI_SELLER_EMAIL) => {
   const mockData = loadMockFinanceData(sellerEmail);
-  const products = mockData.products || mockData.products || [];
+  const products = mockData?.products || [];
   
   return products.map((p, i) => ({
     _id: `prod-${i}`,
@@ -122,6 +120,15 @@ export const useSellerAnalyticsStore = create((set) => ({
 
   fetchSellerAnalytics: async (period = '30', sellerEmail = RANI_SELLER_EMAIL) => {
     set({ loading: true, error: null });
+    
+    // Always use mock data for demo
+    if (FORCE_MOCK) {
+      console.log('Using FORCE_MOCK for analytics');
+      const mockAnalytics = generateMockAnalytics(period, sellerEmail);
+      set({ analytics: mockAnalytics, loading: false, useMockData: true });
+      return;
+    }
+    
     try {
       const params = sellerEmail ? `?period=${period}&email=${encodeURIComponent(sellerEmail)}` : `?period=${period}`;
       const res = await api.get(`/analytics/seller${params}`);
@@ -135,6 +142,14 @@ export const useSellerAnalyticsStore = create((set) => ({
 
   fetchSales: async (period = '30', sellerEmail = RANI_SELLER_EMAIL) => {
     set({ loading: true });
+    
+    // Always use mock data for demo
+    if (FORCE_MOCK) {
+      const mockSales = generateMockSales(period, sellerEmail);
+      set({ sales: mockSales, loading: false });
+      return;
+    }
+    
     try {
       const params = sellerEmail ? `?period=${period}&email=${encodeURIComponent(sellerEmail)}` : `?period=${period}`;
       const res = await api.get(`/analytics/sales${params}`);
@@ -148,6 +163,14 @@ export const useSellerAnalyticsStore = create((set) => ({
 
   fetchCustomers: async (sellerEmail = RANI_SELLER_EMAIL) => {
     set({ loading: true, error: null });
+    
+    // Always use mock data for demo
+    if (FORCE_MOCK) {
+      const mockCustomers = generateMockCustomers();
+      set({ customers: mockCustomers, loading: false });
+      return;
+    }
+    
     try {
       const params = sellerEmail ? `?email=${encodeURIComponent(sellerEmail)}` : '';
       const res = await api.get(`/analytics/customers${params}`);
@@ -161,6 +184,14 @@ export const useSellerAnalyticsStore = create((set) => ({
 
   fetchProductPerformance: async (sellerEmail = RANI_SELLER_EMAIL) => {
     set({ loading: true, error: null });
+    
+    // Always use mock data for demo
+    if (FORCE_MOCK) {
+      const mockProducts = generateMockProducts(sellerEmail);
+      set({ products: mockProducts, loading: false });
+      return;
+    }
+    
     try {
       const params = sellerEmail ? `?email=${encodeURIComponent(sellerEmail)}` : '';
       const res = await api.get(`/analytics/products${params}`);
