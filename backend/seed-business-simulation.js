@@ -779,11 +779,14 @@ async function seedDatabase() {
     await db.collection('orders').deleteMany({});
     await db.collection('chatrooms').deleteMany({});
     await db.collection('messages').deleteMany({});
+    await db.collection('expenses').deleteMany({});
     console.log('✅ Collections cleared');
     
     const users = [];
     const businesses = [];
     const products = [];
+    const allExpenses = [];
+    const allOrders = [];
     
     // Hash password
     const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
@@ -914,6 +917,203 @@ async function seedDatabase() {
       console.log(`  ✅ ${bizDef.name} - ${productCount} ${bizDef.categories.join(', ')} products`);
     }
     
+    // ============================================
+    // SEED EXPENSES FOR EACH SELLER
+    // ============================================
+    console.log('\n💰 Creating expenses for each seller...');
+    
+    const EXPENSE_CATEGORIES = ['supplies', 'marketing', 'transport', 'utilities', 'rent', 'equipment'];
+    const EXPENSE_TEMPLATES = {
+      supplies: [
+        'Bahan baku utama',
+        'Kemasan dus + label',
+        'Bahan setengah jadi',
+        'Ingredients stock',
+        'Raw materials procurement',
+      ],
+      marketing: [
+        'Iklan Facebook Ads',
+        'Promo Instagram',
+        'Iklan Google',
+        'Promo Tokopedia',
+        'Marketing materials',
+      ],
+      transport: [
+        'Ongkir delivery',
+        'Biaya kirim produk',
+        'Transportasi bahan baku',
+        'Delivery costs',
+        'Shipping expenses',
+      ],
+      utilities: [
+        'Listrik bulan ini',
+        'Air PDAM',
+        'Internet bisnis',
+        'Telepon & komunikasi',
+        'Utilities monthly',
+      ],
+      rent: [
+        'Sewa kios',
+        'Sewa gudang',
+        'Sewa ruko',
+        'Sewa stan mall',
+        'Space rental',
+      ],
+      equipment: [
+        'Mesin kerja',
+        'Alat produksi',
+        'Peralatan dapur',
+        'Tools & equipment',
+        'Machinery maintenance',
+      ],
+    };
+    
+    for (const business of businesses) {
+      const userId = business.ownerId;
+      const bizName = business.name;
+      
+      // Generate 8-12 expenses per seller
+      const numExpenses = randomInt(8, 12);
+      
+      // Base expense amounts by category
+      const categoryBaseAmounts = {
+        supplies: { min: 150000, max: 600000 },
+        marketing: { min: 100000, max: 400000 },
+        transport: { min: 80000, max: 300000 },
+        utilities: { min: 50000, max: 150000 },
+        rent: { min: 150000, max: 350000 },
+        equipment: { min: 200000, max: 2500000 },
+      };
+      
+      for (let i = 0; i < numExpenses; i++) {
+        const category = randomItem(EXPENSE_CATEGORIES);
+        const baseAmount = categoryBaseAmounts[category];
+        const amount = randomInt(baseAmount.min, baseAmount.max);
+        const template = randomItem(EXPENSE_TEMPLATES[category]);
+        
+        // Generate date within last 60 days
+        const daysBack = Math.floor(Math.random() * 60);
+        const date = new Date();
+        date.setDate(date.getDate() - daysBack);
+        
+        const expense = {
+          _id: new ObjectId(),
+          userId: userId,
+          localId: `EXP-${bizName.substring(0, 3).toUpperCase()}-${String(i + 1).padStart(3, '0')}`,
+          amount: amount,
+          category: category,
+          description: template,
+          date: date.toISOString().split('T')[0],
+          createdAt: date,
+          updatedAt: new Date(),
+          source: 'seed',
+        };
+        
+        allExpenses.push(expense);
+      }
+    }
+    
+    console.log(`  ✅ Created ${allExpenses.length} expenses for ${businesses.length} sellers`);
+    
+    // ============================================
+    // SEED ORDERS FOR EACH SELLER
+    // ============================================
+    console.log('\n📦 Creating orders for each seller...');
+    
+    const ORDER_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
+    const DELIVERED_STATUSES = ['delivered', 'completed'];
+    
+    for (const business of businesses) {
+      const sellerId = business.ownerId;
+      const businessId = business._id;
+      
+      // Generate 5-15 orders per seller
+      const numOrders = randomInt(5, 15);
+      
+      for (let i = 0; i < numOrders; i++) {
+        // Random buyer (from buyer users that will be created)
+        const buyerIndex = randomInt(0, BUYER_USERS.length - 1);
+        const buyer = BUYER_USERS[buyerIndex];
+        
+        // Random products from this business's products
+        const sellerProducts = products.filter(p => p.businessId.equals(businessId));
+        if (sellerProducts.length === 0) continue;
+        
+        const orderProducts = [];
+        const numProducts = randomInt(1, Math.min(3, sellerProducts.length));
+        const usedProducts = new Set();
+        
+        for (let j = 0; j < numProducts; j++) {
+          const availableProducts = sellerProducts.filter(p => !usedProducts.has(p._id.toString()));
+          if (availableProducts.length === 0) break;
+          
+          const product = randomItem(availableProducts);
+          usedProducts.add(product._id.toString());
+          
+          const quantity = randomInt(1, 5);
+          orderProducts.push({
+            productId: product._id,
+            name: product.name,
+            price: product.price,
+            quantity: quantity,
+          });
+        }
+        
+        if (orderProducts.length === 0) continue;
+        
+        const totalAmount = orderProducts.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+        const shippingFee = randomInt(5000, 25000);
+        const finalTotal = totalAmount + shippingFee;
+        
+        // Random status - 70% delivered/completed
+        const statusRoll = Math.random();
+        let status;
+        if (statusRoll < 0.7) {
+          status = randomItem(DELIVERED_STATUSES);
+        } else if (statusRoll < 0.85) {
+          status = 'shipped';
+        } else if (statusRoll < 0.95) {
+          status = randomItem(['pending', 'confirmed', 'processing']);
+        } else {
+          status = 'cancelled';
+        }
+        
+        // Generate date within last 90 days
+        const daysBack = randomInt(0, 90);
+        const orderDate = new Date();
+        orderDate.setDate(orderDate.getDate() - daysBack);
+        
+        const order = {
+          _id: new ObjectId(),
+          orderNumber: `ORD-${String(allOrders.length + 1).padStart(5, '0')}`,
+          buyer: new ObjectId(), // placeholder - will be set after buyers created
+          buyerName: buyer.name,
+          buyerPhone: buyer.phone,
+          seller: sellerId,
+          businessId: businessId,
+          businessName: business.name,
+          products: orderProducts,
+          subtotal: totalAmount,
+          shippingFee: shippingFee,
+          discountAmount: 0,
+          totalAmount: finalTotal,
+          status: status,
+          paymentMethod: randomItem(['COD', 'Transfer', 'Gopay', 'OVO', 'Dana']),
+          paymentStatus: status === 'cancelled' ? 'refunded' : 'paid',
+          deliveryAddress: {
+            address: LOCATIONS[buyer.locationKey].address,
+            city: LOCATIONS[buyer.locationKey].city,
+          },
+          createdAt: orderDate,
+          updatedAt: orderDate,
+        };
+        
+        allOrders.push(order);
+      }
+    }
+    
+    console.log(`  ✅ Created ${allOrders.length} orders for ${businesses.length} sellers`);
+    
     // Process buyer users (no business)
     console.log('👤 Creating buyer users...');
     for (const buyer of BUYER_USERS) {
@@ -962,6 +1162,16 @@ async function seedDatabase() {
       console.log(`✅ Inserted ${products.length} products`);
     }
     
+    if (allExpenses.length > 0) {
+      await db.collection('expenses').insertMany(allExpenses);
+      console.log(`✅ Inserted ${allExpenses.length} expenses`);
+    }
+    
+    if (allOrders.length > 0) {
+      await db.collection('orders').insertMany(allOrders);
+      console.log(`✅ Inserted ${allOrders.length} orders`);
+    }
+    
     // Create indexes
     console.log('\n🔍 Creating indexes...');
     await db.collection('businesses').createIndex({ ownerId: 1 }, { unique: true });
@@ -970,6 +1180,13 @@ async function seedDatabase() {
     await db.collection('products').createIndex({ seller: 1 });
     await db.collection('products').createIndex({ category: 1 });
     await db.collection('products').createIndex({ 'location.coordinates': '2dsphere' });
+    await db.collection('expenses').createIndex({ userId: 1 });
+    await db.collection('expenses').createIndex({ category: 1 });
+    await db.collection('expenses').createIndex({ date: -1 });
+    await db.collection('orders').createIndex({ seller: 1 });
+    await db.collection('orders').createIndex({ buyer: 1 });
+    await db.collection('orders').createIndex({ status: 1 });
+    await db.collection('orders').createIndex({ createdAt: -1 });
     console.log('✅ Indexes created');
     
     // Summary by category
@@ -1000,6 +1217,14 @@ async function seedDatabase() {
       const b = businesses.find(b => b._id.equals(p.businessId));
       return b && b.isVerified;
     }).length}`);
+    console.log(`Total Expenses: ${allExpenses.length}`);
+    const totalExpenseAmount = allExpenses.reduce((sum, e) => sum + e.amount, 0);
+    console.log(`  - Total Expense Value: Rp ${totalExpenseAmount.toLocaleString('id-ID')}`);
+    console.log(`Total Orders: ${allOrders.length}`);
+    const totalOrderRevenue = allOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+    console.log(`  - Total Order Value: Rp ${totalOrderRevenue.toLocaleString('id-ID')}`);
+    const completedOrders = allOrders.filter(o => o.status === 'delivered' || o.status === 'completed');
+    console.log(`  - Completed/Delivered: ${completedOrders.length}`);
     console.log('=====================\n');
     
     // Verification - ensure all products have business names

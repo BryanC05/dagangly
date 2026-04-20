@@ -50,6 +50,7 @@ const NotFound = lazy(() => import('./pages/new-ui/NotFound'));
 const Finance = lazy(() => import('./pages/FinanceDashboard'));
 const FinanceExp = lazy(() => import('./pages/FinanceExpenses'));
 const FinanceCalc = lazy(() => import('./pages/FinanceCalculator'));
+const FinanceInv = lazy(() => import('./pages/FinanceInvoices'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -149,6 +150,7 @@ function App() {
               <Route path="/finance" element={<Suspense fallback={<LoadingFallback />}><Finance /></Suspense>} />
               <Route path="/finance/expenses" element={<Suspense fallback={<LoadingFallback />}><FinanceExp /></Suspense>} />
               <Route path="/finance/calculator" element={<Suspense fallback={<LoadingFallback />}><FinanceCalc /></Suspense>} />
+              <Route path="/finance/invoices" element={<Suspense fallback={<LoadingFallback />}><FinanceInv /></Suspense>} />
               <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFound /></Suspense>} />
             </Route>
           </Routes>

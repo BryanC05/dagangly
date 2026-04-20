@@ -876,7 +876,16 @@
     "monthlyPayment": "Monthly Payment",
     "totalPayment": "Total Payment",
     "totalInterest": "Total Interest",
-    "close": "Close"
+    "close": "Close",
+    "unpaid": "Unpaid",
+    "markPaid": "Mark Paid",
+    "allSeller": "All Sellers",
+    "all": "All",
+    "search": "Search",
+    "totalAmount": "Total Amount",
+    "action": "Action",
+    "invoice": "Invoice",
+    "noInvoices": "No invoices found"
   },
   "analytics": {
     "title": "Seller Analytics",

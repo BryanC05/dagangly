@@ -881,7 +881,16 @@
     "monthlyPayment": "Pembayaran Bulanan",
     "totalPayment": "Total Pembayaran",
     "totalInterest": "Total Bunga",
-    "close": "Tutup"
+    "close": "Tutup",
+    "unpaid": "Belum Dibayar",
+    "markPaid": "Tandai Lunas",
+    "allSeller": "Semua Penjual",
+    "all": "Semua",
+    "search": "Cari",
+    "totalAmount": "Total Jumlah",
+    "action": "Aksi",
+    "invoice": "Faktur",
+    "noInvoices": "Tidak ada faktur"
   },
   "analytics": {
     "title": "Analitik Penjual",

@@ -221,7 +221,7 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 	orderCursor, _ := ordersColl.Find(context.Background(), bson.M{
 		"seller":    userObjID,
 		"createdAt": bson.M{"$gte": startDate},
-		"status":    bson.M{"$in": []string{"completed", "delivered"}},
+		"status":    bson.M{"$in": []string{"completed", "delivered", "confirmed"}},
 	})
 	var orders []bson.M
 	orderCursor.All(context.Background(), &orders)
@@ -235,7 +235,10 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 
 	productCount, _ = productsColl.CountDocuments(context.Background(), bson.M{
 		"seller": userObjID,
-		"status": "active",
+		"$or": []bson.M{
+			{"status": "active"},
+			{"isAvailable": true},
+		},
 	})
 
 	reviewsFilter := bson.M{"sellerId": userObjID}
@@ -363,7 +366,10 @@ func (h *AnalyticsHandler) GetProductPerformance(c *gin.Context) {
 
 	productsCursor, _ := productsColl.Find(context.Background(), bson.M{
 		"seller": userObjID,
-		"status": "active",
+		"$or": []bson.M{
+			{"status": "active"},
+			{"isAvailable": true},
+		},
 	})
 	var products []bson.M
 	productsCursor.All(context.Background(), &products)

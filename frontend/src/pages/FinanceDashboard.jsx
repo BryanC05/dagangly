@@ -11,11 +11,12 @@ import {
   ArrowDownRight,
   Wallet,
   FileText,
-  Plus
+  Plus,
+  Store
 } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
-import { loadMockFinanceData } from "@/utils/mockFinance";
+import { loadMockFinanceData, getSellers } from "@/utils/mockFinance";
 
 function FinanceDashboard() {
   const { t } = useTranslation();
@@ -27,11 +28,18 @@ function FinanceDashboard() {
     orderCount: 0,
   });
   const [useMockData, setUseMockData] = useState(false);
+  const [sellers, setSellers] = useState([]);
+  const [selectedSeller, setSelectedSeller] = useState("all");
+
+  useEffect(() => {
+    setSellers(getSellers());
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get("/finance/summary");
+        const sellerId = selectedSeller === "all" ? undefined : selectedSeller;
+        const response = await api.get("/finance/summary", { params: { sellerId } });
         setStats({
           totalSales: response.data.totalSales || 0,
           totalExpenses: response.data.totalExpenses || 0,
@@ -40,7 +48,8 @@ function FinanceDashboard() {
         });
       } catch (error) {
         console.log("Using mock finance data for demo");
-        const mockData = loadMockFinanceData();
+        const sellerId = selectedSeller === "all" ? undefined : selectedSeller;
+        const mockData = loadMockFinanceData(sellerId);
         setStats(mockData.summary);
         setUseMockData(true);
       } finally {
@@ -48,7 +57,7 @@ function FinanceDashboard() {
       }
     };
     fetchData();
-  }, []);
+  }, [selectedSeller]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("id-ID", {
@@ -132,10 +141,33 @@ function FinanceDashboard() {
     <div className="container py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">{t("finance") || "Finance"}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t("financeSubtitle") || "Manage your business finances"}
-        </p>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">{t("finance") || "Finance"}</h1>
+            <p className="text-muted-foreground mt-2">
+              {t("financeSubtitle") || "Manage your business finances"}
+            </p>
+          </div>
+          
+          {/* Seller Selector */}
+          {sellers.length > 0 && useMockData && (
+            <div className="flex items-center gap-2">
+              <Store className="h-4 w-4 text-muted-foreground" />
+              <select
+                value={selectedSeller}
+                onChange={(e) => setSelectedSeller(e.target.value)}
+                className="px-3 py-2 border rounded-md bg-background"
+              >
+                <option value="all">{t("allSeller") || "All Sellers"}</option>
+                {sellers.map(seller => (
+                  <option key={seller.sellerId} value={seller.sellerId}>
+                    {seller.sellerName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Demo Banner */}

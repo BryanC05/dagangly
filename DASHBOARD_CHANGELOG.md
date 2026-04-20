@@ -56,3 +56,33 @@ The mobile app was updated to match the new web capabilities, optimized for mobi
 
 ## Summary
 By combining the operational controls (inventory management, order updates) with advanced financial reporting (Recharts, AI Advisor) and payout management (Bank Settings), the Seller Dashboard is now a fully comprehensive **Command Center** on both web and mobile.
+
+---
+
+## 4. Backend Bug Fixes (`backend/internal/handlers/analytics.go`)
+During testing, we discovered that the analytics handler had query mismatches with the actual database schema.
+
+### **Fixes**
+- **Product Count Query**: The `GetSellerAnalytics` handler was filtering products by `status: "active"`, but the seed data uses `isAvailable: true`. Fixed to match on either field using `$or`.
+- **Order Revenue Filter**: The revenue calculation only counted `completed` and `delivered` orders, but the seed data also uses `confirmed`. Added `confirmed` to the filter.
+- **Product Performance Query**: Same `status: "active"` vs `isAvailable: true` fix applied to `GetProductPerformance`.
+
+---
+
+## 5. Mock Data Seeding (`backend/seed-mock-analytics.js`)
+Created a supplementary seed script to ensure all 29 sellers have rich, testable data for the AI Financial Consultant.
+
+### **What It Creates**
+- **Wallets with Bank Accounts**: Creates a wallet for each seller with a randomized bank account (BCA, BNI, BRI, Mandiri, CIMB Niaga, Bank Jago) so the Payout Settings UI has data to display.
+- **Recent Orders**: Ensures every seller has at least 8-15 orders within the last 30 days, so the AI Consultant has meaningful revenue and order data to analyze.
+- **Safe Operation**: Does NOT delete existing data. Only fills in gaps where data is missing.
+
+### **Test Accounts**
+All seeded seller accounts use password: `test123`. Example logins:
+| Email | Business Name |
+|---|---|
+| `rani.summarecon@marketplace.test` | Dapur Summarecon |
+| `budi.kopi@marketplace.test` | Kopi Kita |
+| `indah.batik@marketplace.test` | Batik Modern Indah |
+| `lina.skincare@marketplace.test` | Skincare Alami |
+| `tech.gadget@marketplace.test` | Gadget & Accessories |
