@@ -11,7 +11,6 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useSellerAnalyticsStore } from '../store/sellerAnalyticsStore';
 import api from '../utils/api';
 import { resolveImageUrl } from '@/utils/imageUrl';
-import { loadMockFinanceData } from '../utils/mockFinance';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -182,31 +181,32 @@ function SellerDashboard() {
   const [editValues, setEditValues] = useState({ price: 0, stock: 0 });
   const [confirmModal, setConfirmModal] = useState({ show: false, productId: null, productName: '' });
 
-  // Get mock products based on seller's email for demo
+  // Force mock products for demo
+  const FORCE_MOCK_PRODUCTS = true;
+  
+  // Hardcoded mock products for Rani (Dapur Summarecon)
   const getMockProducts = () => {
-    const mockData = loadMockFinanceData('rani.summarecon@marketplace.test');
-    if (!mockData?.products) return [];
-    return mockData.products.map((p, i) => ({
-      _id: `mock-prod-${i}`,
-      name: p.name,
-      price: p.price,
-      stock: Math.floor(Math.random() * 50) + 10,
-      status: 'active',
-      category: 'food',
-      images: [],
-      createdAt: new Date().toISOString(),
-    }));
+    console.log('Generating mock products...');
+    const products = [
+      { _id: 'mock-1', name: 'Nasi Goreng Special', price: 45000, stock: 25, status: 'active', category: 'food', images: [] },
+      { _id: 'mock-2', name: 'Mie Ayam Jamur', price: 35000, stock: 18, status: 'active', category: 'food', images: [] },
+      { _id: 'mock-3', name: 'Soto Ayam Kudus', price: 40000, stock: 12, status: 'active', category: 'food', images: [] },
+      { _id: 'mock-4', name: 'Bakso Granada', price: 38000, stock: 20, status: 'active', category: 'food', images: [] },
+    ];
+    console.log('Mock products:', products);
+    return products;
   };
 
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ['sellerProducts', sellerId],
     queryFn: async () => {
+      if (FORCE_MOCK_PRODUCTS) return getMockProducts();
       try {
         if (!sellerId) return getMockProducts();
         const response = await api.get(`/products/seller/${sellerId}`);
         return response.data;
       } catch (err) {
-        // Fallback to mock products
+        console.log('Using mock products:', err.message);
         return getMockProducts();
       }
     },
@@ -789,7 +789,7 @@ function SellerDashboard() {
           
           {productsLoading ? (
             <div className="py-12 text-center text-sm text-gray-500">Loading inventory data...</div>
-          ) : products?.length === 0 ? (
+          ) : !products || products.length === 0 ? (
             <div className="text-center py-12">
               <p className="mb-4 text-gray-500">No active products found.</p>
               <Link to="/seller/add-product" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 text-sm font-semibold">
