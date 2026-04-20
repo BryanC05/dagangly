@@ -2,187 +2,9 @@
   "sellers": [
     {
       "sellerId": "SEL-001",
-      "sellerName": "Kopi Kita",
-      "email": "budi.kopi@marketplace.test",
-      "products": [
-        { "name": "Kopi Luwak Premium 100g", "price": 85000, "cost": { "material": 35000, "labor": 5000, "shipping": 8000, "platformFee": 5, "other": 2000 } },
-        { "name": "Kopi Arabika Gayo 100g", "price": 65000, "cost": { "material": 25000, "labor": 4000, "shipping": 6000, "platformFee": 5, "other": 1500 } },
-        { "name": "Kopi Susu Jar 500ml", "price": 25000, "cost": { "material": 10000, "labor": 3000, "shipping": 3000, "platformFee": 5, "other": 1000 } },
-        { "name": "Es Kopi Susu Regular", "price": 18000, "cost": { "material": 7000, "labor": 2000, "shipping": 2000, "platformFee": 5, "other": 500 } }
-      ],
-      "orders": [
-        { "orderId": "ORD-001-KI", "product": "Kopi Luwak Premium 100g", "quantity": 15, "total": 1275000, "status": "delivered", "customer": "Budi Santoso", "date": "2026-04-15" },
-        { "orderId": "ORD-002-KI", "product": "Kopi Arabika Gayo 100g", "quantity": 20, "total": 1300000, "status": "delivered", "customer": "Siti Aminah", "date": "2026-04-14" },
-        { "orderId": "ORD-003-KI", "product": "Kopi Susu Jar 500ml", "quantity": 30, "total": 750000, "status": "delivered", "customer": "Ahmad Wijaya", "date": "2026-04-12" },
-        { "orderId": "ORD-004-KI", "product": "Es Kopi Susu Regular", "quantity": 50, "total": 900000, "status": "completed", "customer": "Dewi Lestari", "date": "2026-04-11" },
-        { "orderId": "ORD-005-KI", "product": "Kopi Luwak Premium 100g", "quantity": 10, "total": 850000, "status": "delivered", "customer": "Rudi Hermawan", "date": "2026-04-09" },
-        { "orderId": "ORD-006-KI", "product": "Kopi Arabika Gayo 100g", "quantity": 15, "total": 975000, "status": "delivered", "customer": "Kartika Sari", "date": "2026-04-08" },
-        { "orderId": "ORD-007-KI", "product": "Kopi Susu Jar 500ml", "quantity": 25, "total": 625000, "status": "completed", "customer": "Hendra Gunawan", "date": "2026-04-06" },
-        { "orderId": "ORD-008-KI", "product": "Es Kopi Susu Regular", "quantity": 40, "total": 720000, "status": "delivered", "customer": "Lisa Permata", "date": "2026-04-05" }
-      ],
-      "expenses": [
-        { "id": "EXP-001-KI", "amount": 500000, "category": "supplies", "description": "Beli biji kopi Mentawai", "date": "2026-04-10" },
-        { "id": "EXP-002-KI", "amount": 150000, "category": "supplies", "description": "Gula aren 5kg", "date": "2026-04-08" },
-        { "id": "EXP-003-KI", "amount": 350000, "category": "marketing", "description": "Iklan Facebook Ads", "date": "2026-04-05" },
-        { "id": "EXP-004-KI", "amount": 200000, "category": "transport", "description": "Ongkir delivery", "date": "2026-04-03" },
-        { "id": "EXP-005-KI", "amount": 75000, "category": "utilities", "description": "Listrik bulan April", "date": "2026-04-01" },
-        { "id": "EXP-006-KI", "amount": 400000, "category": "equipment", "description": "Mesin grinder kopi", "date": "2026-03-25" },
-        { "id": "EXP-007-KI", "amount": 180000, "category": "rent", "description": "Sewa kios Summarecon", "date": "2026-03-15" },
-        { "id": "EXP-008-KI", "amount": 95000, "category": "marketing", "description": "Promo Instagram", "date": "2026-03-10" }
-      ],
-      "totalRevenue": 8220000,
-      "totalExpense": 2150000,
-      "revenueTrend": {
-        "weekly": [
-          { "day": "2026-04-14", "revenue": 1300000 },
-          { "day": "2026-04-15", "revenue": 1275000 },
-          { "day": "2026-04-16", "revenue": 0 },
-          { "day": "2026-04-17", "revenue": 750000 },
-          { "day": "2026-04-18", "revenue": 900000 },
-          { "day": "2026-04-19", "revenue": 0 },
-          { "day": "2026-04-20", "revenue": 850000 }
-        ],
-        "daily30": [
-          { "day": "2026-03-22", "revenue": 650000 }, { "day": "2026-03-23", "revenue": 0 }, { "day": "2026-03-24", "revenue": 450000 }, { "day": "2026-03-25", "revenue": 800000 }, { "day": "2026-03-26", "revenue": 0 },
-          { "day": "2026-03-27", "revenue": 550000 }, { "day": "2026-03-28", "revenue": 700000 }, { "day": "2026-03-29", "revenue": 0 }, { "day": "2026-03-30", "revenue": 900000 }, { "day": "2026-03-31", "revenue": 0 },
-          { "day": "2026-04-01", "revenue": 720000 }, { "day": "2026-04-02", "revenue": 0 }, { "day": "2026-04-03", "revenue": 625000 }, { "day": "2026-04-04", "revenue": 0 }, { "day": "2026-04-05", "revenue": 975000 },
-          { "day": "2026-04-06", "revenue": 0 }, { "day": "2026-04-07", "revenue": 850000 }, { "day": "2026-04-08", "revenue": 0 }, { "day": "2026-04-09", "revenue": 1300000 }, { "day": "2026-04-10", "revenue": 0 },
-          { "day": "2026-04-11", "revenue": 1275000 }, { "day": "2026-04-12", "revenue": 0 }, { "day": "2026-04-13", "revenue": 750000 }, { "day": "2026-04-14", "revenue": 0 }, { "day": "2026-04-15", "revenue": 900000 },
-          { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 650000 }, { "day": "2026-04-18", "revenue": 800000 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 1275000 }
-        ],
-        "monthly": [
-          { "month": "2025-11", "revenue": 5200000, "expenses": 1800000 },
-          { "month": "2025-12", "revenue": 6100000, "expenses": 2100000 },
-          { "month": "2026-01", "revenue": 5800000, "expenses": 1950000 },
-          { "month": "2026-02", "revenue": 6900000, "expenses": 2200000 },
-          { "month": "2026-03", "revenue": 7500000, "expenses": 2400000 },
-          { "month": "2026-04", "revenue": 8220000, "expenses": 2150000 }
-        ]
-      }
-    },
-    {
-      "sellerId": "SEL-002",
-      "sellerName": "Batik Modern Indah",
-      "email": "indah.batik@marketplace.test",
-      "products": [
-        { "name": "Batik Pattern Kain 2m", "price": 275000, "cost": { "material": 120000, "labor": 45000, "shipping": 15000, "platformFee": 5, "other": 10000 } },
-        { "name": "Batik Solo Kain 2.5m", "price": 350000, "cost": { "material": 150000, "labor": 55000, "shipping": 18000, "platformFee": 5, "other": 12000 } },
-        { "name": "Batik Pekalongan Kain 2m", "price": 225000, "cost": { "material": 95000, "labor": 35000, "shipping": 12000, "platformFee": 5, "other": 8000 } }
-      ],
-      "orders": [
-        { "orderId": "ORD-001-BI", "product": "Batik Pattern Kain 2m", "quantity": 5, "total": 1375000, "status": "delivered", "customer": "Dewi Lestari", "date": "2026-04-14" },
-        { "orderId": "ORD-002-BI", "product": "Batik Solo Kain 2.5m", "quantity": 3, "total": 1050000, "status": "delivered", "customer": "Kartika Sari", "date": "2026-04-12" },
-        { "orderId": "ORD-003-BI", "product": "Batik Pekalongan Kain 2m", "quantity": 8, "total": 1800000, "status": "delivered", "customer": "Tuti Handayani", "date": "2026-04-10" },
-        { "orderId": "ORD-004-BI", "product": "Batik Pattern Kain 2m", "quantity": 4, "total": 1100000, "status": "completed", "customer": "Lisa Permata", "date": "2026-04-08" },
-        { "orderId": "ORD-005-BI", "product": "Batik Solo Kain 2.5m", "quantity": 2, "total": 700000, "status": "delivered", "customer": "Rina Susilowati", "date": "2026-04-06" },
-        { "orderId": "ORD-006-BI", "product": "Batik Pekalongan Kain 2m", "quantity": 6, "total": 1350000, "status": "delivered", "customer": "Nina Anggraini", "date": "2026-04-04" },
-        { "orderId": "ORD-007-BI", "product": "Batik Pattern Kain 2m", "quantity": 3, "total": 825000, "status": "delivered", "customer": "Yusuf Ibrahim", "date": "2026-04-02" }
-      ],
-      "expenses": [
-        { "id": "EXP-001-BI", "amount": 800000, "category": "supplies", "description": "Kain batik Mori Prima", "date": "2026-04-08" },
-        { "id": "EXP-002-BI", "amount": 250000, "category": "supplies", "description": "Lil batik malam", "date": "2026-04-05" },
-        { "id": "EXP-003-BI", "amount": 300000, "category": "marketing", "description": "Iklan Instagram", "date": "2026-04-01" },
-        { "id": "EXP-004-BI", "amount": 150000, "category": "transport", "description": "Ongkir delivery", "date": "2026-03-28" },
-        { "id": "EXP-005-BI", "amount": 85000, "category": "utilities", "description": "Listrik bulan April", "date": "2026-04-01" },
-        { "id": "EXP-006-BI", "amount": 200000, "category": "rent", "description": "Sewa kios Summarecon", "date": "2026-03-15" },
-        { "id": "EXP-007-BI", "amount": 120000, "category": "supplies", "description": "Pewarna batik naturel", "date": "2026-03-20" }
-      ],
-      "totalRevenue": 8200000,
-      "totalExpense": 1995000,
-      "revenueTrend": {
-        "weekly": [
-          { "day": "2026-04-14", "revenue": 1375000 },
-          { "day": "2026-04-15", "revenue": 0 },
-          { "day": "2026-04-16", "revenue": 1050000 },
-          { "day": "2026-04-17", "revenue": 0 },
-          { "day": "2026-04-18", "revenue": 1800000 },
-          { "day": "2026-04-19", "revenue": 0 },
-          { "day": "2026-04-20", "revenue": 1100000 }
-        ],
-        "daily30": [
-          { "day": "2026-03-22", "revenue": 0 }, { "day": "2026-03-23", "revenue": 700000 }, { "day": "2026-03-24", "revenue": 0 }, { "day": "2026-03-25", "revenue": 825000 }, { "day": "2026-03-26", "revenue": 0 },
-          { "day": "2026-03-27", "revenue": 1350000 }, { "day": "2026-03-28", "revenue": 0 }, { "day": "2026-03-29", "revenue": 700000 }, { "day": "2026-03-30", "revenue": 0 }, { "day": "2026-03-31", "revenue": 1100000 },
-          { "day": "2026-04-01", "revenue": 0 }, { "day": "2026-04-02", "revenue": 825000 }, { "day": "2026-04-03", "revenue": 0 }, { "day": "2026-04-04", "revenue": 1350000 }, { "day": "2026-04-05", "revenue": 0 },
-          { "day": "2026-04-06", "revenue": 700000 }, { "day": "2026-04-07", "revenue": 0 }, { "day": "2026-04-08", "revenue": 1100000 }, { "day": "2026-04-09", "revenue": 0 }, { "day": "2026-04-10", "revenue": 1800000 },
-          { "day": "2026-04-11", "revenue": 0 }, { "day": "2026-04-12", "revenue": 1050000 }, { "day": "2026-04-13", "revenue": 0 }, { "day": "2026-04-14", "revenue": 1375000 }, { "day": "2026-04-15", "revenue": 0 },
-          { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 825000 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 700000 }, { "day": "2026-04-20", "revenue": 0 }
-        ],
-        "monthly": [
-          { "month": "2025-11", "revenue": 4500000, "expenses": 1500000 },
-          { "month": "2025-12", "revenue": 5200000, "expenses": 1700000 },
-          { "month": "2026-01", "revenue": 5800000, "expenses": 1800000 },
-          { "month": "2026-02", "revenue": 6100000, "expenses": 1900000 },
-          { "month": "2026-03", "revenue": 6800000, "expenses": 2000000 },
-          { "month": "2026-04", "revenue": 8200000, "expenses": 1995000 }
-        ]
-      }
-    },
-    {
-      "sellerId": "SEL-003",
-      "sellerName": "Warung Nusantara",
-      "email": "surya.warung@marketplace.test",
-      "products": [
-        { "name": "Sambal Terasi Pedas", "price": 35000, "cost": { "material": 15000, "labor": 4000, "shipping": 4000, "platformFee": 5, "other": 1500 } },
-        { "name": "Sambal Bawang Manis", "price": 28000, "cost": { "material": 12000, "labor": 3500, "shipping": 3500, "platformFee": 5, "other": 1200 } },
-        { "name": "Keripik Singkong Original", "price": 25000, "cost": { "material": 8000, "labor": 3000, "shipping": 3000, "platformFee": 5, "other": 1000 } },
-        { "name": "Keripik Singkong Pedas", "price": 28000, "cost": { "material": 9000, "labor": 3200, "shipping": 3200, "platformFee": 5, "other": 1200 } }
-      ],
-      "orders": [
-        { "orderId": "ORD-001-WN", "product": "Sambal Terasi Pedas", "quantity": 30, "total": 1050000, "status": "delivered", "customer": "Ahmad Wijaya", "date": "2026-04-15" },
-        { "orderId": "ORD-002-WN", "product": "Keripik Singkong Original", "quantity": 40, "total": 1000000, "status": "delivered", "customer": "Joko Pramono", "date": "2026-04-14" },
-        { "orderId": "ORD-003-WN", "product": "Sambal Bawang Manis", "quantity": 25, "total": 700000, "status": "delivered", "customer": "Rina Susilowati", "date": "2026-04-13" },
-        { "orderId": "ORD-004-WN", "product": "Keripik Singkong Pedas", "quantity": 35, "total": 980000, "status": "completed", "customer": "Nina Anggraini", "date": "2026-04-11" },
-        { "orderId": "ORD-005-WN", "product": "Sambal Terasi Pedas", "quantity": 20, "total": 700000, "status": "delivered", "customer": "Yusuf Ibrahim", "date": "2026-04-10" },
-        { "orderId": "ORD-006-WN", "product": "Keripik Singkong Original", "quantity": 50, "total": 1250000, "status": "delivered", "customer": "Dewi Kusuma", "date": "2026-04-08" },
-        { "orderId": "ORD-007-WN", "product": "Sambal Bawang Manis", "quantity": 30, "total": 840000, "status": "delivered", "customer": "Bambang Sulistio", "date": "2026-04-06" },
-        { "orderId": "ORD-008-WN", "product": "Keripik Singkong Pedas", "quantity": 25, "total": 700000, "status": "delivered", "customer": "Putri Amelia", "date": "2026-04-04" },
-        { "orderId": "ORD-009-WN", "product": "Sambal Terasi Pedas", "quantity": 15, "total": 525000, "status": "delivered", "customer": "Ahmad Fauzi", "date": "2026-04-02" },
-        { "orderId": "ORD-010-WN", "product": "Keripik Singkong Original", "quantity": 30, "total": 750000, "status": "completed", "customer": "Andi Wijaya", "date": "2026-04-01" }
-      ],
-      "expenses": [
-        { "id": "EXP-001-WN", "amount": 400000, "category": "supplies", "description": "Cabe rawit merah 10kg", "date": "2026-04-10" },
-        { "id": "EXP-002-WN", "amount": 180000, "category": "supplies", "description": "Bahan baku singkong 20kg", "date": "2026-04-08" },
-        { "id": "EXP-003-WN", "amount": 250000, "category": "marketing", "description": "Iklan Facebook", "date": "2026-04-05" },
-        { "id": "EXP-004-WN", "amount": 300000, "category": "transport", "description": "Ongkir delivery", "date": "2026-04-03" },
-        { "id": "EXP-005-WN", "amount": 95000, "category": "utilities", "description": "Listrik bulan April", "date": "2026-04-01" },
-        { "id": "EXP-006-WN", "amount": 180000, "category": "rent", "description": "Sewa kios Harapan Indah", "date": "2026-03-15" },
-        { "id": "EXP-007-WN", "amount": 150000, "category": "supplies", "description": "Kemasan dus + label", "date": "2026-03-20" },
-        { "id": "EXP-008-WN", "amount": 80000, "category": "marketing", "description": "Promo GoFood", "date": "2026-03-10" }
-      ],
-      "totalRevenue": 8145000,
-      "totalExpense": 2035000,
-      "revenueTrend": {
-        "weekly": [
-          { "day": "2026-04-14", "revenue": 1000000 },
-          { "day": "2026-04-15", "revenue": 1050000 },
-          { "day": "2026-04-16", "revenue": 0 },
-          { "day": "2026-04-17", "revenue": 700000 },
-          { "day": "2026-04-18", "revenue": 980000 },
-          { "day": "2026-04-19", "revenue": 0 },
-          { "day": "2026-04-20", "revenue": 700000 }
-        ],
-        "daily30": [
-          { "day": "2026-03-22", "revenue": 525000 }, { "day": "2026-03-23", "revenue": 0 }, { "day": "2026-03-24", "revenue": 700000 }, { "day": "2026-03-25", "revenue": 840000 }, { "day": "2026-03-26", "revenue": 0 },
-          { "day": "2026-03-27", "revenue": 1250000 }, { "day": "2026-03-28", "revenue": 0 }, { "day": "2026-03-29", "revenue": 700000 }, { "day": "2026-03-30", "revenue": 980000 }, { "day": "2026-03-31", "revenue": 0 },
-          { "day": "2026-04-01", "revenue": 750000 }, { "day": "2026-04-02", "revenue": 525000 }, { "day": "2026-04-03", "revenue": 0 }, { "day": "2026-04-04", "revenue": 700000 }, { "day": "2026-04-05", "revenue": 840000 },
-          { "day": "2026-04-06", "revenue": 0 }, { "day": "2026-04-07", "revenue": 1250000 }, { "day": "2026-04-08", "revenue": 0 }, { "day": "2026-04-09", "revenue": 700000 }, { "day": "2026-04-10", "revenue": 980000 },
-          { "day": "2026-04-11", "revenue": 0 }, { "day": "2026-04-12", "revenue": 700000 }, { "day": "2026-04-13", "revenue": 1000000 }, { "day": "2026-04-14", "revenue": 0 }, { "day": "2026-04-15", "revenue": 1050000 },
-          { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 700000 }, { "day": "2026-04-18", "revenue": 980000 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 700000 }
-        ],
-        "monthly": [
-          { "month": "2025-11", "revenue": 4200000, "expenses": 1400000 },
-          { "month": "2025-12", "revenue": 5100000, "expenses": 1600000 },
-          { "month": "2026-01", "revenue": 5500000, "expenses": 1700000 },
-          { "month": "2026-02", "revenue": 6200000, "expenses": 1850000 },
-          { "month": "2026-03", "revenue": 7000000, "expenses": 1950000 },
-          { "month": "2026-04", "revenue": 8145000, "expenses": 2035000 }
-        ]
-      }
-    },
-    {
-      "sellerId": "SEL-004",
       "sellerName": "Dapur Summarecon",
       "email": "rani.summarecon@marketplace.test",
+      "category": "food",
       "products": [
         { "name": "Nasi Goreng Special", "price": 45000, "cost": { "material": 18000, "labor": 8000, "shipping": 5000, "platformFee": 5, "other": 2000 } },
         { "name": "Mie Ayam Jamur", "price": 35000, "cost": { "material": 14000, "labor": 6000, "shipping": 4000, "platformFee": 5, "other": 1500 } },
@@ -195,170 +17,351 @@
         { "orderId": "ORD-003-DS", "product": "Soto Ayam Kudus", "quantity": 18, "total": 720000, "status": "delivered", "customer": "Rudi Hartono", "date": "2026-04-13" },
         { "orderId": "ORD-004-DS", "product": "Bakso Granada", "quantity": 22, "total": 836000, "status": "completed", "customer": "Nina Anggraini", "date": "2026-04-12" },
         { "orderId": "ORD-005-DS", "product": "Nasi Goreng Special", "quantity": 15, "total": 675000, "status": "delivered", "customer": "Yusuf Ibrahim", "date": "2026-04-10" },
-        { "orderId": "ORD-006-DS", "product": "Mie Ayam Jamur", "quantity": 30, "total": 1050000, "status": "delivered", "customer": "Dewi Kusuma", "date": "2026-04-08" },
-        { "orderId": "ORD-007-DS", "product": "Soto Ayam Kudus", "quantity": 20, "total": 800000, "status": "delivered", "customer": "Ahmad Fauzi", "date": "2026-04-06" },
-        { "orderId": "ORD-008-DS", "product": "Bakso Granada", "quantity": 25, "total": 950000, "status": "delivered", "customer": "Putri Amelia", "date": "2026-04-04" },
-        { "orderId": "ORD-009-DS", "product": "Nasi Goreng Special", "quantity": 12, "total": 540000, "status": "completed", "customer": "Bambang Sulistio", "date": "2026-04-02" },
-        { "orderId": "ORD-010-DS", "product": "Mie Ayam Jamur", "quantity": 28, "total": 980000, "status": "delivered", "customer": "Citra Lestari", "date": "2026-04-01" }
+        { "orderId": "ORD-006-DS", "product": "Mie Ayam Jamur", "quantity": 30, "total": 1050000, "status": "delivered", "customer": "Dewi Kusuma", "date": "2026-04-08" }
       ],
       "expenses": [
         { "id": "EXP-001-DS", "amount": 600000, "category": "supplies", "description": "Belih daging ayam 15kg", "date": "2026-04-10" },
         { "id": "EXP-002-DS", "amount": 250000, "category": "supplies", "description": "Beras 20kg", "date": "2026-04-08" },
         { "id": "EXP-003-DS", "amount": 400000, "category": "marketing", "description": "Iklan GoFood", "date": "2026-04-05" },
-        { "id": "EXP-004-DS", "amount": 350000, "category": "transport", "description": "Ongkir delivery", "date": "2026-04-03" },
-        { "id": "EXP-005-DS", "amount": 120000, "category": "utilities", "description": "Listrik + Gas bulan April", "date": "2026-04-01" },
-        { "id": "EXP-006-DS", "amount": 250000, "category": "rent", "description": "Sewa kios Summarecon", "date": "2026-03-15" },
-        { "id": "EXP-007-DS", "amount": 180000, "category": "supplies", "description": "Bumbu memasak", "date": "2026-03-20" },
-        { "id": "EXP-008-DS", "amount": 150000, "category": "equipment", "description": "Tabung gas 12kg", "date": "2026-03-10" }
+        { "id": "EXP-004-DS", "amount": 350000, "category": "transport", "description": "Ongkir delivery", "date": "2026-04-03" }
       ],
-      "totalRevenue": 8276000,
-      "totalExpense": 2550000,
+      "totalRevenue": 4906000,
+      "totalExpense": 1600000,
+      "avgRating": 4.8,
+      "totalReviews": 134,
       "revenueTrend": {
-        "weekly": [
-          { "day": "2026-04-14", "revenue": 875000 },
-          { "day": "2026-04-15", "revenue": 900000 },
-          { "day": "2026-04-16", "revenue": 720000 },
-          { "day": "2026-04-17", "revenue": 836000 },
-          { "day": "2026-04-18", "revenue": 0 },
-          { "day": "2026-04-19", "revenue": 1050000 },
-          { "day": "2026-04-20", "revenue": 800000 }
-        ],
-        "daily30": [
-          { "day": "2026-03-22", "revenue": 980000 }, { "day": "2026-03-23", "revenue": 0 }, { "day": "2026-03-24", "revenue": 540000 }, { "day": "2026-03-25", "revenue": 950000 }, { "day": "2026-03-26", "revenue": 0 },
-          { "day": "2026-03-27", "revenue": 800000 }, { "day": "2026-03-28", "revenue": 1050000 }, { "day": "2026-03-29", "revenue": 0 }, { "day": "2026-03-30", "revenue": 675000 }, { "day": "2026-03-31", "revenue": 836000 },
-          { "day": "2026-04-01", "revenue": 0 }, { "day": "2026-04-02", "revenue": 720000 }, { "day": "2026-04-03", "revenue": 875000 }, { "day": "2026-04-04", "revenue": 0 }, { "day": "2026-04-05", "revenue": 900000 },
-          { "day": "2026-04-06", "revenue": 0 }, { "day": "2026-04-07", "revenue": 540000 }, { "day": "2026-04-08", "revenue": 980000 }, { "day": "2026-04-09", "revenue": 0 }, { "day": "2026-04-10", "revenue": 675000 },
-          { "day": "2026-04-11", "revenue": 836000 }, { "day": "2026-04-12", "revenue": 0 }, { "day": "2026-04-13", "revenue": 720000 }, { "day": "2026-04-14", "revenue": 875000 }, { "day": "2026-04-15", "revenue": 0 },
-          { "day": "2026-04-16", "revenue": 800000 }, { "day": "2026-04-17", "revenue": 1050000 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 950000 }, { "day": "2026-04-20", "revenue": 0 }
-        ],
-        "monthly": [
-          { "month": "2025-11", "revenue": 4800000, "expenses": 1600000 },
-          { "month": "2025-12", "revenue": 5500000, "expenses": 1800000 },
-          { "month": "2026-01", "revenue": 6100000, "expenses": 2000000 },
-          { "month": "2026-02", "revenue": 6800000, "expenses": 2200000 },
-          { "month": "2026-03", "revenue": 7500000, "expenses": 2400000 },
-          { "month": "2026-04", "revenue": 8276000, "expenses": 2550000 }
-        ]
+        "weekly": [{ "day": "2026-04-14", "revenue": 875000 }, { "day": "2026-04-15", "revenue": 900000 }, { "day": "2026-04-16", "revenue": 720000 }, { "day": "2026-04-17", "revenue": 836000 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 1050000 }, { "day": "2026-04-20", "revenue": 550000 }],
+        "monthly": [{ "month": "2025-11", "revenue": 3200000, "expenses": 1100000 }, { "month": "2025-12", "revenue": 3800000, "expenses": 1200000 }, { "month": "2026-01", "revenue": 4100000, "expenses": 1300000 }, { "month": "2026-02", "revenue": 4500000, "expenses": 1400000 }, { "month": "2026-03", "revenue": 4600000, "expenses": 1500000 }, { "month": "2026-04", "revenue": 4906000, "expenses": 1600000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-002",
+      "sellerName": "Warung Nusantara",
+      "email": "surya.warung@marketplace.test",
+      "category": "food",
+      "products": [
+        { "name": "Nasi Gudeg Yong Jakarta", "price": 55000, "cost": { "material": 22000, "labor": 10000, "shipping": 6000, "platformFee": 5, "other": 2500 } },
+        { "name": "AyamPenyet Surabaya", "price": 48000, "cost": { "material": 19000, "labor": 8500, "shipping": 5500, "platformFee": 5, "other": 2200 } },
+        { "name": "Sate Maranggi南阳", "price": 65000, "cost": { "material": 26000, "labor": 12000, "shipping": 7000, "platformFee": 5, "other": 3000 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-WN", "product": "Nasi Gudeg Yong Jakarta", "quantity": 12, "total": 660000, "status": "delivered", "customer": "Andi Wijaya", "date": "2026-04-14" },
+        { "orderId": "ORD-002-WN", "product": "AyamPenyet Surabaya", "quantity": 15, "total": 720000, "status": "delivered", "customer": "Lisa Permata", "date": "2026-04-12" },
+        { "orderId": "ORD-003-WN", "product": "Sate Maranggi", "quantity": 8, "total": 520000, "status": "completed", "customer": "Rudi Hartono", "date": "2026-04-10" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-WN", "amount": 300000, "category": "supplies", "description": "Bahan dasar", "date": "2026-04-08" },
+        { "id": "EXP-002-WN", "amount": 150000, "category": "marketing", "description": "Iklan", "date": "2026-04-05" }
+      ],
+      "totalRevenue": 1900000,
+      "totalExpense": 450000,
+      "avgRating": 4.6,
+      "totalReviews": 78,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 660000 }, { "day": "2026-04-15", "revenue": 720000 }, { "day": "2026-04-16", "revenue": 520000 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 1200000, "expenses": 300000 }, { "month": "2025-12", "revenue": 1500000, "expenses": 350000 }, { "month": "2026-01", "revenue": 1700000, "expenses": 400000 }, { "month": "2026-02", "revenue": 1800000, "expenses": 420000 }, { "month": "2026-03", "revenue": 1850000, "expenses": 440000 }, { "month": "2026-04", "revenue": 1900000, "expenses": 450000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-003",
+      "sellerName": "Kopi Kita",
+      "email": "budi.kopi@marketplace.test",
+      "category": "beverages",
+      "products": [
+        { "name": "Kopi Luwak Premium 100g", "price": 85000, "cost": { "material": 35000, "labor": 5000, "shipping": 8000, "platformFee": 5, "other": 2000 } },
+        { "name": "Kopi Arabika Gayo 100g", "price": 65000, "cost": { "material": 25000, "labor": 4000, "shipping": 6000, "platformFee": 5, "other": 1500 } },
+        { "name": "Kopi Susu Aren", "price": 25000, "cost": { "material": 10000, "labor": 3000, "shipping": 3000, "platformFee": 5, "other": 1000 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-KI", "product": "Kopi Luwak Premium 100g", "quantity": 15, "total": 1275000, "status": "delivered", "customer": "Budi Santoso", "date": "2026-04-15" },
+        { "orderId": "ORD-002-KI", "product": "Kopi Arabika Gayo 100g", "quantity": 20, "total": 1300000, "status": "delivered", "customer": "Siti Aminah", "date": "2026-04-14" },
+        { "orderId": "ORD-003-KI", "product": "Kopi Susu Aren", "quantity": 30, "total": 750000, "status": "delivered", "customer": "Ahmad Wijaya", "date": "2026-04-12" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-KI", "amount": 500000, "category": "supplies", "description": "Biji kopi", "date": "2026-04-10" },
+        { "id": "EXP-002-KI", "amount": 350000, "category": "marketing", "description": "Iklan", "date": "2026-04-05" }
+      ],
+      "totalRevenue": 3325000,
+      "totalExpense": 850000,
+      "avgRating": 4.7,
+      "totalReviews": 92,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 1300000 }, { "day": "2026-04-15", "revenue": 1275000 }, { "day": "2026-04-16", "revenue": 750000 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 2100000, "expenses": 500000 }, { "month": "2025-12", "revenue": 2500000, "expenses": 600000 }, { "month": "2026-01", "revenue": 2800000, "expenses": 700000 }, { "month": "2026-02", "revenue": 3000000, "expenses": 750000 }, { "month": "2026-03", "revenue": 3200000, "expenses": 800000 }, { "month": "2026-04", "revenue": 3325000, "expenses": 850000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-004",
+      "sellerName": "Es Teh Manis Bu Dewi",
+      "email": "dewi.esteh@marketplace.test",
+      "category": "beverages",
+      "products": [
+        { "name": "Es Teh Manis Jumbo", "price": 8000, "cost": { "material": 2500, "labor": 1000, "shipping": 1000, "platformFee": 5, "other": 500 } },
+        { "name": "Jus Mangga Segar", "price": 18000, "cost": { "material": 7000, "labor": 2000, "shipping": 2000, "platformFee": 5, "other": 800 } },
+        { "name": "Jus AlpukatSuper", "price": 22000, "cost": { "material": 9000, "labor": 2500, "shipping": 2500, "platformFee": 5, "other": 1000 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-ED", "product": "Es Teh Manis Jumbo", "quantity": 50, "total": 400000, "status": "delivered", "customer": "Lisa Permata", "date": "2026-04-14" },
+        { "orderId": "ORD-002-ED", "product": "Jus Mangga Segar", "quantity": 20, "total": 360000, "status": "delivered", "customer": "Nina", "date": "2026-04-12" },
+        { "orderId": "ORD-003-ED", "product": "Jus Alpukat", "quantity": 15, "total": 330000, "status": "completed", "customer": "Yusuf", "date": "2026-04-10" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-ED", "amount": 200000, "category": "supplies", "description": "Bahan buah", "date": "2026-04-08" }
+      ],
+      "totalRevenue": 1090000,
+      "totalExpense": 200000,
+      "avgRating": 4.5,
+      "totalReviews": 67,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 400000 }, { "day": "2026-04-15", "revenue": 360000 }, { "day": "2026-04-16", "revenue": 330000 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 600000, "expenses": 100000 }, { "month": "2025-12", "revenue": 750000, "expenses": 120000 }, { "month": "2026-01", "revenue": 850000, "expenses": 150000 }, { "month": "2026-02", "revenue": 950000, "expenses": 170000 }, { "month": "2026-03", "revenue": 1050000, "expenses": 190000 }, { "month": "2026-04", "revenue": 1090000, "expenses": 200000 }]
       }
     },
     {
       "sellerId": "SEL-005",
-      "sellerName": "Skincare Alami",
-      "email": "lina.skincare@marketplace.test",
+      "sellerName": "Kedai Kopi Senja",
+      "email": "rizal.kedai@marketplace.test",
+      "category": "beverages",
       "products": [
-        { "name": "Face Wash Rosemary", "price": 85000, "cost": { "material": 35000, "labor": 12000, "shipping": 8000, "platformFee": 5, "other": 3000 } },
-        { "name": "Body Scrub Kopi", "price": 95000, "cost": { "material": 40000, "labor": 14000, "shipping": 9000, "platformFee": 5, "other": 3500 } },
-        { "name": "Lip Tint Natural", "price": 55000, "cost": { "material": 22000, "labor": 8000, "shipping": 5000, "platformFee": 5, "other": 2000 } },
-        { "name": "Moisturizer Aloe Vera", "price": 75000, "cost": { "material": 30000, "labor": 10000, "shipping": 7000, "platformFee": 5, "other": 2500 } }
+        { "name": "Kopi Susu Aren Besar", "price": 28000, "cost": { "material": 11000, "labor": 3500, "shipping": 3000, "platformFee": 5, "other": 1200 } },
+        { "name": "Kopi Hitam Original", "price": 20000, "cost": { "material": 7000, "labor": 2500, "shipping": 2500, "platformFee": 5, "other": 800 } },
+        { "name": "Matcha Latte", "price": 35000, "cost": { "material": 14000, "labor": 4500, "shipping": 4000, "platformFee": 5, "other": 1500 } }
       ],
       "orders": [
-        { "orderId": "ORD-001-SA", "product": "Face Wash Rosemary", "quantity": 12, "total": 1020000, "status": "delivered", "customer": "Lisa Permata", "date": "2026-04-15" },
-        { "orderId": "ORD-002-SA", "product": "Body Scrub Kopi", "quantity": 8, "total": 760000, "status": "delivered", "customer": "Dewi Kusuma", "date": "2026-04-14" },
-        { "orderId": "ORD-003-SA", "product": "Moisturizer Aloe Vera", "quantity": 15, "total": 1125000, "status": "delivered", "customer": "Putri Amelia", "date": "2026-04-12" },
-        { "orderId": "ORD-004-SA", "product": "Lip Tint Natural", "quantity": 20, "total": 1100000, "status": "completed", "customer": "Nina Anggraini", "date": "2026-04-10" },
-        { "orderId": "ORD-005-SA", "product": "Face Wash Rosemary", "quantity": 10, "total": 850000, "status": "delivered", "customer": "Citra Lestari", "date": "2026-04-08" },
-        { "orderId": "ORD-006-SA", "product": "Body Scrub Kopi", "quantity": 6, "total": 570000, "status": "delivered", "customer": "Andi Wijaya", "date": "2026-04-06" }
+        { "orderId": "ORD-001-KS", "product": "Kopi Susu Aren Besar", "quantity": 35, "total": 980000, "status": "delivered", "customer": "Dewi", "date": "2026-04-15" },
+        { "orderId": "ORD-002-KS", "product": "Matcha Latte", "quantity": 20, "total": 700000, "status": "delivered", "customer": "Putri", "date": "2026-04-13" }
       ],
       "expenses": [
-        { "id": "EXP-001-SA", "amount": 350000, "category": "supplies", "description": "Bahan kopi bubuk 5kg", "date": "2026-04-08" },
-        { "id": "EXP-002-SA", "amount": 200000, "category": "supplies", "description": "Aloe vera gel 3L", "date": "2026-04-05" },
-        { "id": "EXP-003-SA", "amount": 250000, "category": "marketing", "description": "Iklan Instagram", "date": "2026-04-01" },
-        { "id": "EXP-004-SA", "amount": 80000, "category": "transport", "description": "Ongkir delivery", "date": "2026-03-28" },
-        { "id": "EXP-005-SA", "amount": 65000, "category": "utilities", "description": "Listrik bulan April", "date": "2026-04-01" },
-        { "id": "EXP-006-SA", "amount": 150000, "category": "rent", "description": "Sewa kios Summarecon", "date": "2026-03-15" }
+        { "id": "EXP-001-KS", "amount": 400000, "category": "supplies", "description": "Biji kopi special", "date": "2026-04-10" },
+        { "id": "EXP-002-KS", "amount": 200000, "category": "rent", "description": "Sewa kios", "date": "2026-04-01" }
       ],
-      "totalRevenue": 5425000,
-      "totalExpense": 1395000,
+      "totalRevenue": 1680000,
+      "totalExpense": 600000,
+      "avgRating": 4.8,
+      "totalReviews": 112,
       "revenueTrend": {
-        "weekly": [
-          { "day": "2026-04-14", "revenue": 760000 },
-          { "day": "2026-04-15", "revenue": 1020000 },
-          { "day": "2026-04-16", "revenue": 0 },
-          { "day": "2026-04-17", "revenue": 1125000 },
-          { "day": "2026-04-18", "revenue": 0 },
-          { "day": "2026-04-19", "revenue": 850000 },
-          { "day": "2026-04-20", "revenue": 0 }
-        ],
-        "daily30": [
-          { "day": "2026-03-22", "revenue": 570000 }, { "day": "2026-03-23", "revenue": 0 }, { "day": "2026-03-24", "revenue": 850000 }, { "day": "2026-03-25", "revenue": 0 }, { "day": "2026-03-26", "revenue": 1100000 },
-          { "day": "2026-03-27", "revenue": 0 }, { "day": "2026-03-28", "revenue": 1125000 }, { "day": "2026-03-29", "revenue": 0 }, { "day": "2026-03-30", "revenue": 760000 }, { "day": "2026-03-31", "revenue": 0 },
-          { "day": "2026-04-01", "revenue": 1020000 }, { "day": "2026-04-02", "revenue": 0 }, { "day": "2026-04-03", "revenue": 570000 }, { "day": "2026-04-04", "revenue": 0 }, { "day": "2026-04-05", "revenue": 850000 },
-          { "day": "2026-04-06", "revenue": 0 }, { "day": "2026-04-07", "revenue": 1100000 }, { "day": "2026-04-08", "revenue": 0 }, { "day": "2026-04-09", "revenue": 1125000 }, { "day": "2026-04-10", "revenue": 0 },
-          { "day": "2026-04-11", "revenue": 760000 }, { "day": "2026-04-12", "revenue": 0 }, { "day": "2026-04-13", "revenue": 1020000 }, { "day": "2026-04-14", "revenue": 0 }, { "day": "2026-04-15", "revenue": 1125000 },
-          { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 850000 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 570000 }, { "day": "2026-04-20", "revenue": 0 }
-        ],
-        "monthly": [
-          { "month": "2025-11", "revenue": 2800000, "expenses": 900000 },
-          { "month": "2025-12", "revenue": 3200000, "expenses": 1000000 },
-          { "month": "2026-01", "revenue": 3800000, "expenses": 1100000 },
-          { "month": "2026-02", "revenue": 4200000, "expenses": 1200000 },
-          { "month": "2026-03", "revenue": 4800000, "expenses": 1300000 },
-          { "month": "2026-04", "revenue": 5425000, "expenses": 1395000 }
-        ]
+        "weekly": [{ "day": "2026-04-14", "revenue": 980000 }, { "day": "2026-04-15", "revenue": 700000 }, { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 900000, "expenses": 300000 }, { "month": "2025-12", "revenue": 1100000, "expenses": 350000 }, { "month": "2026-01", "revenue": 1300000, "expenses": 400000 }, { "month": "2026-02", "revenue": 1500000, "expenses": 500000 }, { "month": "2026-03", "revenue": 1600000, "expenses": 550000 }, { "month": "2026-04", "revenue": 1680000, "expenses": 600000 }]
       }
     },
     {
       "sellerId": "SEL-006",
       "sellerName": "Kue Kering Budi",
       "email": "budi.kue@marketplace.test",
+      "category": "snacks",
       "products": [
         { "name": "Nastar Klasik Box", "price": 65000, "cost": { "material": 28000, "labor": 10000, "shipping": 6000, "platformFee": 5, "other": 2500 } },
         { "name": "Kastengel Keju", "price": 55000, "cost": { "material": 23000, "labor": 8500, "shipping": 5500, "platformFee": 5, "other": 2200 } },
-        { "name": "Brownies Coklat", "price": 45000, "cost": { "material": 18000, "labor": 7000, "shipping": 5000, "platformFee": 5, "other": 2000 } },
-        { "name": "Cookies Choco Chip", "price": 40000, "cost": { "material": 15000, "labor": 6000, "shipping": 4500, "platformFee": 5, "other": 1800 } }
+        { "name": "Thumbprint Cookies", "price": 45000, "cost": { "material": 18000, "labor": 7000, "shipping": 5000, "platformFee": 5, "other": 2000 } }
       ],
       "orders": [
         { "orderId": "ORD-001-KKB", "product": "Nastar Klasik Box", "quantity": 15, "total": 975000, "status": "delivered", "customer": "Dewi Kusuma", "date": "2026-04-14" },
-        { "orderId": "ORD-002-KKB", "product": "Kastengel Keju", "quantity": 20, "total": 1100000, "status": "delivered", "customer": "Yusuf Ibrahim", "date": "2026-04-12" },
-        { "orderId": "ORD-003-KKB", "product": "Brownies Coklat", "quantity": 25, "total": 1125000, "status": "delivered", "customer": "Ahmad Fauzi", "date": "2026-04-10" },
-        { "orderId": "ORD-004-KKB", "product": "Cookies Choco Chip", "quantity": 30, "total": 1200000, "status": "completed", "customer": "Putri Amelia", "date": "2026-04-08" },
-        { "orderId": "ORD-005-KKB", "product": "Nastar Klasik Box", "quantity": 12, "total": 780000, "status": "delivered", "customer": "Bambang Sulistio", "date": "2026-04-06" },
-        { "orderId": "ORD-006-KKB", "product": "Kastengel Keju", "quantity": 18, "total": 990000, "status": "delivered", "customer": "Citra Lestari", "date": "2026-04-04" },
-        { "orderId": "ORD-007-KKB", "product": "Brownies Coklat", "quantity": 20, "total": 900000, "status": "delivered", "customer": "Rudi Hartono", "date": "2026-04-02" }
+        { "orderId": "ORD-002-KKB", "product": "Kastengel Keju", "quantity": 20, "total": 1100000, "status": "delivered", "customer": "Yusuf", "date": "2026-04-12" },
+        { "orderId": "ORD-003-KKB", "product": "Thumbprint Cookies", "quantity": 25, "total": 1125000, "status": "delivered", "customer": "Ahmad", "date": "2026-04-10" }
       ],
       "expenses": [
-        { "id": "EXP-001-KKB", "amount": 400000, "category": "supplies", "description": "Tepung butter telor", "date": "2026-04-08" },
-        { "id": "EXP-002-KKB", "amount": 250000, "category": "supplies", "description": "Coklat coating 3kg", "date": "2026-04-05" },
-        { "id": "EXP-003-KKB", "amount": 200000, "category": "marketing", "description": "Iklan Tokopedia", "date": "2026-04-01" },
-        { "id": "EXP-004-KKB", "amount": 150000, "category": "transport", "description": "Ongkir", "date": "2026-03-28" },
-        { "id": "EXP-005-KKB", "amount": 75000, "category": "utilities", "description": "Listrik + Gas", "date": "2026-04-01" },
-        { "id": "EXP-006-KKB", "amount": 180000, "category": "rent", "description": "Sewa kios Summarecon", "date": "2026-03-15" }
+        { "id": "EXP-001-KKB", "amount": 400000, "category": "supplies", "description": "Tepung butter", "date": "2026-04-08" },
+        { "id": "EXP-002-KKB", "amount": 250000, "category": "supplies", "description": "Coklat coating", "date": "2026-04-05" }
       ],
-      "totalRevenue": 6975000,
-      "totalExpense": 1505000,
+      "totalRevenue": 3200000,
+      "totalExpense": 650000,
+      "avgRating": 4.9,
+      "totalReviews": 189,
       "revenueTrend": {
-        "weekly": [
-          { "day": "2026-04-14", "revenue": 975000 },
-          { "day": "2026-04-15", "revenue": 0 },
-          { "day": "2026-04-16", "revenue": 1100000 },
-          { "day": "2026-04-17", "revenue": 0 },
-          { "day": "2026-04-18", "revenue": 1125000 },
-          { "day": "2026-04-19", "revenue": 0 },
-          { "day": "2026-04-20", "revenue": 1200000 }
-        ],
-        "daily30": [
-          { "day": "2026-03-22", "revenue": 900000 }, { "day": "2026-03-23", "revenue": 0 }, { "day": "2026-03-24", "revenue": 990000 }, { "day": "2026-03-25", "revenue": 0 }, { "day": "2026-03-26", "revenue": 780000 },
-          { "day": "2026-03-27", "revenue": 0 }, { "day": "2026-03-28", "revenue": 1200000 }, { "day": "2026-03-29", "revenue": 0 }, { "day": "2026-03-30", "revenue": 1125000 }, { "day": "2026-03-31", "revenue": 0 },
-          { "day": "2026-04-01", "revenue": 1100000 }, { "day": "2026-04-02", "revenue": 0 }, { "day": "2026-04-03", "revenue": 900000 }, { "day": "2026-04-04", "revenue": 0 }, { "day": "2026-04-05", "revenue": 780000 },
-          { "day": "2026-04-06", "revenue": 0 }, { "day": "2026-04-07", "revenue": 1200000 }, { "day": "2026-04-08", "revenue": 0 }, { "day": "2026-04-09", "revenue": 1125000 }, { "day": "2026-04-10", "revenue": 0 },
-          { "day": "2026-04-11", "revenue": 1100000 }, { "day": "2026-04-12", "revenue": 0 }, { "day": "2026-04-13", "revenue": 975000 }, { "day": "2026-04-14", "revenue": 0 }, { "day": "2026-04-15", "revenue": 1125000 },
-          { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 1200000 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 990000 }, { "day": "2026-04-20", "revenue": 0 }
-        ],
-        "monthly": [
-          { "month": "2025-11", "revenue": 3500000, "expenses": 1000000 },
-          { "month": "2025-12", "revenue": 4800000, "expenses": 1300000 },
-          { "month": "2026-01", "revenue": 4200000, "expenses": 1100000 },
-          { "month": "2026-02", "revenue": 5100000, "expenses": 1300000 },
-          { "month": "2026-03", "revenue": 5800000, "expenses": 1400000 },
-          { "month": "2026-04", "revenue": 6975000, "expenses": 1505000 }
-        ]
+        "weekly": [{ "day": "2026-04-14", "revenue": 975000 }, { "day": "2026-04-15", "revenue": 1100000 }, { "day": "2026-04-16", "revenue": 1125000 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 1800000, "expenses": 400000 }, { "month": "2025-12", "revenue": 2500000, "expenses": 500000 }, { "month": "2026-01", "revenue": 2700000, "expenses": 550000 }, { "month": "2026-02", "revenue": 2900000, "expenses": 600000 }, { "month": "2026-03", "revenue": 3100000, "expenses": 620000 }, { "month": "2026-04", "revenue": 3200000, "expenses": 650000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-007",
+      "sellerName": "Sayur Segar Agus",
+      "email": "agus.sayur@marketplace.test",
+      "category": "agriculture",
+      "products": [
+        { "name": "Paket Sayur Sop", "price": 35000, "cost": { "material": 15000, "labor": 5000, "shipping": 4000, "platformFee": 5, "other": 1500 } },
+        { "name": "Paket Sayur Lodeh", "price": 40000, "cost": { "material": 18000, "labor": 5500, "shipping": 4500, "platformFee": 5, "other": 1800 } },
+        { "name": "Sayuran Organik Mix", "price": 55000, "cost": { "material": 25000, "labor": 7000, "shipping": 5500, "platformFee": 5, "other": 2000 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-SA", "product": "Paket Sayur Sop", "quantity": 20, "total": 700000, "status": "delivered", "customer": "Rudi", "date": "2026-04-15" },
+        { "orderId": "ORD-002-SA", "product": "Paket Sayur Lodeh", "quantity": 15, "total": 600000, "status": "delivered", "customer": "Lisa", "date": "2026-04-13" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-SA", "amount": 250000, "category": "supplies", "description": "Bibit sayuran", "date": "2026-04-10" },
+        { "id": "EXP-002-SA", "amount": 100000, "category": "transport", "description": "Ongkir", "date": "2026-04-08" }
+      ],
+      "totalRevenue": 1300000,
+      "totalExpense": 350000,
+      "avgRating": 4.6,
+      "totalReviews": 89,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 700000 }, { "day": "2026-04-15", "revenue": 600000 }, { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 800000, "expenses": 200000 }, { "month": "2025-12", "revenue": 950000, "expenses": 250000 }, { "month": "2026-01", "revenue": 1100000, "expenses": 280000 }, { "month": "2026-02", "revenue": 1200000, "expenses": 300000 }, { "month": "2026-03", "revenue": 1250000, "expenses": 320000 }, { "month": "2026-04", "revenue": 1300000, "expenses": 350000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-008",
+      "sellerName": "Buah Segar Bekasi",
+      "email": "rina.buah@marketplace.test",
+      "category": "agriculture",
+      "products": [
+        { "name": "Paket Fruit Box", "price": 75000, "cost": { "material": 35000, "labor": 8000, "shipping": 7000, "platformFee": 5, "other": 2500 } },
+        { "name": "Pisang Goreng Kriuk", "price": 25000, "cost": { "material": 10000, "labor": 4000, "shipping": 3000, "platformFee": 5, "other": 1000 } },
+        { "name": "Salad Buah Fresh", "price": 45000, "cost": { "material": 20000, "labor": 6000, "shipping": 5000, "platformFee": 5, "other": 1500 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-BS", "product": "Paket Fruit Box", "quantity": 10, "total": 750000, "status": "delivered", "customer": "Nina", "date": "2026-04-14" },
+        { "orderId": "ORD-002-BS", "product": "Salad Buah Fresh", "quantity": 12, "total": 540000, "status": "delivered", "customer": "Andi", "date": "2026-04-12" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-BS", "amount": 300000, "category": "supplies", "description": "Buah segar", "date": "2026-04-08" }
+      ],
+      "totalRevenue": 1290000,
+      "totalExpense": 300000,
+      "avgRating": 4.8,
+      "totalReviews": 156,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 750000 }, { "day": "2026-04-15", "revenue": 540000 }, { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 800000, "expenses": 180000 }, { "month": "2025-12", "revenue": 950000, "expenses": 220000 }, { "month": "2026-01", "revenue": 1100000, "expenses": 250000 }, { "month": "2026-02", "revenue": 1200000, "expenses": 270000 }, { "month": "2026-03", "revenue": 1250000, "expenses": 285000 }, { "month": "2026-04", "revenue": 1290000, "expenses": 300000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-009",
+      "sellerName": "Anyaman Lokal",
+      "email": "dina.anyaman@marketplace.test",
+      "category": "handicrafts",
+      "products": [
+        { "name": "Tas Rotan Alami", "price": 175000, "cost": { "material": 70000, "labor": 35000, "shipping": 15000, "platformFee": 5, "other": 5000 } },
+        { "name": "Keranjang Bambu", "price": 85000, "cost": { "material": 30000, "labor": 18000, "shipping": 8000, "platformFee": 5, "other": 2500 } },
+        { "name": "Hiasan Dinding Rotan", "price": 125000, "cost": { "material": 45000, "labor": 28000, "shipping": 12000, "platformFee": 5, "other": 3500 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-AL", "product": "Tas Rotan Alami", "quantity": 6, "total": 1050000, "status": "delivered", "customer": "Sari", "date": "2026-04-13" },
+        { "orderId": "ORD-002-AL", "product": "Keranjang Bambu", "quantity": 8, "total": 680000, "status": "delivered", "customer": "Rudi", "date": "2026-04-11" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-AL", "amount": 200000, "category": "supplies", "description": "Bahan rotan", "date": "2026-04-05" }
+      ],
+      "totalRevenue": 1730000,
+      "totalExpense": 200000,
+      "avgRating": 4.7,
+      "totalReviews": 67,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 1050000 }, { "day": "2026-04-15", "revenue": 680000 }, { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 900000, "expenses": 150000 }, { "month": "2025-12", "revenue": 1100000, "expenses": 180000 }, { "month": "2026-01", "revenue": 1400000, "expenses": 190000 }, { "month": "2026-02", "revenue": 1600000, "expenses": 195000 }, { "month": "2026-03", "revenue": 1700000, "expenses": 198000 }, { "month": "2026-04", "revenue": 1730000, "expenses": 200000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-010",
+      "sellerName": "Batik Modern Indah",
+      "email": "indah.batik@marketplace.test",
+      "category": "fashion",
+      "products": [
+        { "name": "Kemeja Batik Lengan Panjang", "price": 275000, "cost": { "material": 120000, "labor": 45000, "shipping": 15000, "platformFee": 5, "other": 10000 } },
+        { "name": "Dress Batik Modern", "price": 385000, "cost": { "material": 165000, "labor": 65000, "shipping": 20000, "platformFee": 5, "other": 13000 } },
+        { "name": "Kerudung Batik Segiempat", "price": 145000, "cost": { "material": 55000, "labor": 25000, "shipping": 12000, "platformFee": 5, "other": 5000 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-BMI", "product": "Kemeja Batik Lengan Panjang", "quantity": 8, "total": 2200000, "status": "delivered", "customer": "Pak Hadi", "date": "2026-04-14" },
+        { "orderId": "ORD-002-BMI", "product": "Dress Batik Modern", "quantity": 5, "total": 1925000, "status": "delivered", "customer": "Ibu Dewi", "date": "2026-04-12" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-BMI", "amount": 500000, "category": "supplies", "description": "Kain batik", "date": "2026-04-08" },
+        { "id": "EXP-002-BMI", "amount": 250000, "category": "marketing", "description": "Iklan Instagram", "date": "2026-04-01" }
+      ],
+      "totalRevenue": 4125000,
+      "totalExpense": 750000,
+      "avgRating": 4.6,
+      "totalReviews": 124,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 2200000 }, { "day": "2026-04-15", "revenue": 1925000 }, { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 2200000, "expenses": 400000 }, { "month": "2025-12", "revenue": 2800000, "expenses": 500000 }, { "month": "2026-01", "revenue": 3300000, "expenses": 600000 }, { "month": "2026-02", "revenue": 3800000, "expenses": 680000 }, { "month": "2026-03", "revenue": 4000000, "expenses": 720000 }, { "month": "2026-04", "revenue": 4125000, "expenses": 750000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-011",
+      "sellerName": "Skincare Alami",
+      "email": "lina.skincare@marketplace.test",
+      "category": "beauty",
+      "products": [
+        { "name": "Face Wash Rosemary", "price": 85000, "cost": { "material": 35000, "labor": 12000, "shipping": 8000, "platformFee": 5, "other": 3000 } },
+        { "name": "Body Scrub Kopi", "price": 95000, "cost": { "material": 40000, "labor": 14000, "shipping": 9000, "platformFee": 5, "other": 3500 } },
+        { "name": "Moisturizer Aloe Vera", "price": 75000, "cost": { "material": 30000, "labor": 10000, "shipping": 7000, "platformFee": 5, "other": 2500 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-SKA", "product": "Face Wash Rosemary", "quantity": 12, "total": 1020000, "status": "delivered", "customer": "Lisa Permata", "date": "2026-04-15" },
+        { "orderId": "ORD-002-SKA", "product": "Body Scrub Kopi", "quantity": 8, "total": 760000, "status": "delivered", "customer": "Dewi Kusuma", "date": "2026-04-14" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-SKA", "amount": 350000, "category": "supplies", "description": "Bahan kopi bubuk", "date": "2026-04-08" },
+        { "id": "EXP-002-SKA", "amount": 200000, "category": "supplies", "description": "Aloe vera gel", "date": "2026-04-05" }
+      ],
+      "totalRevenue": 1780000,
+      "totalExpense": 550000,
+      "avgRating": 4.7,
+      "totalReviews": 145,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 760000 }, { "day": "2026-04-15", "revenue": 1020000 }, { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 900000, "expenses": 250000 }, { "month": "2025-12", "revenue": 1100000, "expenses": 300000 }, { "month": "2026-01", "revenue": 1400000, "expenses": 400000 }, { "month": "2026-02", "revenue": 1600000, "expenses": 450000 }, { "month": "2026-03", "revenue": 1700000, "expenses": 500000 }, { "month": "2026-04", "revenue": 1780000, "expenses": 550000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-012",
+      "sellerName": "Gadget & Accessories",
+      "email": "tech.gadget@marketplace.test",
+      "category": "electronics",
+      "products": [
+        { "name": "Powerbank 10000mAh", "price": 125000, "cost": { "material": 55000, "labor": 15000, "shipping": 10000, "platformFee": 5, "other": 3500 } },
+        { "name": "Earphone Wireless", "price": 185000, "cost": { "material": 85000, "labor": 20000, "shipping": 15000, "platformFee": 5, "other": 5000 } },
+        { "name": "Kabel Charger Fast", "price": 55000, "cost": { "material": 20000, "labor": 8000, "shipping": 6000, "platformFee": 5, "other": 2000 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-GAD", "product": "Powerbank 10000mAh", "quantity": 15, "total": 1875000, "status": "delivered", "customer": "Andi", "date": "2026-04-14" },
+        { "orderId": "ORD-002-GAD", "product": "Earphone Wireless", "quantity": 8, "total": 1480000, "status": "delivered", "customer": "Rudi", "date": "2026-04-12" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-GAD", "amount": 600000, "category": "supplies", "description": "Stock gadget", "date": "2026-04-08" }
+      ],
+      "totalRevenue": 3355000,
+      "totalExpense": 600000,
+      "avgRating": 4.5,
+      "totalReviews": 134,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 1875000 }, { "day": "2026-04-15", "revenue": 1480000 }, { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 1800000, "expenses": 350000 }, { "month": "2025-12", "revenue": 2200000, "expenses": 400000 }, { "month": "2026-01", "revenue": 2700000, "expenses": 500000 }, { "month": "2026-02", "revenue": 3000000, "expenses": 550000 }, { "month": "2026-03", "revenue": 3200000, "expenses": 580000 }, { "month": "2026-04", "revenue": 3355000, "expenses": 600000 }]
+      }
+    },
+    {
+      "sellerId": "SEL-013",
+      "sellerName": "Perlengkapan Rumah Modern",
+      "email": "budi.home@marketplace.test",
+      "category": "home",
+      "products": [
+        { "name": "Set Peralatan Makan 6pcs", "price": 165000, "cost": { "material": 70000, "labor": 25000, "shipping": 15000, "platformFee": 5, "other": 5000 } },
+        { "name": "Lilin Aromaterapi Premium", "price": 55000, "cost": { "material": 20000, "labor": 10000, "shipping": 6000, "platformFee": 5, "other": 2000 } },
+        { "name": "Gorden Blackout 2x1m", "price": 225000, "cost": { "material": 95000, "labor": 35000, "shipping": 20000, "platformFee": 5, "other": 6500 } }
+      ],
+      "orders": [
+        { "orderId": "ORD-001-PRM", "product": "Set Peralatan Makan", "quantity": 8, "total": 1320000, "status": "delivered", "customer": "Siti", "date": "2026-04-13" },
+        { "orderId": "ORD-002-PRM", "product": "Gorden Blackout", "quantity": 5, "total": 1125000, "status": "delivered", "customer": "Budi", "date": "2026-04-11" }
+      ],
+      "expenses": [
+        { "id": "EXP-001-PRM", "amount": 400000, "category": "supplies", "description": "Stock produk", "date": "2026-04-05" }
+      ],
+      "totalRevenue": 2445000,
+      "totalExpense": 400000,
+      "avgRating": 4.6,
+      "totalReviews": 87,
+      "revenueTrend": {
+        "weekly": [{ "day": "2026-04-14", "revenue": 1320000 }, { "day": "2026-04-15", "revenue": 1125000 }, { "day": "2026-04-16", "revenue": 0 }, { "day": "2026-04-17", "revenue": 0 }, { "day": "2026-04-18", "revenue": 0 }, { "day": "2026-04-19", "revenue": 0 }, { "day": "2026-04-20", "revenue": 0 }],
+        "monthly": [{ "month": "2025-11", "revenue": 1200000, "expenses": 200000 }, { "month": "2025-12", "revenue": 1500000, "expenses": 250000 }, { "month": "2026-01", "revenue": 1900000, "expenses": 300000 }, { "month": "2026-02", "revenue": 2200000, "expenses": 350000 }, { "month": "2026-03", "revenue": 2350000, "expenses": 380000 }, { "month": "2026-04", "revenue": 2445000, "expenses": 400000 }]
       }
     }
   ],
   "summary": {
-    "totalRevenue": 44241000,
-    "totalExpenses": 11630000,
-    "netProfit": 32611000,
-    "totalOrders": 48
+    "totalRevenue": 27811000,
+    "totalExpenses": 6450000,
+    "netProfit": 21361000,
+    "totalOrders": 45
   }
 }

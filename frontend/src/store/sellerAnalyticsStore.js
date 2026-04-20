@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { loadMockFinanceData, getRevenueTrend } from '../utils/mockFinance';
 
-const RANI_SELLER_EMAIL = 'rani.summarecon@marketplace.test';
+const DEFAULT_SELLER_EMAIL = 'rani.summarecon@marketplace.test';
 
 // Force use mock data for demo
 const FORCE_MOCK = true;
 
-const generateMockAnalytics = (period, sellerEmail = RANI_SELLER_EMAIL) => {
+const generateMockAnalytics = (period, sellerEmail = DEFAULT_SELLER_EMAIL) => {
   console.log('Generating mock analytics for:', sellerEmail);
   const mockData = loadMockFinanceData(sellerEmail);
   console.log('Mock data loaded:', mockData?.sellerName, mockData?.summary);
@@ -57,7 +57,7 @@ const generateMockAnalytics = (period, sellerEmail = RANI_SELLER_EMAIL) => {
   return mockAnalytics;
 };
 
-const generateMockSales = (period, sellerEmail = RANI_SELLER_EMAIL) => {
+const generateMockSales = (period, sellerEmail = DEFAULT_SELLER_EMAIL) => {
   const mockData = loadMockFinanceData(sellerEmail);
   const sellerData = mockData || { orders: [], revenueTrend: {}, products: [] };
   
@@ -93,7 +93,7 @@ const generateMockCustomers = () => {
   };
 };
 
-const generateMockProducts = (sellerEmail = RANI_SELLER_EMAIL) => {
+const generateMockProducts = (sellerEmail = DEFAULT_SELLER_EMAIL) => {
   const mockData = loadMockFinanceData(sellerEmail);
   const products = mockData?.products || [];
   
@@ -116,9 +116,9 @@ export const useSellerAnalyticsStore = create((set) => ({
   loading: false,
   error: null,
   useMockData: false,
-  mockSellerEmail: RANI_SELLER_EMAIL,
+  mockSellerEmail: DEFAULT_SELLER_EMAIL,
 
-  fetchSellerAnalytics: async (period = '30', sellerEmail = RANI_SELLER_EMAIL) => {
+  fetchSellerAnalytics: async (period = '30', sellerEmail = DEFAULT_SELLER_EMAIL) => {
     set({ loading: true, error: null });
     
     // Always use mock data for demo
@@ -140,7 +140,7 @@ export const useSellerAnalyticsStore = create((set) => ({
     }
   },
 
-  fetchSales: async (period = '30', sellerEmail = RANI_SELLER_EMAIL) => {
+  fetchSales: async (period = '30', sellerEmail = DEFAULT_SELLER_EMAIL) => {
     set({ loading: true });
     
     // Always use mock data for demo
@@ -161,7 +161,7 @@ export const useSellerAnalyticsStore = create((set) => ({
     }
   },
 
-  fetchCustomers: async (sellerEmail = RANI_SELLER_EMAIL) => {
+  fetchCustomers: async (sellerEmail = DEFAULT_SELLER_EMAIL) => {
     set({ loading: true, error: null });
     
     // Always use mock data for demo
@@ -182,7 +182,7 @@ export const useSellerAnalyticsStore = create((set) => ({
     }
   },
 
-  fetchProductPerformance: async (sellerEmail = RANI_SELLER_EMAIL) => {
+  fetchProductPerformance: async (sellerEmail = DEFAULT_SELLER_EMAIL) => {
     set({ loading: true, error: null });
     
     // Always use mock data for demo
