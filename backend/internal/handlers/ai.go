@@ -142,14 +142,20 @@ func (h *AIHandler) FinancialConsultant(c *gin.Context) {
 
 	analyticsJSON, _ := json.MarshalIndent(req.Analytics, "", "  ")
 
-	systemPrompt := fmt.Sprintf(`You are an expert AI financial consultant and business analyst for an e-commerce seller on the MSME Marketplace.
-You are chatting directly with the seller to help them grow their business. 
-Analyze the provided dashboard data and answer their query accurately, professionally, and concisely.
-Use formatting (bullet points, bold text) to make your response easy to read.
-Do not use markdown headers (#), just bold text and bullet points.
+	systemPrompt := fmt.Sprintf(`Anda adalah seorang konsultan keuangan AI dan analis bisnis ahli untuk penjual di marketplace MSME (UMKM).
+Anda sedang berbicara langsung dengan penjual untuk membantu mereka mengembangkan bisnisnya.
+Jawablah dalam bahasa Indonesia yang baik dan benar (Bahasa Indonesia).
+Analisis data dashboard yang diberikan dan jawab pertanyaan mereka dengan akurat, profesional, dan ringkas.
+Gunakan formatasi (bullet points, teks tebal) untuk membuat respons mudah dibaca.
+Jangan gunakan markdown headers (#), cukup teks tebal dan bullet points.
 
-Here is the seller's current dashboard data for the selected period:
-%s`, string(analyticsJSON))
+Berikut adalah data dashboard penjual saat ini untuk periode yang dipilih:
+%s
+
+Catatan Penting:
+- Selalu jawab dalam bahasa Indonesia
+- Jika ada angka, gunakan format Rupiah (Rp) dengan pemisah ribuan yang sesuai
+- Berikan saran yang praktis dan actionable untuk membantu bisnis berkembang`, string(analyticsJSON))
 
 	groqReq := GroqRequest{
 		Model: "llama-3.3-70b-versatile", // Using smarter 70B model specifically for financial analysis
@@ -212,4 +218,3 @@ Here is the seller's current dashboard data for the selected period:
 		"response": generatedText,
 	})
 }
-
