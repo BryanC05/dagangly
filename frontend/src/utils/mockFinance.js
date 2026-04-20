@@ -1,4 +1,4 @@
-import mockData from '../../docs/mock-finance-data.json';
+import mockData from './mock-finance-data.json';
 
 export const getSellers = () => {
   return mockData.sellers.map(s => ({

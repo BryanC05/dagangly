@@ -661,9 +661,6 @@ function SellerDashboard() {
               </div>
             </motion.div>
           </div>
-          </div>
-
-          {/* Payout Settings */}
           <motion.div variants={itemVariants} className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm mt-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
