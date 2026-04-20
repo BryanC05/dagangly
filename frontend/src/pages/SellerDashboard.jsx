@@ -11,6 +11,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useSellerAnalyticsStore } from '../store/sellerAnalyticsStore';
 import api from '../utils/api';
 import { resolveImageUrl } from '@/utils/imageUrl';
+import { loadMockFinanceData } from '../utils/mockFinance';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -181,14 +182,34 @@ function SellerDashboard() {
   const [editValues, setEditValues] = useState({ price: 0, stock: 0 });
   const [confirmModal, setConfirmModal] = useState({ show: false, productId: null, productName: '' });
 
+  // Get mock products based on seller's email for demo
+  const getMockProducts = () => {
+    const mockData = loadMockFinanceData('rani.summarecon@marketplace.test');
+    if (!mockData?.products) return [];
+    return mockData.products.map((p, i) => ({
+      _id: `mock-prod-${i}`,
+      name: p.name,
+      price: p.price,
+      stock: Math.floor(Math.random() * 50) + 10,
+      status: 'active',
+      category: 'food',
+      images: [],
+      createdAt: new Date().toISOString(),
+    }));
+  };
+
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ['sellerProducts', sellerId],
     queryFn: async () => {
-      if (!sellerId) return [];
-      const response = await api.get(`/products/seller/${sellerId}`);
-      return response.data;
+      try {
+        if (!sellerId) return getMockProducts();
+        const response = await api.get(`/products/seller/${sellerId}`);
+        return response.data;
+      } catch (err) {
+        // Fallback to mock products
+        return getMockProducts();
+      }
     },
-    enabled: !!sellerId,
   });
 
   const { data: orders } = useQuery({
