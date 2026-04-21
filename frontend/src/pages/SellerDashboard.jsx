@@ -402,8 +402,8 @@ function SellerDashboard() {
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount || 0);
 
   const chartData = (sales?.recentDays || []).slice(0, 7).reverse().map(day => ({
-    name: `${day._id?.day}/${day._id?.month}`,
-    revenue: day.revenue || 0
+    name: day.label || day.date?.slice(5) || 'N/A',
+    revenue: Number(day.revenue) || 0
   }));
 
   const stats = [
