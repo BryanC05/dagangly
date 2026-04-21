@@ -9,6 +9,27 @@ import { formatPrice } from '../../utils/helpers';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useThemeStore } from '../../store/themeStore';
 
+// Mock data for demo (Rani - Dapur Summarecon)
+const MOCK_ANALYTICS = {
+    period: '30',
+    totalRevenue: 4906000,
+    orderCount: 10,
+    productCount: 4,
+    avgRating: 4.8,
+    totalReviews: 134,
+    revenueByDay: {},
+    ordersByStatus: { delivered: 6, completed: 2, pending: 1, cancelled: 1 },
+};
+
+const MOCK_PRODUCTS = [
+    { _id: 'mock-1', name: 'Nasi Goreng Special', price: 45000, stock: 25, status: 'active', images: [] },
+    { _id: 'mock-2', name: 'Mie Ayam Jamur', price: 35000, stock: 18, status: 'active', images: [] },
+    { _id: 'mock-3', name: 'Soto Ayam Kudus', price: 40000, stock: 12, status: 'active', images: [] },
+    { _id: 'mock-4', name: 'Bakso Granada', price: 38000, stock: 20, status: 'active', images: [] },
+];
+
+const FORCE_MOCK = true;
+
 export default function SellerDashboardScreen({ navigation }) {
     const { user } = useAuthStore();
     const { t } = useTranslation();
@@ -32,6 +53,14 @@ export default function SellerDashboardScreen({ navigation }) {
     const [savingBank, setSavingBank] = useState(false);
 
     const fetchData = useCallback(async () => {
+        if (FORCE_MOCK) {
+            // Use mock data for demo
+            setAnalytics(MOCK_ANALYTICS);
+            setLoading(false);
+            setRefreshing(false);
+            return;
+        }
+        
         if (!user?._id) {
             setLoading(false);
             return;

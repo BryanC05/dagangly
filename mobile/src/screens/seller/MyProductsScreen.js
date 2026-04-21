@@ -7,6 +7,16 @@ import { getImageUrl, formatPrice } from '../../utils/helpers';
 import { useThemeStore } from '../../store/themeStore';
 import LoadingSkeleton from '../../components/LoadingSkeleton';
 
+// Mock products for Rani (Dapur Summarecon)
+const MOCK_PRODUCTS = [
+    { _id: 'mock-1', name: 'Nasi Goreng Special', price: 45000, stock: 25, status: 'active', images: [], category: 'food', description: 'Nasi goreng dengan ayam suwir, telur, dan kerupuk' },
+    { _id: 'mock-2', name: 'Mie Ayam Jamur', price: 35000, stock: 18, status: 'active', images: [], category: 'food', description: 'Mie ayam dengan jamur dan pangsit' },
+    { _id: 'mock-3', name: 'Soto Ayam Kudus', price: 40000, stock: 12, status: 'active', images: [], category: 'food', description: 'Soto ayam kudus dengan suwiran ayam dan nasi' },
+    { _id: 'mock-4', name: 'Bakso Granada', price: 38000, stock: 20, status: 'active', images: [], category: 'food', description: 'Bakso urat dengan kuah segar' },
+];
+
+const FORCE_MOCK = true;
+
 export default function MyProductsScreen({ navigation }) {
     const { user } = useAuthStore();
     const { colors, isDarkMode } = useThemeStore();
@@ -14,6 +24,12 @@ export default function MyProductsScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
 
     const fetchProducts = useCallback(async () => {
+        if (FORCE_MOCK) {
+            setProducts(MOCK_PRODUCTS);
+            setLoading(false);
+            return;
+        }
+        
         if (!user?._id) {
             setLoading(false);
             return;
@@ -23,6 +39,7 @@ export default function MyProductsScreen({ navigation }) {
             setProducts(response.data || []);
         } catch (error) {
             console.error('Failed to fetch seller products:', error);
+            setProducts(MOCK_PRODUCTS);
         } finally {
             setLoading(false);
         }
