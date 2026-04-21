@@ -13,7 +13,28 @@ const generateMockAnalytics = (period, sellerEmail = DEFAULT_SELLER_EMAIL) => {
   
   const days = parseInt(period) || 30;
   
-  const sellerData = mockData || { summary: { totalSales: 8276000, orderCount: 10 }, products: [], orders: [], revenueTrend: {} };
+  const sellerData = mockData || { 
+    summary: { 
+      totalSales: 8276000, 
+      totalExpenses: 1600000,
+      orderCount: 10 
+    }, 
+    products: [], 
+    orders: [], 
+    revenueTrend: {} 
+  };
+  
+  // Calculate expenses (from mock data or generate)
+  const totalExpenses = sellerData.summary?.totalExpenses || 1600000;
+  const totalRevenue = sellerData.summary?.totalSales || 8276000;
+  const netProfit = totalRevenue - totalExpenses;
+  
+  // Previous period revenue for comparison (based on period)
+  let previousPeriodMultiplier = 0.85; // 15% less than current period
+  if (period === '30') previousPeriodMultiplier = 0.82;
+  if (period === '90') previousPeriodMultiplier = 0.75;
+  const previousPeriodRevenue = Math.floor(totalRevenue * previousPeriodMultiplier);
+  const previousPeriodExpenses = Math.floor(totalExpenses * previousPeriodMultiplier);
   
   // Generate revenue by day based on period
   const revenueByDay = {};
@@ -33,7 +54,12 @@ const generateMockAnalytics = (period, sellerEmail = DEFAULT_SELLER_EMAIL) => {
   // Generate realistic mock data
   const mockAnalytics = {
     period: period,
-    totalRevenue: sellerData.summary?.totalSales || 8276000,
+    totalRevenue: totalRevenue,
+    totalExpenses: totalExpenses,
+    netProfit: netProfit,
+    previousPeriodRevenue: previousPeriodRevenue,
+    previousPeriodExpenses: previousPeriodExpenses,
+    previousPeriodProfit: previousPeriodRevenue - previousPeriodExpenses,
     orderCount: completedOrders || 10,
     productCount: sellerData.products?.length || 4,
     avgRating: 4.7,
@@ -62,18 +88,26 @@ const generateMockSales = (period, sellerEmail = DEFAULT_SELLER_EMAIL) => {
   const sellerData = mockData || { orders: [], revenueTrend: {}, products: [] };
   
   const completedOrders = sellerData.orders?.filter(o => o.status === 'delivered' || o.status === 'completed') || [];
-  const trendData = sellerData.revenueTrend?.weekly || [];
+  
+  // Get days based on period
+  const days = parseInt(period) || 7;
+  const trendData = days <= 7 
+    ? (sellerData.revenueTrend?.weekly || [])
+    : (sellerData.revenueTrend?.monthly || []);
+  
+  // Generate appropriate data
+  const recentDays = trendData.slice(0, Math.min(days, trendData.length)).map((d, i) => ({
+    date: d.day || d.month,
+    label: new Date(d.day || d.month).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    revenue: d.revenue || Math.floor(Math.random() * 500000) + 100000,
+  }));
   
   const mockSales = {
     period: period,
     totalRevenue: sellerData.summary?.totalSales || 8276000,
     completedOrders: completedOrders.length || 10,
     pendingOrders: Math.floor((completedOrders.length || 10) * 0.25),
-    recentDays: trendData.slice(0, 7).map(d => ({
-      date: d.day,
-      label: new Date(d.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      revenue: d.revenue || 0,
-    })),
+    recentDays,
     topProducts: (sellerData.products || []).slice(0, 5).map((p, i) => ({
       name: p.name,
       totalSold: Math.floor(Math.random() * 30) + 15,

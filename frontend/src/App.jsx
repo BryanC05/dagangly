@@ -39,6 +39,7 @@ import InstallmentsPage from './pages/Installments';
 import InventoryPage from './pages/Inventory';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/layout/Layout';
+import { WebSocketProvider } from './contexts/WebSocketContext';
 import FinanceDashboard from './pages/FinanceDashboard';
 import FinanceExpenses from './pages/FinanceExpenses';
 import FinanceCalculator from './pages/FinanceCalculator';
@@ -107,55 +108,57 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <ScrollToTop />
-        <AuthRouteHandler />
-        <div className="min-h-screen bg-background text-foreground font-sans antialiased">
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Suspense fallback={<LoadingFallback />}><Home /></Suspense>} />
-              <Route path="/products" element={<Suspense fallback={<LoadingFallback />}><Products /></Suspense>} />
-              <Route path="/product/:id" element={<Suspense fallback={<LoadingFallback />}><ProductDetail /></Suspense>} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/nearby" element={<NearbyMap />} />
-              <Route path="/store/:id" element={<SellerStore />} />
-              <Route path="/seller/dashboard" element={<SellerDashboard />} />
-              <Route path="/seller/add-product" element={<AddProduct />} />
-              <Route path="/add-product" element={<Navigate to="/seller/add-product" replace />} />
-              <Route path="/seller/product-tracking" element={<SellerProductTracking />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/:id" element={<Profile />} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/sell" element={<Sell />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/forums" element={<Forums />} />
-              <Route path="/forum" element={<Forum />} />
-              <Route path="/forum/new" element={<NewThread />} />
-              <Route path="/forum/:id/edit" element={<EditThread />} />
-              <Route path="/forum/:id" element={<ThreadDetail />} />
-              <Route path="/saved-products" element={<SavedProducts />} />
-              <Route path="/automation" element={<Automation />} />
-              <Route path="/social-links" element={<SocialLinks />} />
-              <Route path="/logo-generator" element={<LogoGenerator />} />
-              <Route path="/admin/membership" element={<AdminMembership />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/wallet" element={<Wallet />} />
-              <Route path="/video-call" element={<VideoCallPage />} />
-              <Route path="/installments" element={<InstallmentsPage />} />
-              <Route path="/inventory" element={<InventoryPage />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/invoice/:orderId" element={<Invoice />} />
-              <Route path="/guide" element={<Guide />} />
-              <Route path="/finance" element={<Suspense fallback={<LoadingFallback />}><Finance /></Suspense>} />
-              <Route path="/finance/expenses" element={<Suspense fallback={<LoadingFallback />}><FinanceExp /></Suspense>} />
-              <Route path="/finance/calculator" element={<Suspense fallback={<LoadingFallback />}><FinanceCalc /></Suspense>} />
-              <Route path="/finance/invoices" element={<Suspense fallback={<LoadingFallback />}><FinanceInv /></Suspense>} />
-              <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFound /></Suspense>} />
-            </Route>
-          </Routes>
-        </div>
-      </Router>
+      <WebSocketProvider>
+        <Router>
+          <ScrollToTop />
+          <AuthRouteHandler />
+          <div className="min-h-screen bg-background text-foreground font-sans antialiased">
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Suspense fallback={<LoadingFallback />}><Home /></Suspense>} />
+                <Route path="/products" element={<Suspense fallback={<LoadingFallback />}><Products /></Suspense>} />
+                <Route path="/product/:id" element={<Suspense fallback={<LoadingFallback />}><ProductDetail /></Suspense>} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/nearby" element={<NearbyMap />} />
+                <Route path="/store/:id" element={<SellerStore />} />
+                <Route path="/seller/dashboard" element={<SellerDashboard />} />
+                <Route path="/seller/add-product" element={<AddProduct />} />
+                <Route path="/add-product" element={<Navigate to="/seller/add-product" replace />} />
+                <Route path="/seller/product-tracking" element={<SellerProductTracking />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:id" element={<Profile />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/sell" element={<Sell />} />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/forums" element={<Forums />} />
+                <Route path="/forum" element={<Forum />} />
+                <Route path="/forum/new" element={<NewThread />} />
+                <Route path="/forum/:id/edit" element={<EditThread />} />
+                <Route path="/forum/:id" element={<ThreadDetail />} />
+                <Route path="/saved-products" element={<SavedProducts />} />
+                <Route path="/automation" element={<Automation />} />
+                <Route path="/social-links" element={<SocialLinks />} />
+                <Route path="/logo-generator" element={<LogoGenerator />} />
+                <Route path="/admin/membership" element={<AdminMembership />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/wallet" element={<Wallet />} />
+                <Route path="/video-call" element={<VideoCallPage />} />
+                <Route path="/installments" element={<InstallmentsPage />} />
+                <Route path="/inventory" element={<InventoryPage />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/invoice/:orderId" element={<Invoice />} />
+                <Route path="/guide" element={<Guide />} />
+                <Route path="/finance" element={<Suspense fallback={<LoadingFallback />}><Finance /></Suspense>} />
+                <Route path="/finance/expenses" element={<Suspense fallback={<LoadingFallback />}><FinanceExp /></Suspense>} />
+                <Route path="/finance/calculator" element={<Suspense fallback={<LoadingFallback />}><FinanceCalc /></Suspense>} />
+                <Route path="/finance/invoices" element={<Suspense fallback={<LoadingFallback />}><FinanceInv /></Suspense>} />
+                <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFound /></Suspense>} />
+              </Route>
+            </Routes>
+          </div>
+        </Router>
+      </WebSocketProvider>
     </QueryClientProvider>
   );
 }

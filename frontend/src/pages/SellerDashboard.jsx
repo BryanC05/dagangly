@@ -401,22 +401,55 @@ function SellerDashboard() {
   const formatCurrency = (amount) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount || 0);
 
-  const chartData = (sales?.recentDays || []).slice(0, 7).reverse().map(day => ({
+  // Get number of days based on selected period
+  const getDaysFromPeriod = (period) => {
+    switch(period) {
+      case '7': return 7;
+      case '30': return 30;
+      case '90': return 90;
+      default: return 7;
+    }
+  };
+  
+  const chartData = (sales?.recentDays || []).slice(0, getDaysFromPeriod(period)).map(day => ({
     name: day.label || day.date?.slice(5) || 'N/A',
     revenue: Number(day.revenue) || 0
   }));
 
+  // Helper to calculate percentage change
+  const getPercentageChange = (current, previous) => {
+    if (!previous || previous === 0) return null;
+    const change = ((current - previous) / previous) * 100;
+    return {
+      value: Math.abs(change).toFixed(1),
+      isPositive: change >= 0
+    };
+  };
+
+  const revenueChange = getPercentageChange(analytics?.totalRevenue, analytics?.previousPeriodRevenue);
+  const profitChange = getPercentageChange(analytics?.netProfit, analytics?.previousPeriodProfit);
+  
   const stats = [
     {
-      label: t('analytics.totalRevenue') || 'Gross Volume',
+      label: t('analytics.totalRevenue') || 'Gross Revenue',
       value: analytics?.totalRevenue ? formatCurrency(analytics.totalRevenue) : formatCurrency(0),
+      change: revenueChange,
       icon: DollarSign,
       color: 'text-emerald-500',
       bgClass: 'bg-emerald-500/10'
     },
     {
+      label: 'Net Profit',
+      value: analytics?.netProfit ? formatCurrency(analytics.netProfit) : formatCurrency(0),
+      change: profitChange,
+      icon: TrendingUp,
+      color: analytics?.netProfit >= 0 ? 'text-green-600' : 'text-red-500',
+      bgClass: analytics?.netProfit >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'
+    },
+    {
       label: t('analytics.orders') || 'Total Orders',
       value: analytics?.orderCount || 0,
+      change: null,
       icon: ShoppingBag,
       color: 'text-blue-500',
       bgClass: 'bg-blue-500/10'
@@ -424,16 +457,10 @@ function SellerDashboard() {
     {
       label: t('analytics.products') || 'Active SKUs',
       value: analytics?.productCount || 0,
+      change: null,
       icon: Package,
       color: 'text-purple-500',
       bgClass: 'bg-purple-500/10'
-    },
-    {
-      label: t('analytics.rating') || 'Avg Rating',
-      value: analytics?.avgRating ? analytics.avgRating.toFixed(1) : '0.0',
-      icon: Star,
-      color: 'text-amber-500',
-      bgClass: 'bg-amber-500/10'
     },
   ];
 
@@ -621,6 +648,17 @@ function SellerDashboard() {
                 <div className="flex items-end gap-2">
                   <h3 className="text-2xl font-bold font-mono tracking-tight">{stat.value}</h3>
                 </div>
+                {stat.change && (
+                  <div className={`mt-2 flex items-center gap-1 text-xs font-medium ${stat.change.isPositive ? 'text-green-600' : 'text-red-500'}`}>
+                    {stat.change.isPositive ? (
+                      <ArrowUpRight className="h-3 w-3" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3" />
+                    )}
+                    <span>{stat.change.value}%</span>
+                    <span className="text-gray-400 ml-1">vs last period</span>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>

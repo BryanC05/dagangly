@@ -49,6 +49,7 @@ export default function AddProductScreen({ navigation }) {
         category: 'food',
         unit: 'pieces',
         location: null,
+        status: 'active', // active, sold_out, stock_empty
     });
     const [images, setImages] = useState([]);
     const [tags, setTags] = useState([]);
@@ -187,8 +188,8 @@ export default function AddProductScreen({ navigation }) {
     };
 
     const handleSubmit = async () => {
-        if (!form.name || !form.price || !form.stock) {
-            Alert.alert('Error', 'Please fill in all required fields');
+        if (!form.name || !form.price) {
+            Alert.alert('Error', 'Please fill in product name and price');
             return;
         }
 
@@ -211,14 +212,15 @@ export default function AddProductScreen({ navigation }) {
                 name: form.name,
                 description: form.description,
                 price: Number(form.price),
-                stock: Number(form.stock),
+                stock: form.stock ? Number(form.stock) : null,
                 category: form.category,
                 unit: form.unit,
+                status: form.status || 'active',
                 images: images,
                 tags,
                 location: currentLocation,
                 hasVariants,
-                variants: hasVariants ? variants.map(v => ({ name: v.name, price: Number(v.price), stock: Number(v.stock) })) : [],
+                variants: hasVariants ? variants.map(v => ({ name: v.name, price: Number(v.price), stock: v.stock ? Number(v.stock) : null })) : [],
                 optionGroups: optionGroups.map(g => ({
                     name: g.name,
                     required: g.required || false,
@@ -396,7 +398,7 @@ export default function AddProductScreen({ navigation }) {
                                 />
                             </View>
                             <View style={[styles.inputGroup, { flex: 1 }]}>
-                                <Text style={[styles.label, themedStyles.label]}>Stock *</Text>
+                                <Text style={[styles.label, themedStyles.label]}>Stock (optional)</Text>
                                 <TextInput
                                     style={[styles.input, themedStyles.input]}
                                     placeholder="0"
@@ -405,6 +407,42 @@ export default function AddProductScreen({ navigation }) {
                                     value={form.stock}
                                     onChangeText={t => setForm({ ...form, stock: t })}
                                 />
+                            </View>
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={[styles.label, themedStyles.label]}>Product Status</Text>
+                            <View style={styles.statusOptions}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusOption,
+                                        { borderColor: colors.border },
+                                        form.status === 'active' && { backgroundColor: '#10b98120', borderColor: '#10b981' }
+                                    ]}
+                                    onPress={() => setForm({ ...form, status: 'active' })}
+                                >
+                                    <Text style={[styles.statusText, form.status === 'active' && { color: '#10b981' }]}>Active</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusOption,
+                                        { borderColor: colors.border },
+                                        form.status === 'sold_out' && { backgroundColor: '#ef444420', borderColor: '#ef4444' }
+                                    ]}
+                                    onPress={() => setForm({ ...form, status: 'sold_out' })}
+                                >
+                                    <Text style={[styles.statusText, form.status === 'sold_out' && { color: '#ef4444' }]}>Sold Out</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.statusOption,
+                                        { borderColor: colors.border },
+                                        form.status === 'stock_empty' && { backgroundColor: '#f59e0b20', borderColor: '#f59e0b' }
+                                    ]}
+                                    onPress={() => setForm({ ...form, status: 'stock_empty' })}
+                                >
+                                    <Text style={[styles.statusText, form.status === 'stock_empty' && { color: '#f59e0b' }]}>Stock Empty</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
 

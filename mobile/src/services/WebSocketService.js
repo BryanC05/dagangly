@@ -10,6 +10,11 @@ class WebSocketService {
         this.socket = null;
         this.connected = false;
         this.listeners = new Map();
+        this.activeRooms = [];
+        this.maxActiveRooms = 3;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 5;
+        this.reconnectDelay = 1000;
     }
 
     async connect() {
@@ -23,17 +28,24 @@ class WebSocketService {
         }
 
         return new Promise((resolve, reject) => {
-            this.socket = io(API_URL.replace('/api', ''), {
+            const wsUrl = API_URL.replace('/api', '').replace(/^http/, 'ws');
+            this.socket = io(wsUrl + '/ws', {
                 transports: ['websocket'],
                 auth: { token },
                 query: { token },
+                reconnection: false,
             });
 
             this.socket.on('connect', () => {
                 this.connected = true;
+                this.reconnectAttempts = 0;
+                this.reconnectDelay = 1000;
                 console.log('Socket.IO connected');
 
-                // Keep-alive heartbeat loop
+                this.emitEvent('connected', {});
+
+                this.rejoinActiveRooms();
+
                 if (this.pingInterval) clearInterval(this.pingInterval);
                 this.pingInterval = setInterval(() => {
                     if (this.socket?.connected) {
@@ -44,25 +56,42 @@ class WebSocketService {
                 resolve(this.socket);
             });
 
-            this.socket.on('disconnect', () => {
+            this.socket.on('disconnect', (reason) => {
                 this.connected = false;
                 if (this.pingInterval) clearInterval(this.pingInterval);
-                console.log('Socket.IO disconnected');
+                console.log('Socket.IO disconnected:', reason);
+                this.emitEvent('disconnected', { reason });
+                this.handleReconnect();
             });
 
             this.socket.on('connect_error', (error) => {
                 console.error('WebSocket connection error:', error);
+                this.handleReconnect();
                 reject(error);
             });
 
+            this.socket.on('receive-message', (data) => {
+                this.emitEvent('message', data);
+            });
+
+            this.socket.on('user-typing', (data) => {
+                this.emitEvent('typing', data);
+            });
+
+            this.socket.on('user-stop-typing', (data) => {
+                this.emitEvent('stop-typing', data);
+            });
+
             this.socket.on('driver-location-update', (data) => {
-                const listeners = this.listeners.get('driver-location') || [];
-                listeners.forEach(cb => cb(data));
+                this.emitEvent('driver-location', data);
             });
 
             this.socket.on('order-status-update', (data) => {
-                const listeners = this.listeners.get('order-status') || [];
-                listeners.forEach(cb => cb(data));
+                this.emitEvent('order-status', data);
+            });
+
+            this.socket.on('new-order', (data) => {
+                this.emitEvent('new-order', data);
             });
 
             setTimeout(() => {
@@ -71,6 +100,26 @@ class WebSocketService {
                 }
             }, 10000);
         });
+    }
+
+    async handleReconnect() {
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            console.log('Max reconnection attempts reached');
+            return;
+        }
+
+        const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts);
+        console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
+
+        setTimeout(() => {
+            this.reconnectAttempts++;
+            this.connect().catch(() => {});
+        }, delay);
+    }
+
+    emitEvent(event, data) {
+        const listeners = this.listeners.get(event) || [];
+        listeners.forEach(cb => cb(data));
     }
 
     disconnect() {
@@ -83,6 +132,58 @@ class WebSocketService {
             this.socket = null;
             this.connected = false;
         }
+    }
+
+    joinRoom(roomId) {
+        if (!this.socket?.connected || !roomId) return;
+
+        const index = this.activeRooms.indexOf(roomId);
+        if (index > -1) return;
+
+        if (this.activeRooms.length >= this.maxActiveRooms) {
+            const removedRoom = this.activeRooms.shift();
+            this.socket.emit('leave-room', { roomId: removedRoom });
+        }
+
+        this.activeRooms.push(roomId);
+        this.socket.emit('join-room', { roomId });
+    }
+
+    leaveRoom(roomId) {
+        if (!this.socket?.connected || !roomId) return;
+
+        const index = this.activeRooms.indexOf(roomId);
+        if (index > -1) {
+            this.activeRooms.splice(index, 1);
+            this.socket.emit('leave-room', { roomId });
+        }
+    }
+
+    rejoinActiveRooms() {
+        if (!this.socket?.connected || this.activeRooms.length === 0) return;
+
+        this.activeRooms.forEach(roomId => {
+            this.socket.emit('join-room', { roomId });
+        });
+    }
+
+    sendMessage(roomId, content) {
+        if (!this.socket?.connected || !roomId) return;
+
+        this.socket.emit('send-message', {
+            roomId,
+            data: { content },
+        });
+    }
+
+    sendTyping(roomId) {
+        if (!this.socket?.connected || !roomId) return;
+        this.socket.emit('typing', { roomId });
+    }
+
+    stopTyping(roomId) {
+        if (!this.socket?.connected || !roomId) return;
+        this.socket.emit('stop-typing', { roomId });
     }
 
     on(event, callback) {
@@ -123,11 +224,17 @@ class WebSocketService {
             longitude,
         });
     }
+
+    getActiveRooms() {
+        return this.activeRooms;
+    }
 }
 
 const wsService = new WebSocketService();
 
 export function useWebSocket() {
+    const [isConnected, setIsConnected] = useState(false);
+
     const connect = useCallback(async () => {
         try {
             await wsService.connect();
@@ -143,6 +250,12 @@ export function useWebSocket() {
     }, []);
 
     useEffect(() => {
+        const handleConnected = () => setIsConnected(true);
+        const handleDisconnected = () => setIsConnected(false);
+
+        wsService.on('connected', handleConnected);
+        wsService.on('disconnected', handleDisconnected);
+
         const subscription = AppState.addEventListener('change', nextAppState => {
             if (nextAppState === 'active' && !wsService.connected) {
                 console.log('🔄 [Socket.IO] App awakened, forcing reconnect...');
@@ -151,6 +264,8 @@ export function useWebSocket() {
         });
 
         return () => {
+            wsService.off('connected', handleConnected);
+            wsService.off('disconnected', handleDisconnected);
             subscription.remove();
         };
     }, [connect]);
@@ -159,8 +274,75 @@ export function useWebSocket() {
         connect,
         disconnect,
         socket: wsService.socket,
-        isConnected: wsService.connected,
+        isConnected,
         wsService,
+        joinRoom: wsService.joinRoom.bind(wsService),
+        leaveRoom: wsService.leaveRoom.bind(wsService),
+        sendMessage: wsService.sendMessage.bind(wsService),
+        sendTyping: wsService.sendTyping.bind(wsService),
+        stopTyping: wsService.stopTyping.bind(wsService),
+    };
+}
+
+export function useChatWebSocket(roomId) {
+    const { isConnected, joinRoom, leaveRoom, sendMessage, sendTyping, stopTyping, wsService } = useWebSocket();
+    const [messages, setMessages] = useState([]);
+    const [typingUser, setTypingUser] = useState(null);
+
+    useEffect(() => {
+        if (!isConnected || !roomId) return;
+
+        joinRoom(roomId);
+
+        const handleMessage = (message) => {
+            setMessages(prev => [...prev, message]);
+        };
+
+        const handleTyping = (data) => {
+            setTypingUser(data);
+            setTimeout(() => setTypingUser(null), 3000);
+        };
+
+        const handleStopTyping = () => {
+            setTypingUser(null);
+        };
+
+        wsService.on('message', handleMessage);
+        wsService.on('typing', handleTyping);
+        wsService.on('stop-typing', handleStopTyping);
+
+        return () => {
+            leaveRoom(roomId);
+            wsService.off('message', handleMessage);
+            wsService.off('typing', handleTyping);
+            wsService.off('stop-typing', handleStopTyping);
+        };
+    }, [isConnected, roomId, joinRoom, leaveRoom, wsService]);
+
+    const send = useCallback((content) => {
+        if (roomId) {
+            sendMessage(roomId, content);
+        }
+    }, [roomId, sendMessage]);
+
+    const typing = useCallback(() => {
+        if (roomId) {
+            sendTyping(roomId);
+        }
+    }, [roomId, sendTyping]);
+
+    const stopTypingCallback = useCallback(() => {
+        if (roomId) {
+            stopTyping(roomId);
+        }
+    }, [roomId, stopTyping]);
+
+    return {
+        messages,
+        typingUser,
+        sendMessage: send,
+        sendTyping: typing,
+        stopTyping: stopTypingCallback,
     };
 }
 

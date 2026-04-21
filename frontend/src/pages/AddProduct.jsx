@@ -66,6 +66,7 @@ function AddProduct() {
     category: '',
     stock: '',
     unit: 'pieces',
+    status: 'active', // active, sold_out, stock_empty
   });
 
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
@@ -191,7 +192,7 @@ function AddProduct() {
       const productData = {
         ...formData,
         price: Number(formData.price),
-        stock: Number(formData.stock),
+        stock: formData.stock ? Number(formData.stock) : null,
         images: uploadedUrls,
         tags,
         currentLocation,
@@ -199,7 +200,7 @@ function AddProduct() {
         variants: hasVariants ? variants.map(v => ({
           name: v.name,
           price: Number(v.price),
-          stock: Number(v.stock)
+          stock: v.stock ? Number(v.stock) : null
         })) : [],
         optionGroups: optionGroups.map(g => ({
           name: g.name,
@@ -581,17 +582,30 @@ function AddProduct() {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="stock" className="block text-sm font-medium mb-1">Stock Quantity *</label>
+                    <label htmlFor="stock" className="block text-sm font-medium mb-1">Stock Quantity (optional)</label>
                     <input
                       type="number"
                       id="stock"
                       value={formData.stock}
                       onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                      required
                       min="0"
                       placeholder="Available stock"
                       className="w-full p-2 border rounded-md bg-background text-foreground"
                     />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="status" className="block text-sm font-medium mb-1">Product Status</label>
+                    <select
+                      id="status"
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      className="w-full p-2 border rounded-md bg-background text-foreground"
+                    >
+                      <option value="active">Active - Available for purchase</option>
+                      <option value="sold_out">Sold Out - Not available</option>
+                      <option value="stock_empty">Stock Empty - Waiting for restock</option>
+                    </select>
                   </div>
                 </div>
               ) : (

@@ -47,6 +47,12 @@ export default function MyProductsScreen({ navigation }) {
 
     const renderItem = ({ item }) => {
         const imageUrl = item.images?.[0] ? getImageUrl(item.images[0]) : '';
+        const isSoldOut = item.status === 'sold_out';
+        const isStockEmpty = item.status === 'stock_empty';
+        const hasStock = item.stock && item.stock > 0;
+        const isLowStock = hasStock && item.stock <= 10;
+        const isActive = !isSoldOut && !isStockEmpty;
+        
         return (
             <TouchableOpacity
                 style={styles.card}
@@ -60,17 +66,40 @@ export default function MyProductsScreen({ navigation }) {
                 <View style={styles.info}>
                     <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
                     <Text style={styles.price}>{formatPrice(item.price)}</Text>
-                    <View style={[
-                        styles.stockBadge,
-                        item.stock > 5 ? styles.inStock : styles.lowStock
-                    ]}>
-                        <Text style={[
-                            styles.stockText,
-                            item.stock > 5 ? styles.inStockText : styles.lowStockText
+                    
+                    {/* Status Badge */}
+                    {isSoldOut && (
+                        <View style={[styles.stockBadge, { backgroundColor: '#ef444420' }]}>
+                            <Text style={[styles.stockText, { color: '#ef4444' }]}>Sold Out</Text>
+                        </View>
+                    )}
+                    {isStockEmpty && (
+                        <View style={[styles.stockBadge, { backgroundColor: '#f59e0b20' }]}>
+                            <Text style={[styles.stockText, { color: '#f59e0b' }]}>Stock Empty</Text>
+                        </View>
+                    )}
+                    
+                    {/* Stock Badge - only show for active products with stock > 0 */}
+                    {isActive && hasStock && (
+                        <View style={[
+                            styles.stockBadge,
+                            isLowStock ? styles.lowStock : styles.inStock
                         ]}>
-                            {item.stock} {item.unit}
-                        </Text>
-                    </View>
+                            <Text style={[
+                                styles.stockText,
+                                isLowStock ? styles.lowStockText : styles.inStockText
+                            ]}>
+                                {isLowStock ? `Low Stock: ${item.stock}` : `${item.stock} ${item.unit}`}
+                            </Text>
+                        </View>
+                    )}
+                    
+                    {/* No stock info for active products without stock number */}
+                    {isActive && !hasStock && (
+                        <View style={[styles.stockBadge, { backgroundColor: colors.input }]}>
+                            <Text style={[styles.stockText, { color: colors.textSecondary }]}>—</Text>
+                        </View>
+                    )}
                 </View>
                 <TouchableOpacity
                     style={styles.deleteBtn}

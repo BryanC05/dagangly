@@ -8,6 +8,7 @@ import (
 
 	"msme-marketplace/internal/database"
 	"msme-marketplace/internal/models"
+	"msme-marketplace/internal/redis"
 	"sync"
 	"time"
 
@@ -27,13 +28,16 @@ var upgrader = websocket.Upgrader{
 }
 
 type Hub struct {
-	clients    map[*Client]bool
-	rooms      map[string]map[*Client]bool
-	broadcast  chan *Message
-	register   chan *Client
-	unregister chan *Client
-	jwtSecret  string
-	mutex      sync.RWMutex
+	clients             map[*Client]bool
+	rooms               map[string]map[*Client]bool
+	broadcast           chan *Message
+	register            chan *Client
+	unregister          chan *Client
+	jwtSecret           string
+	mutex               sync.RWMutex
+	userActiveRooms     map[string][]string
+	roomLastActivity    map[string]time.Time
+	activeChatRoomLimit int
 }
 
 type Client struct {
@@ -54,12 +58,15 @@ type Message struct {
 
 func NewHub(jwtSecret string) *Hub {
 	return &Hub{
-		clients:    make(map[*Client]bool),
-		rooms:      make(map[string]map[*Client]bool),
-		broadcast:  make(chan *Message, 256),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		jwtSecret:  jwtSecret,
+		clients:             make(map[*Client]bool),
+		rooms:               make(map[string]map[*Client]bool),
+		broadcast:           make(chan *Message, 256),
+		register:            make(chan *Client),
+		unregister:          make(chan *Client),
+		jwtSecret:           jwtSecret,
+		userActiveRooms:     make(map[string][]string),
+		roomLastActivity:    make(map[string]time.Time),
+		activeChatRoomLimit: 3,
 	}
 }
 
@@ -121,6 +128,15 @@ func (h *Hub) JoinRoom(client *Client, roomID string) {
 	h.rooms[roomID][client] = true
 	client.rooms = append(client.rooms, roomID)
 
+	if isChatRoom(roomID) {
+		h.userActiveRooms[client.userID] = append(h.userActiveRooms[client.userID], roomID)
+		h.roomLastActivity[roomID] = time.Now()
+		if redis.IsAvailable() {
+			redis.UpdateRoomLastActivity(roomID)
+		}
+		h.enforceActiveRoomLimit(client.userID)
+	}
+
 	log.Printf("%s joined room: %s", client.userName, roomID)
 }
 
@@ -139,7 +155,103 @@ func (h *Hub) LeaveRoom(client *Client, roomID string) {
 		}
 	}
 
+	if isChatRoom(roomID) {
+		h.removeUserActiveRoom(client.userID, roomID)
+	}
+
 	log.Printf("%s left room: %s", client.userName, roomID)
+}
+
+func isChatRoom(roomID string) bool {
+	return len(roomID) == 24
+}
+
+func (h *Hub) enforceActiveRoomLimit(userID string) {
+	rooms := h.userActiveRooms[userID]
+	if len(rooms) <= h.activeChatRoomLimit {
+		return
+	}
+
+	roomsToKeep := h.getTopActiveRooms(userID, h.activeChatRoomLimit)
+	h.userActiveRooms[userID] = roomsToKeep
+
+	if redis.IsAvailable() {
+		redis.SetUserRoomLimit(userID, roomsToKeep, h.activeChatRoomLimit)
+	}
+
+	for _, room := range rooms {
+		keep := false
+		for _, keepRoom := range roomsToKeep {
+			if room == keepRoom {
+				keep = true
+				break
+			}
+		}
+		if !keep {
+			h.leaveRoomByUserID(userID, room)
+		}
+	}
+}
+
+func (h *Hub) getTopActiveRooms(userID string, limit int) []string {
+	type roomActivity struct {
+		roomID    string
+		timestamp time.Time
+	}
+
+	var activities []roomActivity
+	rooms := h.userActiveRooms[userID]
+	for _, roomID := range rooms {
+		if ts, ok := h.roomLastActivity[roomID]; ok {
+			activities = append(activities, roomActivity{roomID, ts})
+		} else {
+			activities = append(activities, roomActivity{roomID, time.Now()})
+		}
+	}
+
+	for i := 0; i < len(activities)-1; i++ {
+		for j := i + 1; j < len(activities); j++ {
+			if activities[j].timestamp.After(activities[i].timestamp) {
+				activities[i], activities[j] = activities[j], activities[i]
+			}
+		}
+	}
+
+	var result []string
+	for i, a := range activities {
+		if i >= limit {
+			break
+		}
+		result = append(result, a.roomID)
+	}
+
+	return result
+}
+
+func (h *Hub) removeUserActiveRoom(userID, roomID string) {
+	rooms := h.userActiveRooms[userID]
+	for i, r := range rooms {
+		if r == roomID {
+			h.userActiveRooms[userID] = append(rooms[:i], rooms[i+1:]...)
+			break
+		}
+	}
+}
+
+func (h *Hub) leaveRoomByUserID(userID, roomID string) {
+	h.mutex.RLock()
+	var client *Client
+	for c := range h.rooms[roomID] {
+		if c.userID == userID {
+			client = c
+			break
+		}
+	}
+	h.mutex.RUnlock()
+
+	if client != nil {
+		h.LeaveRoom(client, roomID)
+	}
 }
 
 func (h *Hub) HandleWebSocket(c *gin.Context) {
@@ -312,6 +424,21 @@ func (c *Client) handleSendMessage(msg Message) {
 	result, err := messagesCollection.InsertOne(context.Background(), message)
 	if err != nil {
 		return
+	}
+
+	message.ID = result.InsertedID.(primitive.ObjectID)
+
+	if redis.IsAvailable() {
+		redisMsg := redis.Message{
+			ID:          message.ID.Hex(),
+			ChatRoom:    roomID,
+			Sender:      redis.Sender{ID: c.userID, Name: c.userName},
+			Content:     content,
+			MessageType: "text",
+			IsRead:      false,
+			CreatedAt:   message.CreatedAt,
+		}
+		redis.CacheMessage(roomID, redisMsg)
 	}
 
 	isRoomSeller := chatRoom.Seller.Hex() == c.userID
@@ -497,4 +624,38 @@ func (h *Hub) SendToUser(userID string, data []byte) {
 			h.mutex.Unlock()
 		}
 	}
+}
+
+func (h *Hub) BroadcastNewOrder(orderID, sellerID string, orderData map[string]interface{}) {
+	msg := &Message{
+		Type:   "new-order",
+		RoomID: "user-" + sellerID,
+		Data:   orderData,
+	}
+	data, _ := json.Marshal(msg)
+	h.SendToUser(sellerID, data)
+
+	redisMsg := redis.Message{
+		ID:          orderID,
+		ChatRoom:    "user-" + sellerID,
+		Sender:      redis.Sender{ID: "system", Name: "System"},
+		Content:     "New order received",
+		MessageType: "system",
+		IsRead:      false,
+		CreatedAt:   time.Now(),
+	}
+	redis.CacheMessage("user-"+sellerID, redisMsg)
+}
+
+func (h *Hub) BroadcastOrderStatus(orderID, userID string, status string) {
+	msg := &Message{
+		Type:   "order-status-update",
+		RoomID: "user-" + userID,
+		Data: map[string]interface{}{
+			"orderId": orderID,
+			"status":  status,
+		},
+	}
+	data, _ := json.Marshal(msg)
+	h.SendToUser(userID, data)
 }

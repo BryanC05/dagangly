@@ -9,6 +9,7 @@ import (
 	"msme-marketplace/internal/database"
 	"msme-marketplace/internal/handlers"
 	"msme-marketplace/internal/middleware"
+	"msme-marketplace/internal/redis"
 	"msme-marketplace/internal/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -43,6 +44,13 @@ func main() {
 		log.Printf("⚠️ Server will start without database (limited functionality)")
 	} else {
 		log.Printf("✅ MongoDB connected successfully")
+	}
+
+	redis.Init()
+	if redis.IsAvailable() {
+		log.Printf("✅ Redis initialized")
+	} else {
+		log.Printf("⚠️ Redis not available - using in-memory fallback")
 	}
 
 	r := gin.Default()

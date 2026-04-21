@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { io } from 'socket.io-client';
 import {
   ArrowLeft,
   Send,
@@ -16,12 +15,10 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useAuthModalStore } from '../store/authModalStore';
+import { useWebSocket } from '../contexts/WebSocketContext';
 import api from '../utils/api';
-import { getBackendUrl } from '../config';
 import { ChatListSkeleton } from '@/components/ui/skeleton';
 import './Chat.css';
-
-const SOCKET_URL = getBackendUrl();
 
 function Chat() {
   const navigate = useNavigate();
@@ -30,7 +27,6 @@ function Chat() {
   const { user } = useAuthStore();
   const { openLogin } = useAuthModalStore();
   const messagesEndRef = useRef(null);
-  const socketRef = useRef(null);
   const timeoutRefs = useRef([]);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
@@ -38,6 +34,18 @@ function Chat() {
   const [messageInput, setMessageInput] = useState('');
   const [socketMessages, setSocketMessages] = useState([]);
   const [typingUser, setTypingUser] = useState(null);
+
+  const {
+    isConnected,
+    joinRoom,
+    leaveRoom,
+    sendMessage: wsSendMessage,
+    sendTyping,
+    stopTyping,
+    onMessage,
+    onTyping,
+    onStopTyping
+  } = useWebSocket();
 
   const roomId = searchParams.get('room');
   const sellerId = searchParams.get('seller');
@@ -86,70 +94,52 @@ function Chat() {
     },
   });
 
-  // Initialize socket connection
+  // Initialize socket connection with WebSocket context
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    socketRef.current = io(SOCKET_URL, {
-      auth: { token },
-      transports: ['polling', 'websocket'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      timeout: 20000
-    });
-
-    socketRef.current.on('connect', () => {
-      console.log('Connected to chat server');
+    if (isConnected) {
       setConnectionStatus('connected');
-    });
-
-    socketRef.current.on('connect_error', (error) => {
-      console.error('Socket connection error:', error.message);
-      setConnectionStatus('error');
-    });
-
-    socketRef.current.on('disconnect', (reason) => {
-      console.log('Disconnected from chat server:', reason);
+    } else {
       setConnectionStatus('disconnected');
-    });
+    }
+  }, [isConnected]);
 
-    socketRef.current.on('receive-message', (message) => {
+  // Handle incoming messages
+  useEffect(() => {
+    const unsubscribeMessage = onMessage((message) => {
       setSocketMessages(prev => [...prev, message]);
       const timerId = setTimeout(scrollToBottom, 100);
       timeoutRefs.current.push(timerId);
     });
 
-    socketRef.current.on('user-typing', (data) => {
+    const unsubscribeTyping = onTyping((data) => {
       setTypingUser(data);
       const timerId = setTimeout(() => setTypingUser(null), 3000);
       timeoutRefs.current.push(timerId);
     });
 
-    socketRef.current.on('new-message-notification', () => {
-      queryClient.invalidateQueries({ queryKey: ['chatRooms', user?.id] });
+    const unsubscribeStopTyping = onStopTyping(() => {
+      setTypingUser(null);
     });
 
     return () => {
+      unsubscribeMessage();
+      unsubscribeTyping();
+      unsubscribeStopTyping();
       timeoutRefs.current.forEach(clearTimeout);
       timeoutRefs.current = [];
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
     };
-  }, [queryClient, scrollToBottom]);
+  }, [onMessage, onTyping, onStopTyping, scrollToBottom]);
 
   // Join room when active room changes
   useEffect(() => {
-    if (socketRef.current && activeRoom) {
-      socketRef.current.emit('join-room', activeRoom._id);
+    if (activeRoom) {
+      joinRoom(activeRoom._id);
 
       return () => {
-        socketRef.current.emit('leave-room', activeRoom._id);
+        leaveRoom(activeRoom._id);
       };
     }
-  }, [activeRoom]);
+  }, [activeRoom, joinRoom, leaveRoom]);
 
   // Fetch chat rooms
   const { data: chatRooms, isLoading: roomsLoading } = useQuery({
@@ -184,12 +174,7 @@ function Chat() {
       return response.data;
     },
     onSuccess: (data) => {
-      if (socketRef.current) {
-        socketRef.current.emit('send-message', {
-          roomId: activeRoom._id,
-          message: data
-        });
-      }
+      wsSendMessage(activeRoom._id, data.content);
       setMessageInput('');
       queryClient.invalidateQueries({ queryKey: ['messages', activeRoom._id] });
       queryClient.invalidateQueries({ queryKey: ['chatRooms', user?.id] });
@@ -222,8 +207,10 @@ function Chat() {
   };
 
   const handleTyping = () => {
-    if (socketRef.current && activeRoom) {
-      socketRef.current.emit('typing', { roomId: activeRoom._id });
+    if (activeRoom) {
+      sendTyping(activeRoom._id);
+      const timerId = setTimeout(() => stopTyping(activeRoom._id), 2000);
+      timeoutRefs.current.push(timerId);
     }
   };
 
