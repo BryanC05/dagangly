@@ -33,8 +33,8 @@ export default function Register() {
       >
         <div className="endfield-card bg-card p-8">
           <div className="text-center mb-8">
-            <h1 className="font-display text-2xl font-bold tracking-wide">Daftar</h1>
-            <p className="text-sm text-muted-foreground mt-1">Buat akun baru</p>
+            <h1 className="font-display text-2xl font-bold tracking-wide">Create Account</h1>
+            <p className="text-sm text-muted-foreground mt-1">Join Dagangly - Indonesian MSME Marketplace</p>
           </div>
 
           {/* Role toggle */}
@@ -47,24 +47,24 @@ export default function Register() {
                 className={`flex-1 py-2 text-sm font-display tracking-wide transition-colors
                   ${role === r ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
               >
-                {r === "buyer" ? "Pembeli" : "Penjual"}
+                {r === "buyer" ? "Buyer" : "Seller"}
               </button>
             ))}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Nama Lengkap</Label>
-              <Input id="name" placeholder="Nama lengkap" required className="bg-surface" />
+              <Label htmlFor="name" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Full Name</Label>
+              <Input id="name" placeholder="Your full name" required className="bg-surface" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Email</Label>
-              <Input id="email" type="email" placeholder="nama@email.com" required className="bg-surface" />
+              <Input id="email" type="email" placeholder="name@example.com" required className="bg-surface" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Password</Label>
               <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" required className="bg-surface pr-10" />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Create a password" required className="bg-surface pr-10" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -83,26 +83,26 @@ export default function Register() {
                 className="space-y-4 pt-2 border-t border-border"
               >
                 <div className="space-y-2">
-                  <Label htmlFor="business" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Nama Usaha</Label>
-                  <Input id="business" placeholder="Nama toko / usaha" className="bg-surface" />
+                  <Label htmlFor="business" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Business Name</Label>
+                  <Input id="business" placeholder="Your store name" className="bg-surface" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">No. Telepon</Label>
+                  <Label htmlFor="phone" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Phone Number</Label>
                   <Input id="phone" type="tel" placeholder="08xxxxxxxxxx" className="bg-surface" />
                 </div>
               </motion.div>
             )}
 
             <Button type="submit" className="w-full font-display tracking-wide" disabled={loading}>
-              {loading ? "Memproses..." : "Daftar"}
+              {loading ? "Creating account..." : "Register"}
               {!loading && <ArrowRight className="h-4 w-4 ml-1" />}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Sudah punya akun?{" "}
+            Already have an account?{" "}
             <Link to="/login" className="text-primary hover:underline">
-              Masuk
+              Login
             </Link>
           </p>
         </div>

@@ -167,14 +167,14 @@ const Navbar = () => {
       <div className="container flex h-20 items-center gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-emerald-400 shadow-[0_12px_24px_-14px_hsl(var(--primary))]">
-            <span className="text-primary-foreground font-display font-bold text-lg">T</span>
+            <span className="text-primary-foreground font-display font-bold text-lg">D</span>
           </div>
           <div className="hidden sm:block">
             <span className="block font-display text-xl font-bold tracking-wider leading-none">
-              Troli<span className="text-primary">Toko</span>
+              Dagang<span className="text-primary">ly</span>
             </span>
             <span className="mt-1 block text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
-              Belanja UMKM lebih dekat
+              Pasar UMKM Indonesia
             </span>
           </div>
         </Link>
@@ -394,9 +394,9 @@ const Navbar = () => {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <span className="font-display text-lg font-bold tracking-wider">
-                  Troli<span className="text-primary">Toko</span>
+                  Dagang<span className="text-primary">ly</span>
                 </span>
-                <p className="mt-1 text-xs text-muted-foreground">Navigasi ringkas untuk belanja dan jualan</p>
+                <p className="mt-1 text-xs text-muted-foreground">Pasar UMKM Indonesia</p>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
                 <X className="h-5 w-5" />
@@ -478,15 +478,15 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <Button variant="destructive" className="w-full" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Keluar
+                  Logout
                 </Button>
               ) : (
                 <>
                   <Button variant="outline" className="w-full" onClick={() => { openLogin(); setMobileOpen(false); }}>
-                    Masuk
+                    Login
                   </Button>
                   <Button className="w-full font-display tracking-wide" onClick={() => { openRegister(); setMobileOpen(false); }}>
-                    Daftar
+                    Register
                   </Button>
                 </>
               )}

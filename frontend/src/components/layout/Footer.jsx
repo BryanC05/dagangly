@@ -1,21 +1,21 @@
-﻿import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Store, Facebook, Instagram, Mail, CircleHelp } from "lucide-react";
 
 const footerLinks = {
   Marketplace: [
-    { label: "Produk", to: "/products" },
-    { label: "Penjual Terdekat", to: "/nearby" },
-    { label: "Keranjang", to: "/cart" },
+    { label: "Products", to: "/products" },
+    { label: "Nearby Sellers", to: "/nearby" },
+    { label: "Cart", to: "/cart" },
   ],
-  Komunitas: [
+  Community: [
     { label: "Forum", to: "/forums" },
-    { label: "Chat", to: "/chat" },
-    { label: "Notifikasi", to: "/notifications" },
+    { label: "Messages", to: "/chat" },
+    { label: "Notifications", to: "/notifications" },
   ],
-  Penjual: [
-    { label: "Mulai Berjualan", to: "/sell" },
-    { label: "Dashboard Penjual", to: "/seller/dashboard" },
-    { label: "Tambah Produk", to: "/seller/add-product" },
+  Seller: [
+    { label: "Start Selling", to: "/sell" },
+    { label: "Seller Dashboard", to: "/seller/dashboard" },
+    { label: "Add Product", to: "/seller/add-product" },
   ],
 };
 
@@ -40,11 +40,11 @@ const Footer = () => {
                 <Store className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="font-display text-2xl font-bold tracking-wider">
-                MART<span className="text-primary">KU</span>
+                Dagang<span className="text-primary">ly</span>
               </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-              Marketplace UMKM Indonesia. Menghubungkan penjual lokal dengan pembeli terdekat melalui pengalaman belanja modern.
+              Dagangly - Indonesian MSME Marketplace. Connecting local sellers with nearby buyers through a modern shopping experience.
             </p>
             <div className="flex items-center gap-3 mt-4 text-muted-foreground">
               <a href="#" className="hover:text-primary transition-colors" aria-label="Facebook">

@@ -50,10 +50,10 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
     <>
       <div className="text-center mb-6">
         <h1 className="font-display text-2xl font-bold tracking-wide">
-          {mode === 'login' ? 'Masuk' : 'Daftar'}
+          {mode === 'login' ? 'Login' : 'Register'}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {mode === 'login' ? 'Selamat datang kembali' : 'Buat akun baru'}
+          {mode === 'login' ? 'Welcome back to Dagangly' : 'Create your Dagangly account'}
         </p>
       </div>
 
@@ -66,12 +66,12 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         {mode === 'register' && (
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Nama Lengkap</Label>
+            <Label htmlFor="name" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Full Name</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Nama lengkap"
+              placeholder="Your full name"
               className="bg-surface"
             />
           </div>
@@ -83,7 +83,7 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="nama@email.com"
+            placeholder="name@example.com"
             required
             className="bg-surface"
           />
@@ -96,7 +96,7 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               required
               className="bg-surface pr-10"
             />
@@ -111,7 +111,7 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
         </div>
 
         <Button type="submit" className="w-full font-display tracking-wide" disabled={loading}>
-          {loading ? "Memproses..." : mode === 'login' ? "Masuk" : "Daftar"}
+          {loading ? "Please wait..." : mode === 'login' ? "Login" : "Register"}
           {!loading && <ArrowRight className="h-4 w-4 ml-1" />}
         </Button>
       </form>
@@ -119,16 +119,16 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
       <p className="text-center text-sm text-muted-foreground mt-6">
         {mode === 'login' ? (
           <>
-            Belum punya akun?{" "}
+            Don't have an account?{" "}
             <button onClick={() => { setError(""); handleSwitchMode(); }} className="text-primary hover:underline">
-              Daftar
+              Register
             </button>
           </>
         ) : (
           <>
-            Sudah punya akun?{" "}
+            Already have an account?{" "}
             <button onClick={() => { setError(""); handleSwitchMode(); }} className="text-primary hover:underline">
-              Masuk
+              Login
             </button>
           </>
         )}

@@ -1,6 +1,11 @@
-# MSME Marketplace
+# Dagangly - Indonesian MSME Marketplace
 
 A full-stack web application connecting Micro, Small, and Medium Enterprises (MSMEs) with local buyers. Sellers can list their products, and buyers can discover and purchase items from nearby businesses.
+
+## Brand
+
+- **Name**: Dagangly
+- **Tagline**: Indonesian MSME Marketplace - Connecting local sellers with nearby buyers
 
 ## Features
 

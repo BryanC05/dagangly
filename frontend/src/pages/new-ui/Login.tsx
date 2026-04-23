@@ -58,8 +58,8 @@ export default function Login() {
       >
         <div className="endfield-card bg-card p-8">
           <div className="text-center mb-6">
-            <h1 className="font-display text-2xl font-bold tracking-wide">Masuk</h1>
-            <p className="text-sm text-muted-foreground mt-1">Selamat datang kembali</p>
+            <h1 className="font-display text-2xl font-bold tracking-wide">Welcome Back</h1>
+            <p className="text-sm text-muted-foreground mt-1">Login to your Dagangly account</p>
           </div>
 
           {error && (
@@ -77,7 +77,7 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="nama@email.com"
+                placeholder="name@example.com"
                 required
                 className="bg-surface"
               />
@@ -91,7 +91,7 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   required
                   className="bg-surface pr-10"
                 />
@@ -106,15 +106,15 @@ export default function Login() {
             </div>
 
             <Button type="submit" className="w-full font-display tracking-wide" disabled={loading}>
-              {loading ? "Memproses..." : "Masuk"}
+              {loading ? "Logging in..." : "Login"}
               {!loading && <ArrowRight className="h-4 w-4 ml-1" />}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Belum punya akun?{" "}
+            Don't have an account?{" "}
             <Link to="/register" className="text-primary hover:underline">
-              Daftar
+              Register
             </Link>
           </p>
         </div>
