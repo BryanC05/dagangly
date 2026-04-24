@@ -42,7 +42,7 @@ function FinanceDashboard() {
         const sellerId = selectedSeller === "all" ? undefined : selectedSeller;
         console.log("Fetching summary with sellerId:", sellerId);
         const response = await api.get("/finance/summary", { params: { sellerId } });
-        console.log("Summary response:", response.data);
+        console.log("Summary response:", JSON.stringify(response.data, null, 2));
         setStats({
           totalSales: response.data.totalSales || 0,
           totalExpenses: response.data.totalExpenses || 0,
