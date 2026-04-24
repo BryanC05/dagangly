@@ -366,6 +366,74 @@ func (h *FinanceHandler) GetProductsBySeller(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"products": products})
 }
 
+// UpdateProductExpenses - update a product's expenses (auth required)
+func (h *FinanceHandler) UpdateProductExpenses(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	var req struct {
+		SellerId string `json:"sellerId"`
+		Product  string `json:"product"`
+		Expenses struct {
+			Materials   float64 `json:"materials"`
+			Labor       float64 `json:"labor"`
+			Packaging   float64 `json:"packaging"`
+			PlatformFee float64 `json:"platformFee"`
+			Other       float64 `json:"other"`
+		} `json:"expenses"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	expenses := req.Expenses
+	totalCost := expenses.Materials + expenses.Labor + expenses.Packaging + expenses.PlatformFee + expenses.Other
+
+	collection := database.GetDB().Collection("products")
+
+	// Get current product to calculate new profit
+	var currentProduct bson.M
+	err := collection.FindOne(context.Background(), bson.M{
+		"sellerId": req.SellerId,
+		"name":     req.Product,
+	}).Decode(&currentProduct)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
+		return
+	}
+
+	price := currentProduct["price"].(float64)
+	profitPerUnit := price - totalCost
+	marginPercent := (profitPerUnit / price) * 100
+
+	result, err := collection.UpdateOne(context.Background(),
+		bson.M{"sellerId": req.SellerId, "name": req.Product},
+		bson.M{"$set": bson.M{
+			"expenses": bson.M{
+				"materials":   expenses.Materials,
+				"labor":       expenses.Labor,
+				"packaging":   expenses.Packaging,
+				"platformFee": expenses.PlatformFee,
+				"other":       expenses.Other,
+				"total":       totalCost,
+			},
+			"profitPerUnit": profitPerUnit,
+			"marginPercent": marginPercent,
+		}},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Product expenses updated", "modified": result.ModifiedCount})
+}
+
 // GetOrdersBySeller - get orders for a specific seller
 func (h *FinanceHandler) GetOrdersBySeller(c *gin.Context) {
 	sellerId := c.Query("sellerId")

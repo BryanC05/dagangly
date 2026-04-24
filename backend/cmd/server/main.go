@@ -504,6 +504,7 @@ func main() {
 			financeAuth.POST("/invoices/sync", financeHandler.SyncInvoices)
 			financeAuth.POST("/product-calculations", financeHandler.ProductCalculations)
 			financeAuth.GET("/product-calculations", financeHandler.GetProductCalculations)
+			financeAuth.PUT("/products/expenses", financeHandler.UpdateProductExpenses)
 		}
 
 		// Video Call Integration

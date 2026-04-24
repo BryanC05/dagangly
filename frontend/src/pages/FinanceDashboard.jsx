@@ -13,7 +13,8 @@ import {
   FileText,
   Plus,
   Store,
-  Bot
+  Bot,
+  Package
 } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -91,6 +92,13 @@ function FinanceDashboard() {
       icon: TrendingUp,
       href: "/finance/profit-calculator",
       color: "bg-green-500",
+    },
+    {
+      title: t("productExpenses") || "Product Expenses",
+      description: t("productExpensesDesc") || "Manage expense per product",
+      icon: Package,
+      href: "/finance/product-expenses",
+      color: "bg-orange-500",
     },
     {
       title: t("financeAI") || "AI Consultant",
