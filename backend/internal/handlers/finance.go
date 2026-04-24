@@ -378,11 +378,10 @@ func (h *FinanceHandler) UpdateProductExpenses(c *gin.Context) {
 		SellerId string `json:"sellerId"`
 		Product  string `json:"product"`
 		Expenses struct {
-			Materials   float64 `json:"materials"`
-			Labor       float64 `json:"labor"`
-			Packaging   float64 `json:"packaging"`
-			PlatformFee float64 `json:"platformFee"`
-			Other       float64 `json:"other"`
+			Materials float64 `json:"materials"`
+			Labor     float64 `json:"labor"`
+			Packaging float64 `json:"packaging"`
+			Other     float64 `json:"other"`
 		} `json:"expenses"`
 	}
 
@@ -392,11 +391,10 @@ func (h *FinanceHandler) UpdateProductExpenses(c *gin.Context) {
 	}
 
 	expenses := req.Expenses
-	totalCost := expenses.Materials + expenses.Labor + expenses.Packaging + expenses.PlatformFee + expenses.Other
+	totalCost := expenses.Materials + expenses.Labor + expenses.Packaging + expenses.Other
 
 	collection := database.GetDB().Collection("products")
 
-	// Get current product to calculate new profit
 	var currentProduct bson.M
 	err := collection.FindOne(context.Background(), bson.M{
 		"sellerId": req.SellerId,
@@ -415,12 +413,11 @@ func (h *FinanceHandler) UpdateProductExpenses(c *gin.Context) {
 		bson.M{"sellerId": req.SellerId, "name": req.Product},
 		bson.M{"$set": bson.M{
 			"expenses": bson.M{
-				"materials":   expenses.Materials,
-				"labor":       expenses.Labor,
-				"packaging":   expenses.Packaging,
-				"platformFee": expenses.PlatformFee,
-				"other":       expenses.Other,
-				"total":       totalCost,
+				"materials": expenses.Materials,
+				"labor":     expenses.Labor,
+				"packaging": expenses.Packaging,
+				"other":     expenses.Other,
+				"total":     totalCost,
 			},
 			"profitPerUnit": profitPerUnit,
 			"marginPercent": marginPercent,

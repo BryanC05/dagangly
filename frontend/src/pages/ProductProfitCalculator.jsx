@@ -24,7 +24,6 @@ const EXPENSE_ITEMS = [
   { id: "labor", name: "Labor", nameId: "Tenaga Kerja", icon: "👷", placeholder: "Worker wages" },
   { id: "packaging", name: "Packaging", nameId: "Kemasan", icon: "📫", placeholder: "Boxes, bags, wrappers" },
   { id: "shipping", name: "Shipping", nameId: "Pengiriman", icon: "🚚", placeholder: "Delivery costs" },
-  { id: "platform_fee", name: "Platform Fee", nameId: "Biaya Platform", icon: "📱", placeholder: "Marketplace commission" },
   { id: "marketing", name: "Marketing", nameId: "Pemasaran", icon: "📢", placeholder: "Ads, promotions" },
   { id: "utilities", name: "Utilities", nameId: "Utilitas", icon: "⚡", placeholder: "Electricity, water" },
   { id: "other", name: "Other", nameId: "Lainnya", icon: "📝", placeholder: "Miscellaneous" },

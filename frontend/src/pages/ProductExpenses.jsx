@@ -18,11 +18,10 @@ import { useAuthStore } from "@/store/authStore";
 import api from "@/utils/api";
 
 const EXPENSE_FIELDS = [
-  { key: "materials", label: "Bahan Baku", labelEn: "Materials", icon: "📦" },
-  { key: "labor", label: "Tenaga Kerja", labelEn: "Labor", icon: "👷" },
-  { key: "packaging", label: "Kemasan", labelEn: "Packaging", icon: "📫" },
-  { key: "platformFee", label: "Biaya Platform", labelEn: "Platform Fee", icon: "📱" },
-  { key: "other", label: "Lainnya", labelEn: "Other", icon: "📝" },
+  { key: "materials", label: "Bahan Baku", icon: "📦" },
+  { key: "labor", label: "Tenaga Kerja", icon: "👷" },
+  { key: "packaging", label: "Kemasan", icon: "📫" },
+  { key: "other", label: "Lainnya", icon: "📝" },
 ];
 
 function ProductExpenses() {
@@ -63,7 +62,6 @@ function ProductExpenses() {
         materials: expenses.materials || 0,
         labor: expenses.labor || 0,
         packaging: expenses.packaging || 0,
-        platformFee: expenses.platformFee || 0,
         other: expenses.other || 0,
       }
     });
@@ -95,7 +93,7 @@ function ProductExpenses() {
   };
 
   const calculateProfit = (expenses, price) => {
-    const total = Object.values(expenses).reduce((a, b) => a + b, 0);
+    const total = (expenses.materials || 0) + (expenses.labor || 0) + (expenses.packaging || 0) + (expenses.other || 0);
     const profit = price - total;
     const margin = price > 0 ? (profit / price) * 100 : 0;
     return { total, profit, margin };

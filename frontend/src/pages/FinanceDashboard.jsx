@@ -1,27 +1,26 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Calculator, 
-  Receipt, 
   TrendingUp, 
   DollarSign, 
-  ArrowUpRight, 
   ArrowDownRight,
   Wallet,
   FileText,
-  Plus,
-  Store,
   Bot,
   Package
 } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
 import { loadMockFinanceData, getSellers } from "@/utils/mockFinance";
+import { useAuthStore } from "@/store/authStore";
 
 function FinanceDashboard() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalSales: 0,
@@ -34,8 +33,13 @@ function FinanceDashboard() {
   const [selectedSeller, setSelectedSeller] = useState("all");
 
   useEffect(() => {
+    // Only show finance to sellers
+    if (user && !user.isSeller) {
+      navigate("/");
+      return;
+    }
     setSellers(getSellers());
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
