@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -265,12 +264,6 @@ func (h *FinanceHandler) GetFinanceSummary(c *gin.Context) {
 		}},
 	}
 
-	// Debug: show raw count
-	ordersCount, _ := ordersCollection.CountDocuments(context.Background(), salesFilter)
-	fmt.Printf("DEBUG orders matching filter: %d\n", ordersCount)
-	totalOrders, _ := ordersCollection.CountDocuments(context.Background(), bson.M{})
-	fmt.Printf("DEBUG total orders in DB: %d\n", totalOrders)
-
 	salesCursor, _ := ordersCollection.Aggregate(context.Background(), salesPipeline)
 	var salesSummary struct {
 		Total float64 `bson:"total"`
@@ -305,7 +298,6 @@ func (h *FinanceHandler) GetFinanceSummary(c *gin.Context) {
 		"totalExpenses": expenseSummary.Total,
 		"netProfit":     salesSummary.Total - expenseSummary.Total,
 	})
-	fmt.Printf("FINANCE SUMMARY: sales=%v, orders=%d, expenses=%v, profit=%v", salesSummary.Total, salesSummary.Count, expenseSummary.Total, salesSummary.Total-expenseSummary.Total)
 }
 
 // GetAllSellers - get all sellers with products
