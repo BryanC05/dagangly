@@ -10,7 +10,6 @@ export const getSellers = () => {
 
 export const loadMockFinanceData = (sellerIdOrEmail) => {
   if (sellerIdOrEmail) {
-    // Try to find by sellerId or email
     const seller = mockData.sellers.find(s => 
       s.sellerId === sellerIdOrEmail || s.email === sellerIdOrEmail
     );
@@ -32,7 +31,7 @@ export const loadMockFinanceData = (sellerIdOrEmail) => {
       },
       orders: completedOrders,
       expenses: seller.expenses,
-      products: seller.products,
+      products: computeProductFinancials(seller),
       revenueTrend: seller.revenueTrend,
     };
   }
@@ -47,7 +46,7 @@ export const loadMockFinanceData = (sellerIdOrEmail) => {
     summary: mockData.summary,
     orders: allCompletedOrders,
     expenses: allExpenses,
-    products: mockData.sellers.flatMap(s => s.products),
+    products: mockData.sellers.flatMap(s => computeProductFinancials(s)),
     revenueTrend: {
       weekly: mockData.sellers.reduce((acc, s) => {
         s.revenueTrend.weekly.forEach((d, i) => {
@@ -67,6 +66,57 @@ export const loadMockFinanceData = (sellerIdOrEmail) => {
     },
     sellers: getSellers(),
   };
+};
+
+const computeProductFinancials = (seller) => {
+  return seller.products.map(product => {
+    const cost = product.cost;
+    const platformFeeAmt = product.price * (cost.platformFee / 100);
+    const totalCost = cost.material + cost.labor + cost.shipping + platformFeeAmt + cost.other;
+    const profitPerUnit = product.price - totalCost;
+    const margin = (profitPerUnit / product.price) * 100;
+    
+    const productOrders = seller.orders.filter(
+      o => o.product === product.name && (o.status === 'delivered' || o.status === 'completed')
+    );
+    const ordersCount = productOrders.length;
+    const unitsSold = productOrders.reduce((sum, o) => sum + o.quantity, 0);
+    const revenue = product.price * unitsSold;
+    const totalCostAll = totalCost * unitsSold;
+    const cleanProfit = revenue - totalCostAll;
+    const profitMargin = revenue > 0 ? (cleanProfit / revenue) * 100 : 0;
+
+    return {
+      name: product.name,
+      price: product.price,
+      expenses: {
+        materials: cost.material,
+        labor: cost.labor,
+        packaging: cost.shipping,
+        platformFee: platformFeeAmt,
+        other: cost.other,
+        total: totalCost,
+      },
+      profitPerUnit,
+      marginPercent: margin.toFixed(1),
+      metrics: {
+        ordersCount,
+        unitsSold,
+        revenue,
+        totalCost: totalCostAll,
+        cleanProfit,
+        profitMargin: profitMargin.toFixed(1),
+      },
+    };
+  });
+};
+
+export const getProductFinancials = (sellerId) => {
+  const sellers = sellerId 
+    ? mockData.sellers.filter(s => s.sellerId === sellerId)
+    : mockData.sellers;
+  
+  return sellers.flatMap(s => computeProductFinancials(s));
 };
 
 export const getProductAnalysis = (productName, sellerId) => {
@@ -119,6 +169,18 @@ export const getProductAnalysis = (productName, sellerId) => {
   }
   
   return null;
+};
+
+export const getTopProfitableProducts = (sellerId, limit = 5) => {
+  const products = getProductFinancials(sellerId);
+  return products
+    .sort((a, b) => b.metrics.cleanProfit - a.metrics.cleanProfit)
+    .slice(0, limit);
+};
+
+export const getLosingProducts = (sellerId) => {
+  const products = getProductFinancials(sellerId);
+  return products.filter(p => p.metrics.cleanProfit < 0);
 };
 
 export const getInvoices = (sellerId) => {
@@ -204,7 +266,10 @@ export const getExpensesByCategory = (sellerId) => {
 export default {
   getSellers,
   loadMockFinanceData,
+  getProductFinancials,
   getProductAnalysis,
+  getTopProfitableProducts,
+  getLosingProducts,
   getInvoices,
   getRevenueTrend,
   getExpensesByCategory,

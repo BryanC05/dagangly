@@ -12,7 +12,8 @@ import {
   Wallet,
   FileText,
   Plus,
-  Store
+  Store,
+  Bot
 } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -81,6 +82,20 @@ function FinanceDashboard() {
       icon: Calculator,
       href: "/finance/calculator",
       color: "bg-blue-500",
+    },
+    {
+      title: t("productProfit") || "Product Profit",
+      description: t("productProfitDesc") || "Calculate profit with detailed expenses",
+      icon: TrendingUp,
+      href: "/finance/profit-calculator",
+      color: "bg-green-500",
+    },
+    {
+      title: t("financeAI") || "AI Consultant",
+      description: t("financeAIDesc") || "Ask AI about your finances",
+      icon: Bot,
+      href: "/finance/ai",
+      color: "bg-indigo-500",
     },
     {
       title: t("invoices") || "Invoices",

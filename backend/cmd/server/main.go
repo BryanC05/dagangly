@@ -493,6 +493,12 @@ func main() {
 			finance.GET("/expenses", financeHandler.GetExpenses)
 			finance.POST("/invoices/sync", financeHandler.SyncInvoices)
 			finance.GET("/summary", financeHandler.GetFinanceSummary)
+			finance.POST("/product-calculations", financeHandler.ProductCalculations)
+			finance.GET("/product-calculations", financeHandler.GetProductCalculations)
+			finance.GET("/sellers", financeHandler.GetAllSellers)
+			finance.GET("/products", financeHandler.GetProductsWithFinancials)
+			finance.GET("/products/by-seller", financeHandler.GetProductsBySeller)
+			finance.GET("/orders/by-seller", financeHandler.GetOrdersBySeller)
 		}
 
 		// Video Call Integration

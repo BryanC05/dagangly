@@ -302,3 +302,224 @@ func (h *FinanceHandler) GetFinanceSummary(c *gin.Context) {
 		"netProfit":     salesSummary.Total - expenseSummary.Total,
 	})
 }
+
+// GetAllSellers - get all sellers with products
+func (h *FinanceHandler) GetAllSellers(c *gin.Context) {
+	collection := database.GetDB().Collection("sellers")
+	cursor, err := collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var sellers []bson.M
+	for cursor.Next(context.Background()) {
+		var seller bson.M
+		cursor.Decode(&seller)
+		sellers = append(sellers, seller)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"sellers": sellers})
+}
+
+// GetProductsWithFinancials - get all products with calculated financials
+func (h *FinanceHandler) GetProductsWithFinancials(c *gin.Context) {
+	collection := database.GetDB().Collection("products")
+	cursor, err := collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var products []bson.M
+	for cursor.Next(context.Background()) {
+		var product bson.M
+		cursor.Decode(&product)
+		products = append(products, product)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"products": products})
+}
+
+// GetProductsBySeller - get products for a specific seller
+func (h *FinanceHandler) GetProductsBySeller(c *gin.Context) {
+	sellerId := c.Query("sellerId")
+	if sellerId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "sellerId required"})
+		return
+	}
+
+	collection := database.GetDB().Collection("products")
+	cursor, err := collection.Find(context.Background(), bson.M{"sellerId": sellerId})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var products []bson.M
+	for cursor.Next(context.Background()) {
+		var product bson.M
+		cursor.Decode(&product)
+		products = append(products, product)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"products": products})
+}
+
+// GetOrdersBySeller - get orders for a specific seller
+func (h *FinanceHandler) GetOrdersBySeller(c *gin.Context) {
+	sellerId := c.Query("sellerId")
+	if sellerId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "sellerId required"})
+		return
+	}
+
+	collection := database.GetDB().Collection("orders")
+	cursor, err := collection.Find(context.Background(), bson.M{"sellerId": sellerId})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var orders []bson.M
+	for cursor.Next(context.Background()) {
+		var order bson.M
+		cursor.Decode(&order)
+		orders = append(orders, order)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"orders": orders})
+}
+
+// ProductCalculations - save product profit calculations
+func (h *FinanceHandler) ProductCalculations(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("product_calculations")
+	now := time.Now()
+
+	// GET - fetch all calculations
+	if c.Request.Method == "GET" {
+		cursor, err := collection.Find(context.Background(), bson.M{"userId": userObjID}, options.Find().SetSort(bson.D{{Key: "createdAt", Value: -1}}))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		defer cursor.Close(context.Background())
+
+		var calculations []models.ProductCalculation
+		for cursor.Next(context.Background()) {
+			var calc models.ProductCalculation
+			cursor.Decode(&calc)
+			calculations = append(calculations, calc)
+		}
+
+		c.JSON(http.StatusOK, gin.H{"calculations": calculations})
+		return
+	}
+
+	// POST - save calculation
+	var req struct {
+		ProductName  string  `json:"productName"`
+		SellingPrice float64 `json:"sellingPrice"`
+		Quantity     int     `json:"quantity"`
+		Expenses     []struct {
+			ID     string  `json:"id"`
+			Name   string  `json:"name"`
+			Amount float64 `json:"amount"`
+		} `json:"expenses"`
+		TotalRevenue  float64 `json:"totalRevenue"`
+		TotalCost     float64 `json:"totalCost"`
+		CleanProfit   float64 `json:"cleanProfit"`
+		ProfitMargin  float64 `json:"profitMargin"`
+		CostPerUnit   float64 `json:"costPerUnit"`
+		ProfitPerUnit float64 `json:"profitPerUnit"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	var expenseItems []models.ExpenseItem
+	for _, exp := range req.Expenses {
+		expenseItems = append(expenseItems, models.ExpenseItem{
+			ID:     exp.ID,
+			Name:   exp.Name,
+			Amount: exp.Amount,
+		})
+	}
+
+	calc := models.ProductCalculation{
+		UserID:        userObjID,
+		ProductName:   req.ProductName,
+		SellingPrice:  req.SellingPrice,
+		Quantity:      req.Quantity,
+		Expenses:      expenseItems,
+		TotalRevenue:  req.TotalRevenue,
+		TotalCost:     req.TotalCost,
+		CleanProfit:   req.CleanProfit,
+		ProfitMargin:  req.ProfitMargin,
+		CostPerUnit:   req.CostPerUnit,
+		ProfitPerUnit: req.ProfitPerUnit,
+		CreatedAt:     now,
+		UpdatedAt:     now,
+	}
+
+	result, err := collection.InsertOne(context.Background(), calc)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":     "Calculation saved",
+		"calculation": result.InsertedID,
+	})
+}
+
+// GetProductCalculations - get calculations for AI
+func (h *FinanceHandler) GetProductCalculations(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("product_calculations")
+	cursor, err := collection.Find(context.Background(), bson.M{"userId": userObjID}, options.Find().SetSort(bson.D{{Key: "createdAt", Value: -1}}).SetLimit(10))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var calculations []models.ProductCalculation
+	for cursor.Next(context.Background()) {
+		var calc models.ProductCalculation
+		cursor.Decode(&calc)
+		calculations = append(calculations, calc)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"calculations": calculations})
+}

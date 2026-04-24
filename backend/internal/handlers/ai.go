@@ -24,8 +24,9 @@ type GenerateDescRequest struct {
 }
 
 type FinancialConsultantRequest struct {
-	Query     string                 `json:"query" binding:"required"`
-	Analytics map[string]interface{} `json:"analytics" binding:"required"`
+	Query               string                   `json:"query" binding:"required"`
+	Analytics           map[string]interface{}   `json:"analytics"`
+	ProductCalculations []map[string]interface{} `json:"productCalculations"`
 }
 
 type GroqRequest struct {
@@ -140,22 +141,52 @@ func (h *AIHandler) FinancialConsultant(c *gin.Context) {
 		return
 	}
 
-	analyticsJSON, _ := json.MarshalIndent(req.Analytics, "", "  ")
+	var analyticsJSON string
+	if req.Analytics != nil {
+		aj, _ := json.MarshalIndent(req.Analytics, "", "  ")
+		analyticsJSON = string(aj)
+	}
+
+	var productCalcJSON string
+	if req.ProductCalculations != nil {
+		pc, _ := json.MarshalIndent(req.ProductCalculations, "", "  ")
+		productCalcJSON = string(pc)
+	}
+
+	var analyticsSection string
+	if analyticsJSON != "" {
+		analyticsSection = fmt.Sprintf(`
+=== DATA DASHBOARD PENJUAL ===
+%s
+
+`, analyticsJSON)
+	}
+
+	var productCalcSection string
+	if productCalcJSON != "" {
+		productCalcSection = fmt.Sprintf(`
+=== DATA KALKULASI LABA PRODUK ===
+%s
+
+`, productCalcJSON)
+	}
 
 	systemPrompt := fmt.Sprintf(`Anda adalah seorang konsultan keuangan AI dan analis bisnis ahli untuk penjual di marketplace MSME (UMKM).
-Anda sedang berbicara langsung dengan penjual untuk membantu mereka mengembangkan bisnisnya.
+Anda sedang berbicara langsung dengan penjualan untuk membantu mereka mengembangkan bisnisnya.
 Jawablah dalam bahasa Indonesia yang baik dan benar (Bahasa Indonesia).
-Analisis data dashboard yang diberikan dan jawab pertanyaan mereka dengan akurat, profesional, dan ringkas.
+Analisis data yang diberikan dan jawab pertanyaan mereka dengan akurat, profesional, dan ringkas.
 Gunakan formatasi (bullet points, teks tebal) untuk membuat respons mudah dibaca.
 Jangan gunakan markdown headers (#), cukup teks tebal dan bullet points.
 
-Berikut adalah data dashboard penjual saat ini untuk periode yang dipilih:
+%s
+
 %s
 
 Catatan Penting:
 - Selalu jawab dalam bahasa Indonesia
 - Jika ada angka, gunakan format Rupiah (Rp) dengan pemisah ribuan yang sesuai
-- Berikan saran yang praktis dan actionable untuk membantu bisnis berkembang`, string(analyticsJSON))
+- Berikan saran yang praktis dan actionable untuk membantu bisnis berkembang
+- Fokus pada analisis keuntungan bersih (clean profit) dari setiap produk`, analyticsSection, productCalcSection)
 
 	groqReq := GroqRequest{
 		Model: "llama-3.3-70b-versatile", // Using smarter 70B model specifically for financial analysis
