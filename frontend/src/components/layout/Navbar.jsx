@@ -118,7 +118,7 @@ const Navbar = () => {
 
   const accountLinks = [
     { to: "/profile", label: t("nav.profile") || "Profil", icon: User },
-    { to: "/orders", label: t("nav.navOrders") || "Pesanan", icon: Package, badge: activeOrderCount },
+    { to: "/orders", label: t("nav.orderPage") || t("nav.orders") || "Orders", icon: Package, badge: activeOrderCount },
     { to: "/saved-products", label: t("nav.savedProducts") || "Tersimpan", icon: Heart },
     { to: "/wallet", label: t("wallet.title") || "Dompet", icon: Wallet },
     ...(isSeller

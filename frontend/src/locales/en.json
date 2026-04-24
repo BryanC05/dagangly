@@ -23,7 +23,6 @@
     "dashboard": "Dashboard",
     "forums": "Forums",
     "messages": "Messages",
-    "navOrders": "Orders",
     "saved": "Saved",
     "savedProducts": "Saved Products",
     "tracking": "Tracking",
@@ -337,7 +336,7 @@
     "fashion": "Fashion & Apparel",
     "health": "Health & Beauty"
   },
-  "orders": {
+  "orderItems": {
     "title": "My Orders",
     "noOrders": "No orders yet",
     "noOrdersTitle": "You Haven't Placed Any Orders Yet",

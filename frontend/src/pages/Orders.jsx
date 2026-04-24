@@ -27,7 +27,7 @@ const statusConfig = {
   completed: { icon: CheckCircle, color: 'var(--status-delivered)', bg: 'var(--status-delivered-bg)', label: 'Order is Completed' },
 };
 
-// Helper to get status config with dynamic labels for pickup orders
+// Helper to get status config with dynamic labels for pickup orderItems
 const getStatusConfig = (order, user) => {
   const isPickup = order.deliveryType === 'pickup';
   const isBuyer = order.buyer?._id === user?.id;
@@ -56,7 +56,7 @@ const paymentIcons = {
 
 const normalizeOrdersPayload = (payload) => {
   if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.orders)) return payload.orders;
+  if (Array.isArray(payload?.orderItems)) return payload.orderItems;
   return [];
 };
 
@@ -77,28 +77,28 @@ function Orders() {
   const [expandedOrders, setExpandedOrders] = useState({});
 
   const filterTabs = [
-    { key: 'all', label: t('orders.allOrders') },
-    { key: 'active', label: t('orders.activeOrders') },
-    { key: 'completed', label: t('orders.completedOrders') },
+    { key: 'all', label: t('orderItems.allOrders') },
+    { key: 'active', label: t('orderItems.activeOrders') },
+    { key: 'completed', label: t('orderItems.completedOrders') },
   ];
 
   const hasToken = !!localStorage.getItem('token');
   const { data: rawOrders, isLoading } = useQuery({
-    queryKey: ['orders', user?.id],
+    queryKey: ['orderItems', user?.id],
     queryFn: async () => {
-      const response = await api.get('/orders/my-orders');
+      const response = await api.get('/orderItems/my-orderItems');
       return normalizeOrdersPayload(response.data);
     },
     enabled: !!user?.id && hasToken,
   });
-  const orders = normalizeOrdersPayload(rawOrders);
+  const orderItems = normalizeOrdersPayload(rawOrders);
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }) => {
-      await api.put(`/orders/${orderId}/status`, { status });
+      await api.put(`/orderItems/${orderId}/status`, { status });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['orderItems', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['sellerProductTracking', user?.id] });
     },
   });
@@ -116,7 +116,7 @@ function Orders() {
     return null;
   };
 
-  const filteredOrders = orders.filter((order) => {
+  const filteredOrders = orderItems.filter((order) => {
     if (activeFilter === 'active') {
       return !['delivered', 'cancelled'].includes(order.status);
     }
@@ -126,8 +126,8 @@ function Orders() {
     return true;
   });
 
-  const activeCount = orders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
-  const completedCount = orders.filter(o => ['delivered', 'cancelled'].includes(o.status)).length;
+  const activeCount = orderItems.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
+  const completedCount = orderItems.filter(o => ['delivered', 'cancelled'].includes(o.status)).length;
 
   const toggleExpand = (orderId) => {
     setExpandedOrders(prev => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -151,27 +151,27 @@ function Orders() {
   if (isLoading) {
     return (
       <>
-        <div className="orders-page container py-8">
+        <div className="orderItems-page container py-8">
           <OrdersListSkeleton count={4} />
         </div>
       </>
     );
   }
 
-  if (!orders || orders.length === 0) {
+  if (!orderItems || orderItems.length === 0) {
     return (
       <>
-        <div className="orders-page container py-12">
-          <div className="empty-orders">
+        <div className="orderItems-page container py-12">
+          <div className="empty-orderItems">
             <div className="empty-icon-wrapper">
               <ShoppingBag size={48} />
             </div>
-            <h2 className="text-lg font-semibold">{t('orders.noOrdersTitle')}</h2>
-            <p className="text-sm text-muted-foreground mt-2">{t('orders.startShopping')}</p>
+            <h2 className="text-lg font-semibold">{t('orderItems.noOrdersTitle')}</h2>
+            <p className="text-sm text-muted-foreground mt-2">{t('orderItems.startShopping')}</p>
             <Link to="/products">
               <Button className="mt-4 gap-2">
                 <ShoppingBag className="h-4 w-4" />
-                {t('orders.browseProducts')}
+                {t('orderItems.browseProducts')}
               </Button>
             </Link>
           </div>
@@ -182,18 +182,18 @@ function Orders() {
 
   return (
     <>
-      <div className="orders-page container py-8">
+      <div className="orderItems-page container py-8">
         {/* Header */}
         <div 
-          className="orders-header flex items-center gap-4 mb-6 cursor-pointer"
+          className="orderItems-header flex items-center gap-4 mb-6 cursor-pointer"
           onClick={() => navigate(-1)}
         >
           <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 shrink-0">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1>{t('orders.title')}</h1>
-            <p className="orders-subtitle">{orders.length} {t('orders.totalOrders')}</p>
+            <h1>{t('orderItems.title')}</h1>
+            <p className="orderItems-subtitle">{orderItems.length} {t('orderItems.totalOrders')}</p>
           </div>
         </div>
 
@@ -207,20 +207,20 @@ function Orders() {
             >
               {tab.label}
               <span className="tab-count">
-                {tab.key === 'all' ? orders.length : tab.key === 'active' ? activeCount : completedCount}
+                {tab.key === 'all' ? orderItems.length : tab.key === 'active' ? activeCount : completedCount}
               </span>
             </button>
           ))}
         </div>
 
         {/* Orders List */}
-        <div className="orders-list">
+        <div className="orderItems-list">
           {filteredOrders.length === 0 ? (
-            <div className="no-filtered-orders">
+            <div className="no-filtered-orderItems">
               <p>
-                {activeFilter === 'all' ? t('orders.noOrders') : 
-                 activeFilter === 'active' ? t('orders.noFilteredOrdersActive') : 
-                 t('orders.noFilteredOrdersCompleted')}
+                {activeFilter === 'all' ? t('orderItems.noOrders') : 
+                 activeFilter === 'active' ? t('orderItems.noFilteredOrdersActive') : 
+                 t('orderItems.noFilteredOrdersCompleted')}
               </p>
             </div>
           ) : (
@@ -234,7 +234,7 @@ function Orders() {
               const PaymentIcon = payment.icon;
               const isPickup = order.deliveryType === 'pickup';
               const OrderTypeIcon = isPickup ? Store : Truck;
-              const orderTypeLabel = isPickup ? t('checkout.pickup') : t('orders.delivery');
+              const orderTypeLabel = isPickup ? t('checkout.pickup') : t('orderItems.delivery');
 
               // Preorder badge
               const isPreorder = order.isPreorder && order.deliveryDate;
@@ -247,26 +247,26 @@ function Orders() {
                         <div>
                           <div className="preorder-label-row">
                             <Calendar size={20} className="preorder-icon" />
-                            <span className="preorder-label">{t('orders.preorder')}</span>
+                            <span className="preorder-label">{t('orderItems.preorder')}</span>
                           </div>
                           <div className="preorder-date">
                             {formatDate(order.deliveryDate)}
                           </div>
                           <div className="preorder-time">
-                            {t('orders.at')} {order.preorderTime}
+                            {t('orderItems.at')} {order.preorderTime}
                           </div>
                         </div>
                       </div>
                       <div className="preorder-meta">
                         <Package size={16} className="preorder-icon" />
                         <span>
-                          {order.itemsCount || order.products?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0} {t('orders.items')} | {formatCurrency(order.totalAmount)}
+                          {order.itemsCount || order.products?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0} {t('orderItems.items')} | {formatCurrency(order.totalAmount)}
                         </span>
                       </div>
                       {order.requestStatus === 'seller_accepted' && (
                         <Button size="sm" className="preorder-confirm-btn">
                           <CheckCircle size={16} className="mr-1.5" />
-                          {t('orders.confirmAndPay')}
+                          {t('orderItems.confirmAndPay')}
                         </Button>
                       )}
                     </div>
@@ -281,7 +281,7 @@ function Orders() {
                     <div className="order-header">
                       <div className="order-header-left">
                         <div className="order-id-section">
-                          <span className="order-label">{t('orders.order')}</span>
+                          <span className="order-label">{t('orderItems.order')}</span>
                           {isPreorder && <span className="preorder-pill">PREORDER</span>}
                           <span className="order-id">#{orderId.slice(-8).toUpperCase()}</span>
                         </div>
@@ -314,12 +314,12 @@ function Orders() {
                               });
                             }}
                             disabled={updateStatusMutation.isPending}
-                            title={nextStatus === 'payment_pending' ? t('orders.markAsPaid') : `${t('orders.markAs')} ${statusConfig[nextStatus]?.label}`}
+                            title={nextStatus === 'payment_pending' ? t('orderItems.markAsPaid') : `${t('orderItems.markAs')} ${statusConfig[nextStatus]?.label}`}
                           >
                             {nextStatus === 'payment_pending' ? (
                               <>
                                 <CheckCircle size={14} />
-                                <span>{t('orders.paid')}</span>
+                                <span>{t('orderItems.paid')}</span>
                               </>
                             ) : (
                               <>
@@ -391,7 +391,7 @@ function Orders() {
                             {/* Seller/Buyer Info - Check if user is seller of this order */}
                             {order.seller?._id === user?.id ? (
                               <div className="meta-row">
-                                <span className="meta-label">{t('orders.buyer')}</span>
+                                <span className="meta-label">{t('orderItems.buyer')}</span>
                                 <span className="meta-value">
                                   <Link 
                                     to={`/profile/${order.buyer?._id}`} 
@@ -410,7 +410,7 @@ function Orders() {
                               </div>
                             ) : (
                               <div className="meta-row">
-                                <span className="meta-label">{t('orders.seller')}</span>
+                                <span className="meta-label">{t('orderItems.seller')}</span>
                                 <span className="meta-value">
                                   <Link 
                                     to={`/profile/${order.seller?._id}`}
@@ -431,10 +431,10 @@ function Orders() {
 
                             {/* Pickup Info */}
                             <div className="meta-row">
-                              <span className="meta-label">{t('orders.orderType') || 'Order Type'}</span>
+                              <span className="meta-label">{t('orderItems.orderType') || 'Order Type'}</span>
                               <span className={`meta-value order-type-meta ${isPickup ? 'pickup' : 'delivery'}`}>
                                 <OrderTypeIcon size={12} />
-                                {isPickup ? t('checkout.pickupAtStore') : t('orders.delivery')}
+                                {isPickup ? t('checkout.pickupAtStore') : t('orderItems.delivery')}
                                 {isPickup && order.preorderTime && ` - ${order.preorderTime}`}
                               </span>
                             </div>
@@ -442,7 +442,7 @@ function Orders() {
                             {/* Pickup Address for Pickup Orders */}
                             {isPickup && order.pickupAddress && (
                               <div className="meta-row">
-                                <span className="meta-label">{t('orders.pickupLocation') || 'Pickup Location'}</span>
+                                <span className="meta-label">{t('orderItems.pickupLocation') || 'Pickup Location'}</span>
                                 <span className="meta-value">
                                   <MapPin size={12} style={{ marginRight: 4 }} />
                                   {order.pickupAddress}
@@ -452,7 +452,7 @@ function Orders() {
 
                             {/* Payment Method */}
                             <div className="meta-row">
-                              <span className="meta-label">{t('orders.payment')}</span>
+                              <span className="meta-label">{t('orderItems.payment')}</span>
                               <span className="meta-value payment-badge">
                                 <PaymentIcon size={14} />
                                 {payment.label}
@@ -462,7 +462,7 @@ function Orders() {
                             {/* Notes */}
                             {order.notes && (
                               <div className="meta-row">
-                                <span className="meta-label">{t('orders.notes')}</span>
+                                <span className="meta-label">{t('orderItems.notes')}</span>
                                 <span className="meta-value note-text">{order.notes}</span>
                               </div>
                             )}
@@ -487,7 +487,7 @@ function Orders() {
                               <Link to={`/invoice/${orderId}`} className="flex-1">
                                 <Button variant="outline" size="sm" className="w-full gap-2">
                                   <FileText className="h-4 w-4" />
-                                  {t('orders.viewInvoice')}
+                                  {t('orderItems.viewInvoice')}
                                 </Button>
                               </Link>
                               {/* Fraud/Scam Reporting - Available to both buyer and seller */}
@@ -568,7 +568,7 @@ function Orders() {
                           {/* Total + Action */}
                           <div className="order-total-section">
                             <div className="total-row">
-                              <span>{t('orders.total')}</span>
+                              <span>{t('orderItems.total')}</span>
                               <span className="total-amount">{formatCurrency(order.totalAmount)}</span>
                             </div>
 
@@ -586,7 +586,7 @@ function Orders() {
                                 disabled={updateStatusMutation.isPending}
                                 className="update-status-btn"
                               >
-                                {nextStatus === 'payment_pending' ? t('orders.markAsPaid') : `${t('orders.markAs')} ${statusConfig[nextStatus].label}`}
+                                {nextStatus === 'payment_pending' ? t('orderItems.markAsPaid') : `${t('orderItems.markAs')} ${statusConfig[nextStatus].label}`}
                               </Button>
                             )}
                           </div>

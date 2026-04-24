@@ -23,7 +23,7 @@
         "dashboard": "Dasbor",
         "forums": "Forum",
         "messages": "Pesan",
-        "navOrders": "Pesanan",
+        "orderPage": "Pesanan",
         "saved": "Disimpan",
         "savedProducts": "Produk Disimpan",
         "tracking": "Pelacakan",
@@ -342,7 +342,7 @@
         "fashion": "Mode & Busana",
         "health": "Kecantikan & Kesehatan"
     },
-    "orders": {
+    "orderItems": {
         "title": "Pesanan Saya",
         "noOrders": "Belum ada pesanan",
         "noOrdersTitle": "Anda Belum Memesan Apapun",
