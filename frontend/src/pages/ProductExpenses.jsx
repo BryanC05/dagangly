@@ -35,15 +35,16 @@ function ProductExpenses() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (user?._id) {
-      loadProducts();
-    }
-  }, [user?._id]);
+    loadProducts();
+  }, [user]);
 
   const loadProducts = async () => {
+    const sellerId = user?.sellerId || user?._id || user?.id;
+    console.log("Loading products for sellerId:", sellerId);
+    console.log("Full user:", user);
     try {
       const response = await api.get("/finance/products", { 
-        params: { sellerId: user?.sellerId } 
+        params: { sellerId } 
       });
       setProducts(response.data.products || []);
     } catch (error) {
@@ -71,12 +72,13 @@ function ProductExpenses() {
   const saveExpenses = async () => {
     if (!editingProduct) return;
     
+    const sellerId = user?.sellerId || user?._id || user?.id;
     setSaving(true);
     setMessage("");
     
     try {
       await api.put("/finance/products/expenses", {
-        sellerId: user?.sellerId,
+        sellerId: sellerId,
         product: editingProduct.name,
         expenses: editingProduct.expenses,
       });
@@ -85,6 +87,7 @@ function ProductExpenses() {
       loadProducts();
       setEditingProduct(null);
     } catch (error) {
+      console.error("Save error:", error);
       setMessage("✗ Failed to save: " + error.message);
     } finally {
       setSaving(false);
@@ -106,13 +109,9 @@ function ProductExpenses() {
     }).format(amount || 0);
   };
 
-  if (!user?.sellerId) {
-    return (
-      <div className="container py-8">
-        <p>Please login as a seller to manage product expenses.</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    loadProducts();
+  }, [user]);
 
   return (
     <div className="container py-8">
