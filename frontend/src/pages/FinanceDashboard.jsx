@@ -40,7 +40,9 @@ function FinanceDashboard() {
     const fetchData = async () => {
       try {
         const sellerId = selectedSeller === "all" ? undefined : selectedSeller;
+        console.log("Fetching summary with sellerId:", sellerId);
         const response = await api.get("/finance/summary", { params: { sellerId } });
+        console.log("Summary response:", response.data);
         setStats({
           totalSales: response.data.totalSales || 0,
           totalExpenses: response.data.totalExpenses || 0,
@@ -48,7 +50,7 @@ function FinanceDashboard() {
           orderCount: response.data.orderCount || 0,
         });
       } catch (error) {
-        console.log("Using mock finance data for demo");
+        console.log("Using mock finance data for demo", error);
         const sellerId = selectedSeller === "all" ? undefined : selectedSeller;
         const mockData = loadMockFinanceData(sellerId);
         setStats(mockData.summary);
