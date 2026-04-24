@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -298,6 +299,7 @@ func (h *FinanceHandler) GetFinanceSummary(c *gin.Context) {
 		"totalExpenses": expenseSummary.Total,
 		"netProfit":     salesSummary.Total - expenseSummary.Total,
 	})
+	fmt.Printf("FINANCE SUMMARY: sales=%v, orders=%d, expenses=%v, profit=%v", salesSummary.Total, salesSummary.Count, expenseSummary.Total, salesSummary.Total-expenseSummary.Total)
 }
 
 // GetAllSellers - get all sellers with products
