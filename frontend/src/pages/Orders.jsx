@@ -166,8 +166,8 @@ function Orders() {
             <div className="empty-icon-wrapper">
               <ShoppingBag size={48} />
             </div>
-            <h2>{t('orders.noOrdersTitle')}</h2>
-            <p>{t('orders.startShopping')}</p>
+            <h2 className="text-lg font-semibold">{t('orders.noOrdersTitle')}</h2>
+            <p className="text-sm text-muted-foreground mt-2">{t('orders.startShopping')}</p>
             <Link to="/products">
               <Button className="mt-4 gap-2">
                 <ShoppingBag className="h-4 w-4" />
