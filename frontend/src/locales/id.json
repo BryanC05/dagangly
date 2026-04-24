@@ -344,11 +344,6 @@
     },
     "orderItems": {
         "title": "Pesanan Saya",
-        "noOrders": "Belum ada pesanan",
-        "noOrdersTitle": "Anda Belum Memesan Apapun",
-        "noOrdersDesc": "Ketika Anda melakukan pembelian, detail pesanan akan muncul di sini",
-        "startShopping": "Temukan produk menarik dari penjual lokal terdekat Anda!",
-        "browseProducts": "Jelajahi Produk",
         "noFilteredOrders": "Tidak ada pesanan {filter}",
         "noFilteredOrdersActive": "Anda tidak memiliki pesanan aktif",
         "noFilteredOrdersCompleted": "Anda tidak memiliki pesanan yang selesai",

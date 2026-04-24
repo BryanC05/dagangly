@@ -77,46 +77,23 @@ function Orders() {
   const [expandedOrders, setExpandedOrders] = useState({});
 
   const filterTabs = [
-    { key: 'all', label: t('orderItems.allOrders') },
-    { key: 'active', label: t('orderItems.activeOrders') },
-    { key: 'completed', label: t('orderItems.completedOrders') },
+    { key: 'all', label: t('orders.allOrders') },
+    { key: 'active', label: t('orders.activeOrders') },
+    { key: 'completed', label: t('orders.completedOrders') },
   ];
 
   const hasToken = !!localStorage.getItem('token');
   const { data: rawOrders, isLoading } = useQuery({
-    queryKey: ['orderItems', user?.id],
+    queryKey: ['orders', user?.id],
     queryFn: async () => {
-      const response = await api.get('/orderItems/my-orderItems');
+      const response = await api.get('/orders/my-orders');
       return normalizeOrdersPayload(response.data);
     },
     enabled: !!user?.id && hasToken,
   });
-  const orderItems = normalizeOrdersPayload(rawOrders);
+const orders = normalizeOrdersPayload(rawOrders);
 
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ orderId, status }) => {
-      await api.put(`/orderItems/${orderId}/status`, { status });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orderItems', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['sellerProductTracking', user?.id] });
-    },
-  });
-
-  const getNextStatus = (currentStatus) => {
-    // For payment_pending, next is confirmed (paid)
-    if (currentStatus === 'payment_pending') {
-      return 'confirmed';
-    }
-    const statusFlow = ['pending', 'payment_pending', 'confirmed', 'preparing', 'ready', 'delivered'];
-    const currentIndex = statusFlow.indexOf(currentStatus);
-    if (currentIndex < statusFlow.length - 1) {
-      return statusFlow[currentIndex + 1];
-    }
-    return null;
-  };
-
-  const filteredOrders = orderItems.filter((order) => {
+  const filteredOrders = orders.filter((order) => {
     if (activeFilter === 'active') {
       return !['delivered', 'cancelled'].includes(order.status);
     }
@@ -126,8 +103,8 @@ function Orders() {
     return true;
   });
 
-  const activeCount = orderItems.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
-  const completedCount = orderItems.filter(o => ['delivered', 'cancelled'].includes(o.status)).length;
+  const activeCount = orders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
+  const completedCount = orders.filter(o => ['delivered', 'cancelled'].includes(o.status)).length;
 
   const toggleExpand = (orderId) => {
     setExpandedOrders(prev => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -158,11 +135,11 @@ function Orders() {
     );
   }
 
-  if (!orderItems || orderItems.length === 0) {
+  if (!orders || orders.length === 0) {
     return (
       <>
-        <div className="orderItems-page container py-12">
-          <div className="empty-orderItems">
+        <div className="orders-page container py-12">
+          <div className="empty-orders">
             <div className="empty-icon-wrapper">
               <ShoppingBag size={48} />
             </div>
@@ -182,10 +159,10 @@ function Orders() {
 
   return (
     <>
-      <div className="orderItems-page container py-8">
+      <div className="orders-page container py-8">
         {/* Header */}
         <div 
-          className="orderItems-header flex items-center gap-4 mb-6 cursor-pointer"
+          className="orders-header flex items-center gap-4 mb-6 cursor-pointer"
           onClick={() => navigate(-1)}
         >
           <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 shrink-0">
@@ -193,7 +170,7 @@ function Orders() {
           </button>
           <div>
             <h1>{t('orderItems.title')}</h1>
-            <p className="orderItems-subtitle">{orderItems.length} {t('orderItems.totalOrders')}</p>
+            <p className="orders-subtitle">{orders.length} {t('orderItems.totalOrders')}</p>
           </div>
         </div>
 
@@ -214,9 +191,9 @@ function Orders() {
         </div>
 
         {/* Orders List */}
-        <div className="orderItems-list">
+        <div className="orders-list">
           {filteredOrders.length === 0 ? (
-            <div className="no-filtered-orderItems">
+            <div className="no-filtered-orders">
               <p>
                 {activeFilter === 'all' ? t('orderItems.noOrders') : 
                  activeFilter === 'active' ? t('orderItems.noFilteredOrdersActive') : 
