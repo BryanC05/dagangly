@@ -145,12 +145,12 @@ const orders = normalizeOrdersPayload(rawOrders);
             </div>
             <h2 className="text-lg font-semibold">{t('orderItems.noOrdersTitle')}</h2>
             <p className="text-sm text-muted-foreground mt-2">{t('orderItems.startShopping')}</p>
-            <Link to="/products">
-              <Button className="mt-4 gap-2">
+            <Button asChild className="mt-4 gap-2">
+              <Link to="/products" draggable="false">
                 <ShoppingBag className="h-4 w-4" />
                 {t('orderItems.browseProducts')}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </>
