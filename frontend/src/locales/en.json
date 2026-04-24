@@ -48,6 +48,7 @@
     "lightMode": "Light Mode",
     "guide": "Guide"
   },
+  "orders": "Orders",
   "guide": {
     "title": "Help Center",
     "subtitle": "Learn how to use all features",
