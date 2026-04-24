@@ -54,12 +54,6 @@ const paymentIcons = {
   credit_card: { icon: CreditCard, label: 'Credit Card' },
 };
 
-const filterTabs = [
-  { key: 'all', label: t('orders.allOrders') },
-  { key: 'active', label: t('orders.activeOrders') },
-  { key: 'completed', label: t('orders.completedOrders') },
-];
-
 const normalizeOrdersPayload = (payload) => {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.orders)) return payload.orders;
@@ -81,6 +75,12 @@ function Orders() {
   const queryClient = useQueryClient();
   const [activeFilter, setActiveFilter] = useState('all');
   const [expandedOrders, setExpandedOrders] = useState({});
+
+  const filterTabs = [
+    { key: 'all', label: t('orders.allOrders') },
+    { key: 'active', label: t('orders.activeOrders') },
+    { key: 'completed', label: t('orders.completedOrders') },
+  ];
 
   const hasToken = !!localStorage.getItem('token');
   const { data: rawOrders, isLoading } = useQuery({
@@ -586,7 +586,7 @@ function Orders() {
                                 disabled={updateStatusMutation.isPending}
                                 className="update-status-btn"
                               >
-                                {nextStatus === 'payment_pending' ? 'Mark as Paid' : `${t('orders.markAs')} ${statusConfig[nextStatus].label}`}
+                                {nextStatus === 'payment_pending' ? t('orders.markAsPaid') : `${t('orders.markAs')} ${statusConfig[nextStatus].label}`}
                               </Button>
                             )}
                           </div>
