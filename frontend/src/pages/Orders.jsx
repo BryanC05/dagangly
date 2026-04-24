@@ -55,9 +55,9 @@ const paymentIcons = {
 };
 
 const filterTabs = [
-  { key: 'all', label: 'All Orders' },
-  { key: 'active', label: 'Active' },
-  { key: 'completed', label: 'Completed' },
+  { key: 'all', label: t('orders.allOrders') },
+  { key: 'active', label: t('orders.activeOrders') },
+  { key: 'completed', label: t('orders.completedOrders') },
 ];
 
 const normalizeOrdersPayload = (payload) => {
@@ -217,7 +217,11 @@ function Orders() {
         <div className="orders-list">
           {filteredOrders.length === 0 ? (
             <div className="no-filtered-orders">
-              <p>No {activeFilter} orders found</p>
+              <p>
+                {activeFilter === 'all' ? t('orders.noOrders') : 
+                 activeFilter === 'active' ? t('orders.noFilteredOrdersActive') : 
+                 t('orders.noFilteredOrdersCompleted')}
+              </p>
             </div>
           ) : (
             filteredOrders.map((order, orderIndex) => {
@@ -230,7 +234,7 @@ function Orders() {
               const PaymentIcon = payment.icon;
               const isPickup = order.deliveryType === 'pickup';
               const OrderTypeIcon = isPickup ? Store : Truck;
-              const orderTypeLabel = isPickup ? 'Pickup' : 'Delivery';
+              const orderTypeLabel = isPickup ? t('checkout.pickup') : t('orders.delivery');
 
               // Preorder badge
               const isPreorder = order.isPreorder && order.deliveryDate;
@@ -243,26 +247,26 @@ function Orders() {
                         <div>
                           <div className="preorder-label-row">
                             <Calendar size={20} className="preorder-icon" />
-                            <span className="preorder-label">PREORDER</span>
+                            <span className="preorder-label">{t('orders.preorder')}</span>
                           </div>
                           <div className="preorder-date">
                             {formatDate(order.deliveryDate)}
                           </div>
                           <div className="preorder-time">
-                            at {order.preorderTime}
+                            {t('orders.at')} {order.preorderTime}
                           </div>
                         </div>
                       </div>
                       <div className="preorder-meta">
                         <Package size={16} className="preorder-icon" />
                         <span>
-                          {order.itemsCount || order.products?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0} items | {formatCurrency(order.totalAmount)}
+                          {order.itemsCount || order.products?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0} {t('orders.items')} | {formatCurrency(order.totalAmount)}
                         </span>
                       </div>
                       {order.requestStatus === 'seller_accepted' && (
                         <Button size="sm" className="preorder-confirm-btn">
                           <CheckCircle size={16} className="mr-1.5" />
-                          Confirm & Pay
+                          {t('orders.confirmAndPay')}
                         </Button>
                       )}
                     </div>
@@ -310,12 +314,12 @@ function Orders() {
                               });
                             }}
                             disabled={updateStatusMutation.isPending}
-                            title={nextStatus === 'payment_pending' ? 'Mark as Paid' : `Mark as ${statusConfig[nextStatus]?.label}`}
+                            title={nextStatus === 'payment_pending' ? t('orders.markAsPaid') : `${t('orders.markAs')} ${statusConfig[nextStatus]?.label}`}
                           >
                             {nextStatus === 'payment_pending' ? (
                               <>
                                 <CheckCircle size={14} />
-                                <span>Paid</span>
+                                <span>{t('orders.paid')}</span>
                               </>
                             ) : (
                               <>
@@ -427,10 +431,10 @@ function Orders() {
 
                             {/* Pickup Info */}
                             <div className="meta-row">
-                              <span className="meta-label">Order Type</span>
+                              <span className="meta-label">{t('orders.orderType') || 'Order Type'}</span>
                               <span className={`meta-value order-type-meta ${isPickup ? 'pickup' : 'delivery'}`}>
                                 <OrderTypeIcon size={12} />
-                                {isPickup ? 'Pickup at Store' : 'Delivery'}
+                                {isPickup ? t('checkout.pickupAtStore') : t('orders.delivery')}
                                 {isPickup && order.preorderTime && ` - ${order.preorderTime}`}
                               </span>
                             </div>
@@ -438,7 +442,7 @@ function Orders() {
                             {/* Pickup Address for Pickup Orders */}
                             {isPickup && order.pickupAddress && (
                               <div className="meta-row">
-                                <span className="meta-label">Pickup Location</span>
+                                <span className="meta-label">{t('orders.pickupLocation') || 'Pickup Location'}</span>
                                 <span className="meta-value">
                                   <MapPin size={12} style={{ marginRight: 4 }} />
                                   {order.pickupAddress}
@@ -483,7 +487,7 @@ function Orders() {
                               <Link to={`/invoice/${orderId}`} className="flex-1">
                                 <Button variant="outline" size="sm" className="w-full gap-2">
                                   <FileText className="h-4 w-4" />
-                                  View Invoice
+                                  {t('orders.viewInvoice')}
                                 </Button>
                               </Link>
                               {/* Fraud/Scam Reporting - Available to both buyer and seller */}
