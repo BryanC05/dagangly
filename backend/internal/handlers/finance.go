@@ -237,29 +237,26 @@ func (h *FinanceHandler) SyncInvoices(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"invoices": invoices})
 }
 
-// GetFinanceSummary - dashboard summary
+// GetFinanceSummary - dashboard summary (no auth required)
 func (h *FinanceHandler) GetFinanceSummary(c *gin.Context) {
-	userID := c.GetString("userID")
-	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
-		return
-	}
-
-	userObjID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid user ID"})
-		return
-	}
+	sellerId := c.Query("sellerId")
 
 	ordersCollection := database.GetDB().Collection("orders")
 	expensesCollection := database.GetDB().Collection("expenses")
 
+	var salesFilter bson.M
+	var expFilter bson.M
+	if sellerId != "" {
+		salesFilter = bson.M{"sellerId": sellerId, "status": bson.M{"$in": []string{"delivered", "completed"}}}
+		expFilter = bson.M{"sellerId": sellerId}
+	} else {
+		salesFilter = bson.M{"status": bson.M{"$in": []string{"delivered", "completed"}}}
+		expFilter = bson.M{}
+	}
+
 	// Get sales from completed orders
 	salesPipeline := []bson.M{
-		{"$match": bson.M{
-			"seller": userObjID,
-			"status": bson.M{"$in": []string{"delivered", "completed"}},
-		}},
+		{"$match": salesFilter},
 		{"$group": bson.M{
 			"_id":   nil,
 			"total": bson.M{"$sum": "$total"},
@@ -279,7 +276,7 @@ func (h *FinanceHandler) GetFinanceSummary(c *gin.Context) {
 
 	// Get expenses
 	expPipeline := []bson.M{
-		{"$match": bson.M{"userId": userObjID}},
+		{"$match": expFilter},
 		{"$group": bson.M{
 			"_id":   nil,
 			"total": bson.M{"$sum": "$amount"},

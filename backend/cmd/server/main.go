@@ -487,18 +487,23 @@ func main() {
 		// Finance
 		financeHandler := handlers.NewFinanceHandler()
 		finance := api.Group("/finance")
-		finance.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
-			finance.POST("/expenses/sync", financeHandler.SyncExpenses)
-			finance.GET("/expenses", financeHandler.GetExpenses)
-			finance.POST("/invoices/sync", financeHandler.SyncInvoices)
 			finance.GET("/summary", financeHandler.GetFinanceSummary)
-			finance.POST("/product-calculations", financeHandler.ProductCalculations)
-			finance.GET("/product-calculations", financeHandler.GetProductCalculations)
 			finance.GET("/sellers", financeHandler.GetAllSellers)
 			finance.GET("/products", financeHandler.GetProductsWithFinancials)
 			finance.GET("/products/by-seller", financeHandler.GetProductsBySeller)
 			finance.GET("/orders/by-seller", financeHandler.GetOrdersBySeller)
+		}
+
+		// Finance (auth required)
+		financeAuth := api.Group("/finance")
+		financeAuth.Use(middleware.AuthRequired(cfg.JWTSecret))
+		{
+			financeAuth.POST("/expenses/sync", financeHandler.SyncExpenses)
+			financeAuth.GET("/expenses", financeHandler.GetExpenses)
+			financeAuth.POST("/invoices/sync", financeHandler.SyncInvoices)
+			financeAuth.POST("/product-calculations", financeHandler.ProductCalculations)
+			financeAuth.GET("/product-calculations", financeHandler.GetProductCalculations)
 		}
 
 		// Video Call Integration
