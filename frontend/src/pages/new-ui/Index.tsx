@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ArrowRight, MapPin, ChevronRight } from "lucide-react";
+import { Search, ArrowRight, MapPin, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
@@ -25,6 +25,45 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slideInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const heroSlides = [
+    {
+      image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80",
+      title: "Produk Lokal Berkualitas",
+      desc: "Temukan kerajinan tangan terbaik dari pengrajin Indonesia",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1567620905732-2d1ecea66514?w=1200&q=80",
+      title: "Makanan Khas Nusantara",
+      desc: "Jelajahi kelezatan makanan tradisional Indonesia",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1555529669-e69e7aa0f9a2?w=1200&q=80",
+      title: "Dukung Ekonomi Lokal",
+      desc: "Setiap pembelian mendukung pelaku UMKM",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1445205170230-053bc82c5110?w=1200&q=80",
+      title: "Fashion Karya Anak Bangsa",
+      desc: "Desain unik bisnis lokal yang tak kalah kreatif",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1596462502278-27dc1c2cae24?w=1200&q=80",
+      title: "Kecantikan Alami",
+      desc: "Produk beauty alami dari bahan lokal",
+    },
+  ];
+
+  useEffect(() => {
+    slideInterval.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => {
+      if (slideInterval.current) clearInterval(slideInterval.current);
+    };
+  }, [heroSlides.length]);
 
   const categoryDefs = [
     { id: "food", name: t("categories.food"), icon: "🍜" },
@@ -72,35 +111,92 @@ export default function Index() {
     }
   };
 
-  return (
+return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden py-12 md:py-32 endfield-gradient">
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-10 right-10 w-64 h-64 border border-primary/10 rotate-45" />
-          <div className="absolute bottom-20 left-10 w-32 h-32 border border-primary/5 rotate-12" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-primary/5" />
+      {/* Hero with Slideshow */}
+      <section className="relative overflow-hidden min-h-[60vh] md:min-h-[70vh]">
+        {/* Slideshow Background */}
+        <div className="absolute inset-0 -z-10">
+          {heroSlides.map((slide, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === currentSlide ? "opacity-100" : "opacity-0"
+              }`}
+              style={{
+                backgroundImage: `url(${slide.image})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center center",
+              }}
+            />
+          ))}
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
 
-        <div className="container relative">
+        {/* Slide Indicators */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+          {heroSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setCurrentSlide(index);
+                if (slideInterval.current) clearInterval(slideInterval.current);
+                slideInterval.current = setInterval(() => {
+                  setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+                }, 5000);
+              }}
+              className={`h-2 rounded-full transition-all ${
+                index === currentSlide ? "bg-white w-8" : "bg-white/50 w-2 hover:bg-white/80"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={() => {
+            setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+            if (slideInterval.current) clearInterval(slideInterval.current);
+            slideInterval.current = setInterval(() => {
+              setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+            }, 5000);
+          }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors hidden md:flex"
+        >
+          <ChevronLeft className="w-8 h-8" />
+        </button>
+        <button
+          onClick={() => {
+            setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+            if (slideInterval.current) clearInterval(slideInterval.current);
+            slideInterval.current = setInterval(() => {
+              setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+            }, 5000);
+          }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors hidden md:flex"
+        >
+          <ChevronRight className="w-8 h-8" />
+        </button>
+
+        <div className="container relative py-12 md:py-32">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="max-w-2xl mx-auto text-center"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs font-mono mb-6">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-glow" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/30 bg-white/10 text-white text-xs font-mono mb-6">
+              <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse-glow" />
               {t("home.heroBadge")}
             </div>
 
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4 leading-tight">
-              {t("home.heroHeading")}
-              <span className="text-primary text-glow block sm:inline"> {t("home.heroHeadingAccent")}</span>
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4 leading-tight text-white">
+              {heroSlides[currentSlide].title}
             </h1>
 
-            <p className="text-muted-foreground text-lg mb-8 max-w-lg mx-auto">
-              {t("home.heroDescription")}
+            <p className="text-gray-200 text-lg mb-8 max-w-lg mx-auto">
+              {heroSlides[currentSlide].desc}
             </p>
 
             <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
@@ -108,7 +204,7 @@ export default function Index() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t("nav.searchPlaceholder")}
-                  className="pl-9 h-12 bg-card border-border text-base w-full"
+                  className="pl-9 h-12 bg-white border-white text-gray-900 w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
