@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator
+    View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator, Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeStore } from '../../store/themeStore';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useAuthStore } from '../../store/authStore';
 import api from '../../api/api';
 import financeDB from '../../services/FinanceDB';
 
@@ -13,6 +14,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 export default function FinanceDashboardScreen({ navigation }) {
     const { colors } = useThemeStore();
     const { t, language } = useTranslation();
+    const { user } = useAuthStore();
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [stats, setStats] = useState({
@@ -24,6 +26,37 @@ export default function FinanceDashboardScreen({ navigation }) {
         lastMonth: 0
     });
     const [recentOrders, setRecentOrders] = useState([]);
+
+    // Seller check - redirect non-sellers
+    useEffect(() => {
+        if (!user?.isSeller) {
+            Alert.alert(
+                t.error || 'Error',
+                'Finance features are available for sellers only. Register your business to access this feature.',
+                [{ text: 'OK', onPress: () => navigation.goBack() }]
+            );
+        }
+    }, [user?.isSeller]);
+
+    if (!user?.isSeller) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 32 }]}>
+                <Ionicons name="wallet-outline" size={64} color={colors.primary} style={{ marginBottom: 16 }} />
+                <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text, textAlign: 'center', marginBottom: 12 }}>
+                    Seller Access Required
+                </Text>
+                <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 24 }}>
+                    Finance features are available for sellers only.
+                </Text>
+                <TouchableOpacity
+                    style={{ backgroundColor: colors.primary, paddingHorizontal: 32, paddingVertical: 12, borderRadius: 8 }}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>Go Back</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     const loadData = useCallback(async () => {
         try {

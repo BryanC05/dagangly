@@ -41,6 +41,37 @@ export default function SellerDashboardScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
+    // Seller check - redirect non-sellers
+    useEffect(() => {
+        if (!user?.isSeller && !loading) {
+            Alert.alert(
+                'Seller Access Required',
+                'You need to register as a seller to access the dashboard.',
+                [{ text: 'OK', onPress: () => navigation.goBack() }]
+            );
+        }
+    }, [user?.isSeller, loading]);
+
+    if (!user?.isSeller && !FORCE_MOCK) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 32 }]}>
+                <Ionicons name="storefront-outline" size={64} color={colors.primary} style={{ marginBottom: 16 }} />
+                <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text, textAlign: 'center', marginBottom: 12 }}>
+                    Seller Access Required
+                </Text>
+                <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 24 }}>
+                    You need to register as a seller to access this dashboard.
+                </Text>
+                <TouchableOpacity
+                    style={{ backgroundColor: colors.primary, paddingHorizontal: 32, paddingVertical: 12, borderRadius: 8 }}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>Go Back</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
     // Membership state
     const [membership, setMembership] = useState(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
