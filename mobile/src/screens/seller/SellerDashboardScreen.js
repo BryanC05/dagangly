@@ -8,8 +8,8 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { formatPrice } from '../../utils/helpers';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useThemeStore } from '../../store/themeStore';
+import { useNavigation } from '@react-navigation/native';
 
-// Mock data for demo (Rani - Dapur Summarecon)
 const MOCK_ANALYTICS = {
     period: '30',
     totalRevenue: 4906000,

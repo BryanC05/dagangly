@@ -3,7 +3,7 @@ import {
     View, Text, TouchableOpacity, FlatList, TextInput, ActivityIndicator, ScrollView, Dimensions, StyleSheet, Animated, PanResponder, Pressable, Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { useThemeStore } from '../../store/themeStore';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -134,13 +134,17 @@ export default function NearbySellersScreen() {
         })
     ).current;
 
-    useEffect(() => {
-        getUserLocation();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            getUserLocation();
+        }, [])
+    );
 
     useEffect(() => {
         if (location) {
-            fetchNearbySellers();
+            fetchNearbySellers().catch(err => {
+                console.warn('Failed to fetch nearby sellers:', err);
+            });
         }
     }, [location, radius]);
 
