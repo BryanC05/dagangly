@@ -64,27 +64,27 @@ const Home = () => {
 
   const heroSlides = [
     {
-      image: "https://images.unsplash.com/photo-1557804506-669a67965ce4?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80",
       title: "Produk Lokal Berkualitas",
       desc: "Temukan kerajinan tangan terbaik dari pengrajin Indonesia"
     },
     {
-      image: "https://images.unsplash.com/photo-1504674900247-0877b9c1ae9f?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1567620905732-2d1ecea66514?w=1200&q=80",
       title: "Makanan Khas Nusantara",
       desc: "Jelajahi kelezatan makanan tradisional Indonesia"
     },
     {
-      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d3?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1555529669-e69e7aa0f9a2?w=1200&q=80",
       title: "Dukung Ekonomi Lokal",
       desc: "Setiap pembelian mendukung pelaku UMKM"
     },
     {
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1445205170230-053bc82c5110?w=1200&q=80",
       title: "Fashion Karya Anak Bangsa",
       desc: "Desain unik bisnis lokal yang tak kalah kreatif"
     },
     {
-      image: "https://images.unsplash.com/photo-1512436991641-6745cdb19e69?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1596462502278-27dc1c2cae24?w=1200&q=80",
       title: "Kecantikan Alami",
       desc: "Produk beauty alami dari bahan lokal"
     }
@@ -149,27 +149,28 @@ const Home = () => {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-background min-h-[500px] md:min-h-[600px]">
+      <section className="relative overflow-hidden bg-background min-h-[60vh] md:min-h-[70vh]">
         {/* Slideshow Background */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 -z-10">
           {heroSlides.map((slide, index) => (
             <div
               key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                index === currentSlide ? 'opacity-40' : 'opacity-0'
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === currentSlide ? 'opacity-100' : 'opacity-0'
               }`}
               style={{
                 backgroundImage: `url(${slide.image})`,
                 backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                backgroundPosition: 'center center',
               }}
             />
           ))}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
 
         {/* Slide Indicators */}
-        <div className="absolute bottom-32 md:bottom-40 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
           {heroSlides.map((_, index) => (
             <button
               key={index}
@@ -216,17 +217,15 @@ const Home = () => {
         </button>
 
         <div className="container py-16 md:py-24 relative z-10">
-          <OnboardingPrompt />
-          
           <div className="max-w-3xl mx-auto text-center">
-            <Badge variant="outline" className="mb-6 px-4 py-1.5 text-sm border-primary/30 text-primary bg-primary/10 rounded-full inline-flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+            <Badge variant="outline" className="mb-6 px-4 py-1.5 text-sm border-white/30 text-white bg-white/10 rounded-full inline-flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
               MARKETPLACE UMKM INDONESIA
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-4">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-4">
               {heroSlides[currentSlide].title}
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-xl mx-auto">
               {heroSlides[currentSlide].desc}
             </p>
 
@@ -238,7 +237,7 @@ const Home = () => {
                   placeholder={t('products.searchPlaceholder') || "Cari produk, toko, atau kategori..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-14 text-base bg-muted border-border text-foreground placeholder:text-muted-foreground rounded-lg"
+                  className="pl-12 h-14 text-base bg-white border-white text-gray-900 placeholder:text-gray-500 rounded-lg shadow-lg"
                 />
                 <Button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-6 bg-primary hover:bg-primary/90 text-primary-foreground">
                   Cari
