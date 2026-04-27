@@ -16,8 +16,16 @@ type User struct {
 	AutomationEnabled     bool                  `bson:"automationEnabled" json:"automationEnabled"`
 	BusinessName          *string               `bson:"businessName" json:"businessName"`
 	BusinessType          string                `bson:"businessType" json:"businessType"`
-	BusinessID            *primitive.ObjectID   `bson:"businessId,omitempty" json:"businessId"` // Reference to registered business
-	Business              *BusinessResponse     `bson:"-,omitempty" json:"business,omitempty"`  // Populated business data
+	BusinessID            *primitive.ObjectID   `bson:"businessId,omitempty" json:"businessId"`
+	Business              *BusinessResponse     `bson:"-,omitempty" json:"business,omitempty"`
+	BusinessAddress       *string               `bson:"businessAddress" json:"businessAddress"`
+	NPWP                  *string               `bson:"npwp" json:"npwp"`
+	BusinessCategory      *string               `bson:"businessCategory" json:"businessCategory"`
+	RegistrationStatus    string                `bson:"registrationStatus" json:"registrationStatus"` // "pending", "approved", "denied", "none"
+	RegisteredAt          *time.Time            `bson:"registeredAt" json:"registeredAt"`
+	ApprovedAt            *time.Time            `bson:"approvedAt" json:"approvedAt"`
+	DeniedAt              *time.Time            `bson:"deniedAt" json:"deniedAt"`
+	DenialReason          *string               `bson:"denialReason" json:"denialReason"`
 	Location              Location              `bson:"location" json:"location"`
 	IsVerified            bool                  `bson:"isVerified" json:"isVerified"`
 	ProfileImage          *string               `bson:"profileImage" json:"profileImage"`

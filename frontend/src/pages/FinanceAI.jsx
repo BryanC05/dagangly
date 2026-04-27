@@ -9,7 +9,8 @@ import {
   Send,
   Bot,
   User,
-  Loader2
+  Loader2,
+  Trash2
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import api from "@/utils/api";
@@ -23,6 +24,7 @@ function FinanceAI() {
   const [analytics, setAnalytics] = useState(null);
   const [productCalcs, setProductCalcs] = useState([]);
   const [userCalcs, setUserCalcs] = useState([]);
+  const [clearing, setClearing] = useState(false);
   const messagesEnd = useRef(null);
 
   useEffect(() => {
@@ -34,6 +36,18 @@ function FinanceAI() {
   }, [messages]);
 
   const loadData = async () => {
+    // Load chat history
+    try {
+      const chatRes = await api.get("/ai/finance-chats");
+      if (chatRes.data.chats?.length > 0) {
+        setMessages(chatRes.data.chats.map(c => ({ role: c.role, content: c.content })));
+        return;
+      }
+    } catch (e) {
+      console.log("No saved chats");
+    }
+
+    // Load products and summary
     try {
       const [productsRes, summaryRes] = await Promise.all([
         api.get("/finance/products").catch(() => ({ data: { products: [] } })),
@@ -67,6 +81,20 @@ function FinanceAI() {
       if (stored) {
         setUserCalcs(JSON.parse(stored));
       }
+    }
+  };
+
+  const clearChats = async () => {
+    if (!window.confirm("Clear all chat history?")) return;
+    
+    setClearing(true);
+    try {
+      await api.delete("/ai/finance-chats");
+      setMessages([]);
+    } catch (error) {
+      console.error("Failed to clear chats:", error);
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -130,6 +158,12 @@ function FinanceAI() {
             {t("financeAIDesc") || "Tanya tentang profit dan bisnis Anda"}
           </p>
         </div>
+        {messages.length > 0 && (
+          <Button variant="outline" size="sm" onClick={clearChats} disabled={clearing}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            {clearing ? "Clearing..." : "Clear Chats"}
+          </Button>
+        )}
       </div>
 
       {messages.length === 0 && (

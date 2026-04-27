@@ -143,6 +143,10 @@ func main() {
 			users.PUT("/social-links", handlers.UpdateSocialLinks)
 			users.POST("/social-links", handlers.AddSocialLink)
 			users.DELETE("/social-links", handlers.RemoveSocialLink)
+
+			// Business registration
+			users.POST("/register-business", userHandler.RegisterBusiness)
+			users.GET("/registration-status", userHandler.GetRegistrationStatus)
 		}
 
 		// Admin routes for membership management
@@ -176,6 +180,11 @@ func main() {
 			// Dispute Management
 			admin.GET("/disputes", adminHandler.GetDisputes)
 			admin.PUT("/disputes/:id/resolve", adminHandler.ResolveDispute)
+
+			// Business Registration Management
+			admin.GET("/registrations/pending", adminHandler.GetPendingRegistrations)
+			admin.POST("/registrations/:id/approve", adminHandler.ApproveRegistration)
+			admin.POST("/registrations/:id/deny", adminHandler.DenyRegistration)
 		}
 
 		api.GET("/users/sellers/count", userHandler.GetSellersCount)
@@ -444,6 +453,8 @@ func main() {
 		{
 			ai.POST("/generate-description", aiHandler.GenerateDescription)
 			ai.POST("/financial-consultant", aiHandler.FinancialConsultant)
+			ai.GET("/finance-chats", aiHandler.GetFinanceChats)
+			ai.DELETE("/finance-chats", aiHandler.ClearFinanceChats)
 		}
 
 		// Wishlists

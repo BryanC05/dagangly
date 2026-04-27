@@ -448,3 +448,125 @@ func (h *AdminHandler) GetRevenueReport(c *gin.Context) {
 		"period":       period,
 	})
 }
+
+func (h *AdminHandler) GetPendingRegistrations(c *gin.Context) {
+	usersColl := database.GetDB().Collection("users")
+
+	filter := bson.M{"registrationStatus": "pending"}
+	opts := options.Find().SetSort(bson.D{{Key: "registeredAt", Value: -1}})
+
+	cursor, err := usersColl.Find(context.Background(), filter, opts)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var users []models.User
+	cursor.All(context.Background(), &users)
+
+	var results []gin.H
+	for _, u := range users {
+		results = append(results, gin.H{
+			"_id":              u.ID.Hex(),
+			"name":             u.Name,
+			"email":            u.Email,
+			"businessName":     u.BusinessName,
+			"businessAddress":  u.BusinessAddress,
+			"businessCategory": u.BusinessCategory,
+			"npwp":             u.NPWP,
+			"registeredAt":     u.RegisteredAt,
+		})
+	}
+
+	total, _ := usersColl.CountDocuments(context.Background(), filter)
+
+	c.JSON(http.StatusOK, gin.H{
+		"registrations": results,
+		"total":         total,
+	})
+}
+
+func (h *AdminHandler) ApproveRegistration(c *gin.Context) {
+	userID := c.Param("id")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	usersColl := database.GetDB().Collection("users")
+	var user models.User
+	err = usersColl.FindOne(context.Background(), bson.M{"_id": userObjID}).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if user.RegistrationStatus != "pending" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No pending application"})
+		return
+	}
+
+	now := time.Now()
+	update := bson.M{
+		"$set": bson.M{
+			"isSeller":           true,
+			"registrationStatus": "approved",
+			"approvedAt":         now,
+			"updatedAt":          now,
+		},
+	}
+
+	_, err = usersColl.UpdateOne(context.Background(), bson.M{"_id": userObjID}, update)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to approve"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Registration approved"})
+}
+
+func (h *AdminHandler) DenyRegistration(c *gin.Context) {
+	userID := c.Param("id")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	var req struct {
+		Reason string `json:"reason"`
+	}
+	c.ShouldBindJSON(&req)
+
+	usersColl := database.GetDB().Collection("users")
+	var user models.User
+	err = usersColl.FindOne(context.Background(), bson.M{"_id": userObjID}).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if user.RegistrationStatus != "pending" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No pending application"})
+		return
+	}
+
+	now := time.Now()
+	update := bson.M{
+		"$set": bson.M{
+			"registrationStatus": "denied",
+			"deniedAt":           now,
+			"denialReason":       req.Reason,
+			"updatedAt":          now,
+		},
+	}
+
+	_, err = usersColl.UpdateOne(context.Background(), bson.M{"_id": userObjID}, update)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to deny"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Registration denied"})
+}

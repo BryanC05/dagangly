@@ -29,6 +29,7 @@ import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import TrackingPage from './pages/TrackingPage';
 import AdminMembership from './pages/AdminMembership';
+import AdminPendingRegistrations from './pages/AdminPendingRegistrations';
 import AdminDashboard from './pages/AdminDashboard';
 import Notifications from './pages/Notifications';
 import Invoice from './pages/Invoice';
@@ -144,6 +145,7 @@ function App() {
                 <Route path="/social-links" element={<SocialLinks />} />
                 <Route path="/logo-generator" element={<LogoGenerator />} />
                 <Route path="/admin/membership" element={<AdminMembership />} />
+                <Route path="/admin/registrations" element={<AdminPendingRegistrations />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/wallet" element={<Wallet />} />
                 <Route path="/video-call" element={<VideoCallPage />} />

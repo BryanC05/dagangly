@@ -2,14 +2,22 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+	"time"
+
+	"msme-marketplace/internal/database"
+	"msme-marketplace/internal/models"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type AIHandler struct{}
@@ -245,7 +253,89 @@ Catatan Penting:
 
 	generatedText := strings.TrimSpace(groqResp.Choices[0].Message.Content)
 
+	// Save chat to MongoDB
+	userID := c.GetString("userID")
+	if userID != "" {
+		userObjID, _ := primitive.ObjectIDFromHex(userID)
+		collection := database.GetDB().Collection("finance_chats")
+		now := time.Now()
+
+		// Save user message
+		_, _ = collection.InsertOne(context.Background(), models.FinanceChat{
+			UserID:    userObjID,
+			Role:      "user",
+			Content:   req.Query,
+			CreatedAt: now,
+		})
+
+		// Save AI response
+		_, _ = collection.InsertOne(context.Background(), models.FinanceChat{
+			UserID:    userObjID,
+			Role:      "assistant",
+			Content:   generatedText,
+			CreatedAt: now,
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"response": generatedText,
 	})
+}
+
+// GetFinanceChats - get user's finance AI chat history
+func (h *AIHandler) GetFinanceChats(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("finance_chats")
+	cursor, err := collection.Find(context.Background(),
+		bson.M{"userId": userObjID},
+		options.Find().SetSort(bson.D{{Key: "createdAt", Value: 1}}))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var chats []models.FinanceChat
+	for cursor.Next(context.Background()) {
+		var chat models.FinanceChat
+		cursor.Decode(&chat)
+		chats = append(chats, chat)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"chats": chats})
+}
+
+// ClearFinanceChats - clear user's finance AI chat history
+func (h *AIHandler) ClearFinanceChats(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("finance_chats")
+	_, err = collection.DeleteMany(context.Background(), bson.M{"userId": userObjID})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Chat history cleared"})
 }

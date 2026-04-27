@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,9 @@ import {
   Search,
   CreditCard,
   Package,
-  Handshake
+  Handshake,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "@/utils/api";
@@ -57,6 +59,43 @@ const Home = () => {
   const [categoryCounts, setCategoryCounts] = useState({});
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [stats, setStats] = useState({ sellers: 0, products: 0 });
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slideInterval = useRef(null);
+
+  const heroSlides = [
+    {
+      image: "https://images.unsplash.com/photo-1557804506-669a67965ce4?w=800&q=80",
+      title: "Produk Lokal Berkualitas",
+      desc: "Temukan kerajinan tangan terbaik dari pengrajin Indonesia"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1504674900247-0877b9c1ae9f?w=800&q=80",
+      title: "Makanan Khas Nusantara",
+      desc: "Jelajahi kelezatan makanan tradisional Indonesia"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d3?w=800&q=80",
+      title: "Dukung Ekonomi Lokal",
+      desc: "Setiap pembelian mendukung pelaku UMKM"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80",
+      title: "Fashion Karya Anak Bangsa",
+      desc: "Desain unik bisnis lokal yang tak kalah kreatif"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1512436991641-6745cdb19e69?w=800&q=80",
+      title: "Kecantikan Alami",
+      desc: "Produk beauty alami dari bahan lokal"
+    }
+  ];
+
+  useEffect(() => {
+    slideInterval.current = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(slideInterval.current);
+  }, [heroSlides.length]);
 
   useEffect(() => {
     const fetchCategoryCounts = async () => {
@@ -110,8 +149,73 @@ const Home = () => {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-background">
-        <div className="container py-16 md:py-24">
+      <section className="relative overflow-hidden bg-background min-h-[500px] md:min-h-[600px]">
+        {/* Slideshow Background */}
+        <div className="absolute inset-0">
+          {heroSlides.map((slide, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                index === currentSlide ? 'opacity-40' : 'opacity-0'
+              }`}
+              style={{
+                backgroundImage: `url(${slide.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            />
+          ))}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+        </div>
+
+        {/* Slide Indicators */}
+        <div className="absolute bottom-32 md:bottom-40 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {heroSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setCurrentSlide(index);
+                clearInterval(slideInterval.current);
+                slideInterval.current = setInterval(() => {
+                  setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+                }, 5000);
+              }}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentSlide
+                  ? 'bg-primary w-6'
+                  : 'bg-white/50 hover:bg-white/80'
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={() => {
+            setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length);
+            clearInterval(slideInterval.current);
+            slideInterval.current = setInterval(() => {
+              setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+            }, 5000);
+          }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors hidden md:flex"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <button
+          onClick={() => {
+            setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+            clearInterval(slideInterval.current);
+            slideInterval.current = setInterval(() => {
+              setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+            }, 5000);
+          }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors hidden md:flex"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+
+        <div className="container py-16 md:py-24 relative z-10">
           <OnboardingPrompt />
           
           <div className="max-w-3xl mx-auto text-center">
@@ -120,11 +224,10 @@ const Home = () => {
               MARKETPLACE UMKM INDONESIA
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-4">
-              Temukan Produk{" "}
-              <span className="text-primary">Lokal Terbaik</span>
+              {heroSlides[currentSlide].title}
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl mx-auto">
-              Hubungkan langsung dengan penjual UMKM di sekitarmu. Belanja mudah, dukung ekonomi lokal.
+              {heroSlides[currentSlide].desc}
             </p>
 
             <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-8">

@@ -847,3 +847,89 @@ func (h *UserHandler) ExtendMembership(c *gin.Context) {
 		"memberExpiry": newExpiry,
 	})
 }
+
+type RegisterBusinessRequest struct {
+	BusinessName     string `json:"businessName" binding:"required"`
+	BusinessAddress  string `json:"businessAddress" binding:"required"`
+	BusinessCategory string `json:"businessCategory" binding:"required"`
+	NPWP             string `json:"npwp"`
+}
+
+func (h *UserHandler) RegisterBusiness(c *gin.Context) {
+	userID := c.GetString("userID")
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("users")
+	var user models.User
+	err = collection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&user)
+	if err != nil {
+		c.JSON(404, gin.H{"message": "User not found"})
+		return
+	}
+
+	if user.IsSeller {
+		c.JSON(400, gin.H{"message": "User is already a seller"})
+		return
+	}
+
+	if user.RegistrationStatus == "pending" {
+		c.JSON(400, gin.H{"message": "Application already pending"})
+		return
+	}
+
+	var req RegisterBusinessRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"message": err.Error()})
+		return
+	}
+
+	now := time.Now()
+	update := bson.M{
+		"$set": bson.M{
+			"businessName":       req.BusinessName,
+			"businessAddress":    req.BusinessAddress,
+			"businessCategory":   req.BusinessCategory,
+			"npwp":               req.NPWP,
+			"registrationStatus": "pending",
+			"registeredAt":       now,
+			"updatedAt":          now,
+		},
+	}
+
+	_, err = collection.UpdateOne(context.Background(), bson.M{"_id": objID}, update)
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Failed to submit application"})
+		return
+	}
+
+	c.JSON(200, gin.H{"message": "Application submitted, awaiting approval"})
+}
+
+func (h *UserHandler) GetRegistrationStatus(c *gin.Context) {
+	userID := c.GetString("userID")
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("users")
+	var user models.User
+	err = collection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&user)
+	if err != nil {
+		c.JSON(404, gin.H{"message": "User not found"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"isSeller":           user.IsSeller,
+		"registrationStatus": user.RegistrationStatus,
+		"businessName":       user.BusinessName,
+		"registeredAt":       user.RegisteredAt,
+		"approvedAt":         user.ApprovedAt,
+	})
+}

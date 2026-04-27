@@ -28,6 +28,7 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 
 ### For Sellers (MSMEs)
 - Register as Micro, Small, or Medium Enterprise
+- **Business Registration** - Submit business application for admin approval
 - Add and manage products with images
 - Set stock quantities and pricing
 - Receive and manage orders

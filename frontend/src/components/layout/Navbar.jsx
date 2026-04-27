@@ -359,10 +359,22 @@ const Navbar = () => {
                       <BarChart3 className="h-4 w-4 mr-2" />
                       {t("finance")}
                     </DropdownMenuItem>
+                    {!isSeller && (
+                      <DropdownMenuItem onSelect={() => handleNavigate("/register-business")}>
+                        <Store className="h-4 w-4 mr-2" />
+                        Register as Seller
+                      </DropdownMenuItem>
+                    )}
                     {(user?.role === 'admin' || user?.role === 'superadmin') && (
                       <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard")}>
                         <Shield className="h-4 w-4 mr-2" />
                         {t("admin.title")}
+                      </DropdownMenuItem>
+                    )}
+                    {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                      <DropdownMenuItem onSelect={() => handleNavigate("/admin/registrations")}>
+                        <Store className="h-4 w-4 mr-2" />
+                        Seller Registrations
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />

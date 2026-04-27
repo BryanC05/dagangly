@@ -122,7 +122,7 @@ function LogoGenerator() {
             <p className="text-muted-foreground mb-4">
               Logo Generator is available for sellers only. Register your business to get started.
             </p>
-            <Link to="/sell">
+            <Link to="/register-business">
               <Button>Register as Seller</Button>
             </Link>
           </CardContent>

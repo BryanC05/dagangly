@@ -99,7 +99,51 @@ The dashboard displays:
 
 ---
 
-## 5. Implementation Details
+## 5. Business Registration System
+
+### Overview
+Before accessing seller features, users must register their business and get approved by admin.
+
+### Registration Flow
+1. User visits `/register-business`
+2. Fills business registration form (name, address, category, NPWP)
+3. Submits application → status = "pending"
+4. Admin reviews at `/admin/registrations`
+5. Admin approves → `isSeller = true`
+6. User gains access to seller features
+
+### User Model Fields
+```javascript
+{
+  isSeller: Boolean,           // true when approved
+  businessName: String,       // from registration
+  businessAddress: String,   // from registration
+  businessCategory: String,   // from registration
+  npwp: String,              // optional
+  registrationStatus: String, // "pending", "approved", "denied", "none"
+  registeredAt: Date,        // submission date
+  approvedAt: Date          // approval date
+}
+```
+
+### API Endpoints
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/users/register-business` | POST | Submit registration |
+| `/api/users/registration-status` | GET | Check status |
+| `/api/admin/registrations/pending` | GET | List pending |
+| `/api/admin/registrations/:id/approve` | POST | Approve seller |
+| `/api/admin/registrations/:id/deny` | POST | Deny seller |
+
+### Frontend Routes
+| Route | Description |
+|-------|-------------|
+| `/register-business` | Registration form |
+| `/admin/registrations` | Admin approval page |
+
+---
+
+## 6. Implementation Details
 
 ### Frontend Files
 
@@ -143,7 +187,7 @@ The dashboard displays:
 
 ---
 
-## 6. Seed Data (Backend)
+## 7. Seed Data (Backend)
 
 ### Database Collections
 Run `node seed-business-simulation.js` to populate:
@@ -166,7 +210,7 @@ Run `node seed-business-simulation.js` to populate:
 
 ---
 
-## 7. API Endpoints
+## 8. API Endpoints
 
 ### Analytics
 - `GET /analytics/seller?period=30` - Seller analytics
@@ -181,7 +225,7 @@ Run `node seed-business-simulation.js` to populate:
 
 ---
 
-## 8. Testing Accounts
+## 9. Testing Accounts
 
 ### Seller Accounts
 | Email | Password | Business |
@@ -198,7 +242,7 @@ Run `node seed-business-simulation.js` to populate:
 
 ---
 
-## 9. Troubleshooting
+## 11. Troubleshooting
 
 ### Dashboard shows 0
 - Check if `FORCE_MOCK = true` in sellerAnalyticsStore.js
@@ -214,7 +258,7 @@ Run `node seed-business-simulation.js` to populate:
 
 ---
 
-## 10. Future Enhancements
+## 12. Future Enhancements
 
 ### Planned Features
 1. **Expense tracking** - Detailed expense categories

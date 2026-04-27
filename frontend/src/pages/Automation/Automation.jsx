@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -207,7 +207,7 @@ const Automation = () => {
             <p className="text-muted-foreground mb-4">
               {t('automation.sellerAccessDesc') || 'Automation features are available for sellers only. Register your business to get started.'}
             </p>
-            <Link to="/sell">
+            <Link to="/register-business">
               <Button>{t('automation.registerAsSeller') || 'Register as Seller'}</Button>
             </Link>
           </CardContent>
