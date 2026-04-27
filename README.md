@@ -24,6 +24,7 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 - Real-time chat with sellers
 - Multi-language support (English/Indonesian)
 - Dark/light theme support
+- **Hero Slideshow** - Auto-advancing featured images on home page
 - **User Guide & Tutorials** - In-app help center with step-by-step tutorials for buyers and sellers
 
 ### For Sellers (MSMEs)

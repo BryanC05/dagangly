@@ -511,55 +511,50 @@ Start with Phase 1 improvements for maximum impact with reasonable effort.
 *Document Version: 1.1*
 *Last Updated: April 2026*
 *Project: Dagangly Marketplace*
+*Dynamic UI Components Added: April 16, 2026*
 
 ---
 
-## Dynamic UI Components (April 2026)
+## Hero Slideshow (April 2026)
 
-### Implemented Components
+### Overview
+Implemented a hero slideshow on the home screen that auto-advances through featured images highlighting different aspects of the marketplace.
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| LiveStockBadge | `components/LiveStockBadge.js` | Stock urgency indicator |
-| OrderStatusCountdown | `components/OrderStatusCountdown.js` | Order time remaining |
-| BalanceAnimation | `components/BalanceAnimation.js` | Animated wallet balance |
-| TypingIndicator | `components/TypingIndicator.js` | Chat typing indicator |
-| OrderProgressStepper | `components/OrderProgressStepper.js` | Order status steps |
+### Slides Content
+| # | Title | Description | Image Theme |
+|---|-------|-------------|------------|
+| 1 | Produk Lokal Berkualitas | Temukan kerajinan tangan terbaik | Handicrafts |
+| 2 | Makanan Khas Nusantara | Jelajahi kelezatan makanan tradisional | Food |
+| 3 | Dukung Ekonomi Lokal | Setiap pembelian mendukung pelaku UMKM | Community |
+| 4 | Fashion Karya Anak Bangsa | Desain unik bisnis lokal | Fashion |
+| 5 | Kecantikan Alami | Produk beauty alami dari bahan lokal | Beauty |
 
-### LiveStockBadge Behavior
+### Technical Implementation
 
-```
-Stock ≤ 3:   🔴 "Hanya 3!" + pulse animation (red)
-Stock ≤ 10: 🟡 "X tersisa" (yellow)
-Stock 0:    🔴 "Habis" (out of stock)
-```
+**Web (React):**
+- Location: `frontend/src/pages/new-ui/Index.tsx`
+- Auto-advance: 5 second interval
+- Transitions: CSS opacity with 1s duration
+- Overlay: Black at 60% opacity for text readability
+- Indicators: Bottom dots (white), active slide wider
 
-### OrderStatusCountdown Features
+**Mobile (React Native):**
+- Location: `mobile/src/screens/home/HomeScreen.js`
+- Auto-advance: 5 second interval
+- Components: ImageBackground with overlay
+- Indicators: Bottom dots (white), active slide wider
 
-- Time remaining per status (based on average processing time)
-- Progress bar showing completion
-- Color-coded urgency:
-  - Green: > 5 minutes remaining
-  - Orange: ≤ 5 minutes
-  - Red: Time expired
-- Bilingual (EN/ID)
+### Features
+- Auto-advances every 5 seconds
+- Tap indicators to jump to any slide
+- Smooth fade transitions between slides
+- Dark overlay for text contrast
+- Responsive height (60vh mobile, 70vh desktop)
 
-### BalanceAnimation Features
+### Files Modified
 
-- Count-up animation on value change
-- Scale bounce effect
-- Color indicates positive/negative:
-  - Green: positive amount
-  - Red: negative amount
-- WalletBalanceCard component included
+**Frontend:**
+- `frontend/src/pages/new-ui/Index.tsx` - Added slideshow to hero section
 
-### Performance
-
-- All animations use `useNativeDriver: true`
-- Interval cleanup in useEffect
-- Conditional rendering for low stock only
-
-*Document Version: 1.1*
-*Last Updated: April 2026*
-*Project: Dagangly Marketplace*
-*Dynamic UI Components Added: April 16, 2026*
+**Mobile:**
+- `mobile/src/screens/home/HomeScreen.js` - Added slideshow to hero section
