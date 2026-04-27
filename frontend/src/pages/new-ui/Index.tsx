@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ArrowRight, MapPin, ChevronRight, ChevronLeft } from "lucide-react";
+import { Search, ArrowRight, MapPin, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
@@ -152,32 +152,6 @@ return (
             />
           ))}
         </div>
-
-        {/* Navigation Arrows */}
-        <button
-          onClick={() => {
-            setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-            if (slideInterval.current) clearInterval(slideInterval.current);
-            slideInterval.current = setInterval(() => {
-              setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-            }, 5000);
-          }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors hidden md:flex"
-        >
-          <ChevronLeft className="w-8 h-8" />
-        </button>
-        <button
-          onClick={() => {
-            setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-            if (slideInterval.current) clearInterval(slideInterval.current);
-            slideInterval.current = setInterval(() => {
-              setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-            }, 5000);
-          }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors hidden md:flex"
-        >
-          <ChevronRight className="w-8 h-8" />
-        </button>
 
         <div className="container relative py-12 md:py-32">
           <motion.div
