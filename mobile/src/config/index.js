@@ -1,8 +1,7 @@
-// For Android Emulator: const DEFAULT_API_HOST = 'http://10.0.2.2:5000';
-// For iOS Simulator: const DEFAULT_API_HOST = 'http://localhost:5000';
-// For Physical Device (same WiFi): const DEFAULT_API_HOST = 'http://10.38.52.231:5000';
-// For production builds: const DEFAULT_API_HOST = 'https://dagangly-production.up.railway.app';
-const DEFAULT_API_HOST = 'http://10.38.52.231:5000';
+// EXPO_PUBLIC_API_HOST should be set via environment variable (from .env file)
+// For local development, set EXPO_PUBLIC_API_HOST=http://localhost:5000
+// Default falls back to production
+const DEFAULT_API_HOST = 'https://dagangly-production.up.railway.app';
 const RAW_API_HOST = process.env.EXPO_PUBLIC_API_HOST || DEFAULT_API_HOST;
 export const API_HOST = RAW_API_HOST.replace(/\/+$/, '');
 export const API_URL = `${API_HOST}/api`;
