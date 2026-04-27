@@ -20,6 +20,7 @@ import { useLanguageStore } from '../store/languageStore';
 import { useDriverStore } from '../store/driverStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { useAuthStore } from '../store/authStore';
+import { useMembershipStore } from '../store/membershipStore';
 import { API_HOST } from '../config';
 import notificationService, { usePushNotifications } from '../services/NotificationService';
 import BackgroundEffect from '../components/BackgroundEffect';
@@ -1165,10 +1166,19 @@ const styles = StyleSheet.create({
 function FloatingActionButton({ navigation }) {
     const { colors } = useThemeStore();
     const [isPressed, setIsPressed] = useState(false);
+    const { user } = useAuthStore();
     const parentNav = useNavigation();
     const nav = navigation || parentNav;
 
     const handlePress = () => {
+        // If not a seller, navigate to register
+        if (!user?.isSeller) {
+            if (nav?.navigate) {
+                nav.navigate('Profile', { screen: 'RegisterBusiness' });
+            }
+            return;
+        }
+        
         if (nav?.navigate) {
             nav.navigate('Add', { screen: 'AddProduct', params: { reset: true } });
         }
@@ -1196,6 +1206,7 @@ export default function AppNavigator() {
     const { colors, isDarkMode } = useThemeStore();
     const { t, languageVersion } = useLanguageStore();
     const isDriverMode = useDriverStore((s) => s.isDriverMode);
+    const { user } = useAuthStore();
 
     return (
         <>
@@ -1297,19 +1308,21 @@ export default function AppNavigator() {
                         tabBarLabel: t.tabProducts,
                     }}
                 />
-                {/* Center FAB - Add Products */}
-                <Tab.Screen
-                    name="Add"
-                    component={AddStackNavigator}
-                    options={{
-                        tabBarLabel: '',
-                        tabBarButton: (props) => (
-                            <View style={[props.style, { justifyContent: 'center', alignItems: 'center' }]}>
-                                <FloatingActionButton navigation={props.navigation} />
-                            </View>
-                        ),
-                    }}
-                />
+                {/* Center FAB - Only show for sellers */}
+                {user?.isSeller && (
+                    <Tab.Screen
+                        name="Add"
+                        component={AddStackNavigator}
+                        options={{
+                            tabBarLabel: '',
+                            tabBarButton: (props) => (
+                                <View style={[props.style, { justifyContent: 'center', alignItems: 'center' }]}>
+                                    <FloatingActionButton navigation={props.navigation} />
+                                </View>
+                            ),
+                        }}
+                    />
+                )}
                 <Tab.Screen name="Profile" component={ProfileStackNavigator} options={{ tabBarLabel: t.tabProfile }} />
                 <Tab.Screen
                     name="Messages"
@@ -1318,13 +1331,16 @@ export default function AppNavigator() {
                         tabBarLabel: t.tabMessages || 'Messages',
                     }}
                 />
-                <Tab.Screen
-                    name="Finance"
-                    component={FinanceStackNavigator}
-                    options={{
-                        tabBarLabel: t.finance || 'Finance',
-                    }}
-                />
+                {/* Only show Finance tab for sellers */}
+                {user?.isSeller && (
+                    <Tab.Screen
+                        name="Finance"
+                        component={FinanceStackNavigator}
+                        options={{
+                            tabBarLabel: t.finance || 'Finance',
+                        }}
+                    />
+                )}
                 {/* Hidden Cart - not shown in tab bar */}
                 <Tab.Screen
                     name="Cart"
