@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity,
     RefreshControl, Dimensions, StyleSheet, ActivityIndicator,
-    TextInput,
+    TextInput, ImageBackground, FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -37,6 +37,46 @@ export default function HomeScreen({ navigation }) {
     const [nearbyLoading, setNearbyLoading] = useState(true);
     const [userLocation, setUserLocation] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const slideInterval = useRef(null);
+
+    const heroSlides = [
+        {
+            image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=70",
+            title: "Produk Lokal Berkualitas",
+            desc: "Temukan kerajinan tangan terbaik",
+        },
+        {
+            image: "https://images.unsplash.com/photo-1567620905732-2d1ecea66514?w=800&q=70",
+            title: "Makanan Khas Nusantara",
+            desc: "Jelajahi kelezatan makanan tradisional",
+        },
+        {
+            image: "https://images.unsplash.com/photo-1555529669-e69e7aa0f9a2?w=800&q=70",
+            title: "Dukung Ekonomi Lokal",
+            desc: "Setiap pembelian mendukung pelaku UMKM",
+        },
+        {
+            image: "https://images.unsplash.com/photo-1445205170230-053bc82c5110?w=800&q=70",
+            title: "Fashion Karya Anak Bangsa",
+            desc: "Desain unik bisnis lokal",
+        },
+        {
+            image: "https://images.unsplash.com/photo-1596462502278-27dc1c2cae24?w=800&q=70",
+            title: "Kecantikan Alami",
+            desc: "Produk beauty alami dari bahan lokal",
+        },
+    ];
+
+    // Auto-advance slideshow
+    useEffect(() => {
+        slideInterval.current = setInterval(() => {
+            setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+        }, 5000);
+        return () => {
+            if (slideInterval.current) clearInterval(slideInterval.current);
+        };
+    }, [heroSlides.length]);
 
     // Collapsible sections state
     const [collapsedSections, setCollapsedSections] = useState({
@@ -145,12 +185,34 @@ export default function HomeScreen({ navigation }) {
     const styles = {
         container: { flex: 1, backgroundColor: colors.background },
         hero: {
+            height: isMobile ? 420 : 480,
             paddingHorizontal: 20,
-            paddingTop: insets.top + 16,
-            paddingBottom: 24,
-            backgroundColor: isDarkMode ? '#0f172a' : '#eef7f5',
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
+            paddingTop: 0,
+            paddingBottom: 16,
+        },
+        heroBackground: {
+            ...StyleSheet.absoluteFillObject,
+        },
+        heroOverlay: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: 'rgba(0,0,0,0.55)',
+        },
+        heroGradient: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: 'transparent',
+        },
+        slideIndicatorContainer: {
+            position: 'absolute',
+            bottom: 20,
+            left: 0,
+            right: 0,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: 8,
+        },
+        slideIndicator: {
+            height: 4,
+            borderRadius: 2,
         },
         statRow: {
             flexDirection: 'row',
@@ -181,31 +243,31 @@ export default function HomeScreen({ navigation }) {
             flexDirection: 'row',
             alignItems: 'center',
             gap: 8,
-            backgroundColor: colors.primary + '15',
+            backgroundColor: 'rgba(255,255,255,0.15)',
             paddingHorizontal: 12,
             paddingVertical: 6,
             borderRadius: 20,
             alignSelf: 'center',
             marginBottom: 16,
             borderWidth: 1,
-            borderColor: colors.primary + '40',
+            borderColor: 'rgba(255,255,255,0.3)',
         },
         heroBadgeDot: {
             width: 6,
             height: 6,
             borderRadius: 3,
-            backgroundColor: colors.primary,
+            backgroundColor: '#fff',
         },
         heroBadgeText: {
             fontSize: 11,
-            color: colors.primary,
+            color: '#fff',
             fontWeight: '600',
             letterSpacing: 0.5,
         },
         heroTitle: {
             fontSize: isMobile ? 28 : isTablet ? 34 : 38,
             fontWeight: '800',
-            color: colors.text,
+            color: '#fff',
             lineHeight: isMobile ? 36 : 42,
             marginBottom: 8,
             textAlign: 'center',
@@ -213,7 +275,7 @@ export default function HomeScreen({ navigation }) {
         heroHighlight: { color: colors.primary },
         heroSubtitle: {
             fontSize: 15,
-            color: colors.textSecondary,
+            color: '#e0e0e0',
             lineHeight: 22,
             marginBottom: 20,
             textAlign: 'center',
@@ -250,24 +312,24 @@ export default function HomeScreen({ navigation }) {
             flexDirection: 'row',
             gap: 10,
             maxWidth: '100%',
-            marginBottom: 16,
+            marginBottom: 24,
         },
         searchInput: {
             flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: colors.card,
+            backgroundColor: '#fff',
             borderRadius: 10,
             paddingHorizontal: 14,
             height: 48,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: 'rgba(255,255,255,0.2)',
         },
         searchIcon: { marginRight: 10 },
         searchTextInput: {
             flex: 1,
             fontSize: 14,
-            color: colors.text,
+            color: '#333',
             padding: 0,
         },
         searchBtn: {
@@ -559,18 +621,45 @@ export default function HomeScreen({ navigation }) {
             showsVerticalScrollIndicator={false}
         >
             <View style={styles.hero}>
-                <View style={styles.heroBadge}>
+                {/* Slideshow Background */}
+                {heroSlides.map((slide, index) => (
+                    <ImageBackground
+                        key={index}
+                        source={{ uri: slide.image }}
+                        style={styles.heroBackground}
+                        imageStyle={{ opacity: index === currentSlide ? 1 : 0 }}
+                        resizeMode="cover"
+                    />
+                ))}
+                <View style={styles.heroOverlay} />
+
+                {/* Slide Indicators */}
+                <View style={styles.slideIndicatorContainer}>
+                    {heroSlides.map((_, index) => (
+                        <View
+                            key={index}
+                            style={[
+                                styles.slideIndicator,
+                                {
+                                    width: index === currentSlide ? 24 : 8,
+                                    backgroundColor: index === currentSlide ? '#fff' : 'rgba(255,255,255,0.5)',
+                                },
+                            ]}
+                        />
+                    ))}
+                </View>
+
+                <View style={[styles.heroBadge, { marginTop: insets.top + 20 }]}>
                     <View style={styles.heroBadgeDot} />
-                    <Text style={styles.heroBadgeText}>{t('heroBadge')}</Text>
+                    <Text style={styles.heroBadgeText}>MARKETPLACE UMKM INDONESIA</Text>
                 </View>
 
                 <Text style={styles.heroTitle}>
-                    {t('heroTitle')}{'\n'}
-                    <Text style={styles.heroHighlight}>{t('heroHighlight')}</Text>
+                    {heroSlides[currentSlide].title}
                 </Text>
 
                 <Text style={styles.heroSubtitle}>
-                    {t('heroSubtitle')}
+                    {heroSlides[currentSlide].desc}
                 </Text>
 
                 <View style={styles.searchContainer}>
@@ -579,7 +668,7 @@ export default function HomeScreen({ navigation }) {
                         <TextInput
                             style={styles.searchTextInput}
                             placeholder={t('searchProductsPlaceholder')}
-                            placeholderTextColor={colors.textSecondary}
+                            placeholderTextColor="#666"
                             value={searchQuery}
                             onChangeText={setSearchQuery}
                             onSubmitEditing={handleSearch}
