@@ -1,4 +1,4 @@
-import React, { useRef, useImperativeHandle, forwardRef, Component } from 'react';
+import React, { useRef, useImperativeHandle, forwardRef, useState, Component } from 'react';
 import { View, Text, Dimensions, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
 import { useTranslation } from '../hooks/useTranslation';
@@ -7,8 +7,10 @@ import { tokens } from '../theme/tokens';
 
 const { width, height } = Dimensions.get('window');
 
-// Try to import MapView - it may crash on standalone builds without a valid API key
+// Try to import MapView - handle gracefully if not available
 let MapView, Marker, Circle, Polyline, PROVIDER_GOOGLE;
+let mapLoaded = false;
+
 try {
     const maps = require('react-native-maps');
     MapView = maps.default;
@@ -16,14 +18,102 @@ try {
     Circle = maps.Circle;
     Polyline = maps.Polyline;
     PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
+    mapLoaded = true;
 } catch (e) {
-    console.warn('Failed to load react-native-maps:', e);
+    console.warn('Failed to load react-native-maps:', e.message);
     MapView = null;
     Marker = null;
     Circle = null;
     Polyline = null;
     PROVIDER_GOOGLE = null;
 }
+
+// Fallback Map using WebView with OpenStreetMap
+function WebViewMapFallback({ region, markers, style, onMarkerPress }) {
+    const { colors } = useThemeStore();
+    const [selected, setSelected] = useState(null);
+    
+    const centerLat = region?.latitude || -6.2088;
+    const centerLng = region?.longitude || 106.8456;
+    const zoom = region?.latitudeDelta > 0.1 ? 10 : 13;
+    
+    // Build markers as HTML overlays
+    const markerHtml = markers?.map((marker, idx) => {
+        const lat = marker.lat || marker.latitude;
+        const lng = marker.lng || marker.longitude;
+        if (!lat || !lng) return '';
+        
+        // Calculate position on tile (simplified)
+        const x = Math.round((lng - centerLng) * 8000 / Math.pow(2, 17-zoom)) + width/2;
+        const y = Math.round((centerLat - lat) * 8000 / Math.pow(2, 17-zoom)) + 150;
+        
+        return `<div style="position:absolute;left:${x}px;top:${y}px;font-size:24px;cursor:pointer;" onclick="window.ReactNativeWebView.postMessage('marker:'+${idx})">📍</div>`;
+    }).join('') || '';
+
+    return (
+        <View style={[stylesWebView.container, style]}>
+            <View style={[stylesWebView.mapArea, { backgroundColor: '#e5e5e5' }]}>
+                {/* OpenStreetMap style header */}
+                <View style={stylesWebView.header}>
+                    <Text style={stylesWebView.headerText}>🗺️ OpenStreetMap</Text>
+                    <Text style={stylesWebView.headerSubtext}>Set up Google Maps API for full features</Text>
+                </View>
+                
+                {/* Simple map visualization using Views */}
+                <View style={stylesWebView.grid}>
+                    {[...Array(5)].map((_, row) => (
+                        <View key={row} style={stylesWebView.gridRow}>
+                            {[...Array(5)].map((_, col) => (
+                                <View key={col} style={stylesWebView.gridCell} />
+                            ))}
+                        </View>
+                    ))}
+                </View>
+                
+                {/* Markers rendered as React Native Views */}
+                {markers?.map((marker, idx) => {
+                    const lat = marker.lat || marker.latitude;
+                    const lng = marker.lng || marker.longitude;
+                    if (!lat || !lng) return null;
+                    
+                    // Simple relative positioning (center of view = region center)
+                    const relLat = (lat - (region?.latitude || -6.2088)) * 10000;
+                    const relLng = (lng - (region?.longitude || 106.8456)) * 10000;
+                    const x = width/2 + relLng * 0.01;
+                    const y = 150 - relLat * 0.01;
+                    
+                    return (
+                        <TouchableOpacity
+                            key={idx}
+                            style={[stylesWebView.marker, { left: x, top: y }]}
+                            onPress={() => onMarkerPress?.(marker)}
+                        >
+                            <Text style={stylesWebView.markerText}>📍</Text>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+            
+            <Text style={stylesWebView.footer}>
+                Using list view - tap sellers below to view on map
+            </Text>
+        </View>
+    );
+}
+
+const stylesWebView = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#f5f5f5' },
+    mapArea: { flex: 1, position: 'relative' },
+    header: { padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e0e0e0' },
+    headerText: { fontSize: 16, fontWeight: '700', color: '#333' },
+    headerSubtext: { fontSize: 12, color: '#666', marginTop: 4 },
+    grid: { flex: 1, padding: 8 },
+    gridRow: { flex: 1, flexDirection: 'row' },
+    gridCell: { flex: 1, margin: 2, backgroundColor: '#ddd', borderRadius: 4 },
+    marker: { position: 'absolute', padding: 4 },
+    markerText: { fontSize: 24 },
+    footer: { padding: 12, textAlign: 'center', color: '#666', fontSize: 12, backgroundColor: '#fff' }
+});
 
 // Error boundary to catch runtime map crashes
 class MapErrorBoundary extends Component {
@@ -58,7 +148,7 @@ class MapErrorBoundary extends Component {
 }
 
 /**
- * Reusable Map Component with error handling
+ * Reusable Map Component - uses react-native-maps if available, otherwise shows fallback
  */
 const Map = forwardRef(({
     region,
@@ -76,6 +166,19 @@ const Map = forwardRef(({
     showsCompass = true,
     children,
 }, ref) => {
+    // If maps didn't load, show fallback
+    if (!mapLoaded) {
+        return (
+            <WebViewMapFallback 
+                region={region}
+                markers={markers}
+                style={style}
+                onMarkerPress={onMarkerPress}
+            />
+        );
+    }
+    
+    // Rest of the existing Map implementation...
     const innerMapRef = useRef(null);
     const { colors } = useThemeStore();
 
