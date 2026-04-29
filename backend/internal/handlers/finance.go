@@ -247,10 +247,15 @@ func (h *FinanceHandler) GetFinanceSummary(c *gin.Context) {
 	var salesFilter bson.M
 	var expFilter bson.M
 	if sellerId != "" {
-		salesFilter = bson.M{"sellerId": sellerId, "status": bson.M{"$in": []string{"delivered", "completed"}}}
-		expFilter = bson.M{"sellerId": sellerId}
+		sellerObjID, err := primitive.ObjectIDFromHex(sellerId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid seller ID"})
+			return
+		}
+		salesFilter = bson.M{"seller": sellerObjID, "status": bson.M{"$in": []string{"confirmed", "preparing", "ready", "delivered", "completed"}}}
+		expFilter = bson.M{"userId": sellerObjID}
 	} else {
-		salesFilter = bson.M{"status": bson.M{"$in": []string{"delivered", "completed"}}}
+		salesFilter = bson.M{"status": bson.M{"$in": []string{"confirmed", "preparing", "ready", "delivered", "completed"}}}
 		expFilter = bson.M{}
 	}
 
@@ -259,7 +264,7 @@ func (h *FinanceHandler) GetFinanceSummary(c *gin.Context) {
 		{"$match": salesFilter},
 		{"$group": bson.M{
 			"_id":   nil,
-			"total": bson.M{"$sum": "$total"},
+			"total": bson.M{"$sum": "$totalAmount"},
 			"count": bson.M{"$sum": 1},
 		}},
 	}
@@ -439,8 +444,14 @@ func (h *FinanceHandler) GetOrdersBySeller(c *gin.Context) {
 		return
 	}
 
+	sellerObjID, err := primitive.ObjectIDFromHex(sellerId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid seller ID"})
+		return
+	}
+
 	collection := database.GetDB().Collection("orders")
-	cursor, err := collection.Find(context.Background(), bson.M{"sellerId": sellerId})
+	cursor, err := collection.Find(context.Background(), bson.M{"seller": sellerObjID})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
