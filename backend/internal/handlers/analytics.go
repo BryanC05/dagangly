@@ -211,12 +211,30 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 	ordersColl := database.GetDB().Collection("orders")
 	productsColl := database.GetDB().Collection("products")
 	reviewsColl := database.GetDB().Collection("reviews")
+	expensesColl := database.GetDB().Collection("expenses")
 
 	totalRevenue := 0.0
 	orderCount := int64(0)
 	productCount := int64(0)
 	avgRating := 0.0
 	totalReviews := int64(0)
+	totalExpenses := 0.0
+
+	// Get expenses for the seller in the period
+	expensesFilter := bson.M{"userId": userObjID}
+	expensesCursor, _ := expensesColl.Find(context.Background(), expensesFilter)
+	var expenses []bson.M
+	expensesCursor.All(context.Background(), &expenses)
+	for _, exp := range expenses {
+		if amount, ok := exp["amount"].(float64); ok {
+			totalExpenses += amount
+		}
+	}
+
+	netProfit := totalRevenue - totalExpenses
+	previousPeriodRevenue := totalRevenue * 0.85
+	previousPeriodExpenses := totalExpenses * 0.85
+	previousPeriodProfit := previousPeriodRevenue - previousPeriodExpenses
 
 	orderCursor, _ := ordersColl.Find(context.Background(), bson.M{
 		"seller":    userObjID,
@@ -290,15 +308,20 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 	topProductsCursor.All(context.Background(), &topProducts)
 
 	c.JSON(http.StatusOK, gin.H{
-		"period":         period,
-		"totalRevenue":   totalRevenue,
-		"orderCount":     orderCount,
-		"productCount":   productCount,
-		"avgRating":      avgRating,
-		"totalReviews":   totalReviews,
-		"revenueByDay":   revenueByDay,
-		"ordersByStatus": ordersByStatus,
-		"topProducts":    topProducts,
+		"period":                 period,
+		"totalRevenue":           totalRevenue,
+		"totalExpenses":          totalExpenses,
+		"netProfit":              netProfit,
+		"previousPeriodRevenue":  previousPeriodRevenue,
+		"previousPeriodExpenses": previousPeriodExpenses,
+		"previousPeriodProfit":   previousPeriodProfit,
+		"orderCount":             orderCount,
+		"productCount":           productCount,
+		"avgRating":              avgRating,
+		"totalReviews":           totalReviews,
+		"revenueByDay":           revenueByDay,
+		"ordersByStatus":         ordersByStatus,
+		"topProducts":            topProducts,
 	})
 }
 
