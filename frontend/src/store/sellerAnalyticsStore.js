@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import api from '../utils/api';
 import { loadMockFinanceData, getRevenueTrend } from '../utils/mockFinance';
 
 const DEFAULT_SELLER_EMAIL = 'rani.summarecon@marketplace.test';
