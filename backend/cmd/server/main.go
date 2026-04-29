@@ -230,6 +230,7 @@ func main() {
 		orders := api.Group("/orders")
 		orders.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
+			orders.POST("", orderHandler.CreateOrder)
 			orders.GET("/my-orders", orderHandler.GetMyOrders)
 			orders.GET("/:id", orderHandler.GetOrderByID)
 			orders.PUT("/:id/status", orderHandler.UpdateOrderStatus)
