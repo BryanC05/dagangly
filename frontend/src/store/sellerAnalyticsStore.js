@@ -3,8 +3,8 @@ import { loadMockFinanceData, getRevenueTrend } from '../utils/mockFinance';
 
 const DEFAULT_SELLER_EMAIL = 'rani.summarecon@marketplace.test';
 
-// Force use mock data for demo
-const FORCE_MOCK = true;
+// Force use mock data for demo (set to false to use real API data)
+const FORCE_MOCK = false;
 
 const generateMockAnalytics = (period, sellerEmail = DEFAULT_SELLER_EMAIL) => {
   console.log('Generating mock analytics for:', sellerEmail);

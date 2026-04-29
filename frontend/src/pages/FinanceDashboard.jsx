@@ -44,7 +44,10 @@ function FinanceDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const sellerId = selectedSeller === "all" ? undefined : selectedSeller;
+        // Use logged-in user's ID as default sellerId (they are a seller viewing their own dashboard)
+        const sellerId = selectedSeller === "all" 
+          ? (user?.id || user?._id) 
+          : selectedSeller;
         console.log("Fetching summary with sellerId:", sellerId);
         const response = await api.get("/finance/summary", { params: { sellerId } });
         console.log("Summary response:", JSON.stringify(response.data, null, 2));
@@ -54,6 +57,7 @@ function FinanceDashboard() {
           netProfit: response.data.netProfit || 0,
           orderCount: response.data.orderCount || 0,
         });
+        setUseMockData(false);
       } catch (error) {
         console.log("Using mock finance data for demo", error);
         const sellerId = selectedSeller === "all" ? undefined : selectedSeller;
@@ -64,8 +68,10 @@ function FinanceDashboard() {
         setLoading(false);
       }
     };
-    fetchData();
-  }, [selectedSeller]);
+    if (user?.id || user?._id) {
+      fetchData();
+    }
+  }, [selectedSeller, user]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("id-ID", {

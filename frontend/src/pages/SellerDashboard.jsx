@@ -169,11 +169,11 @@ function SellerDashboard() {
   } = useSellerAnalyticsStore();
 
   useEffect(() => {
-    // Always fetch analytics - use mock data if not logged in as seller
-    fetchSellerAnalytics(period, 'rani.summarecon@marketplace.test');
-    fetchSales(period, 'rani.summarecon@marketplace.test');
-    fetchCustomers('rani.summarecon@marketplace.test');
-    fetchProductPerformance('rani.summarecon@marketplace.test');
+    // Fetch real analytics data for the logged-in seller
+    fetchSellerAnalytics(period);
+    fetchSales(period);
+    fetchCustomers();
+    fetchProductPerformance();
   }, [period]);
 
   // Edit state
@@ -182,7 +182,7 @@ function SellerDashboard() {
   const [confirmModal, setConfirmModal] = useState({ show: false, productId: null, productName: '' });
 
   // Force mock products for demo
-  const FORCE_MOCK_PRODUCTS = true;
+  const FORCE_MOCK_PRODUCTS = false;
   
   // Hardcoded mock products for Rani (Dapur Summarecon)
   const getMockProducts = () => {
