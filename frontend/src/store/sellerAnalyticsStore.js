@@ -155,6 +155,8 @@ export const useSellerAnalyticsStore = create((set) => ({
   fetchSellerAnalytics: async (period = '30', sellerEmail = DEFAULT_SELLER_EMAIL) => {
     set({ loading: true, error: null });
     
+    console.log('fetchSellerAnalytics called, FORCE_MOCK:', FORCE_MOCK);
+    
     // Always use mock data for demo
     if (FORCE_MOCK) {
       console.log('Using FORCE_MOCK for analytics');
@@ -165,7 +167,9 @@ export const useSellerAnalyticsStore = create((set) => ({
     
     try {
       const params = sellerEmail ? `?period=${period}&email=${encodeURIComponent(sellerEmail)}` : `?period=${period}`;
+      console.log('Calling API: /analytics/seller' + params);
       const res = await api.get(`/analytics/seller${params}`);
+      console.log('API response:', res.data);
       set({ analytics: res.data, loading: false, useMockData: false });
     } catch (err) {
       console.error('Failed to fetch seller analytics:', err);
