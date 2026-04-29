@@ -224,11 +224,13 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 		"status":    bson.M{"$in": []string{"completed", "delivered", "confirmed", "ready", "preparing"}},
 	})
 	var orders []models.Order
-	orderCursor.All(context.Background(), &orders)
-
-	for _, order := range orders {
-		totalRevenue += order.TotalAmount
-		orderCount++
+	for orderCursor.Next(context.Background()) {
+		var order models.Order
+		if err := orderCursor.Decode(&order); err == nil {
+			orders = append(orders, order)
+			totalRevenue += order.TotalAmount
+			orderCount++
+		}
 	}
 
 	productCount, _ = productsColl.CountDocuments(context.Background(), bson.M{
@@ -263,11 +265,12 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 
 	ordersByStatus := make(map[string]int64)
 	statusCursor, _ := ordersColl.Find(context.Background(), bson.M{"seller": userObjID})
-	var allOrders []bson.M
-	statusCursor.All(context.Background(), &allOrders)
-	for _, order := range allOrders {
-		if status, ok := order["status"].(string); ok {
-			ordersByStatus[status]++
+	for statusCursor.Next(context.Background()) {
+		var order bson.M
+		if err := statusCursor.Decode(&order); err == nil {
+			if status, ok := order["status"].(string); ok {
+				ordersByStatus[status]++
+			}
 		}
 	}
 
