@@ -494,7 +494,7 @@ export default function OrdersScreen({ navigation }) {
                                 paddingHorizontal: 24, paddingVertical: 12,
                                 borderRadius: 12,
                             }}
-                            onPress={() => navigation.navigate('ProductsTab')}
+                            onPress={() => navigation.navigate('Products')}
                         >
                             <Text style={{ color: '#fff', fontWeight: '600' }}>
                                 {t.browseProducts || 'Browse Products'}

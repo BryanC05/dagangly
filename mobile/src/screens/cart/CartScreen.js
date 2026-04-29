@@ -379,7 +379,7 @@ export default function CartScreen({ navigation }) {
                 </Text>
                 <TouchableOpacity
                     style={styles.browseBtn}
-                    onPress={() => navigation.navigate('ProductsTab')}
+                    onPress={() => navigation.navigate('Products')}
                 >
                     <Text style={styles.browseBtnText}>{t.browseProducts || 'Browse Products'}</Text>
                 </TouchableOpacity>

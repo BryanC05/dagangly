@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Linking, Platform } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+let MapView, Marker, Polyline, PROVIDER_GOOGLE;
+let mapsAvailable = false;
+try {
+    const maps = require('react-native-maps');
+    MapView = maps.default;
+    Marker = maps.Marker;
+    Polyline = maps.Polyline;
+    PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
+    mapsAvailable = true;
+} catch (e) {
+    console.warn('react-native-maps not available in LiveTrackingMap:', e.message);
+}
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -390,7 +401,7 @@ export default function LiveTrackingMap() {
             <MapView
                 ref={mapRef}
                 style={styles.map}
-                provider={PROVIDER_GOOGLE}
+                provider={Platform.OS === 'ios' ? PROVIDER_GOOGLE : undefined}
                 showsUserLocation
                 showsMyLocationButton={false}
                 showsCompass

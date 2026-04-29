@@ -54,6 +54,15 @@ const paymentIcons = {
   credit_card: { icon: CreditCard, label: 'Credit Card' },
 };
 
+const STATUS_FLOW = ['pending', 'payment_pending', 'confirmed', 'preparing', 'ready', 'delivered'];
+
+const getNextStatus = (currentStatus) => {
+  if (currentStatus === 'payment_pending') return 'confirmed';
+  const idx = STATUS_FLOW.indexOf(currentStatus);
+  if (idx >= 0 && idx < STATUS_FLOW.length - 1) return STATUS_FLOW[idx + 1];
+  return null;
+};
+
 const normalizeOrdersPayload = (payload) => {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.orderItems)) return payload.orderItems;
@@ -75,6 +84,19 @@ function Orders() {
   const queryClient = useQueryClient();
   const [activeFilter, setActiveFilter] = useState('all');
   const [expandedOrders, setExpandedOrders] = useState({});
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }) => {
+      const res = await api.put(`/orders/${orderId}/status`, { status });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+    onError: (err) => {
+      alert(err.response?.data?.message || 'Failed to update order status');
+    },
+  });
 
   const filterTabs = [
     { key: 'all', label: t('orders.allOrders') },
@@ -184,7 +206,7 @@ const orders = normalizeOrdersPayload(rawOrders);
             >
               {tab.label}
               <span className="tab-count">
-                {tab.key === 'all' ? orderItems.length : tab.key === 'active' ? activeCount : completedCount}
+                {tab.key === 'all' ? orders.length : tab.key === 'active' ? activeCount : completedCount}
               </span>
             </button>
           ))}

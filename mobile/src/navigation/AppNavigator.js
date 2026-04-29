@@ -20,7 +20,6 @@ import { useLanguageStore } from '../store/languageStore';
 import { useDriverStore } from '../store/driverStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { useAuthStore } from '../store/authStore';
-import { useMembershipStore } from '../store/membershipStore';
 import { API_HOST } from '../config';
 import notificationService, { usePushNotifications } from '../services/NotificationService';
 import BackgroundEffect from '../components/BackgroundEffect';

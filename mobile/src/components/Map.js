@@ -166,6 +166,16 @@ const Map = forwardRef(({
     showsCompass = true,
     children,
 }, ref) => {
+    // All hooks must be called before any conditional returns (Rules of Hooks)
+    const innerMapRef = useRef(null);
+    const { colors } = useThemeStore();
+
+    useImperativeHandle(ref, () => ({
+        animateToRegion: (rgn, duration) => {
+            innerMapRef.current?.animateToRegion(rgn, duration);
+        },
+    }));
+
     // If maps didn't load, show fallback
     if (!mapLoaded) {
         return (
@@ -177,16 +187,6 @@ const Map = forwardRef(({
             />
         );
     }
-    
-    // Rest of the existing Map implementation...
-    const innerMapRef = useRef(null);
-    const { colors } = useThemeStore();
-
-    useImperativeHandle(ref, () => ({
-        animateToRegion: (region, duration) => {
-            innerMapRef.current?.animateToRegion(region, duration);
-        },
-    }));
 
     const dynamicStyles = {
         container: {
@@ -275,33 +275,26 @@ const Map = forwardRef(({
         },
     };
 
-if (!MapView) {
-        const { colors } = useThemeStore();
-        const { t, language } = useTranslation();
-        
+    if (!MapView) {
         return (
             <View style={[dynamicStyles.fallbackContainer, style]}>
                 <Text style={dynamicStyles.fallbackIcon}>🗺️</Text>
-                <Text style={dynamicStyles.fallbackTitle}>
-                    {language === 'id' ? 'Peta Tidak Tersedia' : 'Map Unavailable'}
-                </Text>
+                <Text style={dynamicStyles.fallbackTitle}>Map Unavailable</Text>
                 <Text style={dynamicStyles.fallbackText}>
-                    {language === 'id' 
-                        ? 'Google Maps API belum dikonfigurasi.\nCek app.json untuk menambahkan API key.'
-                        : 'Google Maps API not configured.\nAdd your API key in app.json.'}
+                    Google Maps API not configured.{'\n'}Add your API key in app.json.
                 </Text>
                 
                 {/* OpenStreetMap Fallback Button */}
                 {region && (
                     <TouchableOpacity 
-                        style={styles.osmButton}
+                        style={dynamicStyles.osmButton}
                         onPress={() => {
                             const url = `https://www.openstreetmap.org/?mlat=${region.latitude}&mlon=${region.longitude}&zoom=14`;
                             Linking.openURL(url);
                         }}
                     >
                         <Ionicons name="globe-outline" size={18} color="#fff" />
-                        <Text style={styles.osmButtonText}>OpenStreetMap</Text>
+                        <Text style={dynamicStyles.osmButtonText}>OpenStreetMap</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -338,7 +331,7 @@ if (!MapView) {
                 <MapView
                     ref={innerMapRef}
                     style={dynamicStyles.map}
-                    provider={PROVIDER_GOOGLE}
+                    provider={Platform.OS === 'ios' ? PROVIDER_GOOGLE : undefined}
                     region={region}
                     showsUserLocation={showsUserLocation}
                     showsMyLocationButton={showsMyLocationButton}
@@ -349,8 +342,7 @@ if (!MapView) {
                     loadingIndicatorColor={colors.primary}
                     loadingBackgroundColor={colors.background}
                 >
-                    {/* Map Padding for better UI */}
-                    {MapView && MapView.setMapPadding && MapView.setMapPadding(0, 0, 0, 100)}
+
                     {/* User Location Circle */}
                     {userLocation && radius && Circle && (
                         <Circle
