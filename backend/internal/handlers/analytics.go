@@ -302,10 +302,39 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 			"revenue":   bson.M{"$sum": bson.M{"$multiply": []interface{}{"$products.price", "$products.quantity"}}},
 		}},
 		{"$sort": bson.M{"revenue": -1}},
-		{"$limit": 5},
+		{"$limit": 10},
 	})
-	var topProducts []bson.M
-	topProductsCursor.All(context.Background(), &topProducts)
+
+	type topProductResult struct {
+		ID        primitive.ObjectID `bson:"_id"`
+		Name      string             `bson:"name"`
+		TotalSold int                `bson:"totalSold"`
+		Revenue   float64            `bson:"revenue"`
+	}
+
+	var rawResults []topProductResult
+	topProductsCursor.All(context.Background(), &rawResults)
+
+	var topProducts []gin.H
+	for _, r := range rawResults {
+		productName := r.Name
+		if productName == "" {
+			var prod models.Product
+			err := productsColl.FindOne(context.Background(), bson.M{"_id": r.ID}).Decode(&prod)
+			if err == nil {
+				productName = prod.Name
+			}
+		}
+		if productName == "" {
+			productName = "Unknown Product"
+		}
+		topProducts = append(topProducts, gin.H{
+			"_id":       r.ID,
+			"name":      productName,
+			"totalSold": r.TotalSold,
+			"revenue":   r.Revenue,
+		})
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"period":                 period,
