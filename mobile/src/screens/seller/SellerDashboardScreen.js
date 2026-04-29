@@ -28,7 +28,7 @@ const MOCK_PRODUCTS = [
     { _id: 'mock-4', name: 'Bakso Granada', price: 38000, stock: 20, status: 'active', images: [] },
 ];
 
-const FORCE_MOCK = true;
+const FORCE_MOCK = false;
 
 export default function SellerDashboardScreen({ navigation }) {
     const { user } = useAuthStore();
