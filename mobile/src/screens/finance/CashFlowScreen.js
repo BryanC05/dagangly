@@ -53,7 +53,7 @@ export default function FinanceCashFlowScreen({ navigation }) {
                     return date >= startDate && date <= endDate && 
                            (o.status === 'delivered' || o.status === 'completed');
                 })
-                .reduce((sum, o) => sum + (o.total || 0), 0);
+                .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
             const expenses = await financeDB.getExpensesByDateRange(startDate, endDate);
             const periodExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -77,7 +77,7 @@ export default function FinanceCashFlowScreen({ navigation }) {
                 return date >= prevStart && date <= prevEnd && 
                        (o.status === 'delivered' || o.status === 'completed');
             });
-            const prevIncome = prevOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+            const prevIncome = prevOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
             const prevExpenses = await financeDB.getExpensesByDateRange(prevStart, prevEnd);
             const prevExpenseTotal = prevExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -102,7 +102,7 @@ export default function FinanceCashFlowScreen({ navigation }) {
                 if (o.status === 'delivered' || o.status === 'completed') {
                     const date = o.createdAt?.split('T')[0];
                     if (date >= startDate && date <= endDate) {
-                        dailyMap[date] = (dailyMap[date] || 0) + (o.total || 0);
+                        dailyMap[date] = (dailyMap[date] || 0) + (o.totalAmount || 0);
                     }
                 }
             });

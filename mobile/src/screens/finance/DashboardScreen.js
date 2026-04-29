@@ -65,7 +65,7 @@ export default function FinanceDashboardScreen({ navigation }) {
             
             const totalSales = orders
                 .filter(o => o.status === 'delivered' || o.status === 'completed')
-                .reduce((sum, o) => sum + (o.total || 0), 0);
+                .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
             
             const orderCount = orders.filter(o => o.status === 'delivered' || o.status === 'completed').length;
             
@@ -78,14 +78,14 @@ export default function FinanceDashboardScreen({ navigation }) {
                     const date = o.createdAt?.slice(0, 7);
                     return date === thisMonth && (o.status === 'delivered' || o.status === 'completed');
                 })
-                .reduce((sum, o) => sum + (o.total || 0), 0);
+                .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
             
             const lastMonthSales = orders
                 .filter(o => {
                     const date = o.createdAt?.slice(0, 7);
                     return date === lastMonth && (o.status === 'delivered' || o.status === 'completed');
                 })
-                .reduce((sum, o) => sum + (o.total || 0), 0);
+                .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
             
             const expenses = await financeDB.getTotalExpenses();
             
@@ -309,7 +309,7 @@ export default function FinanceDashboardScreen({ navigation }) {
                                 {order.customer?.name || order.shippingAddress?.name || '-'}
                             </Text>
                             <Text style={[styles.orderTotal, { color: colors.text }]}>
-                                {formatCurrency(order.total)}
+                                {formatCurrency(order.totalAmount)}
                             </Text>
                         </View>
                     ))

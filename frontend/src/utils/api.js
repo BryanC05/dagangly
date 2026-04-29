@@ -19,7 +19,7 @@ api.interceptors.request.use((config) => {
 
   // Add cache buster to bypass aggressive 301 cached redirects from previous backend CORS bug
   if (config.method?.toLowerCase() === 'get') {
-    config.params = { ...config.params, _cb: 'v2' };
+    config.params = { ...config.params, _cb: Date.now() };
   }
 
   return config;

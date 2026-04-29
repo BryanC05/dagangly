@@ -50,7 +50,7 @@ export default function FinanceInvoicesScreen() {
                 orderId: order._id,
                 customerName: order.shippingAddress?.name || order.customer?.name || '-',
                 items: items,
-                total: order.total,
+                total: order.totalAmount,
             });
 
             await loadData();
@@ -91,7 +91,7 @@ export default function FinanceInvoicesScreen() {
         items.forEach(item => {
             text += `- ${item.name} x${item.quantity} = Rp ${(item.price * item.quantity).toLocaleString('id-ID')}\n`;
         });
-        text += `\nTotal: Rp ${(invoice.total || 0).toLocaleString('id-ID')}`;
+        text += `\nTotal: Rp ${(invoice.totalAmount || invoice.total || 0).toLocaleString('id-ID')}`;
         
         try {
             await Share.share({ message: text });
@@ -120,7 +120,7 @@ export default function FinanceInvoicesScreen() {
             </View>
             <Text style={[styles.customerName, { color: colors.text }]}>{item.customerName}</Text>
             <Text style={[styles.date, { color: colors.textSecondary }]}>{item.createdAt?.split('T')[0]}</Text>
-            <Text style={[styles.total, { color: colors.text }]}>{formatCurrency(item.total)}</Text>
+            <Text style={[styles.total, { color: colors.text }]}>{formatCurrency(item.totalAmount || item.total)}</Text>
         </TouchableOpacity>
     );
 
@@ -133,7 +133,7 @@ export default function FinanceInvoicesScreen() {
             <Text style={[styles.orderName, { color: colors.textSecondary }]}>
                 {item.shippingAddress?.name || item.customer?.name || '-'}
             </Text>
-            <Text style={[styles.orderTotal, { color: colors.text }]}>{formatCurrency(item.total)}</Text>
+            <Text style={[styles.orderTotal, { color: colors.text }]}>{formatCurrency(item.totalAmount || item.total)}</Text>
         </TouchableOpacity>
     );
 
