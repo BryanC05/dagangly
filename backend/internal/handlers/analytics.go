@@ -221,15 +221,13 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 	orderCursor, _ := ordersColl.Find(context.Background(), bson.M{
 		"seller":    userObjID,
 		"createdAt": bson.M{"$gte": startDate},
-		"status":    bson.M{"$in": []string{"completed", "delivered", "confirmed"}},
+		"status":    bson.M{"$in": []string{"completed", "delivered", "confirmed", "ready", "preparing"}},
 	})
-	var orders []bson.M
+	var orders []models.Order
 	orderCursor.All(context.Background(), &orders)
 
 	for _, order := range orders {
-		if total, ok := order["totalAmount"].(float64); ok {
-			totalRevenue += total
-		}
+		totalRevenue += order.TotalAmount
 		orderCount++
 	}
 
@@ -259,12 +257,8 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 
 	revenueByDay := make(map[string]float64)
 	for _, order := range orders {
-		if createdAt, ok := order["createdAt"].(time.Time); ok {
-			dayKey := createdAt.Format("2006-01-02")
-			if total, ok := order["totalAmount"].(float64); ok {
-				revenueByDay[dayKey] += total
-			}
-		}
+		dayKey := order.CreatedAt.Format("2006-01-02")
+		revenueByDay[dayKey] += order.TotalAmount
 	}
 
 	ordersByStatus := make(map[string]int64)
