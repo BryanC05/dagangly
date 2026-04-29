@@ -168,9 +168,8 @@ export const useSellerAnalyticsStore = create((set) => ({
       const res = await api.get(`/analytics/seller${params}`);
       set({ analytics: res.data, loading: false, useMockData: false });
     } catch (err) {
-      console.log('Using mock analytics for Rani (Dapur Summarecon)');
-      const mockAnalytics = generateMockAnalytics(period, sellerEmail);
-      set({ analytics: mockAnalytics, loading: false, useMockData: true });
+      console.error('Failed to fetch seller analytics:', err);
+      set({ analytics: null, loading: false, useMockData: false, error: err.message });
     }
   },
 
@@ -189,9 +188,8 @@ export const useSellerAnalyticsStore = create((set) => ({
       const res = await api.get(`/analytics/sales${params}`);
       set({ sales: res.data, loading: false });
     } catch (err) {
-      console.log('Using mock sales for Rani (Dapur Summarecon)');
-      const mockSales = generateMockSales(period, sellerEmail);
-      set({ sales: mockSales, loading: false });
+      console.error('Failed to fetch sales analytics:', err);
+      set({ sales: null, loading: false, error: err.message });
     }
   },
 
@@ -210,9 +208,8 @@ export const useSellerAnalyticsStore = create((set) => ({
       const res = await api.get(`/analytics/customers${params}`);
       set({ customers: res.data, loading: false });
     } catch (err) {
-      console.log('Using mock customers for Rani (Dapur Summarecon)');
-      const mockCustomers = generateMockCustomers();
-      set({ customers: mockCustomers, loading: false });
+      console.error('Failed to fetch customers:', err);
+      set({ customers: null, loading: false, error: err.message });
     }
   },
 
@@ -231,9 +228,8 @@ export const useSellerAnalyticsStore = create((set) => ({
       const res = await api.get(`/analytics/products${params}`);
       set({ products: res.data, loading: false });
     } catch (err) {
-      console.log('Using mock products for Rani (Dapur Summarecon)');
-      const mockProducts = generateMockProducts(sellerEmail);
-      set({ products: mockProducts, loading: false });
+      console.error('Failed to fetch product performance:', err);
+      set({ products: [], loading: false, error: err.message });
     }
   },
 }));
