@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"sort"
 	"time"
 
 	"msme-marketplace/internal/database"
@@ -28,10 +29,10 @@ func (h *AnalyticsHandler) GetSalesAnalytics(c *gin.Context) {
 	period := c.DefaultQuery("period", "30")
 	var days int
 	switch period {
-	case "7":
-		days = 7
 	case "30":
 		days = 30
+	case "60":
+		days = 60
 	case "90":
 		days = 90
 	default:
@@ -71,18 +72,32 @@ func (h *AnalyticsHandler) GetSalesAnalytics(c *gin.Context) {
 		dailyRevenue[day] += order.TotalAmount
 	}
 
-	// Recent days revenue - show data for the selected period
+	// Recent days revenue - only show dates with revenue, filtered by period
 	recentDays := []gin.H{}
+	startDate := time.Now().AddDate(0, 0, -days)
 
-	// Generate all dates in the period
-	for i := days - 1; i >= 0; i-- {
-		d := time.Now().AddDate(0, 0, -i)
-		key := d.Format("2006-01-02")
-		revenue := dailyRevenue[key] // 0 if no orders on that day
+	type dateRevenue struct {
+		date    string
+		revenue float64
+	}
+	var allDates []dateRevenue
+	for date, revenue := range dailyRevenue {
+		parsedDate, _ := time.Parse("2006-01-02", date)
+		if parsedDate.After(startDate) || parsedDate.Equal(startDate) {
+			allDates = append(allDates, dateRevenue{date, revenue})
+		}
+	}
+
+	sort.Slice(allDates, func(i, j int) bool {
+		return allDates[i].date < allDates[j].date
+	})
+
+	for _, d := range allDates {
+		parsedDate, _ := time.Parse("2006-01-02", d.date)
 		recentDays = append(recentDays, gin.H{
-			"date":    key,
-			"label":   d.Format("Jan 02"),
-			"revenue": revenue,
+			"date":    d.date,
+			"label":   parsedDate.Format("Jan 02"),
+			"revenue": d.revenue,
 		})
 	}
 
