@@ -25,16 +25,30 @@ func (h *AnalyticsHandler) GetSalesAnalytics(c *gin.Context) {
 	userID := c.GetString("userID")
 	userObjID, _ := primitive.ObjectIDFromHex(userID)
 
+	period := c.DefaultQuery("period", "30")
+	var days int
+	switch period {
+	case "7":
+		days = 7
+	case "30":
+		days = 30
+	case "90":
+		days = 90
+	default:
+		days = 30
+	}
+
 	ordersCol := database.GetDB().Collection("orders")
 
 	// Total stats
 	totalFilter := bson.M{"seller": userObjID}
 	totalOrders, _ := ordersCol.CountDocuments(context.Background(), totalFilter)
 
-	// Revenue (from completed/delivered orders)
+	// Revenue (from all relevant order statuses)
+	relevantStatuses := []string{"completed", "delivered", "confirmed", "ready", "preparing", "shipped", "processing"}
 	completedFilter := bson.M{
 		"seller": userObjID,
-		"status": bson.M{"$in": []string{"completed", "delivered", "confirmed"}},
+		"status": bson.M{"$in": relevantStatuses},
 	}
 	cursor, err := ordersCol.Find(context.Background(), completedFilter)
 	if err != nil {
@@ -57,15 +71,19 @@ func (h *AnalyticsHandler) GetSalesAnalytics(c *gin.Context) {
 		dailyRevenue[day] += order.TotalAmount
 	}
 
-	// Recent 7 days revenue
+	// Recent days revenue based on period
 	recentDays := []gin.H{}
-	for i := 6; i >= 0; i-- {
+	for i := days - 1; i >= 0; i-- {
 		d := time.Now().AddDate(0, 0, -i)
 		key := d.Format("2006-01-02")
+		revenue := dailyRevenue[key]
+		if revenue == 0 {
+			revenue = dailyRevenue[key]
+		}
 		recentDays = append(recentDays, gin.H{
 			"date":    key,
 			"label":   d.Format("Jan 02"),
-			"revenue": dailyRevenue[key],
+			"revenue": revenue,
 		})
 	}
 
