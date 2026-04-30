@@ -47,11 +47,11 @@ function FinanceAI() {
       console.log("No saved chats");
     }
 
-    // Load products and summary
+    // Load products and analytics
     try {
-      const [productsRes, summaryRes] = await Promise.all([
+      const [productsRes, analyticsRes] = await Promise.all([
         api.get("/finance/products").catch(() => ({ data: { products: [] } })),
-        api.get("/finance/summary").catch(() => ({ data: {} }))
+        api.get("/analytics/sales?period=30").catch(() => ({ data: {} }))
       ]);
       
       if (productsRes.data.products?.length > 0) {
@@ -60,8 +60,13 @@ function FinanceAI() {
         throw new Error("No products from API");
       }
       
-      if (summaryRes.data.totalSales) {
-        setAnalytics(summaryRes.data);
+      if (analyticsRes.data.totalRevenue) {
+        setAnalytics({
+          totalRevenue: analyticsRes.data.totalRevenue,
+          totalSales: analyticsRes.data.totalRevenue,
+          orderCount: analyticsRes.data.completedOrders,
+          recentDays: analyticsRes.data.recentDays
+        });
       }
     } catch (error) {
       const mockProds = getProductFinancials();
