@@ -194,19 +194,6 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 	}
 
 	period := c.DefaultQuery("period", "30")
-	var days int
-	switch period {
-	case "7":
-		days = 7
-	case "30":
-		days = 30
-	case "90":
-		days = 90
-	default:
-		days = 30
-	}
-
-	startDate := time.Now().AddDate(0, 0, -days)
 
 	ordersColl := database.GetDB().Collection("orders")
 	productsColl := database.GetDB().Collection("products")
@@ -219,6 +206,20 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 	avgRating := 0.0
 	totalReviews := int64(0)
 	totalExpenses := 0.0
+
+	// Get all relevant orders (not filtered by startDate for revenue calculation)
+	allOrdersCursor, _ := ordersColl.Find(context.Background(), bson.M{
+		"seller": userObjID,
+		"status": bson.M{"$in": []string{"completed", "delivered", "confirmed", "ready", "preparing", "shipped", "processing"}},
+	})
+	var allOrders []models.Order
+	allOrdersCursor.All(context.Background(), &allOrders)
+
+	// Calculate total from all orders
+	for _, order := range allOrders {
+		totalRevenue += order.TotalAmount
+	}
+	orderCount = int64(len(allOrders))
 
 	// Get expenses for the seller in the period
 	expensesFilter := bson.M{"userId": userObjID}
@@ -235,21 +236,6 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 	previousPeriodRevenue := totalRevenue * 0.85
 	previousPeriodExpenses := totalExpenses * 0.85
 	previousPeriodProfit := previousPeriodRevenue - previousPeriodExpenses
-
-	orderCursor, _ := ordersColl.Find(context.Background(), bson.M{
-		"seller":    userObjID,
-		"createdAt": bson.M{"$gte": startDate},
-		"status":    bson.M{"$in": []string{"completed", "delivered", "confirmed", "ready", "preparing"}},
-	})
-	var orders []models.Order
-	for orderCursor.Next(context.Background()) {
-		var order models.Order
-		if err := orderCursor.Decode(&order); err == nil {
-			orders = append(orders, order)
-			totalRevenue += order.TotalAmount
-			orderCount++
-		}
-	}
 
 	productCount, _ = productsColl.CountDocuments(context.Background(), bson.M{
 		"seller": userObjID,
@@ -276,7 +262,7 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 	}
 
 	revenueByDay := make(map[string]float64)
-	for _, order := range orders {
+	for _, order := range allOrders {
 		dayKey := order.CreatedAt.Format("2006-01-02")
 		revenueByDay[dayKey] += order.TotalAmount
 	}
