@@ -190,6 +190,19 @@ Jangan gunakan markdown headers (#), cukup teks tebal dan bullet points.
 
 %s
 
+PENTING - Data yang diberikan adalah SEMUA data historis pendapatan dari awal:
+- totalRevenue: total pendapatan SEMUA waktu
+- recentDays/dailyRevenue: data pendapatan per hari untuk SEMUA hari yang ada
+- orderCount: total pesanan SEMUA waktu
+
+Anda dapat menghitung periode spesifik berdasarkan pertanyaan:
+- "30 hari terakhir" = hitung dari tanggal terbaru ke belakang 30 hari
+- "60 hari terakhir" = hitung dari tanggal terbaru ke belakang 60 hari
+- "90 hari terakhir" = hitung dari tanggal terbaru ke belakang 90 hari
+- "semua waktu" = gunakan semua data yang ada
+
+Gunakan tanggal-tanggal dalam data untuk menghitung periode yang diminta pengguna.
+
 Catatan Penting:
 - Selalu jawab dalam bahasa Indonesia
 - Jika ada angka, gunakan format Rupiah (Rp) dengan pemisah ribuan yang sesuai
