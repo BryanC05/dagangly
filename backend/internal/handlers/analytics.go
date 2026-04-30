@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"sort"
 	"time"
 
 	"msme-marketplace/internal/database"
@@ -25,26 +26,13 @@ func (h *AnalyticsHandler) GetSalesAnalytics(c *gin.Context) {
 	userID := c.GetString("userID")
 	userObjID, _ := primitive.ObjectIDFromHex(userID)
 
-	period := c.DefaultQuery("period", "30")
-	var days int
-	switch period {
-	case "7":
-		days = 7
-	case "30":
-		days = 30
-	case "90":
-		days = 90
-	default:
-		days = 30
-	}
-
 	ordersCol := database.GetDB().Collection("orders")
 
 	// Total stats
 	totalFilter := bson.M{"seller": userObjID}
 	totalOrders, _ := ordersCol.CountDocuments(context.Background(), totalFilter)
 
-	// Revenue (from all relevant order statuses)
+	// Revenue (from all relevant order statuses - all historical data)
 	relevantStatuses := []string{"completed", "delivered", "confirmed", "ready", "preparing", "shipped", "processing"}
 	completedFilter := bson.M{
 		"seller": userObjID,
@@ -71,19 +59,36 @@ func (h *AnalyticsHandler) GetSalesAnalytics(c *gin.Context) {
 		dailyRevenue[day] += order.TotalAmount
 	}
 
-	// Recent days revenue based on period
+	// Recent days revenue - show ALL historical data (not just period)
 	recentDays := []gin.H{}
-	for i := days - 1; i >= 0; i-- {
-		d := time.Now().AddDate(0, 0, -i)
-		key := d.Format("2006-01-02")
-		revenue := dailyRevenue[key]
-		if revenue == 0 {
-			revenue = dailyRevenue[key]
-		}
+
+	// Get all unique dates from dailyRevenue and sort them
+	type dateRevenue struct {
+		date    string
+		revenue float64
+	}
+	var allDates []dateRevenue
+	for date, revenue := range dailyRevenue {
+		allDates = append(allDates, dateRevenue{date, revenue})
+	}
+
+	// Sort by date
+	sort.Slice(allDates, func(i, j int) bool {
+		return allDates[i].date < allDates[j].date
+	})
+
+	// If too many dates, show last 90 days
+	showDates := allDates
+	if len(allDates) > 90 {
+		showDates = allDates[len(allDates)-90:]
+	}
+
+	for _, d := range showDates {
+		parsedDate, _ := time.Parse("2006-01-02", d.date)
 		recentDays = append(recentDays, gin.H{
-			"date":    key,
-			"label":   d.Format("Jan 02"),
-			"revenue": revenue,
+			"date":    d.date,
+			"label":   parsedDate.Format("Jan 02"),
+			"revenue": d.revenue,
 		})
 	}
 
