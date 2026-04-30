@@ -47,12 +47,11 @@ function FinanceAI() {
       console.log("No saved chats");
     }
 
-    // Load products and analytics (all historical data for AI)
+    // Load products and analytics (ALL historical data for AI)
     try {
-      const [productsRes, analyticsRes, sellerAnalyticsRes] = await Promise.all([
+      const [productsRes, sellerAnalyticsRes] = await Promise.all([
         api.get("/finance/products").catch(() => ({ data: { products: [] } })),
-        api.get("/analytics/sales?period=90").catch(() => ({ data: {} })),
-        api.get("/analytics/seller?period=90").catch(() => ({ data: {} }))
+        api.get("/analytics/seller").catch(() => ({ data: {} })) // No period = all data
       ]);
       
       if (productsRes.data.products?.length > 0) {
@@ -61,20 +60,14 @@ function FinanceAI() {
         throw new Error("No products from API");
       }
       
-      // Use seller analytics for full historical data (includes all time revenue)
+      // Use seller analytics for ALL historical revenue data
       if (sellerAnalyticsRes.data.totalRevenue) {
         setAnalytics({
           totalRevenue: sellerAnalyticsRes.data.totalRevenue,
           totalSales: sellerAnalyticsRes.data.totalRevenue,
           orderCount: sellerAnalyticsRes.data.orderCount,
-          recentDays: analyticsRes.data.recentDays || []
-        });
-      } else if (analyticsRes.data.totalRevenue) {
-        setAnalytics({
-          totalRevenue: analyticsRes.data.totalRevenue,
-          totalSales: analyticsRes.data.totalRevenue,
-          orderCount: analyticsRes.data.completedOrders,
-          recentDays: analyticsRes.data.recentDays
+          recentDays: sellerAnalyticsRes.data.revenueByDay ? 
+            Object.entries(sellerAnalyticsRes.data.revenueByDay).map(([date, revenue]) => ({ date, revenue })) : []
         });
       }
     } catch (error) {
