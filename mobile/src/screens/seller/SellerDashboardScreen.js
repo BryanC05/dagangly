@@ -344,8 +344,8 @@ export default function SellerDashboardScreen({ navigation }) {
 
                 <View style={styles.periodSelector}>
                     {[
-                        { label: '7 Days', val: '7' },
                         { label: '30 Days', val: '30' },
+                        { label: '60 Days', val: '60' },
                         { label: '90 Days', val: '90' }
                     ].map((p) => (
                         <TouchableOpacity 

@@ -626,8 +626,8 @@ function SellerDashboard() {
           <div className="relative inline-flex items-center bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-md p-1 shadow-sm">
             <Calendar className="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" />
             <select value={period} onChange={(e) => setPeriod(e.target.value)} className="appearance-none bg-transparent pl-9 pr-10 py-1 text-sm font-semibold focus:outline-none cursor-pointer dark:text-white">
-              <option value="7">7 Days</option>
               <option value="30">30 Days</option>
+              <option value="60">60 Days</option>
               <option value="90">90 Days</option>
             </select>
             <ChevronDown className="absolute right-3 h-4 w-4 text-gray-400 pointer-events-none" />
