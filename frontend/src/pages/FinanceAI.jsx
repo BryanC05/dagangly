@@ -47,11 +47,12 @@ function FinanceAI() {
       console.log("No saved chats");
     }
 
-    // Load products and analytics
+    // Load products and analytics (all historical data for AI)
     try {
-      const [productsRes, analyticsRes] = await Promise.all([
+      const [productsRes, analyticsRes, sellerAnalyticsRes] = await Promise.all([
         api.get("/finance/products").catch(() => ({ data: { products: [] } })),
-        api.get("/analytics/sales?period=30").catch(() => ({ data: {} }))
+        api.get("/analytics/sales?period=90").catch(() => ({ data: {} })),
+        api.get("/analytics/seller?period=90").catch(() => ({ data: {} }))
       ]);
       
       if (productsRes.data.products?.length > 0) {
@@ -60,7 +61,15 @@ function FinanceAI() {
         throw new Error("No products from API");
       }
       
-      if (analyticsRes.data.totalRevenue) {
+      // Use seller analytics for full historical data (includes all time revenue)
+      if (sellerAnalyticsRes.data.totalRevenue) {
+        setAnalytics({
+          totalRevenue: sellerAnalyticsRes.data.totalRevenue,
+          totalSales: sellerAnalyticsRes.data.totalRevenue,
+          orderCount: sellerAnalyticsRes.data.orderCount,
+          recentDays: analyticsRes.data.recentDays || []
+        });
+      } else if (analyticsRes.data.totalRevenue) {
         setAnalytics({
           totalRevenue: analyticsRes.data.totalRevenue,
           totalSales: analyticsRes.data.totalRevenue,
