@@ -1,4 +1,4 @@
-import React, { useRef, useState, Component, forwardRef } from 'react';
+import React, { useRef, useState, Component, forwardRef, useImperativeHandle } from 'react';
 import { View, Text, Dimensions, StyleSheet } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
 import { WebView } from 'react-native-webview';
