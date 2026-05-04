@@ -45,6 +45,16 @@ function WebViewMapFallback({ region, markers, style, onMarkerPress }) {
     );
 }
 
+// Fallback styles
+const styles = StyleSheet.create({
+    fallbackContainer: { flex: 1 },
+    mapPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+    mapPlaceholderIcon: { fontSize: 48, marginBottom: 16 },
+    mapPlaceholderText: { fontSize: 14, marginBottom: 16, textAlign: 'center' },
+    mapButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, gap: 8 },
+    mapButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+});
+
 // Error boundary
 class MapErrorBoundary extends Component {
     constructor(props) {
