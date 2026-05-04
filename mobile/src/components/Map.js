@@ -46,7 +46,6 @@ function WebViewMapFallback({ region, markers, style, onMarkerPress }) {
 }
 
 // Error boundary
-class MapErrorBoundary extends Component { to catch runtime map crashes
 class MapErrorBoundary extends Component {
     constructor(props) {
         super(props);
