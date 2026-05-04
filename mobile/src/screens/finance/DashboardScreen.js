@@ -60,45 +60,42 @@ export default function FinanceDashboardScreen({ navigation }) {
 
     const loadData = useCallback(async () => {
         try {
-            const ordersRes = await api.get('/orders/my-orders', { params: { limit: 50 } });
-            const orders = ordersRes.data.orders || [];
+            // Use seller analytics endpoint (same as web)
+            const analyticsRes = await api.get('/analytics/seller', { 
+                params: { period: 'all' }
+            });
+            const analytics = analyticsRes.data;
             
-            const totalSales = orders
-                .filter(o => o.status === 'delivered' || o.status === 'completed')
-                .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+            const totalSales = analytics.totalRevenue || 0;
+            const expenses = await financeDB.getTotalExpenses();
             
-            const orderCount = orders.filter(o => o.status === 'delivered' || o.status === 'completed').length;
-            
+            // Calculate monthly data
+            const revenueByDay = analytics.revenueByDay || {};
             const now = new Date();
             const thisMonth = now.toISOString().slice(0, 7);
             const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 7);
             
-            const thisMonthSales = orders
-                .filter(o => {
-                    const date = o.createdAt?.slice(0, 7);
-                    return date === thisMonth && (o.status === 'delivered' || o.status === 'completed');
-                })
-                .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+            let thisMonthSales = 0;
+            let lastMonthSales = 0;
             
-            const lastMonthSales = orders
-                .filter(o => {
-                    const date = o.createdAt?.slice(0, 7);
-                    return date === lastMonth && (o.status === 'delivered' || o.status === 'completed');
-                })
-                .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-            
-            const expenses = await financeDB.getTotalExpenses();
+            Object.entries(revenueByDay).forEach(([date, revenue]) => {
+                const month = date.slice(0, 7);
+                if (month === thisMonth) thisMonthSales += revenue;
+                if (month === lastMonth) lastMonthSales += revenue;
+            });
             
             setStats({
                 totalSales,
                 totalExpenses: expenses,
                 netProfit: totalSales - expenses,
-                orderCount,
+                orderCount: analytics.totalOrders || 0,
                 thisMonth: thisMonthSales,
                 lastMonth: lastMonthSales
             });
             
-            setRecentOrders(orders.slice(0, 5));
+            // Also fetch recent orders for the list
+            const ordersRes = await api.get('/orders/my-orders', { params: { limit: 10 } });
+            setRecentOrders(Array.isArray(ordersRes.data) ? ordersRes.data.slice(0, 5) : []);
         } catch (error) {
             console.error('Failed to load finance data:', error);
         } finally {
@@ -244,6 +241,15 @@ export default function FinanceDashboardScreen({ navigation }) {
                         {language === 'id' ? 'Setelan' : 'Settings'}
                     </Text>
                 </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[styles.quickAction, { backgroundColor: colors.primary }]}
+                    onPress={() => navigation.navigate('FinanceAI')}
+                >
+                    <Ionicons name="chatbubbles" size={24} color={colors.white} />
+                    <Text style={[styles.quickActionText, { color: colors.white }]}>
+                        {language === 'id' ? 'AI Advisor' : 'AI Advisor'}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <View style={styles.section}>
@@ -253,7 +259,7 @@ export default function FinanceDashboardScreen({ navigation }) {
                 <View style={[styles.monthCard, { backgroundColor: colors.card }]}>
                     <View style={styles.monthItem}>
                         <Text style={[styles.monthLabel, { color: colors.textSecondary }]}>
-                            {getMonthName(stats.thisMonth)}
+                            {language === 'id' ? 'Penjualan' : 'Sales'}
                         </Text>
                         <Text style={[styles.monthValue, { color: colors.text }]}>
                             {formatCurrency(stats.thisMonth)}

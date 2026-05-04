@@ -40,6 +40,41 @@ export default function AIConsultantScreen({ route, navigation }) {
     }
   };
 
+  const renderMarkdown = (text) => {
+    if (!text) return null;
+    const lines = text.split('\n');
+    return lines.map((line, idx) => {
+      if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
+        return (
+          <Text key={idx} style={{ flexDirection: 'row', marginVertical: 2 }}>
+            <Text style={{ color: colors.primary }}>• </Text>
+            <Text style={{ color: colors.text }}>{line.trim().substring(2)}</Text>
+          </Text>
+        );
+      }
+      const match = line.match(/^(\d+)\.\s/);
+      if (match) {
+        return (
+          <Text key={idx} style={{ flexDirection: 'row', marginVertical: 2 }}>
+            <Text style={{ color: colors.primary }}>{match[1]}. </Text>
+            <Text style={{ color: colors.text }}>{line.substring(match[0].length)}</Text>
+          </Text>
+        );
+      }
+      const parts = line.split(/(\*\*[^*]+\*\*)/g);
+      return (
+        <Text key={idx} style={{ color: colors.text }}>
+          {parts.map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              return <Text key={i} style={{ fontWeight: '700' }}>{part.slice(2, -2)}</Text>;
+            }
+            return part;
+          })}
+        </Text>
+      );
+    });
+  };
+
   const handleSend = async () => {
     if (!query.trim()) return;
 
@@ -132,14 +167,20 @@ export default function AIConsultantScreen({ route, navigation }) {
               {msg.role === 'ai' && (
                   <Ionicons name="sparkles" size={14} color={colors.primary} style={{ marginRight: 6, marginTop: 2 }} />
               )}
-              <Text
-                style={[
-                  styles.messageText,
-                  { color: msg.role === 'user' ? '#fff' : colors.text },
-                ]}
-              >
-                {msg.content}
-              </Text>
+              {msg.role === 'user' ? (
+                <Text
+                  style={[
+                    styles.messageText,
+                    { color: '#fff' },
+                  ]}
+                >
+                  {msg.content}
+                </Text>
+              ) : (
+                <View style={{ flex: 1 }}>
+                  {renderMarkdown(msg.content)}
+                </View>
+              )}
             </View>
           ))
         )}

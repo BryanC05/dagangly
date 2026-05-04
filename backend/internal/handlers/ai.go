@@ -151,63 +151,90 @@ func (h *AIHandler) FinancialConsultant(c *gin.Context) {
 
 	var analyticsJSON string
 	if req.Analytics != nil {
-		aj, _ := json.MarshalIndent(req.Analytics, "", "  ")
+		// Only send essential fields to reduce token count
+		type SimpleAnalytics struct {
+			TotalRevenue float64 `json:"totalRevenue"`
+			TotalOrders  int     `json:"orderCount"`
+		}
+		sa := SimpleAnalytics{}
+		if v, ok := req.Analytics["totalRevenue"].(float64); ok {
+			sa.TotalRevenue = v
+		}
+		if v, ok := req.Analytics["totalSales"].(float64); ok {
+			sa.TotalRevenue = v
+		}
+		if v, ok := req.Analytics["orderCount"].(float64); ok {
+			sa.TotalOrders = int(v)
+		} else if v, ok := req.Analytics["orderCount"].(int); ok {
+			sa.TotalOrders = v
+		}
+		aj, _ := json.MarshalIndent(sa, "", "  ")
 		analyticsJSON = string(aj)
 	}
 
 	var productCalcJSON string
-	if req.ProductCalculations != nil {
-		pc, _ := json.MarshalIndent(req.ProductCalculations, "", "  ")
+	if req.ProductCalculations != nil && len(req.ProductCalculations) > 0 {
+		// Limit to first 10 products with essential fields only to reduce token count
+		type SimpleProduct struct {
+			Name         string  `json:"name"`
+			Price        float64 `json:"price"`
+			Cost         float64 `json:"cost"`
+			Revenue      float64 `json:"revenue"`
+			Profit       float64 `json:"profit"`
+			ProfitMargin float64 `json:"profitMargin"`
+			Orders       int     `json:"orders"`
+		}
+		simpleProds := make([]SimpleProduct, 0)
+		for i, p := range req.ProductCalculations {
+			if i >= 10 {
+				break
+			}
+			sp := SimpleProduct{}
+			if v, ok := p["name"].(string); ok {
+				sp.Name = v
+			}
+			if v, ok := p["price"].(float64); ok {
+				sp.Price = v
+			} else if v, ok := p["price"].(int); ok {
+				sp.Price = float64(v)
+			}
+			if v, ok := p["cost"].(float64); ok {
+				sp.Cost = v
+			} else if v, ok := p["cost"].(int); ok {
+				sp.Cost = float64(v)
+			}
+			if v, ok := p["revenue"].(float64); ok {
+				sp.Revenue = v
+			} else if v, ok := p["revenue"].(int); ok {
+				sp.Revenue = float64(v)
+			}
+			if v, ok := p["profit"].(float64); ok {
+				sp.Profit = v
+			} else if v, ok := p["profit"].(int); ok {
+				sp.Profit = float64(v)
+			}
+			if v, ok := p["profitMargin"].(float64); ok {
+				sp.ProfitMargin = v
+			} else if v, ok := p["profitMargin"].(int); ok {
+				sp.ProfitMargin = float64(v)
+			}
+			if v, ok := p["orders"].(float64); ok {
+				sp.Orders = int(v)
+			} else if v, ok := p["orders"].(int); ok {
+				sp.Orders = v
+			}
+			simpleProds = append(simpleProds, sp)
+		}
+		pc, _ := json.MarshalIndent(simpleProds, "", "  ")
 		productCalcJSON = string(pc)
 	}
 
-	var analyticsSection string
-	if analyticsJSON != "" {
-		analyticsSection = fmt.Sprintf(`
-=== DATA DASHBOARD PENJUAL ===
-%s
-
-`, analyticsJSON)
-	}
-
-	var productCalcSection string
+	var systemPrompt string
 	if productCalcJSON != "" {
-		productCalcSection = fmt.Sprintf(`
-=== DATA KALKULASI LABA PRODUK ===
-%s
-
-`, productCalcJSON)
+		systemPrompt = "Anda adalah konsultan keuangan AI untukUMKM. Jawab dalam Bahasa Indonesia dengan bullet points. Gunakan format Rupiah (Rp). Fokus pada profit bersih.\n\nData Bisnis:\n" + analyticsJSON + "\n\nProduk:\n" + productCalcJSON
+	} else {
+		systemPrompt = "Anda adalah konsultan keuangan AI untukUMKM. Jawab dalam Bahasa Indonesia dengan bullet points. Gunakan format Rupiah (Rp). Fokus pada profit bersih.\n\nData Bisnis:\n" + analyticsJSON
 	}
-
-	systemPrompt := fmt.Sprintf(`Anda adalah seorang konsultan keuangan AI dan analis bisnis ahli untuk penjual di marketplace MSME (UMKM).
-Anda sedang berbicara langsung dengan penjualan untuk membantu mereka mengembangkan bisnisnya.
-Jawablah dalam bahasa Indonesia yang baik dan benar (Bahasa Indonesia).
-Analisis data yang diberikan dan jawab pertanyaan mereka dengan akurat, profesional, dan ringkas.
-Gunakan formatasi (bullet points, teks tebal) untuk membuat respons mudah dibaca.
-Jangan gunakan markdown headers (#), cukup teks tebal dan bullet points.
-
-%s
-
-%s
-
-PENTING - Data yang diberikan adalah SEMUA data historis pendapatan dari awal:
-- totalRevenue: total pendapatan SEMUA waktu
-- recentDays/dailyRevenue: data pendapatan per hari untuk SEMUA hari yang ada
-- orderCount: total pesanan SEMUA waktu
-
-Anda dapat menghitung periode spesifik berdasarkan pertanyaan:
-- "30 hari terakhir" = hitung dari tanggal terbaru ke belakang 30 hari
-- "60 hari terakhir" = hitung dari tanggal terbaru ke belakang 60 hari
-- "90 hari terakhir" = hitung dari tanggal terbaru ke belakang 90 hari
-- "semua waktu" = gunakan semua data yang ada
-
-Gunakan tanggal-tanggal dalam data untuk menghitung periode yang diminta pengguna.
-
-Catatan Penting:
-- Selalu jawab dalam bahasa Indonesia
-- Jika ada angka, gunakan format Rupiah (Rp) dengan pemisah ribuan yang sesuai
-- Berikan saran yang praktis dan actionable untuk membantu bisnis berkembang
-- Fokus pada analisis keuntungan bersih (clean profit) dari setiap produk`, analyticsSection, productCalcSection)
 
 	groqReq := GroqRequest{
 		Model: "llama-3.3-70b-versatile", // Using smarter 70B model specifically for financial analysis

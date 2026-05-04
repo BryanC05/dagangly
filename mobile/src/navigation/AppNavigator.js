@@ -67,6 +67,7 @@ import FinanceCashFlowScreen from '../screens/finance/CashFlowScreen';
 import FinanceInvoicesScreen from '../screens/finance/InvoicesScreen';
 import FinanceSettingsScreen from '../screens/finance/SettingsScreen';
 import ProductAnalysisScreen from '../screens/finance/ProductAnalysisScreen';
+import FinanceAIScreen from '../screens/finance/AIScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -100,7 +101,7 @@ function HomeStackNavigator() {
                     animation: 'slide_from_right',
                 }}
             >
-                <HomeStack.Screen name="Home" component={HomeScreenWithCart} options={{ headerShown: false }} />
+                <HomeStack.Screen name="HomeMain" component={HomeScreenWithCart} options={{ headerShown: false }} />
                 <HomeStack.Screen
                     name="ProductDetail"
                     component={ProductDetailScreen}
@@ -276,6 +277,17 @@ function FinanceStackNavigator() {
                 component={ProductAnalysisScreen}
                 options={{
                     title: language === 'id' ? 'Analisis Produk' : 'Product Analysis',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+            <FinanceStack.Screen
+                name="FinanceAI"
+                component={FinanceAIScreen}
+                options={{
+                    title: language === 'id' ? 'Konsultan AI' : 'AI Consultant',
                     headerStyle: { backgroundColor: colors.card },
                     headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
                     headerShadowVisible: false,
@@ -643,6 +655,16 @@ function ProfileStackNavigator() {
             <ProfileStack.Screen
                 name="Inventory"
                 component={InventoryScreen}
+                options={{ headerShown: false }}
+            />
+            <ProfileStack.Screen
+                name="FinanceDashboard"
+                component={FinanceDashboardScreen}
+                options={{ headerShown: false }}
+            />
+            <ProfileStack.Screen
+                name="FinanceAI"
+                component={FinanceAIScreen}
                 options={{ headerShown: false }}
             />
         </ProfileStack.Navigator>
@@ -1343,16 +1365,7 @@ export default function AppNavigator() {
                         tabBarLabel: t.tabMessages || 'Messages',
                     }}
                 />
-                {/* Only show Finance tab for sellers */}
-                {user?.isSeller && (
-                    <Tab.Screen
-                        name="Finance"
-                        component={FinanceStackNavigator}
-                        options={{
-                            tabBarLabel: t.finance || 'Finance',
-                        }}
-                    />
-                )}
+                
                 {/* Hidden Cart - not shown in tab bar */}
                 <Tab.Screen
                     name="Cart"
