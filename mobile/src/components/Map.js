@@ -1,53 +1,128 @@
 import React, { useRef, useImperativeHandle, forwardRef, useState, Component } from 'react';
-import { View, Text, Dimensions, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
+import { View, Text, Dimensions, StyleSheet, TouchableOpacity, Linking, Platform, ActivityIndicator } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { tokens } from '../theme/tokens';
 
+// Import WebView for fallback map on Expo Go
+import { WebView } from 'react-native-webview';
+
 const { width, height } = Dimensions.get('window');
 
 // Try to import MapView - handle gracefully if not available
+// In Expo Go, react-native-maps requires Google Play Services which isn't available
+// So we use a WebView fallback instead
 let MapView, Marker, Circle, Polyline, PROVIDER_GOOGLE;
 let mapLoaded = false;
 
-try {
-    const maps = require('react-native-maps');
-    MapView = maps.default;
-    Marker = maps.Marker;
-    Circle = maps.Circle;
-    Polyline = maps.Polyline;
-    PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
-    mapLoaded = true;
-} catch (e) {
-    console.warn('Failed to load react-native-maps:', e.message);
+// Check if we can use native maps (requires Google Play Services / Google Maps SDK)
+const isNativeMapsAvailable = () => {
+    try {
+        const maps = require('react-native-maps');
+        // Just check if it can be loaded, actual availability depends on device services
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
+// Only try to load native maps if explicitly enabled
+const USE_NATIVE_MAPS = false; // Set to true only with development build
+
+if (USE_NATIVE_MAPS) {
+    try {
+        const maps = require('react-native-maps');
+        MapView = maps.default;
+        Marker = maps.Marker;
+        Circle = maps.Circle;
+        Polyline = maps.Polyline;
+        PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
+        mapLoaded = true;
+    } catch (e) {
+        console.warn('Failed to load react-native-maps:', e.message);
+        MapView = null;
+    }
+} else {
+    console.log('Using WebView map fallback (Expo Go mode)');
     MapView = null;
-    Marker = null;
-    Circle = null;
-    Polyline = null;
-    PROVIDER_GOOGLE = null;
 }
 
 // Fallback Map using WebView with OpenStreetMap
 function WebViewMapFallback({ region, markers, style, onMarkerPress }) {
     const { colors } = useThemeStore();
     const [selected, setSelected] = useState(null);
+    const webViewRef = useRef(null);
     
     const centerLat = region?.latitude || -6.2088;
     const centerLng = region?.longitude || 106.8456;
-    const zoom = region?.latitudeDelta > 0.1 ? 10 : 13;
+    const zoom = region?.latitudeDelta > 0.1 ? 10 : 14;
     
-    // Build markers as HTML overlays
-    const markerHtml = markers?.map((marker, idx) => {
-        const lat = marker.lat || marker.latitude;
-        const lng = marker.lng || marker.longitude;
-        if (!lat || !lng) return '';
-        
-        // Calculate position on tile (simplified)
-        const x = Math.round((lng - centerLng) * 8000 / Math.pow(2, 17-zoom)) + width/2;
-        const y = Math.round((centerLat - lat) * 8000 / Math.pow(2, 17-zoom)) + 150;
-        
-        return `<div style="position:absolute;left:${x}px;top:${y}px;font-size:24px;cursor:pointer;" onclick="window.ReactNativeWebView.postMessage('marker:'+${idx})">📍</div>`;
+    // Build OpenStreetMap embed HTML
+    const mapHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            html, body { width: 100%; height: 100%; overflow: hidden; background: #f0f0f0; }
+            #map { width: 100%; height: 100%; }
+            .marker { position: absolute; font-size: 32px; transform: translate(-50%, -100%); cursor: pointer; z-index: 1000; }
+            .marker.selected { font-size: 40px; }
+        </style>
+    </head>
+    <body>
+        <iframe id="map" width="100%" height="100%" frameborder="0" 
+            src="https://www.openstreetmap.org/export/embed.html?bbox=${centerLng-0.01}%2C${centerLat-0.01}%2C${centerLng+0.01}%2C${centerLat+0.01}&layer=mapnik&marker=${centerLat}%2C${centerLng}">
+        </iframe>
+        ${markers?.map((marker, idx) => {
+            const lat = marker.lat || marker.latitude;
+            const lng = marker.lng || marker.longitude;
+            if (!lat || !lng) return '';
+            return `<div class="marker" style="left:50%;top:50%;font-size:32px;">📍</div>`;
+        }).join('')}
+    </body>
+    </html>
+    `;
+
+    return (
+        <View style={[styles.fallbackContainer, style]}>
+            {Platform.OS === 'ios' ? (
+                <WebView
+                    ref={webViewRef}
+                    source={{ html: mapHtml }}
+                    style={{ flex: 1 }}
+                    scrollEnabled={true}
+                    bounces={false}
+                    originWhitelist={['*']}
+                    allowFileAccess={true}
+                    startInLoadingState={true}
+                    renderLoading={() => (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color={colors.primary} />
+                        </View>
+                    )}
+                />
+            ) : (
+                <View style={[stylesWebView.mapArea, { backgroundColor: '#e5e5e5' }]}>
+                    <Text style={[stylesWebView.fallbackText, { color: colors.text }]}>
+                        📍 Location: {centerLat.toFixed(4)}, {centerLng.toFixed(4)}
+                    </Text>
+                    <TouchableOpacity
+                        style={[stylesWebView.osmButton, { backgroundColor: colors.primary }]}
+                        onPress={() => {
+                            const url = `https://www.openstreetmap.org/?mlat=${centerLat}&mlon=${centerLng}&zoom=${zoom}`;
+                            Linking.openURL(url);
+                        }}
+                    >
+                        <Text style={stylesWebView.osmButtonText}>Open in Maps</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+        </View>
+    );
+}
     }).join('') || '';
 
     return (
