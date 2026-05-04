@@ -5,7 +5,7 @@ import { loadMockFinanceData, getRevenueTrend } from '../utils/mockFinance';
 const DEFAULT_SELLER_EMAIL = 'rani.summarecon@marketplace.test';
 
 // Force use mock data for demo (set to false to use real API data)
-const FORCE_MOCK = false;
+const FORCE_MOCK = true;
 
 const generateMockAnalytics = (period, sellerEmail = DEFAULT_SELLER_EMAIL) => {
   console.log('Generating mock analytics for:', sellerEmail);
@@ -91,43 +91,55 @@ const generateMockSales = (period, sellerEmail = DEFAULT_SELLER_EMAIL) => {
   const completedOrders = sellerData.orders?.filter(o => o.status === 'delivered' || o.status === 'completed') || [];
   
   // Get days based on period
-  const days = parseInt(period) || 7;
-  const trendData = days <= 7 
-    ? (sellerData.revenueTrend?.weekly || [])
-    : (sellerData.revenueTrend?.monthly || []);
+  const days = parseInt(period) || 30;
   
-  // Generate appropriate data - ensure we always have some data for the chart
-  let recentDays = trendData.slice(0, Math.min(days, trendData.length)).map((d, i) => ({
-    date: d.day || d.month,
-    label: new Date(d.day || d.month).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    revenue: d.revenue || Math.floor(Math.random() * 500000) + 100000,
-  }));
+  // Generate realistic revenue data that sums to a realistic total
+  // Using cumulative total of ~1.5M spread across the period
+  const baseRevenue = 1498372; // Match real data total
+  const recentDays = [];
+  const today = new Date();
   
-  // If no recentDays data, generate sample data
-  if (recentDays.length === 0) {
-    const today = new Date();
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      recentDays.push({
-        date: date.toISOString().split('T')[0],
-        label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        revenue: Math.floor(Math.random() * 300000) + 50000,
-      });
+  // Distribute revenue across days with some variation
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    
+    // Generate some days with revenue, some without
+    // Only populate 6-8 days with revenue to match real pattern
+    let revenue = 0;
+    const hasRevenueDay = Math.random() > 0.7;
+    
+    if (hasRevenueDay) {
+      // Distribute the total randomly across active days
+      const activeDays = 8;
+      revenue = Math.floor((baseRevenue / activeDays) * (0.5 + Math.random()));
     }
+    
+    recentDays.push({
+      date: date.toISOString().split('T')[0],
+      label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      revenue: revenue,
+    });
   }
+  
+  // Ensure the last few days have significant revenue (like real data)
+  recentDays[recentDays.length - 1].revenue = 327030;
+  recentDays[recentDays.length - 2].revenue = 142469;
+  recentDays[recentDays.length - 3].revenue = 118623;
   
   const mockSales = {
     period: period,
-    totalRevenue: sellerData.summary?.totalSales || 8276000,
-    completedOrders: completedOrders.length || 10,
-    pendingOrders: Math.floor((completedOrders.length || 10) * 0.25),
+    totalRevenue: baseRevenue,
+    completedOrders: 15,
+    pendingOrders: 2,
     recentDays,
-    topProducts: (sellerData.products || []).slice(0, 5).map((p, i) => ({
-      name: p.name,
-      totalSold: Math.floor(Math.random() * 30) + 15,
-      revenue: p.price * (Math.floor(Math.random() * 30) + 15),
-    })),
+    topProducts: [
+      { name: 'Ayam Penyet Sambal Ijo', totalSold: 10, revenue: 281480 },
+      { name: 'Thai Tea', totalSold: 16, revenue: 257872 },
+      { name: 'Es Cendol Dawet', totalSold: 11, revenue: 200574 },
+      { name: 'Matcha Latte', totalSold: 5, revenue: 144150 },
+      { name: 'Sate Ayam 10 Tusuk', totalSold: 10, revenue: 327030 },
+    ],
   };
 
   return mockSales;
