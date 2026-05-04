@@ -5,121 +5,42 @@ import { useTranslation } from '../hooks/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { tokens } from '../theme/tokens';
 
-// Import WebView for fallback map on Expo Go
-import { WebView } from 'react-native-webview';
-
 const { width, height } = Dimensions.get('window');
 
-// Try to import MapView - handle gracefully if not available
-// In Expo Go, react-native-maps requires Google Play Services which isn't available
-// So we use a WebView fallback instead
-let MapView, Marker, Circle, Polyline, PROVIDER_GOOGLE;
+// Disable native react-native-maps in Expo Go - it requires Google Play Services
+// Map functionality will use the fallback below (WebView or browser)
+let MapView = null;
+let Marker = null;
 let mapLoaded = false;
 
-// Check if we can use native maps (requires Google Play Services / Google Maps SDK)
-const isNativeMapsAvailable = () => {
-    try {
-        const maps = require('react-native-maps');
-        // Just check if it can be loaded, actual availability depends on device services
-        return true;
-    } catch (e) {
-        return false;
-    }
-};
-
-// Only try to load native maps if explicitly enabled
-const USE_NATIVE_MAPS = false; // Set to true only with development build
-
-if (USE_NATIVE_MAPS) {
-    try {
-        const maps = require('react-native-maps');
-        MapView = maps.default;
-        Marker = maps.Marker;
-        Circle = maps.Circle;
-        Polyline = maps.Polyline;
-        PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
-        mapLoaded = true;
-    } catch (e) {
-        console.warn('Failed to load react-native-maps:', e.message);
-        MapView = null;
-    }
-} else {
-    console.log('Using WebView map fallback (Expo Go mode)');
-    MapView = null;
-}
-
-// Fallback Map using WebView with OpenStreetMap
+// Fallback Map - always shows button to open OpenStreetMap in browser
 function WebViewMapFallback({ region, markers, style, onMarkerPress }) {
     const { colors } = useThemeStore();
-    const [selected, setSelected] = useState(null);
-    const webViewRef = useRef(null);
     
     const centerLat = region?.latitude || -6.2088;
     const centerLng = region?.longitude || 106.8456;
     const zoom = region?.latitudeDelta > 0.1 ? 10 : 14;
     
-    // Build OpenStreetMap embed HTML
-    const mapHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            html, body { width: 100%; height: 100%; overflow: hidden; background: #f0f0f0; }
-            #map { width: 100%; height: 100%; }
-            .marker { position: absolute; font-size: 32px; transform: translate(-50%, -100%); cursor: pointer; z-index: 1000; }
-            .marker.selected { font-size: 40px; }
-        </style>
-    </head>
-    <body>
-        <iframe id="map" width="100%" height="100%" frameborder="0" 
-            src="https://www.openstreetmap.org/export/embed.html?bbox=${centerLng-0.01}%2C${centerLat-0.01}%2C${centerLng+0.01}%2C${centerLat+0.01}&layer=mapnik&marker=${centerLat}%2C${centerLng}">
-        </iframe>
-        ${markers?.map((marker, idx) => {
-            const lat = marker.lat || marker.latitude;
-            const lng = marker.lng || marker.longitude;
-            if (!lat || !lng) return '';
-            return `<div class="marker" style="left:50%;top:50%;font-size:32px;">📍</div>`;
-        }).join('')}
-    </body>
-    </html>
-    `;
-
+    const openInBrowser = () => {
+        const url = `https://www.openstreetmap.org/?mlat=${centerLat}&mlon=${centerLng}&zoom=${zoom}`;
+        Linking.openURL(url);
+    };
+    
     return (
         <View style={[styles.fallbackContainer, style]}>
-            {Platform.OS === 'ios' ? (
-                <WebView
-                    ref={webViewRef}
-                    source={{ html: mapHtml }}
-                    style={{ flex: 1 }}
-                    scrollEnabled={true}
-                    bounces={false}
-                    originWhitelist={['*']}
-                    allowFileAccess={true}
-                    startInLoadingState={true}
-                    renderLoading={() => (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color={colors.primary} />
-                        </View>
-                    )}
-                />
-            ) : (
-                <View style={[stylesWebView.mapArea, { backgroundColor: '#e5e5e5' }]}>
-                    <Text style={[stylesWebView.fallbackText, { color: colors.text }]}>
-                        📍 Location: {centerLat.toFixed(4)}, {centerLng.toFixed(4)}
-                    </Text>
-                    <TouchableOpacity
-                        style={[stylesWebView.osmButton, { backgroundColor: colors.primary }]}
-                        onPress={() => {
-                            const url = `https://www.openstreetmap.org/?mlat=${centerLat}&mlon=${centerLng}&zoom=${zoom}`;
-                            Linking.openURL(url);
-                        }}
-                    >
-                        <Text style={stylesWebView.osmButtonText}>Open in Maps</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
+            <View style={[styles.mapPlaceholder, { backgroundColor: colors.card }]}>
+                <Text style={[styles.mapPlaceholderIcon, { color: colors.primary }]}>🗺️</Text>
+                <Text style={[styles.mapPlaceholderText, { color: colors.text }]}>
+                    Location: {centerLat.toFixed(4)}, {centerLng.toFixed(4)}
+                </Text>
+                <TouchableOpacity
+                    style={[styles.mapButton, { backgroundColor: colors.primary }]}
+                    onPress={openInBrowser}
+                >
+                    <Ionicons name="globe-outline" size={20} color="#fff" />
+                    <Text style={styles.mapButtonText}>Open in Maps</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -187,7 +108,21 @@ const stylesWebView = StyleSheet.create({
     gridCell: { flex: 1, margin: 2, backgroundColor: '#ddd', borderRadius: 4 },
     marker: { position: 'absolute', padding: 4 },
     markerText: { fontSize: 24 },
-    footer: { padding: 12, textAlign: 'center', color: '#666', fontSize: 12, backgroundColor: '#fff' }
+    footer: { padding: 12, textAlign: 'center', color: '#666', fontSize: 12, backgroundColor: '#fff' },
+    fallbackText: { fontSize: 14, color: '#666', marginBottom: 12 },
+    osmButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, gap: 8 },
+    osmButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+});
+
+// Fallback container styles
+const styles = StyleSheet.create({
+    fallbackContainer: { flex: 1 },
+    mapPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+    mapPlaceholderIcon: { fontSize: 48, marginBottom: 16 },
+    mapPlaceholderText: { fontSize: 14, marginBottom: 16, textAlign: 'center' },
+    mapButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, gap: 8 },
+    mapButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+    loadingContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.8)' },
 });
 
 // Error boundary to catch runtime map crashes
