@@ -29,39 +29,42 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const originalConfig = error.config;
+    
     // If direct cross-origin call fails in browser, retry once through local /api proxy.
     if (
       error?.code === 'ERR_NETWORK' &&
       isAbsoluteApiUrl &&
-      !error?.config?.__proxyRetried
+      !originalConfig?.__proxyRetried
     ) {
       return api.request({
-        ...error.config,
+        ...originalConfig,
         baseURL: '/api',
         __proxyRetried: true,
       });
     }
 
-    // If primary API fails, try fallback URL
-    if (
-      (error?.code === 'ERR_NETWORK' || error?.response?.status >= 500) &&
-      !error?.config?.__fallbackRetried &&
-      !isApiFailed()
-    ) {
-      console.log('Primary API failed, trying fallback to localhost...');
-      setApiFailed(true);
-      return api.request({
-        ...error.config,
-        baseURL: FALLBACK_URL,
-        __fallbackRetried: true,
-      });
+    // If primary API fails, try fallback URL (more aggressive fallback)
+    if (!originalConfig?.__fallbackRetried) {
+      // Always try fallback for /ai/ endpoints
+      const isAIEndpoint = originalConfig?.url?.includes('/ai/');
+      const isNetworkError = error?.code === 'ERR_NETWORK';
+      const isServerError = error?.response?.status >= 500;
+      
+      if (isAIEndpoint || isNetworkError || isServerError) {
+        console.log('API failed, trying fallback to localhost...', { isAIEndpoint, isNetworkError, isServerError });
+        setApiFailed(true);
+        return api.request({
+          ...originalConfig,
+          baseURL: FALLBACK_URL,
+          __fallbackRetried: true,
+        });
+      }
     }
 
     // Don't automatically logout on 401 - let components handle auth errors themselves
     // This prevents unwanted logout when user tries to access protected endpoints
     if (error.response?.status === 401) {
-      // Only logout if explicitly on a protected page and not handling it manually
-      // The component can handle the redirect itself
       return Promise.reject(error);
     }
     return Promise.reject(error);
