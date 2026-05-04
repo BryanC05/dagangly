@@ -4,6 +4,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import api from '../api/api';
 
+// Check if running in Expo Go (push notifications not supported)
+const isExpoGo = Constants.executionEnvironment === 'storeClient';
+console.log('Running in Expo Go:', isExpoGo);
+
 let notificationHandlerSet = false;
 
 class NotificationService {
@@ -17,6 +21,10 @@ class NotificationService {
     }
 
     get Notifications() {
+        // Return null in Expo Go (push notifications removed in SDK 53)
+        if (isExpoGo) {
+            return null;
+        }
         if (!this._notifications) {
             try {
                 this._notifications = require('expo-notifications');
