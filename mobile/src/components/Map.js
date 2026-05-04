@@ -47,19 +47,20 @@ function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
     <body>
         <div id="map"></div>
         <script>
-            var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
+var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
             
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(map);
             
-            var markers = [];
+            // Add markers - handle both coordinate.lat/lng and lat/lng formats
             ${markers?.map((marker) => {
-                const lat = marker.lat || marker.latitude;
-                const lng = marker.lng || marker.longitude;
+                // Handle coordinate format (from NearbySellersScreen)
+                const lat = marker?.coordinate?.latitude || marker?.lat || marker?.latitude;
+                const lng = marker?.coordinate?.longitude || marker?.lng || marker?.longitude;
                 if (!lat || !lng) return '';
-                return `markers.push(L.marker([${lat}, ${lng}]).addTo(map).on('click', function() { window.ReactNativeWebView.postMessage('marker:${lat},${lng}'); }));`;
+                return `L.marker([${lat}, ${lng}]).addTo(map).bindPopup('${marker?.title || 'Seller'}').on('click', function() { window.ReactNativeWebView.postMessage('marker:${lat},${lng}'); });`;
             }).join('\n            ') || ''}
             
             map.whenReady(function() {
