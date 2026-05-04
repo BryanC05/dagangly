@@ -1233,14 +1233,14 @@ export default function AppNavigator() {
                             }
                         // If on Profile tab and tapping when already focused, reset to Profile
                         } else if (route.name === 'Profile') {
-                            if (isFocused && currentScreenName !== 'ProfileScreen') {
+                            if (isFocused && currentScreenName !== 'ProfileMain') {
                                 tabNavigation.navigate('Profile', {
-                                    screen: 'ProfileScreen',
+                                    screen: 'ProfileMain',
                                     params: { reset: true },
                                     merge: true
                                 });
                             } else if (isFocused) {
-                                tabNavigation.navigate('Profile', { screen: 'ProfileScreen', params: { reset: true } });
+                                tabNavigation.navigate('Profile', { screen: 'ProfileMain', params: { reset: true } });
                             } else {
                                 defaultHandler();
                             }
