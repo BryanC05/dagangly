@@ -14,7 +14,7 @@ let MapView = null;
 let Marker = null;
 let mapLoaded = false;
 
-// Embedded WebView Map using OpenStreetMap
+// Embedded WebView Map using OpenStreetMap tile server
 function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
     const { colors } = useThemeStore();
     const webviewRef = useRef(null);
@@ -22,67 +22,48 @@ function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
     
     const centerLat = region?.latitude || -6.2088;
     const centerLng = region?.longitude || 106.8456;
-    const zoom = region?.latitudeDelta > 0.1 ? 10 : 14;
+    const zoom = 14;
     
-    // Calculate bounding box for the map
-    const latDelta = 0.02;
-    const lngDelta = 0.02;
-    const minLat = centerLat - latDelta;
-    const maxLat = centerLat + latDelta;
-    const minLng = centerLng - lngDelta;
-    const maxLng = centerLng + lngDelta;
+    // Calculate tile coordinates for OpenStreetMap
+    const n = Math.pow(2, zoom);
+    const xtile = Math.floor((centerLng + 180) / 360 * n);
+    const ytile = Math.floor((1 - Math.log(Math.tan(centerLat * Math.PI / 180) + 1 / Math.cos(centerLat * Math.PI / 180)) / Math.PI) / 2 * n);
     
-    // Generate markers HTML for the webview
-    const markersHtml = markers?.map((marker, idx) => {
-        const lat = marker.lat || marker.latitude;
-        const lng = marker.lng || marker.longitude;
-        if (!lat || !lng) return '';
-        return `
-            <div class="marker" style="
-                position: absolute;
-                left: ${((lng - minLng) / (maxLng - minLng)) * 100}%;
-                top: ${((maxLat - lat) / (maxLat - minLat)) * 100}%;
-                transform: translate(-50%, -100%);
-                font-size: 32px;
-                cursor: pointer;
-                z-index: 1000;
-            " onclick="window.ReactNativeWebView.postMessage('marker:${idx}')">📍</div>
-        `;
-    }).join('') || '';
-    
+    // Map HTML with Leaflet for proper tile rendering
     const mapHtml = `
     <!DOCTYPE html>
     <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            html, body { width: 100%; height: 100%; overflow: hidden; background: #f0f0f0; }
-            #map { width: 100%; height: 100%; position: relative; }
-            .marker { transition: transform 0.1s; }
-            .marker:active { transform: translate(-50%, -100%) scale(1.2); }
-            #loading { 
-                position: absolute; top: 50%; left: 50%; 
-                transform: translate(-50%, -50%);
-                font-family: -apple-system, sans-serif;
-                color: #666;
-            }
+            html, body { width: 100%; height: 100%; overflow: hidden; }
+            #map { width: 100%; height: 100%; }
+            .marker-icon { font-size: 32px; text-align: center; }
         </style>
     </head>
     <body>
-        <div id="map">
-            <div id="loading">Loading map...</div>
-            <img src="https://www.openstreetmap.org/export/embed.html?bbox=${minLng}%2C${minLat}%2C${maxLng}%2C${maxLat}&layer=mapnik&marker=${centerLat}%2C${centerLng}" 
-                style="width: 100%; height: 100%; object-fit: cover;"
-                onload="document.getElementById('loading').style.display='none'"
-                onerror="document.getElementById('loading').innerText='Failed to load map'" />
-            ${markersHtml}
-        </div>
+        <div id="map"></div>
         <script>
-            document.addEventListener('message', function(e) {
-                if (e.data.startsWith('marker:')) {
-                    window.ReactNativeWebView.postMessage(e.data);
-                }
+            var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
+            
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+            
+            var markers = [];
+            ${markers?.map((marker) => {
+                const lat = marker.lat || marker.latitude;
+                const lng = marker.lng || marker.longitude;
+                if (!lat || !lng) return '';
+                return `markers.push(L.marker([${lat}, ${lng}]).addTo(map).on('click', function() { window.ReactNativeWebView.postMessage('marker:${lat},${lng}'); }));`;
+            }).join('\n            ') || ''}
+            
+            map.whenReady(function() {
+                window.ReactNativeWebView.postMessage('mapReady');
             });
         </script>
     </body>
@@ -92,10 +73,17 @@ function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
     const handleMessage = (event) => {
         const data = event.nativeEvent.data;
         if (data && data.startsWith('marker:')) {
-            const idx = parseInt(data.split(':')[1]);
-            if (markers && markers[idx]) {
-                onMarkerPress?.(markers[idx]);
+            const parts = data.split(':')[1].split(',');
+            const lat = parseFloat(parts[0]);
+            const lng = parseFloat(parts[1]);
+            const marker = markers?.find(m => 
+                (m.lat || m.latitude) === lat && (m.lng || m.longitude) === lng
+            );
+            if (marker) {
+                onMarkerPress?.(marker);
             }
+        } else if (data === 'mapReady') {
+            setLoading(false);
         }
     };
     
@@ -114,6 +102,9 @@ function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
                 onLoadStart={() => setLoading(true)}
                 onLoadEnd={() => setLoading(false)}
                 onMessage={handleMessage}
+                javaScriptEnabled={true}
+                mixedContentMode="always"
+                domStorageEnabled={true}
                 renderLoading={() => (
                     <View style={styles.loadingOverlay}>
                         <ActivityIndicator size="large" color={colors?.primary || '#14b8a6'} />
