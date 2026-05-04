@@ -93,6 +93,16 @@ class NotificationService {
     }
 
     async registerForPushNotifications() {
+        // Skip push notifications in Expo Go (not supported in SDK 53+)
+        if (!global.nativeExtensionsUnavailable) {
+            // Not in a development build, try to detect if running in Expo Go
+            const { isDevice } = require('expo-device') || {};
+            if (!isDevice || isDevice === undefined) {
+                console.log('📱 Push notifications skipped in Expo Go');
+                return null;
+            }
+        }
+
         const Notifications = this.Notifications;
         if (!Notifications) {
             console.log('📱 Notifications not available');
@@ -332,6 +342,13 @@ export function usePushNotifications() {
     const [initialized, setInitialized] = React.useState(false);
 
     React.useEffect(() => {
+        // Skip in Expo Go (push notifications not supported in SDK 53+)
+        const isExpoGo = Constants.executionEnvironment === 'storeClient';
+        if (isExpoGo) {
+            console.log('Push notifications disabled in Expo Go');
+            return;
+        }
+
         let cleanup = null;
 
         const init = async () => {
