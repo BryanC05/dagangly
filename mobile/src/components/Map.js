@@ -7,6 +7,7 @@ const { width, height } = Dimensions.get('window');
 
 // Disable native react-native-maps in Expo Go - it requires Google Play Services
 let MapView = null;
+let mapLoaded = false;
 
 // Embedded WebView Map using OpenStreetMap tile server
 function EmbeddedMapFallback({ region, markers, style, onMarkerPress, onNavigate }) {
