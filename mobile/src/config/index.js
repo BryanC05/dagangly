@@ -1,11 +1,34 @@
 // EXPO_PUBLIC_API_HOST should be set via environment variable (from .env file)
 // For local development, set EXPO_PUBLIC_API_HOST=http://localhost:5000
 // Default falls back to production
-const DEFAULT_API_HOST = 'https://dagangly-production.up.railway.app';
-const RAW_API_HOST = process.env.EXPO_PUBLIC_API_HOST || DEFAULT_API_HOST;
+
+// Primary (local development)
+const LOCAL_API_HOST = 'http://localhost:5000';
+
+// Fallback (production Railway)
+const RAILWAY_API_HOST = 'https://dagangly-production.up.railway.app';
+
+// Get from env or use local by default for development
+const RAW_API_HOST = process.env.EXPO_PUBLIC_API_HOST || LOCAL_API_HOST;
+const isUsingLocal = RAW_API_HOST.startsWith('http://localhost');
+
 export const API_HOST = RAW_API_HOST.replace(/\/+$/, '');
 export const API_URL = `${API_HOST}/api`;
 export const SOCKET_URL = API_HOST;
+
+// Fallback configuration
+export const FALLBACK_API_HOST = RAILWAY_API_HOST;
+export const FALLBACK_API_URL = `${RAILWAY_API_HOST}/api`;
+export const FALLBACK_SOCKET_URL = RAILWAY_API_HOST;
+
+// Check which backend is active
+export const isLocalApi = () => isUsingLocal;
+
+// Get active API URL
+export const getActiveApiUrl = () => API_URL;
+
+// Get fallback API URL
+export const getFallbackApiUrl = () => FALLBACK_API_URL;
 
 // English categories (default)
 export const CATEGORIES_EN = [

@@ -1,10 +1,14 @@
 import axios from 'axios';
 import { Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import { API_URL } from '../config';
+import { API_URL, FALLBACK_API_URL, isLocalApi } from '../config';
+
+let useFallback = false;
+
+const getBaseURL = () => useFallback ? FALLBACK_API_URL : API_URL;
 
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: getBaseURL(),
     headers: {
         'Content-Type': 'application/json',
     },
@@ -25,6 +29,22 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const config = error.config;
+
+        // Try fallback to Railway if local fails (and not already tried)
+        if (!config?._fallbackRetried && !useFallback) {
+            const isNetworkError = !error.response;
+            const isServerError = error.response?.status >= 500;
+            
+            if (isNetworkError || isServerError) {
+                console.log('[API] Primary failed, trying Railway fallback...');
+                useFallback = true;
+                return api.request({
+                    ...config,
+                    baseURL: FALLBACK_API_URL,
+                    _fallbackRetried: true,
+                });
+            }
+        }
 
         // Initialize retry count
         if (config && (!config.retryCount)) {
