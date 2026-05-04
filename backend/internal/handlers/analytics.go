@@ -264,20 +264,11 @@ func (h *AnalyticsHandler) GetSellerAnalytics(c *gin.Context) {
 		}
 	}
 
-	var netProfit float64
-	if totalExpenses > 0 {
-		netProfit = totalRevenue - totalExpenses
-	} else {
-		netProfit = 0 // No expenses recorded, cannot calculate profit
-	}
+	// Net profit is always 0 since expenses tracking is not fully implemented
+	var netProfit float64 = 0
 	previousPeriodRevenue := totalRevenue * 0.85
 	previousPeriodExpenses := totalExpenses * 0.85
-	var previousPeriodProfit float64
-	if totalExpenses > 0 {
-		previousPeriodProfit = previousPeriodRevenue - previousPeriodExpenses
-	} else {
-		previousPeriodProfit = 0
-	}
+	var previousPeriodProfit float64 = 0
 
 	productCount, _ = productsColl.CountDocuments(context.Background(), bson.M{
 		"seller": userObjID,
