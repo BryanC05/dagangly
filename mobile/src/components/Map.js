@@ -44,88 +44,9 @@ function WebViewMapFallback({ region, markers, style, onMarkerPress }) {
         </View>
     );
 }
-    }).join('') || '';
 
-    return (
-        <View style={[stylesWebView.container, style]}>
-            <View style={[stylesWebView.mapArea, { backgroundColor: '#e5e5e5' }]}>
-                {/* OpenStreetMap style header */}
-                <View style={stylesWebView.header}>
-                    <Text style={stylesWebView.headerText}>🗺️ OpenStreetMap</Text>
-                    <Text style={stylesWebView.headerSubtext}>Set up Google Maps API for full features</Text>
-                </View>
-                
-                {/* Simple map visualization using Views */}
-                <View style={stylesWebView.grid}>
-                    {[...Array(5)].map((_, row) => (
-                        <View key={row} style={stylesWebView.gridRow}>
-                            {[...Array(5)].map((_, col) => (
-                                <View key={col} style={stylesWebView.gridCell} />
-                            ))}
-                        </View>
-                    ))}
-                </View>
-                
-                {/* Markers rendered as React Native Views */}
-                {markers?.map((marker, idx) => {
-                    const lat = marker.lat || marker.latitude;
-                    const lng = marker.lng || marker.longitude;
-                    if (!lat || !lng) return null;
-                    
-                    // Simple relative positioning (center of view = region center)
-                    const relLat = (lat - (region?.latitude || -6.2088)) * 10000;
-                    const relLng = (lng - (region?.longitude || 106.8456)) * 10000;
-                    const x = width/2 + relLng * 0.01;
-                    const y = 150 - relLat * 0.01;
-                    
-                    return (
-                        <TouchableOpacity
-                            key={idx}
-                            style={[stylesWebView.marker, { left: x, top: y }]}
-                            onPress={() => onMarkerPress?.(marker)}
-                        >
-                            <Text style={stylesWebView.markerText}>📍</Text>
-                        </TouchableOpacity>
-                    );
-                })}
-            </View>
-            
-            <Text style={stylesWebView.footer}>
-                Using list view - tap sellers below to view on map
-            </Text>
-        </View>
-    );
-}
-
-const stylesWebView = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    mapArea: { flex: 1, position: 'relative' },
-    header: { padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e0e0e0' },
-    headerText: { fontSize: 16, fontWeight: '700', color: '#333' },
-    headerSubtext: { fontSize: 12, color: '#666', marginTop: 4 },
-    grid: { flex: 1, padding: 8 },
-    gridRow: { flex: 1, flexDirection: 'row' },
-    gridCell: { flex: 1, margin: 2, backgroundColor: '#ddd', borderRadius: 4 },
-    marker: { position: 'absolute', padding: 4 },
-    markerText: { fontSize: 24 },
-    footer: { padding: 12, textAlign: 'center', color: '#666', fontSize: 12, backgroundColor: '#fff' },
-    fallbackText: { fontSize: 14, color: '#666', marginBottom: 12 },
-    osmButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, gap: 8 },
-    osmButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-});
-
-// Fallback container styles
-const styles = StyleSheet.create({
-    fallbackContainer: { flex: 1 },
-    mapPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-    mapPlaceholderIcon: { fontSize: 48, marginBottom: 16 },
-    mapPlaceholderText: { fontSize: 14, marginBottom: 16, textAlign: 'center' },
-    mapButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, gap: 8 },
-    mapButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
-    loadingContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.8)' },
-});
-
-// Error boundary to catch runtime map crashes
+// Error boundary
+class MapErrorBoundary extends Component { to catch runtime map crashes
 class MapErrorBoundary extends Component {
     constructor(props) {
         super(props);
