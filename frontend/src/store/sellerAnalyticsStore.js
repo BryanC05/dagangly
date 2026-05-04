@@ -96,12 +96,26 @@ const generateMockSales = (period, sellerEmail = DEFAULT_SELLER_EMAIL) => {
     ? (sellerData.revenueTrend?.weekly || [])
     : (sellerData.revenueTrend?.monthly || []);
   
-  // Generate appropriate data
-  const recentDays = trendData.slice(0, Math.min(days, trendData.length)).map((d, i) => ({
+  // Generate appropriate data - ensure we always have some data for the chart
+  let recentDays = trendData.slice(0, Math.min(days, trendData.length)).map((d, i) => ({
     date: d.day || d.month,
     label: new Date(d.day || d.month).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     revenue: d.revenue || Math.floor(Math.random() * 500000) + 100000,
   }));
+  
+  // If no recentDays data, generate sample data
+  if (recentDays.length === 0) {
+    const today = new Date();
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      recentDays.push({
+        date: date.toISOString().split('T')[0],
+        label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        revenue: Math.floor(Math.random() * 300000) + 50000,
+      });
+    }
+  }
   
   const mockSales = {
     period: period,
@@ -196,8 +210,10 @@ export const useSellerAnalyticsStore = create((set) => ({
       const res = await api.get(`/analytics/sales${params}`);
       set({ sales: res.data, loading: false });
     } catch (err) {
-      console.error('Failed to fetch sales analytics:', err);
-      set({ sales: null, loading: false, error: err.message });
+      console.error('Failed to fetch sales analytics:', err.message);
+      // Fallback to mock data
+      const mockSales = generateMockSales(period, sellerEmail);
+      set({ sales: mockSales, loading: false, useMockData: true });
     }
   },
 
