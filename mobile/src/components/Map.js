@@ -9,8 +9,7 @@ const { width, height } = Dimensions.get('window');
 let MapView = null;
 
 // Embedded WebView Map using OpenStreetMap tile server
-function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
-    const { colors } = useThemeStore();
+function EmbeddedMapFallback({ region, markers, style, onMarkerPress, onNavigate }) {
     const webviewRef = useRef(null);
     
     const centerLat = region?.latitude || -6.2088;
@@ -31,6 +30,23 @@ function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
             * { margin: 0; padding: 0; box-sizing: border-box; }
             html, body { width: 100%; height: 100%; overflow: hidden; }
             #map { width: 100%; height: 100%; }
+            .popup-content { min-width: 150px; }
+            .popup-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+            .popup-rating { color: #666; font-size: 12px; margin-bottom: 8px; }
+            .popup-btn {
+                background: #14b8a6;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 6px;
+                text-align: center;
+                cursor: pointer;
+                font-size: 13px;
+                border: none;
+                display: block;
+                text-decoration: none;
+            }
+            .popup-btn:active { background: #0d9488; }
+            .star { color: #f59e0b; }
         </style>
     </head>
     <body>
@@ -50,9 +66,32 @@ function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
                     markersData.forEach(function(m) {
                         var lat = m.coordinate ? m.coordinate.latitude : m.latitude;
                         var lng = m.coordinate ? m.coordinate.longitude : m.longitude;
-                        if (lat && lng) {
-                            L.marker([lat, lng]).addTo(map).bindPopup(m.title || 'Seller');
+                        var title = m.title || m.description || 'Seller';
+                        var rating = m.rating || 0;
+                        var reviewCount = m.reviewCount || 0;
+                        var id = m.id || '';
+                        
+                        // Create popup content
+                        var stars = '';
+                        for(var i=0; i<5; i++) {
+                            stars += i < Math.floor(rating) ? '<span class="star">★</span>' : '<span style="color:#ddd">★</span>';
                         }
+                        
+                        var popupContent = '<div class="popup-content">' +
+                            '<div class="popup-title">' + title + '</div>' +
+                            '<div class="popup-rating">' + stars + ' (' + reviewCount + ' reviews)</div>' +
+                            '<button class="popup-btn" onclick="window.ReactNativeWebView.postMessage(\\'navigate:' + id + '\\')">🧭 Go to Store</button>' +
+                        '</div>';
+                        
+                        // Add circle marker (dot)
+                        L.circleMarker([lat, lng], {
+                            radius: 10,
+                            fillColor: '#14b8a6',
+                            color: '#0f766e',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(map).bindPopup(popupContent);
                     });
                 }
                 
@@ -66,7 +105,13 @@ function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
     `;
     
     const handleMessage = (event) => {
-        console.log('Map message:', event.nativeEvent.data);
+        const data = event.nativeEvent.data;
+        if (data && data.startsWith('navigate:')) {
+            const sellerId = data.split(':')[1];
+            if (onNavigate) {
+                onNavigate(sellerId);
+            }
+        }
     };
     
     return (
@@ -175,6 +220,7 @@ const Map = forwardRef(({
                 markers={markers}
                 style={style}
                 onMarkerPress={onMarkerPress}
+                onNavigate={onMarkerPress}
             />
         );
     }
