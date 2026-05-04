@@ -4,43 +4,123 @@ import { useThemeStore } from '../store/themeStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { tokens } from '../theme/tokens';
+// Import WebView for embedded map
+import { WebView } from 'react-native-webview';
 
 const { width, height } = Dimensions.get('window');
 
 // Disable native react-native-maps in Expo Go - it requires Google Play Services
-// Map functionality will use the fallback below (WebView or browser)
 let MapView = null;
 let Marker = null;
 let mapLoaded = false;
 
-// Fallback Map - always shows button to open OpenStreetMap in browser
-function WebViewMapFallback({ region, markers, style, onMarkerPress }) {
+// Embedded WebView Map using OpenStreetMap
+function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
     const { colors } = useThemeStore();
+    const webviewRef = useRef(null);
+    const [loading, setLoading] = useState(true);
     
     const centerLat = region?.latitude || -6.2088;
     const centerLng = region?.longitude || 106.8456;
     const zoom = region?.latitudeDelta > 0.1 ? 10 : 14;
     
-    const openInBrowser = () => {
-        const url = `https://www.openstreetmap.org/?mlat=${centerLat}&mlon=${centerLng}&zoom=${zoom}`;
-        Linking.openURL(url);
+    // Calculate bounding box for the map
+    const latDelta = 0.02;
+    const lngDelta = 0.02;
+    const minLat = centerLat - latDelta;
+    const maxLat = centerLat + latDelta;
+    const minLng = centerLng - lngDelta;
+    const maxLng = centerLng + lngDelta;
+    
+    // Generate markers HTML for the webview
+    const markersHtml = markers?.map((marker, idx) => {
+        const lat = marker.lat || marker.latitude;
+        const lng = marker.lng || marker.longitude;
+        if (!lat || !lng) return '';
+        return `
+            <div class="marker" style="
+                position: absolute;
+                left: ${((lng - minLng) / (maxLng - minLng)) * 100}%;
+                top: ${((maxLat - lat) / (maxLat - minLat)) * 100}%;
+                transform: translate(-50%, -100%);
+                font-size: 32px;
+                cursor: pointer;
+                z-index: 1000;
+            " onclick="window.ReactNativeWebView.postMessage('marker:${idx}')">📍</div>
+        `;
+    }).join('') || '';
+    
+    const mapHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            html, body { width: 100%; height: 100%; overflow: hidden; background: #f0f0f0; }
+            #map { width: 100%; height: 100%; position: relative; }
+            .marker { transition: transform 0.1s; }
+            .marker:active { transform: translate(-50%, -100%) scale(1.2); }
+            #loading { 
+                position: absolute; top: 50%; left: 50%; 
+                transform: translate(-50%, -50%);
+                font-family: -apple-system, sans-serif;
+                color: #666;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map">
+            <div id="loading">Loading map...</div>
+            <img src="https://www.openstreetmap.org/export/embed.html?bbox=${minLng}%2C${minLat}%2C${maxLng}%2C${maxLat}&layer=mapnik&marker=${centerLat}%2C${centerLng}" 
+                style="width: 100%; height: 100%; object-fit: cover;"
+                onload="document.getElementById('loading').style.display='none'"
+                onerror="document.getElementById('loading').innerText='Failed to load map'" />
+            ${markersHtml}
+        </div>
+        <script>
+            document.addEventListener('message', function(e) {
+                if (e.data.startsWith('marker:')) {
+                    window.ReactNativeWebView.postMessage(e.data);
+                }
+            });
+        </script>
+    </body>
+    </html>
+    `;
+    
+    const handleMessage = (event) => {
+        const data = event.nativeEvent.data;
+        if (data && data.startsWith('marker:')) {
+            const idx = parseInt(data.split(':')[1]);
+            if (markers && markers[idx]) {
+                onMarkerPress?.(markers[idx]);
+            }
+        }
     };
     
     return (
         <View style={[styles.fallbackContainer, style]}>
-            <View style={[styles.mapPlaceholder, { backgroundColor: colors.card }]}>
-                <Text style={[styles.mapPlaceholderIcon, { color: colors.primary }]}>🗺️</Text>
-                <Text style={[styles.mapPlaceholderText, { color: colors.text }]}>
-                    Location: {centerLat.toFixed(4)}, {centerLng.toFixed(4)}
-                </Text>
-                <TouchableOpacity
-                    style={[styles.mapButton, { backgroundColor: colors.primary }]}
-                    onPress={openInBrowser}
-                >
-                    <Ionicons name="globe-outline" size={20} color="#fff" />
-                    <Text style={styles.mapButtonText}>Open in Maps</Text>
-                </TouchableOpacity>
-            </View>
+            <WebView
+                ref={webviewRef}
+                source={{ html: mapHtml }}
+                style={styles.webview}
+                scrollEnabled={true}
+                zoomEnabled={true}
+                bounces={true}
+                originWhitelist={['*']}
+                allowFileAccess={true}
+                startInLoadingState={true}
+                onLoadStart={() => setLoading(true)}
+                onLoadEnd={() => setLoading(false)}
+                onMessage={handleMessage}
+                renderLoading={() => (
+                    <View style={styles.loadingOverlay}>
+                        <ActivityIndicator size="large" color={colors?.primary || '#14b8a6'} />
+                        <Text style={styles.loadingText}>Loading map...</Text>
+                    </View>
+                )}
+            />
         </View>
     );
 }
@@ -48,6 +128,14 @@ function WebViewMapFallback({ region, markers, style, onMarkerPress }) {
 // Fallback styles
 const styles = StyleSheet.create({
     fallbackContainer: { flex: 1 },
+    webview: { flex: 1 },
+    loadingOverlay: { 
+        position: 'absolute', 
+        top: 0, left: 0, right: 0, bottom: 0, 
+        justifyContent: 'center', alignItems: 'center', 
+        backgroundColor: 'rgba(255,255,255,0.9)' 
+    },
+    loadingText: { marginTop: 10, color: '#666', fontSize: 14 },
     mapPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
     mapPlaceholderIcon: { fontSize: 48, marginBottom: 16 },
     mapPlaceholderText: { fontSize: 14, marginBottom: 16, textAlign: 'center' },
@@ -116,10 +204,10 @@ const Map = forwardRef(({
         },
     }));
 
-    // If maps didn't load, show fallback
+    // If maps didn't load, show embedded map fallback
     if (!mapLoaded) {
         return (
-            <WebViewMapFallback 
+            <EmbeddedMapFallback 
                 region={region}
                 markers={markers}
                 style={style}
