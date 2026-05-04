@@ -91,12 +91,39 @@ export default function ProductDetailScreen({ route }) {
     const [reviewPhotos, setReviewPhotos] = useState([]);
     const [isSaved, setIsSaved] = useState(false);
     const [whatsappUrl, setWhatsappUrl] = useState(null);
+    const [sellerInfo, setSellerInfo] = useState(null);
+
+    // Smart back navigation - go to seller store if coming from map/store
+    const handleGoBack = () => {
+        const routes = navigation.getState()?.routes || [];
+        // Find if we came from a seller store page
+        const sellerRoute = routes.find(r => 
+            r.name === 'SellerStore' || 
+            r.name === 'BusinessDetails' ||
+            r.name === 'NearbySellers'
+        );
+        
+        if (sellerRoute && sellerRoute.params?.sellerId) {
+            // Navigate to the seller store instead of going back
+            navigation.navigate('SellerStore', { sellerId: sellerRoute.params.sellerId });
+        } else if (sellerInfo?._id) {
+            // Fallback: navigate to seller store using stored seller info
+            navigation.navigate('SellerStore', { sellerId: sellerInfo._id });
+        } else {
+            navigation.goBack();
+        }
+    };
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 const response = await api.get(`/products/${productId}`);
                 setProduct(response.data);
+                
+                // Store seller info for smart back navigation
+                if (response.data.seller) {
+                    setSellerInfo(response.data.seller);
+                }
                 
                 // Fetch seller's WhatsApp
                 const sellerId = response.data.seller?._id;
@@ -513,7 +540,7 @@ export default function ProductDetailScreen({ route }) {
                             ))}
                         </View>
                     )}
-                    <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+                    <TouchableOpacity style={styles.backBtn} onPress={handleGoBack}>
                         <Ionicons name="arrow-back" size={22} color={colors.text} />
                     </TouchableOpacity>
                     <View style={{ position: 'absolute', top: 50, right: 16, flexDirection: 'row', gap: 8 }}>
