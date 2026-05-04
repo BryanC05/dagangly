@@ -128,9 +128,22 @@ function FinanceAI() {
         content: response.data.response 
       }]);
     } catch (error) {
+      console.error('AI request failed:', error);
+      let errorMessage = t("aiError") || "Maaf, saya sedang mengalami kesulitan. Coba lagi nanti.";
+      
+      if (error.code === 'ERR_NETWORK') {
+        errorMessage = "Tidak dapat terhubung ke server. Pastikan backend berjalan di localhost:5000";
+      } else if (error.response?.status === 401) {
+        errorMessage = "Silakan login terlebih dahulu untuk menggunakan AI Advisor";
+      } else if (error.response?.status >= 500) {
+        errorMessage = "Server error. Coba beberapa saat lagi.";
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: t("aiError") || "Maaf, saya sedang mengalami kesulitan. Coba lagi nanti."
+        content: errorMessage
       }]);
     } finally {
       setLoading(false);
