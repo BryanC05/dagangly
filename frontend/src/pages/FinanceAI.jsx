@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -259,7 +260,13 @@ function FinanceAI() {
                 <div className={`inline-block p-3 rounded-lg ${
                   msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                 }`}>
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                  {msg.role === "user" ? (
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  ) : (
+                    <ReactMarkdown className="prose prose-sm dark:prose-invert max-w-none">
+                      {msg.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
               </div>
             </div>

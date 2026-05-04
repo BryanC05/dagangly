@@ -1,0 +1,11 @@
+name: dagangly-backend
+icon: 🛒
+runtime:Provided
+build: ""
+run: ./server
+dev: ""
+ignore:
+  - node_modules
+  - uploads
+  - *.log
+  - .env

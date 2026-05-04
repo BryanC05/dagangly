@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { getApiUrl } from '@/config';
+import { getApiUrl, getFallbackApiUrl, setApiFailed, isApiFailed } from '@/config';
 
 const API_URL = getApiUrl() || '/api';
+const FALLBACK_URL = getFallbackApiUrl();
 const isAbsoluteApiUrl = /^https?:\/\//i.test(API_URL);
 
 const api = axios.create({
@@ -38,6 +39,21 @@ api.interceptors.response.use(
         ...error.config,
         baseURL: '/api',
         __proxyRetried: true,
+      });
+    }
+
+    // If primary API fails, try fallback URL
+    if (
+      (error?.code === 'ERR_NETWORK' || error?.response?.status >= 500) &&
+      !error?.config?.__fallbackRetried &&
+      !isApiFailed()
+    ) {
+      console.log('Primary API failed, trying fallback to localhost...');
+      setApiFailed(true);
+      return api.request({
+        ...error.config,
+        baseURL: FALLBACK_URL,
+        __fallbackRetried: true,
       });
     }
 

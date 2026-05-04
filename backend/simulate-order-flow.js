@@ -13,7 +13,7 @@
  * Usage: node simulate-order-flow.js
  */
 
-const API_BASE = 'https://dagangly-production.up.railway.app/api';
+const API_BASE = 'http://localhost:5000/api';
 const PASSWORD = 'test123';
 
 const BUYER_EMAIL = 'andi.buyer@marketplace.test';

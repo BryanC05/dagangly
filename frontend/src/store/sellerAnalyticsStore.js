@@ -173,8 +173,11 @@ export const useSellerAnalyticsStore = create((set) => ({
       console.log('API response:', res.data);
       set({ analytics: res.data, loading: false, useMockData: false });
     } catch (err) {
-      console.error('Failed to fetch seller analytics:', err);
-      set({ analytics: null, loading: false, useMockData: false, error: err.message });
+      console.error('Failed to fetch seller analytics:', err.message);
+      // Fallback to mock data when API fails
+      console.log('Using mock data as fallback...');
+      const mockAnalytics = generateMockAnalytics(period, sellerEmail);
+      set({ analytics: mockAnalytics, loading: false, useMockData: true, error: null });
     }
   },
 
