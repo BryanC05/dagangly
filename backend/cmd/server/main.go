@@ -561,7 +561,9 @@ func main() {
 
 	log.Printf("🚀 About to start server on port %s", port)
 	fmt.Printf("🚀 Server running on port %s\n", port)
-	r.Run(":" + port)
+	// Bind to all interfaces (0.0.0.0) to allow external connections from phone
+	r.SetTrustedProxies([]string{"0.0.0.0/0"})
+	r.Run("0.0.0.0:" + port)
 }
 
 // maskURI hides credentials in MongoDB connection string for logging
