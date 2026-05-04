@@ -3,6 +3,11 @@ import { getApiUrl, getFallbackApiUrl, setApiFailed, isApiFailed } from '@/confi
 
 const API_URL = getApiUrl() || '/api';
 const FALLBACK_URL = getFallbackApiUrl();
+
+// Log the API URL on initialization
+console.log('API initialized with URL:', API_URL);
+console.log('Fallback URL:', FALLBACK_URL);
+
 const isAbsoluteApiUrl = /^https?:\/\//i.test(API_URL);
 
 const api = axios.create({

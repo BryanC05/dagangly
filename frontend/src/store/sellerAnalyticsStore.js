@@ -182,6 +182,11 @@ export const useSellerAnalyticsStore = create((set) => ({
   fetchSellerAnalytics: async (period = '30', sellerEmail = DEFAULT_SELLER_EMAIL) => {
     set({ loading: true, error: null });
     
+    // Get current API URL to debug
+    import('@/config').then(({ getApiUrl }) => {
+      console.log('Current API URL:', getApiUrl());
+    });
+    
     console.log('fetchSellerAnalytics called, FORCE_MOCK:', FORCE_MOCK);
     
     // Always use mock data for demo
