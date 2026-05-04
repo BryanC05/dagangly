@@ -1,35 +1,25 @@
-import React, { useRef, useImperativeHandle, forwardRef, useState, Component } from 'react';
-import { View, Text, Dimensions, StyleSheet, TouchableOpacity, Linking, Platform, ActivityIndicator } from 'react-native';
+import React, { useRef, useState, Component } from 'react';
+import { View, Text, Dimensions, StyleSheet } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
-import { useTranslation } from '../hooks/useTranslation';
-import { Ionicons } from '@expo/vector-icons';
-import { tokens } from '../theme/tokens';
-// Import WebView for embedded map
 import { WebView } from 'react-native-webview';
 
 const { width, height } = Dimensions.get('window');
 
 // Disable native react-native-maps in Expo Go - it requires Google Play Services
 let MapView = null;
-let Marker = null;
-let mapLoaded = false;
 
 // Embedded WebView Map using OpenStreetMap tile server
 function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
     const { colors } = useThemeStore();
     const webviewRef = useRef(null);
-    const [loading, setLoading] = useState(true);
     
     const centerLat = region?.latitude || -6.2088;
     const centerLng = region?.longitude || 106.8456;
     const zoom = 14;
     
-    // Calculate tile coordinates for OpenStreetMap
-    const n = Math.pow(2, zoom);
-    const xtile = Math.floor((centerLng + 180) / 360 * n);
-    const ytile = Math.floor((1 - Math.log(Math.tan(centerLat * Math.PI / 180) + 1 / Math.cos(centerLat * Math.PI / 180)) / Math.PI) / 2 * n);
+    // Convert markers to JSON for JS
+    const markersJson = JSON.stringify(markers || []);
     
-    // Map HTML with Leaflet for proper tile rendering
     const mapHtml = `
     <!DOCTYPE html>
     <html>
@@ -41,51 +31,42 @@ function EmbeddedMapFallback({ region, markers, style, onMarkerPress }) {
             * { margin: 0; padding: 0; box-sizing: border-box; }
             html, body { width: 100%; height: 100%; overflow: hidden; }
             #map { width: 100%; height: 100%; }
-            .marker-icon { font-size: 32px; text-align: center; }
         </style>
     </head>
     <body>
         <div id="map"></div>
         <script>
-var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
-            
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            }).addTo(map);
-            
-            // Add markers - handle both coordinate.lat/lng and lat/lng formats
-            ${markers?.map((marker) => {
-                // Handle coordinate format (from NearbySellersScreen)
-                const lat = marker?.coordinate?.latitude || marker?.lat || marker?.latitude;
-                const lng = marker?.coordinate?.longitude || marker?.lng || marker?.longitude;
-                if (!lat || !lng) return '';
-                return `L.marker([${lat}, ${lng}]).addTo(map).bindPopup('${marker?.title || 'Seller'}').on('click', function() { window.ReactNativeWebView.postMessage('marker:${lat},${lng}'); });`;
-            }).join('\n            ') || ''}
-            
-            map.whenReady(function() {
+            try {
+                var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
+                
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+                
+                // Add markers from React Native data
+                var markersData = ${markersJson};
+                if (markersData && markersData.length > 0) {
+                    markersData.forEach(function(m) {
+                        var lat = m.coordinate ? m.coordinate.latitude : m.latitude;
+                        var lng = m.coordinate ? m.coordinate.longitude : m.longitude;
+                        if (lat && lng) {
+                            L.marker([lat, lng]).addTo(map).bindPopup(m.title || 'Seller');
+                        }
+                    });
+                }
+                
                 window.ReactNativeWebView.postMessage('mapReady');
-            });
+            } catch(e) {
+                document.body.innerHTML = '<div style="padding:20px;color:red;">Error: ' + e.message + '</div>';
+            }
         </script>
     </body>
     </html>
     `;
     
     const handleMessage = (event) => {
-        const data = event.nativeEvent.data;
-        if (data && data.startsWith('marker:')) {
-            const parts = data.split(':')[1].split(',');
-            const lat = parseFloat(parts[0]);
-            const lng = parseFloat(parts[1]);
-            const marker = markers?.find(m => 
-                (m.lat || m.latitude) === lat && (m.lng || m.longitude) === lng
-            );
-            if (marker) {
-                onMarkerPress?.(marker);
-            }
-        } else if (data === 'mapReady') {
-            setLoading(false);
-        }
+        console.log('Map message:', event.nativeEvent.data);
     };
     
     return (
@@ -98,20 +79,10 @@ var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
                 zoomEnabled={true}
                 bounces={true}
                 originWhitelist={['*']}
-                allowFileAccess={true}
-                startInLoadingState={true}
-                onLoadStart={() => setLoading(true)}
-                onLoadEnd={() => setLoading(false)}
-                onMessage={handleMessage}
                 javaScriptEnabled={true}
                 mixedContentMode="always"
                 domStorageEnabled={true}
-                renderLoading={() => (
-                    <View style={styles.loadingOverlay}>
-                        <ActivityIndicator size="large" color={colors?.primary || '#14b8a6'} />
-                        <Text style={styles.loadingText}>Loading map...</Text>
-                    </View>
-                )}
+                onMessage={handleMessage}
             />
         </View>
     );
