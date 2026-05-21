@@ -18,7 +18,10 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useThemeStore } from '../../store/themeStore';
 import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../api/api';
-import { haversineDistanceKm } from '../../utils/helpers';
+import { OFFLINE_TESTING_MODE } from '../../config';
+import { getMockLocation, getMockDestination } from '../../data/mockApi';
+import { getRouteCoordinates } from '../../services/routingService';
+import Map from '../../components/Map';
 
 export default function LiveTrackingMap() {
     const route = useRoute();

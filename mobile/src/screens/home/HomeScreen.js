@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     View, Text, ScrollView, TouchableOpacity,
     RefreshControl, Dimensions, StyleSheet, ActivityIndicator,
-    TextInput, ImageBackground, FlatList,
+    TextInput, ImageBackground, FlatList, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,10 +13,12 @@ import ProductCard from '../../components/ProductCard';
 import ForumPostCard from '../../components/ForumPostCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { HomeScreenSkeleton } from '../../components/LoadingSkeleton';
-import { CATEGORIES_EN, CATEGORIES_ID } from '../../config';
+import { CATEGORIES_EN, CATEGORIES_ID, OFFLINE_TESTING_MODE } from '../../config';
 import { DEFAULT_LOCATION } from '../../utils/constants';
 import * as Location from 'expo-location';
 import { useResponsive } from '../../hooks/useResponsive';
+import { getProducts, getRecommendations, getTrendingProducts } from '../../data/mockApi';
+import productImages from '../../assets/productImages';
 
 const { width } = Dimensions.get('window');
 
@@ -42,29 +44,29 @@ export default function HomeScreen({ navigation }) {
 
     const heroSlides = [
         {
-            image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=70",
-            title: "Produk Lokal Berkualitas",
-            desc: "Temukan kerajinan tangan terbaik",
+            image: "nasi_goreng.webp",
+            title: "Nasi Goreng Special",
+            desc: "Bumbu rahasia pilihan untuk rasa yang tak terlupakan",
         },
         {
-            image: "https://images.unsplash.com/photo-1567620905732-2d1ecea66514?w=800&q=70",
-            title: "Makanan Khas Nusantara",
-            desc: "Jelajahi kelezatan makanan tradisional",
+            image: "bakmi.png",
+            title: "Mie Ayam Bakso",
+            desc: "Mie ayam dengan bakso daging sapi pilihan",
         },
         {
-            image: "https://images.unsplash.com/photo-1555529669-e69e7aa0f9a2?w=800&q=70",
-            title: "Dukung Ekonomi Lokal",
-            desc: "Setiap pembelian mendukung pelaku UMKM",
+            image: "kopi-susu.jpg",
+            title: "Kopi Susu Gula Aren",
+            desc: "Racikan kopi susu manis khas Indonesia",
         },
         {
-            image: "https://images.unsplash.com/photo-1445205170230-053bc82c5110?w=800&q=70",
-            title: "Fashion Karya Anak Bangsa",
-            desc: "Desain unik bisnis lokal",
+            image: "brownies.webp",
+            title: "Brownies Premium",
+            desc: "Brownies cokelat dengan topping pilihan",
         },
         {
-            image: "https://images.unsplash.com/photo-1596462502278-27dc1c2cae24?w=800&q=70",
-            title: "Kecantikan Alami",
-            desc: "Produk beauty alami dari bahan lokal",
+            image: "sate-ayam.webp",
+            title: "Sate Ayam Khas Solo",
+            desc: "Sate ayam dengan bumbu kacang spesial",
         },
     ];
 
@@ -97,6 +99,29 @@ export default function HomeScreen({ navigation }) {
     const categories = allCategories.filter((c) => c.id !== 'all');
 
     const fetchData = useCallback(async () => {
+        if (OFFLINE_TESTING_MODE) {
+            setLoading(true);
+            try {
+                const newProducts = getProducts({ limit: 6 });
+                const trending = getTrendingProducts();
+                const recommended = getRecommendations();
+
+                setFeaturedProducts(newProducts.products || []);
+                setTrendingProducts(trending.products || []);
+                setDailyDeals(recommended.products || []);
+                setStats({ sellers: 3, products: newProducts.total });
+                setCategoryCounts({ food: 14, beverages: 9, snacks: 5 });
+                setNearbySellers([]);
+                setForumPosts([]);
+            } catch (error) {
+                console.error('Error loading mock data:', error);
+            } finally {
+                setLoading(false);
+                setNearbyLoading(false);
+            }
+            return;
+        }
+
         let coords = userLocation;
 
         if (!coords) {
@@ -168,7 +193,7 @@ export default function HomeScreen({ navigation }) {
             setLoading(false);
             setNearbyLoading(false);
         }
-    }, []);
+    }, [userLocation]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -625,7 +650,7 @@ export default function HomeScreen({ navigation }) {
                 {heroSlides.map((slide, index) => (
                     <ImageBackground
                         key={index}
-                        source={{ uri: slide.image }}
+                        source={productImages[slide.image] || {}}
                         style={styles.heroBackground}
                         imageStyle={{ opacity: index === currentSlide ? 1 : 0 }}
                         resizeMode="cover"
@@ -757,11 +782,11 @@ export default function HomeScreen({ navigation }) {
                             >
                                 {nearbySellers.slice(0, 5).map((seller) => (
                                     <TouchableOpacity
-                                        key={seller._id}
+                                        key={seller._id || seller.id}
                                         style={styles.nearbySellerItem}
                                         onPress={() => navigation.navigate('Home', {
                                             screen: 'BusinessDetails',
-                                            params: { sellerId: seller._id }
+                                            params: { sellerId: seller._id || seller.id }
                                         })}
                                     >
                                         <View style={styles.nearbySellerIcon}>
@@ -836,10 +861,10 @@ export default function HomeScreen({ navigation }) {
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
                     {featuredProducts.map((item) => (
-                        <View key={item._id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
+                        <View key={item._id || item.id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
                             <ProductCard
                                 product={item}
-                                onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
+                                onPress={() => navigation.navigate('ProductDetail', { productId: item._id || item.id })}
                             />
                         </View>
                     ))}
@@ -859,10 +884,10 @@ export default function HomeScreen({ navigation }) {
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
                         {trendingProducts.map((item) => (
-                            <View key={item._id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
+                            <View key={item._id || item.id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
                                 <ProductCard
                                     product={item}
-                                    onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
+                                    onPress={() => navigation.navigate('ProductDetail', { productId: item._id || item.id })}
                                 />
                             </View>
                         ))}
@@ -883,10 +908,10 @@ export default function HomeScreen({ navigation }) {
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
                         {dailyDeals.map((item) => (
-                            <View key={item._id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
+                            <View key={item._id || item.id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
                                 <ProductCard
                                     product={item}
-                                    onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
+                                    onPress={() => navigation.navigate('ProductDetail', { productId: item._id || item.id })}
                                 />
                             </View>
                         ))}

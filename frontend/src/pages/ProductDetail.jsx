@@ -1,4 +1,5 @@
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, Store, Phone, Star, ArrowLeft, ShoppingCart, MessageCircle, Shield, Package, Heart, Share2, Flag, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -134,19 +135,19 @@ function ProductDetail() {
   const handleAddToCart = () => {
     if (!product) return;
     if (product.hasVariants && !selectedVariant) {
-      alert('Please select a variant first.');
+      toast.error('Please select a variant first.');
       return;
     }
     // Check required option groups
     const missingRequired = product.optionGroups?.filter(g => g.required && (!selectedOptions[g.name] || selectedOptions[g.name].chosen.length === 0));
     if (missingRequired?.length > 0) {
-      alert(`Please select: ${missingRequired.map(g => g.name).join(', ')}`);
+      toast.error(`Please select: ${missingRequired.map(g => g.name).join(', ')}`);
       return;
     }
     const variant = selectedVariant ? { name: selectedVariant.name, price: selectedVariant.price } : null;
     const optionsArr = Object.values(selectedOptions).filter(o => o.chosen.length > 0);
     addToCart(product, quantity, variant, optionsArr);
-    alert(`Added ${quantity} ${product.name} to cart!`);
+    toast.success(`Added ${quantity} ${product.name} to cart!`);
   };
 
   const { isProductSaved, toggleSaveProduct, isLoading: isSaveLoading } = useSavedProductsStore();
@@ -441,7 +442,7 @@ function ProductDetail() {
                             navigator.share({ title: product.name, url });
                           } else {
                             navigator.clipboard.writeText(url);
-                            alert('Link disalin!');
+                            toast.success('Link disalin!');
                           }
                         }}
                       >
@@ -499,8 +500,8 @@ function ProductDetail() {
                             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
                             body: JSON.stringify({ targetType: 'product', targetId: product._id, reason }),
                           });
-                          alert('Report submitted. Thank you!');
-                        } catch (e) { alert('Failed to submit report'); }
+                          toast.success('Report submitted. Thank you!');
+                        } catch (e) { toast.error('Failed to submit report'); }
                       }}
                     >
                       <Flag className="h-4 w-4" />

@@ -14,6 +14,10 @@ import DriverRatingModal from '../../components/DriverRatingModal';
 import { OrdersListSkeleton } from '../../components/LoadingSkeleton';
 import OrderProgressStepper from '../../components/OrderProgressStepper';
 import OrderStatusCountdown from '../../components/OrderStatusCountdown';
+import { OFFLINE_TESTING_MODE } from '../../config';
+import { getOrders } from '../../data/mockApi';
+import OrderPaymentPanel from '../../components/OrderPaymentPanel';
+import { getBuyerStatusLabel, getSellerStatusLabel, formatScheduledPickup } from '../../utils/orderStatus';
 
 const STATUS_FLOW = ['pending', 'payment_pending', 'confirmed', 'preparing', 'ready', 'delivered'];
 
@@ -57,6 +61,12 @@ export default function OrdersScreen({ navigation }) {
 
     const fetchOrders = useCallback(async () => {
         try {
+            if (OFFLINE_TESTING_MODE) {
+                const { orders: mockOrders } = await getOrders(user?.id);
+                setOrders(mockOrders);
+                setLoading(false);
+                return;
+            }
             const response = await api.get('/orders/my-orders');
             setOrders(response.data || []);
         } catch (error) {
@@ -64,7 +74,7 @@ export default function OrdersScreen({ navigation }) {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [user?.id]);
 
     useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
@@ -76,16 +86,13 @@ export default function OrdersScreen({ navigation }) {
 
     const isSeller = (order) => {
         const sellerId = order.seller?._id || order.seller;
-        // Use 'id' since that's what the user object has (not '_id')
-        const userId = user?.id;
-        const userIdStr = String(userId || '');
-        
-        // Convert to string for comparison
-        const sellerIdStr = String(sellerId || '');
-        
-        return sellerIdStr === userIdStr;
+        return String(sellerId || '') === String(user?.id || '');
     };
-    // isBuyer function removed - no longer needed for UI
+
+    const isBuyer = (order) => {
+        const buyerId = order.buyer?._id || order.buyer;
+        return String(buyerId || '') === String(user?.id || '');
+    };
 
     const getNextStatus = (currentStatus) => {
         // For payment_pending, next is confirmed (paid)
@@ -124,7 +131,9 @@ export default function OrdersScreen({ navigation }) {
         const isPickup = order.deliveryType === 'pickup';
         const canUpdate = isSeller(order) && !['delivered', 'cancelled'].includes(order.status);
         const nextStatus = getNextStatus(order.status);
-        
+        const statusLabel = isSeller(order) ? getSellerStatusLabel(order) : getBuyerStatusLabel(order);
+        const scheduled = formatScheduledPickup(order);
+
         // Get products from order
         const products = order.products || order.items || [];
         const firstProduct = products[0];
@@ -167,12 +176,15 @@ export default function OrdersScreen({ navigation }) {
                         )}
                         <View style={[{}, { backgroundColor: statusInfo.bg, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }]}>
                             <Text style={{ fontSize: 11, fontWeight: '700', color: statusInfo.text }}>
-                                {STATUS_LABELS[order.status] || order.status}
+                                {statusLabel || STATUS_LABELS[order.status] || order.status}
                             </Text>
                         </View>
                     </View>
                 </View>
-                
+                {scheduled && (
+                    <Text style={{ fontSize: 11, color: '#b45309', marginBottom: 6 }}>Pickup {scheduled}</Text>
+                )}
+
                 {!['delivered', 'cancelled'].includes(order.status) && (
                     <View style={{ marginVertical: 8 }}>
                         <OrderStatusCountdown status={order.status} orderDate={order.createdAt} />
@@ -257,6 +269,7 @@ export default function OrdersScreen({ navigation }) {
         const statusInfo = STATUS_COLORS[order.status] || STATUS_COLORS.pending;
         const canUpdate = isSeller(order) && !['delivered', 'cancelled'].includes(order.status);
         const nextStatus = getNextStatus(order.status);
+        const scheduled = formatScheduledPickup(order);
 
         return (
             <Modal visible={showOrderModal} animationType="slide" transparent>
@@ -401,11 +414,28 @@ export default function OrdersScreen({ navigation }) {
                             </View>
                         </View>
 
+                        {scheduled && (
+                            <Text style={{ fontSize: 13, color: colors?.textSecondary, marginBottom: 8 }}>
+                                Scheduled pickup: {scheduled}
+                            </Text>
+                        )}
+
+                        <OrderPaymentPanel
+                            order={order}
+                            user={user}
+                            colors={colors}
+                            t={t}
+                            onUpdated={(updated) => {
+                                setSelectedOrder(updated);
+                                fetchOrders();
+                            }}
+                        />
+
                         {/* Status Update Button */}
-                        {canUpdate && nextStatus && (
+                        {canUpdate && nextStatus && nextStatus !== 'payment_pending' && (
                             <TouchableOpacity
                                 style={{
-                                    marginTop: 100,
+                                    marginTop: 16,
                                     marginBottom: 20,
                                     backgroundColor: colors?.primary,
                                     paddingVertical: 14,

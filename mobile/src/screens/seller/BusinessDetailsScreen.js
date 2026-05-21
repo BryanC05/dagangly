@@ -11,6 +11,8 @@ import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from '../../hooks/useTranslation';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { BusinessDetailSkeleton } from '../../components/LoadingSkeleton';
+import { OFFLINE_TESTING_MODE } from '../../config';
+import { getBusinessById, getProductsByBusiness } from '../../data/mockApi';
 
 export default function BusinessDetailsScreen() {
     const { t } = useTranslation();
@@ -43,6 +45,14 @@ export default function BusinessDetailsScreen() {
 
     const fetchSellerDetails = async () => {
         try {
+            if (OFFLINE_TESTING_MODE) {
+                const mockSeller = getBusinessById(sellerId);
+                const mockProducts = getProductsByBusiness(sellerId);
+                setSeller(mockSeller || { id: sellerId, name: 'Store', businessName: 'Store' });
+                setProducts(mockProducts || []);
+                setLoading(false);
+                return;
+            }
             const [sellerRes, productsRes] = await Promise.all([
                 api.get(`/users/seller/${sellerId}`),
                 api.get(`/products/seller/${sellerId}`)

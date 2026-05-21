@@ -50,6 +50,12 @@ const InteractiveBackground = () => {
 
     useEffect(() => {
         setIsClient(true);
+
+        // Disable particle effects on mobile or when reduced motion is preferred
+        const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (isMobile || prefersReducedMotion) return;
+
         let rafId;
         let lastSpawnTime = 0;
 
@@ -58,8 +64,8 @@ const InteractiveBackground = () => {
 
             rafId = requestAnimationFrame(() => {
                 const now = Date.now();
-                // Spawn a ⭐ star every ~40ms to avoid DOM overload
-                if (now - lastSpawnTime > 40 && containerRef.current) {
+                // Spawn a ⭐ star every ~100ms to reduce DOM churn
+                if (now - lastSpawnTime > 100 && containerRef.current) {
                     lastSpawnTime = now;
 
                     const particle = document.createElement('div');
@@ -71,7 +77,6 @@ const InteractiveBackground = () => {
                     particle.style.pointerEvents = 'none';
                     particle.style.userSelect = 'none';
                     particle.style.zIndex = '50';
-                    particle.style.filter = 'drop-shadow(0 0 4px rgba(234,179,8,0.5))';
 
                     const angle = Math.random() * Math.PI * 2;
                     const velocity = 40 + Math.random() * 100;
@@ -106,7 +111,7 @@ const InteractiveBackground = () => {
             const colors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7'];
             const icons = ['🛒', '✨', '🛍️', '🎉'];
 
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 15; i++) {
                 const particle = document.createElement('div');
                 particle.textContent = icons[Math.floor(Math.random() * icons.length)];
                 particle.style.cssText = `
@@ -143,7 +148,7 @@ const InteractiveBackground = () => {
             }
         };
 
-        const spawnBurst = (x, y, icons, count = 20, velocityRange = 300) => {
+        const spawnBurst = (x, y, icons, count = 12, velocityRange = 300) => {
             for (let i = 0; i < count; i++) {
                 const particle = document.createElement('div');
                 particle.textContent = icons[Math.floor(Math.random() * icons.length)];

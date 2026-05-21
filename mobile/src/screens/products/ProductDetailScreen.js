@@ -15,7 +15,8 @@ import { getImageUrl, formatPrice } from '../../utils/helpers';
 import { ProductDetailSkeleton } from '../../components/LoadingSkeleton';
 import { particleEvents } from '../../components/BackgroundEffect';
 import LiveStockBadge from '../../components/LiveStockBadge';
-import { API_HOST } from '../../config';
+import { API_HOST, OFFLINE_TESTING_MODE } from '../../config';
+import { getProductById } from '../../data/mockApi';
 
 const { width } = Dimensions.get('window');
 
@@ -117,22 +118,33 @@ export default function ProductDetailScreen({ route }) {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
+                if (OFFLINE_TESTING_MODE) {
+                    const mockProduct = getProductById(productId);
+                    if (mockProduct) {
+                        setProduct(mockProduct);
+                        if (mockProduct.seller) {
+                            setSellerInfo(mockProduct.seller);
+                        }
+                    } else {
+                        Alert.alert(t.error || 'Error', 'Product not found');
+                        navigation.goBack();
+                    }
+                    setLoading(false);
+                    return;
+                }
                 const response = await api.get(`/products/${productId}`);
                 setProduct(response.data);
-                
-                // Store seller info for smart back navigation
+
                 if (response.data.seller) {
                     setSellerInfo(response.data.seller);
                 }
-                
-                // Fetch seller's WhatsApp
+
                 const sellerId = response.data.seller?._id;
                 if (sellerId) {
                     try {
                         const waRes = await api.get(`/whatsapp/seller/${sellerId}`);
                         setWhatsappUrl(waRes.data.whatsappUrl);
                     } catch (e) {
-                        // WhatsApp not available
                     }
                 }
             } catch (error) {

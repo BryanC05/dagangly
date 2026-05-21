@@ -14,6 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import { OrdersListSkeleton } from '@/components/ui/skeleton';
+import OrderPaymentPanel from '../components/OrderPaymentPanel';
+import { getBuyerStatusLabel, getSellerStatusLabel, formatScheduledPickup } from '../utils/orderStatus';
+import { showError, showSuccess } from '../utils/toast';
 import './Orders.css';
 
 const statusConfig = {
@@ -92,9 +95,10 @@ function Orders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      showSuccess('Order updated');
     },
     onError: (err) => {
-      alert(err.response?.data?.message || 'Failed to update order status');
+      showError('Update failed', err.response?.data?.message || 'Failed to update order status');
     },
   });
 
@@ -226,6 +230,11 @@ const orders = normalizeOrdersPayload(rawOrders);
             filteredOrders.map((order, orderIndex) => {
               const orderId = resolveOrderId(order, `order-${orderIndex}`);
               const status = getStatusConfig(order, user);
+              const isOrderSeller = String(order.seller?._id || order.seller) === String(user?.id);
+              const displayStatusLabel = isOrderSeller
+                ? getSellerStatusLabel(order)
+                : getBuyerStatusLabel(order);
+              const scheduledLabel = formatScheduledPickup(order);
               const StatusIcon = status.icon;
               const nextStatus = getNextStatus(order.status);
               const isExpanded = !!expandedOrders[orderId];
@@ -296,8 +305,13 @@ const orders = normalizeOrdersPayload(rawOrders);
                       <div className="order-header-right">
                         <div className="order-status-badge" style={{ color: status.color, background: status.bg }}>
                           <StatusIcon size={14} />
-                          <span>{status.label}</span>
+                          <span>{displayStatusLabel || status.label}</span>
                         </div>
+                        {scheduledLabel && (
+                          <span className="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                            Pickup {scheduledLabel}
+                          </span>
+                        )}
                         <div className="order-total-compact">
                           {formatCurrency(order.totalAmount)}
                         </div>
@@ -456,6 +470,22 @@ const orders = normalizeOrdersPayload(rawOrders);
                                 <PaymentIcon size={14} />
                                 {payment.label}
                               </span>
+                            </div>
+
+                            {scheduledLabel && (
+                              <div className="meta-row">
+                                <span className="meta-label">Scheduled pickup</span>
+                                <span className="meta-value">{scheduledLabel}</span>
+                              </div>
+                            )}
+
+                            <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+                              <OrderPaymentPanel
+                                order={order}
+                                user={user}
+                                compact
+                                onUpdated={() => queryClient.invalidateQueries({ queryKey: ['orders'] })}
+                              />
                             </div>
 
                             {/* Notes */}

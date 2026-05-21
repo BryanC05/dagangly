@@ -1,158 +1,229 @@
-import React, { useRef, useState, Component, forwardRef, useImperativeHandle } from 'react';
-import { View, Text, Dimensions, StyleSheet } from 'react-native';
+import React, { useRef, useState, Component, forwardRef, useImperativeHandle, useEffect } from 'react';
+import { View, Text, Dimensions, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useThemeStore } from '../store/themeStore';
+import { tokens } from '../theme/tokens';
 import { WebView } from 'react-native-webview';
+import { OFFLINE_TESTING_MODE } from '../config';
 
 const { width, height } = Dimensions.get('window');
 
-// Disable native react-native-maps in Expo Go - it requires Google Play Services
 let MapView = null;
 let mapLoaded = false;
 
-// Embedded WebView Map using OpenStreetMap tile server
-function EmbeddedMapFallback({ region, markers, style, onMarkerPress, onNavigate }) {
+function EmbeddedMapFallback({ region, markers, style, onMarkerPress, onNavigate, polylineCoordinates, polylineColor }) {
     const webviewRef = useRef(null);
-    
+    const [isReady, setIsReady] = useState(false);
+    const [routeCoords, setRouteCoords] = useState([]);
+
     const centerLat = region?.latitude || -6.2088;
     const centerLng = region?.longitude || 106.8456;
     const zoom = 14;
-    
-    // Convert markers to JSON for JS
+    const routeColor = polylineColor || '#14b8a6';
+
     const markersJson = JSON.stringify(markers || []);
-    
-    const mapHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            html, body { width: 100%; height: 100%; overflow: hidden; }
-            #map { width: 100%; height: 100%; }
-            .popup-content { min-width: 150px; }
-            .popup-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
-            .popup-rating { color: #666; font-size: 12px; margin-bottom: 8px; }
-            .popup-btn {
-                background: #14b8a6;
-                color: white;
-                padding: 8px 16px;
-                border-radius: 6px;
-                text-align: center;
-                cursor: pointer;
-                font-size: 13px;
-                border: none;
-                display: block;
-                text-decoration: none;
+
+    useEffect(() => {
+        if (polylineCoordinates && polylineCoordinates.length > 0) {
+            const coords = polylineCoordinates.map(c => [c.longitude, c.latitude]);
+            setRouteCoords(coords);
+            if (isReady && webviewRef.current) {
+                const coordsJson = JSON.stringify(coords);
+                webviewRef.current.injectJavaScript(`drawRoute(${coordsJson});void(0);`);
             }
-            .popup-btn:active { background: #0d9488; }
-            .star { color: #f59e0b; }
-        </style>
-    </head>
-    <body>
-        <div id="map"></div>
-        <script>
-            try {
-                var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
-                
-                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-                
-                // Add markers from React Native data
-                var markersData = ${markersJson};
-                if (markersData && markersData.length > 0) {
-                    markersData.forEach(function(m) {
-                        var lat = m.coordinate ? m.coordinate.latitude : m.latitude;
-                        var lng = m.coordinate ? m.coordinate.longitude : m.longitude;
-                        var title = m.title || m.description || 'Seller';
-                        var rating = m.rating || 0;
-                        var reviewCount = m.reviewCount || 0;
-                        var id = m.id || '';
-                        
-                        // Create popup content
-                        var stars = '';
-                        for(var i=0; i<5; i++) {
-                            stars += i < Math.floor(rating) ? '<span class="star">★</span>' : '<span style="color:#ddd">★</span>';
-                        }
-                        
-                        var popupContent = '<div class="popup-content">' +
-                            '<div class="popup-title">' + title + '</div>' +
-                            '<div class="popup-rating">' + stars + ' (' + reviewCount + ' reviews)</div>' +
-                            '<button class="popup-btn" onclick="window.ReactNativeWebView.postMessage(\\'navigate:' + id + '\\')">🧭 Go to Store</button>' +
-                        '</div>';
-                        
-                        // Add circle marker (dot)
-                        L.circleMarker([lat, lng], {
-                            radius: 10,
-                            fillColor: '#14b8a6',
-                            color: '#0f766e',
-                            weight: 2,
-                            opacity: 1,
-                            fillOpacity: 0.8
-                        }).addTo(map).bindPopup(popupContent);
-                    });
-                }
-                
-                window.ReactNativeWebView.postMessage('mapReady');
-            } catch(e) {
-                document.body.innerHTML = '<div style="padding:20px;color:red;">Error: ' + e.message + '</div>';
-            }
-        </script>
-    </body>
-    </html>
-    `;
-    
-    const handleMessage = (event) => {
-        const data = event.nativeEvent.data;
-        if (data && data.startsWith('navigate:')) {
-            const sellerId = data.split(':')[1];
-            if (onNavigate) {
-                onNavigate(sellerId);
+        } else {
+            setRouteCoords([]);
+            if (isReady && webviewRef.current) {
+                webviewRef.current.injectJavaScript('clearRoute();void(0);');
             }
         }
+    }, [polylineCoordinates, isReady]);
+
+    const routeCoordsJson = JSON.stringify(routeCoords);
+
+    const mapHtml = `<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        * { margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        #map { width: 100%; height: 100%; background: #e5e5e5; }
+        .leaflet-container { width: 100% !important; height: 100% !important; background: #e5e5e5 !important; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map, userMarker, routePolyline, userIcon;
+        var routeCoords = ${routeCoordsJson};
+        var markers = ${markersJson};
+        var routeColor = '${routeColor}';
+
+        function clearRoute() {
+            if (routePolyline) {
+                map.removeLayer(routePolyline);
+                routePolyline = null;
+            }
+            routeCoords = [];
+        }
+
+        function drawRoute(coords) {
+            if (routePolyline) {
+                map.removeLayer(routePolyline);
+            }
+            if (coords && coords.length > 1) {
+                var latlngs = coords.map(function(c) {
+                    return [c[1], c[0]];
+                });
+                routePolyline = L.polyline(latlngs, {
+                    color: routeColor,
+                    weight: 5,
+                    opacity: 0.8,
+                    dashArray: '10, 10'
+                }).addTo(map);
+                map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
+            }
+        }
+
+        function init() {
+            try {
+                map = L.map('map', {
+                    center: [${centerLat}, ${centerLng}],
+                    zoom: ${zoom}
+                });
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OSM'
+                }).addTo(map);
+
+                if (routeCoords && routeCoords.length > 0) {
+                    drawRoute(routeCoords);
+                }
+
+                markers.forEach(function(m, i) {
+                    var lat = m.coordinate ? m.coordinate.latitude : m.latitude;
+                    var lng = m.coordinate ? m.coordinate.longitude : m.longitude;
+                    var title = m.title || m.description || 'Seller';
+                    var id = m.id || m._id || 's' + i;
+                    var popupContent = '<div style="padding:10px;font-family:sans-serif">' +
+                        '<b style="font-size:14px">' + title + '</b><br/>' +
+                        '<button onclick="nav(\\'' + id + '\\',' + lat + ',' + lng + ')" ' +
+                        'style="margin-top:8px;padding:8px;background:' + routeColor + ';color:white;border:none;border-radius:4px;cursor:pointer">Navigate</button> ' +
+                        '<button onclick="sto(\\'' + id + '\\')" ' +
+                        'style="margin-top:8px;padding:8px;background:#6366f1;color:white;border:none;border-radius:4px;cursor:pointer">Store</button>' +
+                        '</div>';
+                    L.circleMarker([lat, lng], {
+                        radius: 10,
+                        fillColor: routeColor,
+                        color: '#fff',
+                        weight: 2,
+                        fillOpacity: 0.8
+                    }).addTo(map).bindPopup(popupContent);
+                });
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(p) {
+                        userIcon = L.divIcon({
+                            className: '',
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 10],
+                            html: '<div style="width:20px;height:20px;background:#3b82f6;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3)"></div>'
+                        });
+                        userMarker = L.marker([p.coords.latitude, p.coords.longitude], { icon: userIcon }).addTo(map);
+                        map.setView([p.coords.latitude, p.coords.longitude], ${zoom});
+                    }, null, { timeout: 5000 });
+                }
+
+                window.ReactNativeWebView.postMessage('ready');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function nav(id, lat, lng) {
+            window.ReactNativeWebView.postMessage('nav:' + id + ':navigate');
+        }
+
+        function sto(id) {
+            window.ReactNativeWebView.postMessage('store:' + id);
+        }
+
+        function handleNativeMessage(event) {
+            var data = event.data || event;
+            if (typeof data === 'string') {
+                if (data === 'clearRoute') {
+                    clearRoute();
+                } else if (data.startsWith('route:')) {
+                    try {
+                        var coords = JSON.parse(data.substring(6));
+                        routeCoords = coords;
+                        drawRoute(coords);
+                    } catch (e) {
+                        console.error('Failed to parse route:', e);
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('message', handleNativeMessage);
+        window.addEventListener('message', handleNativeMessage);
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>`;
+
+    const handleMessage = (event) => {
+        const data = event.nativeEvent.data;
+        const handler = onNavigate || onMarkerPress;
+
+        if (data === 'ready') {
+            setIsReady(true);
+        } else if (data === 'cleared') {
+            if (handler) handler(null, 'clearRoute');
+        } else if (data && data.startsWith('store:')) {
+            const id = data.split(':')[1];
+            if (handler) handler(id, 'store');
+        } else if (data && data.startsWith('nav:')) {
+            const parts = data.split(':');
+            const id = parts[1];
+            const action = parts[2];
+            if (handler) handler(id, action);
+        }
     };
-    
+
     return (
-        <View style={[styles.fallbackContainer, style]}>
+        <View style={[styles.fallbackContainer, style, { minHeight: 300 }]}>
             <WebView
                 ref={webviewRef}
                 source={{ html: mapHtml }}
                 style={styles.webview}
-                scrollEnabled={true}
-                zoomEnabled={true}
-                bounces={true}
+                scrollEnabled={false}
+                zoomEnabled={false}
+                bounces={false}
                 originWhitelist={['*']}
                 javaScriptEnabled={true}
                 mixedContentMode="always"
                 domStorageEnabled={true}
                 onMessage={handleMessage}
+                onError={(e) => console.log('WebView error:', e)}
             />
         </View>
     );
 }
 
-// Fallback styles
 const styles = StyleSheet.create({
     fallbackContainer: { flex: 1 },
     webview: { flex: 1 },
-    loadingOverlay: { 
-        position: 'absolute', 
-        top: 0, left: 0, right: 0, bottom: 0, 
-        justifyContent: 'center', alignItems: 'center', 
-        backgroundColor: 'rgba(255,255,255,0.9)' 
-    },
-    loadingText: { marginTop: 10, color: '#666', fontSize: 14 },
-    mapPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-    mapPlaceholderIcon: { fontSize: 48, marginBottom: 16 },
-    mapPlaceholderText: { fontSize: 14, marginBottom: 16, textAlign: 'center' },
-    mapButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, gap: 8 },
-    mapButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
 });
 
-// Error boundary
 class MapErrorBoundary extends Component {
     constructor(props) {
         super(props);
@@ -184,9 +255,6 @@ class MapErrorBoundary extends Component {
     }
 }
 
-/**
- * Reusable Map Component - uses react-native-maps if available, otherwise shows fallback
- */
 const Map = forwardRef(({
     region,
     userLocation,
@@ -196,6 +264,7 @@ const Map = forwardRef(({
     polylineColor,
     polylineWidth = 4,
     onMarkerPress,
+    onNavigate,
     selectedMarkerId,
     style,
     showsUserLocation = true,
@@ -203,7 +272,6 @@ const Map = forwardRef(({
     showsCompass = true,
     children,
 }, ref) => {
-    // All hooks must be called before any conditional returns (Rules of Hooks)
     const innerMapRef = useRef(null);
     const { colors } = useThemeStore();
 
@@ -213,7 +281,6 @@ const Map = forwardRef(({
         },
     }));
 
-    // If maps didn't load, show embedded map fallback
     if (!mapLoaded) {
         return (
             <EmbeddedMapFallback 
@@ -221,96 +288,27 @@ const Map = forwardRef(({
                 markers={markers}
                 style={style}
                 onMarkerPress={onMarkerPress}
-                onNavigate={onMarkerPress}
+                onNavigate={onNavigate}
+                polylineCoordinates={polylineCoordinates}
+                polylineColor={polylineColor}
             />
         );
     }
 
     const dynamicStyles = {
-        container: {
-            flex: 1,
-        },
-        map: {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-        },
-        fallbackContainer: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: colors.background,
-        },
-        fallbackIcon: {
-            fontSize: tokens.fontSize['5xl'],
-            marginBottom: tokens.spacing[3],
-        },
-        fallbackTitle: {
-            fontSize: tokens.fontSize.lg,
-            fontWeight: tokens.fontWeight.bold,
-            color: colors.text,
-            marginBottom: tokens.spacing[2],
-        },
-        fallbackText: {
-            fontSize: tokens.fontSize.sm,
-            color: colors.textSecondary,
-            textAlign: 'center',
-            lineHeight: tokens.lineHeight.normal * tokens.fontSize.sm,
-            paddingHorizontal: tokens.spacing[10],
-        },
-        osmButton: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            backgroundColor: colors.primary,
-            paddingVertical: 10,
-            paddingHorizontal: 20,
-            borderRadius: tokens.radius.md,
-            marginTop: tokens.spacing[4],
-        },
-        osmButtonText: {
-            color: '#fff',
-            fontSize: tokens.fontSize.sm,
-            fontWeight: tokens.fontWeight.semibold,
-        },
-        markerContainer: {
-            alignItems: 'center',
-        },
-        markerSelected: {
-            transform: [{ scale: 1.1 }],
-        },
-        markerBubble: {
-            width: 30,
-            height: 30,
-            borderRadius: tokens.radius.full,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: colors.card,
-            backgroundColor: colors.primary,
-            ...tokens.shadows.md,
-        },
-        markerText: {
-            color: '#fff',
-            fontSize: tokens.fontSize.sm,
-            fontWeight: tokens.fontWeight.bold,
-        },
-        markerArrow: {
-            width: 0,
-            height: 0,
-            backgroundColor: 'transparent',
-            borderStyle: 'solid',
-            borderLeftWidth: 6,
-            borderRightWidth: 6,
-            borderTopWidth: 8,
-            borderLeftColor: 'transparent',
-            borderRightColor: 'transparent',
-            borderTopColor: colors.primary,
-            marginTop: -2,
-        },
+        container: { flex: 1 },
+        map: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+        fallbackContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+        fallbackIcon: { fontSize: 48, marginBottom: 16 },
+        fallbackTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 8 },
+        fallbackText: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', paddingHorizontal: 40 },
+        osmButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginTop: 16 },
+        osmButtonText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+        markerContainer: { alignItems: 'center' },
+        markerSelected: { transform: [{ scale: 1.1 }] },
+        markerBubble: { width: 30, height: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.card, backgroundColor: colors.primary },
+        markerText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+        markerArrow: { width: 0, height: 0, backgroundColor: 'transparent', borderStyle: 'solid', borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 8, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: colors.primary, marginTop: -2 },
     };
 
     if (!MapView) {
@@ -318,19 +316,9 @@ const Map = forwardRef(({
             <View style={[dynamicStyles.fallbackContainer, style]}>
                 <Text style={dynamicStyles.fallbackIcon}>🗺️</Text>
                 <Text style={dynamicStyles.fallbackTitle}>Map Unavailable</Text>
-                <Text style={dynamicStyles.fallbackText}>
-                    Google Maps API not configured.{'\n'}Add your API key in app.json.
-                </Text>
-                
-                {/* OpenStreetMap Fallback Button */}
+                <Text style={dynamicStyles.fallbackText}>Google Maps API not configured.{'\n'}Add your API key in app.json.</Text>
                 {region && (
-                    <TouchableOpacity 
-                        style={dynamicStyles.osmButton}
-                        onPress={() => {
-                            const url = `https://www.openstreetmap.org/?mlat=${region.latitude}&mlon=${region.longitude}&zoom=14`;
-                            Linking.openURL(url);
-                        }}
-                    >
+                    <TouchableOpacity style={dynamicStyles.osmButton} onPress={() => { Linking.openURL(`https://www.openstreetmap.org/?mlat=${region.latitude}&mlon=${region.longitude}&zoom=14`); }}>
                         <Ionicons name="globe-outline" size={18} color="#fff" />
                         <Text style={dynamicStyles.osmButtonText}>OpenStreetMap</Text>
                     </TouchableOpacity>
@@ -338,30 +326,6 @@ const Map = forwardRef(({
             </View>
         );
     }
-
-    // Custom map style for better integration with app theme
-    const mapStyle = [
-        {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
-        },
-        {
-            featureType: 'transit',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
-        },
-        {
-            featureType: 'water',
-            elementType: 'geometry',
-            stylers: [{ color: '#e3f2fd' }]
-        },
-        {
-            featureType: 'landscape',
-            elementType: 'geometry',
-            stylers: [{ color: '#f8fafc' }]
-        }
-    ];
 
     return (
         <MapErrorBoundary style={style} fallbackStyles={dynamicStyles}>
@@ -374,65 +338,38 @@ const Map = forwardRef(({
                     showsUserLocation={showsUserLocation}
                     showsMyLocationButton={showsMyLocationButton}
                     showsCompass={showsCompass}
-                    customMapStyle={mapStyle}
+                    customMapStyle={[
+                        { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+                        { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+                        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#e3f2fd' }] },
+                        { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#f8fafc' }] },
+                    ]}
                     mapType="standard"
                     loadingEnabled={true}
                     loadingIndicatorColor={colors.primary}
                     loadingBackgroundColor={colors.background}
                 >
-
-                    {/* User Location Circle */}
                     {userLocation && radius && Circle && (
-                        <Circle
-                            center={userLocation}
-                            radius={radius}
-                            strokeColor={colors.primary + '50'}
-                            fillColor={colors.primary + '20'}
-                            strokeWidth={2}
-                        />
+                        <Circle center={userLocation} radius={radius} strokeColor={colors.primary + '50'} fillColor={colors.primary + '20'} strokeWidth={2} />
                     )}
-
-                    {/* Custom Markers */}
                     {markers.map((marker, index) => {
                         if (!Marker) return null;
                         const isSelected = selectedMarkerId === marker.id;
                         const markerColor = marker.color || (isSelected ? tokens.colors.accent || '#f59e0b' : colors.primary);
-
                         return (
-                            <Marker
-                                key={marker.id || index}
-                                coordinate={marker.coordinate}
-                                onPress={() => onMarkerPress?.(marker)}
-                                zIndex={isSelected ? 999 : index}
-                                hitSlop={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                                anchor={{ x: 0.5, y: 1 }} // Ensures tip points exactly at coordinate
-                            >
-                                <View style={[
-                                    dynamicStyles.markerContainer,
-                                    isSelected && dynamicStyles.markerSelected
-                                ]}>
-                                    <View style={[
-                                        dynamicStyles.markerBubble,
-                                        { backgroundColor: markerColor, borderColor: isSelected ? '#fff' : colors.card, borderWidth: isSelected ? 3 : 2 }
-                                    ]}>
-                                        <Text style={dynamicStyles.markerText}>
-                                            {marker.icon || (marker.number || index + 1)}
-                                        </Text>
+                            <Marker key={marker.id || index} coordinate={marker.coordinate} onPress={() => onMarkerPress?.(marker)} zIndex={isSelected ? 999 : index} hitSlop={{ top: 20, right: 20, bottom: 20, left: 20 }} anchor={{ x: 0.5, y: 1 }}>
+                                <View style={[dynamicStyles.markerContainer, isSelected && dynamicStyles.markerSelected]}>
+                                    <View style={[dynamicStyles.markerBubble, { backgroundColor: markerColor, borderColor: isSelected ? '#fff' : colors.card, borderWidth: isSelected ? 3 : 2 }]}>
+                                        <Text style={dynamicStyles.markerText}>{marker.icon || (marker.number || index + 1)}</Text>
                                     </View>
                                     <View style={[dynamicStyles.markerArrow, { borderTopColor: markerColor }]} />
                                 </View>
                             </Marker>
                         );
                     })}
-
                     {Polyline && Array.isArray(polylineCoordinates) && polylineCoordinates.length > 1 && (
-                        <Polyline
-                            coordinates={polylineCoordinates}
-                            strokeColor={polylineColor || colors.primary}
-                            strokeWidth={polylineWidth}
-                        />
+                        <Polyline coordinates={polylineCoordinates} strokeColor={polylineColor || colors.primary} strokeWidth={polylineWidth} />
                     )}
-
                     {children}
                 </MapView>
             </View>

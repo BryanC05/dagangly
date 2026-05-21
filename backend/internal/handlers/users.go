@@ -157,6 +157,72 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	c.JSON(200, user)
 }
 
+// UploadSellerQris uploads a QRIS image and optional static code for seller checkout
+func (h *UserHandler) UploadSellerQris(c *gin.Context) {
+	userID := c.GetString("userID")
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("users")
+	var user models.User
+	if err := collection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&user); err != nil {
+		c.JSON(404, gin.H{"message": "User not found"})
+		return
+	}
+	if !user.IsSeller {
+		c.JSON(403, gin.H{"message": "Only sellers can upload QRIS"})
+		return
+	}
+
+	update := bson.M{"updatedAt": time.Now()}
+	if qrisCode := c.PostForm("qrisCode"); qrisCode != "" {
+		update["qrisCode"] = qrisCode
+	}
+	if pickupHours := c.PostForm("pickupHours"); pickupHours != "" {
+		update["pickupHours"] = pickupHours
+	}
+
+	file, header, err := c.Request.FormFile("qrisImage")
+	if err == nil {
+		defer file.Close()
+		uploadDir := filepath.Join("./uploads/qris", userID)
+		if err := os.MkdirAll(uploadDir, 0755); err != nil {
+			c.JSON(500, gin.H{"message": "Failed to create upload directory"})
+			return
+		}
+		ext := filepath.Ext(header.Filename)
+		if ext == "" {
+			ext = ".jpg"
+		}
+		filename := fmt.Sprintf("qris_%d%s", time.Now().Unix(), ext)
+		destPath := filepath.Join(uploadDir, filename)
+		out, err := os.Create(destPath)
+		if err != nil {
+			c.JSON(500, gin.H{"message": "Failed to save file"})
+			return
+		}
+		defer out.Close()
+		if _, err := io.Copy(out, file); err != nil {
+			c.JSON(500, gin.H{"message": "Failed to save file"})
+			return
+		}
+		url := fmt.Sprintf("/uploads/qris/%s/%s", userID, filename)
+		update["qrisImageUrl"] = url
+	}
+
+	if len(update) <= 1 {
+		c.JSON(400, gin.H{"message": "Provide qrisImage, qrisCode, or pickupHours"})
+		return
+	}
+
+	collection.UpdateOne(context.Background(), bson.M{"_id": objID}, bson.M{"$set": update})
+	collection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&user)
+	c.JSON(200, user)
+}
+
 func (h *UserHandler) GetSellersCount(c *gin.Context) {
 	collection := database.GetDB().Collection("users")
 	count, err := collection.CountDocuments(context.Background(), bson.M{
@@ -377,6 +443,9 @@ func (h *UserHandler) GetSellerByID(c *gin.Context) {
 		"isSeller":     seller.IsSeller,
 		"email":        seller.Email,
 		"phone":        seller.Phone,
+		"qrisImageUrl": seller.QrisImageURL,
+		"qrisCode":     seller.QrisCode,
+		"pickupHours":  seller.PickupHours,
 		"createdAt":    seller.CreatedAt,
 	})
 }

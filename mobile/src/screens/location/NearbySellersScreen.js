@@ -13,6 +13,9 @@ import api from '../../api/api';
 import { DEFAULT_LOCATION, DEFAULT_RADIUS_METERS } from '../../utils/constants';
 import { haversineDistanceKm } from '../../utils/helpers';
 import { SellerListSkeleton, NearbySellersSkeleton } from '../../components/LoadingSkeleton';
+import { OFFLINE_TESTING_MODE } from '../../config';
+import { getMockSellersLocation } from '../../data/mockApi';
+import { getRouteCoordinates } from '../../services/routingService';
 
 const { width, height } = Dimensions.get('window');
 const MIN_SHEET_HEIGHT = 70; // Just the drag handle (collapsible to show only handle)
@@ -207,6 +210,21 @@ export default function NearbySellersScreen() {
     const fetchNearbySellers = async () => {
         try {
             setLoading(true);
+
+            if (OFFLINE_TESTING_MODE) {
+                const mockSellers = getMockSellersLocation().map(seller => ({
+                    ...seller,
+                    _id: seller.id,
+                    location: {
+                        type: 'Point',
+                        coordinates: [seller.coordinate.longitude, seller.coordinate.latitude],
+                    },
+                }));
+                setSellers(mockSellers);
+                setLoading(false);
+                return;
+            }
+
             const response = await api.get('/users/nearby-sellers', {
                 params: {
                     lat: location.lat,
@@ -346,6 +364,33 @@ export default function NearbySellersScreen() {
 
         const fetchRoute = async () => {
             try {
+                if (OFFLINE_TESTING_MODE) {
+                    const result = await getRouteCoordinates(
+                        activeLocation.lat,
+                        activeLocation.lng,
+                        sellerCoords.lat,
+                        sellerCoords.lng
+                    );
+
+                    if (!isActive) return;
+
+                    if (result && result.coordinates.length > 0) {
+                        setRoutePath(result.coordinates);
+                        setRouteSummary({
+                            distanceMeters: result.distanceMeters,
+                            durationSeconds: result.durationSeconds,
+                        });
+                    } else {
+                        setRoutePath([
+                            { latitude: activeLocation.lat, longitude: activeLocation.lng },
+                            { latitude: sellerCoords.lat, longitude: sellerCoords.lng },
+                        ]);
+                        setRouteSummary(null);
+                    }
+                    setNavigationError(null);
+                    return;
+                }
+
                 const response = await api.get('/navigation/route', {
                     params: {
                         originLat: activeLocation.lat,
@@ -394,7 +439,7 @@ export default function NearbySellersScreen() {
             isActive = false;
             clearInterval(interval);
         };
-    }, [isNavigating, selectedSeller, activeLocation?.lat, activeLocation?.lng]);
+    }, [isNavigating, selectedSeller, activeLocation?.lat, activeLocation?.lng, OFFLINE_TESTING_MODE]);
 
     const mapRegion = useMemo(() => {
         if (!activeLocation) return null;
@@ -674,6 +719,19 @@ export default function NearbySellersScreen() {
                         setSelectedSeller(seller);
                     }}
                     selectedMarkerId={getSellerId(selectedSeller)}
+                    onNavigate={(sellerId, action) => {
+                        if (action === 'navigate' || action === 'store') {
+                            const seller = sellers.find((s) => getSellerId(s) === sellerId);
+                            if (seller) {
+                                setSelectedSeller(seller);
+                                if (action === 'store') {
+                                    navigation.navigate('BusinessDetails', { businessId: sellerId });
+                                }
+                            }
+                        } else if (action === 'clearRoute') {
+                            stopNavigation();
+                        }
+                    }}
                 />
 
                 {isNavigating && selectedSeller && (
@@ -791,7 +849,7 @@ export default function NearbySellersScreen() {
                                     const displayName = getSellerDisplayName(seller);
                                     return (
                                         <TouchableOpacity
-                                            key={sellerId || `seller-${index}`}
+                                            key={`seller-${index}-${sellerId || 'unknown'}`}
                                             style={[
                                                 styles.dropdownItem,
                                                 { borderBottomColor: colors.border },

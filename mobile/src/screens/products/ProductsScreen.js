@@ -10,7 +10,8 @@ import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../api/api';
 import ProductCard from '../../components/ProductCard';
 import { ProductsListSkeleton } from '../../components/LoadingSkeleton';
-import { CATEGORIES_EN, CATEGORIES_ID, SORT_OPTIONS_EN, SORT_OPTIONS_ID } from '../../config';
+import { CATEGORIES_EN, CATEGORIES_ID, SORT_OPTIONS_EN, SORT_OPTIONS_ID, OFFLINE_TESTING_MODE } from '../../config';
+import { getProducts } from '../../data/mockApi';
 
 const { width } = Dimensions.get('window');
 
@@ -50,6 +51,26 @@ export default function ProductsScreen({ navigation, route }) {
 
     const fetchProducts = useCallback(async (pageNum = 1, append = false) => {
         try {
+            if (OFFLINE_TESTING_MODE) {
+                const mockResult = getProducts({
+                    category: category && category !== 'all' ? category : undefined,
+                    search: searchQuery || undefined,
+                    page: pageNum,
+                    limit: 20,
+                });
+
+                if (append) {
+                    setProducts((prev) => [...prev, ...mockResult.products]);
+                } else {
+                    setProducts(mockResult.products);
+                }
+                setTotalPages(mockResult.hasMore ? 2 : 1);
+                setPage(pageNum);
+                setLoading(false);
+                setLoadingMore(false);
+                return;
+            }
+
             const params = {
                 sort: sortBy,
                 page: pageNum,
@@ -58,14 +79,10 @@ export default function ProductsScreen({ navigation, route }) {
             if (searchQuery) params.search = searchQuery;
             if (category && category !== 'all') params.category = category;
 
-            // Apply quick filters
             if (activeFilter === 'price-low') params.sort = 'price-low';
             else if (activeFilter === 'price-high') params.sort = 'price-high';
             else if (activeFilter === 'rating') params.sort = 'rating';
             else if (activeFilter === 'new') params.sort = 'newest';
-            else if (activeFilter === 'nearby') { 
-                // Nearby requires location coordinates
-            }
 
             const response = await api.get('/products', { params });
             const newProducts = response.data.products || [];
@@ -462,33 +479,33 @@ export default function ProductsScreen({ navigation, route }) {
             ) : (
                 <FlatList
                     data={products}
-                    keyExtractor={(item) => item._id}
+                    keyExtractor={(item) => item._id || item.id}
                     numColumns={2}
                     columnWrapperStyle={styles.row}
                     contentContainerStyle={styles.list}
                     ListHeaderComponent={renderHeader}
                     ListEmptyComponent={!loading ? renderEmpty : null}
                     refreshControl={
-                        <RefreshControl 
-                            refreshing={refreshing} 
-                            onRefresh={onRefresh} 
-                            tintColor={colors.primary} 
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            tintColor={colors.primary}
                         />
                     }
                     onEndReached={onEndReached}
                     onEndReachedThreshold={0.3}
                     ListFooterComponent={
                         loadingMore ? (
-                            <ActivityIndicator 
-                                style={{ padding: 16 }} 
-                                color={colors.primary} 
+                            <ActivityIndicator
+                                style={{ padding: 16 }}
+                                color={colors.primary}
                             />
                         ) : null
                     }
                     renderItem={({ item }) => (
                         <ProductCard
                             product={item}
-                            onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
+                            onPress={() => navigation.navigate('ProductDetail', { productId: item._id || item.id })}
                         />
                     )}
                 />

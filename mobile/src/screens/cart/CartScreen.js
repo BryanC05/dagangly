@@ -237,20 +237,22 @@ export default function CartScreen({ navigation }) {
                 },
             };
 
-            await api.post('/orders', orderData);
-            
-            // Track cart abandonment - mark as recovered after successful order
+            const res = await api.post('/orders', orderData);
+            const orderId = res.data?._id;
+
             try {
                 await api.post('/cart-abandonment/mark-recovered');
             } catch (e) { /* ignore */ }
-            
+
             await clearSellerCart(selectedSeller.sellerId);
-            // 🎉 Checkout celebration burst
             const { width: W, height: H } = require('react-native').Dimensions.get('window');
             particleEvents.emit('particle-burst', { type: 'checkout', x: W / 2, y: H / 2 });
             setShowCheckoutModal(false);
             setSelectedSeller(null);
-            Alert.alert(t.orderPlaced, t.orderSuccess, [
+            const msg = selectedPayment === 'qris'
+                ? `Order #${orderId?.slice(-8).toUpperCase()}\n\nView Orders to scan QRIS and upload payment proof.`
+                : `Order #${orderId?.slice(-8).toUpperCase()}\n\nPay with cash when you pick up.`;
+            Alert.alert(t.orderPlaced || 'Order placed', msg, [
                 { text: 'View Orders', onPress: () => navigation.navigate('Profile', { screen: 'Orders' }) },
                 { text: 'OK' },
             ]);
@@ -600,7 +602,6 @@ export default function CartScreen({ navigation }) {
                                         selectedPayment === method.id ? styles.optionSelected : styles.optionUnselected
                                     ]}
                                     onPress={() => setSelectedPayment(method.id)}
-                                    disabled={method.id !== 'cash'}
                                 >
                                     <View style={styles.optionIcon}>
                                         <Ionicons name={method.icon} size={22} color={colors.primary} />

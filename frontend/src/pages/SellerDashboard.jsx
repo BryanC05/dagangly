@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import PromoManager from '@/components/PromoManager';
+import SellerOnboardingChecklist from '@/components/SellerOnboardingChecklist';
+import { formatScheduledPickup } from '@/utils/orderStatus';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
@@ -151,7 +153,7 @@ const AIConsultantWidget = ({ period, analytics, sales, customers, products }) =
 };
 
 function SellerDashboard() {
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const sellerId = user?._id || user?.id;
@@ -478,6 +480,10 @@ function SellerDashboard() {
     return null;
   };
 
+  const sellerOrders = Array.isArray(orders)
+    ? orders.filter((o) => String(o.seller?._id || o.seller) === String(sellerId))
+    : [];
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 pb-20 font-sans">
       {/* Confirmation Modal */}
@@ -522,6 +528,12 @@ function SellerDashboard() {
       )}
 
       <div className="max-w-7xl mx-auto p-4 md:p-8">
+
+        <SellerOnboardingChecklist
+          user={user}
+          productCount={products?.length || 0}
+          onUpdated={(updatedUser) => updatedUser && setUser(updatedUser)}
+        />
         
         {/* Header & Membership */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">

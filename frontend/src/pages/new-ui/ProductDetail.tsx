@@ -233,10 +233,12 @@ export default function ProductDetail() {
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4 fill-primary text-primary" />
-              <span className="text-sm font-medium">{product.rating?.toFixed(1) || "4.5"}</span>
+              <span className="text-sm font-medium">
+                {product.totalReviews > 0 ? product.rating?.toFixed(1) : "No reviews yet"}
+              </span>
             </div>
             <span className="text-sm text-muted-foreground">
-              ({product.reviewCount || product.reviews?.length || 0} {t("productDetail.reviews")})
+              ({product.totalReviews || product.reviewCount || 0} {t("productDetail.reviews")})
             </span>
           </div>
 

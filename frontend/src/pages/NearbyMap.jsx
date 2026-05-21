@@ -10,7 +10,7 @@ import { isValidCoordinates, haversineDistanceKm } from '../utils/helpers';
 import './NearbyMap.css';
 
 // Leaflet
-import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '@/utils/leafletSetup';
@@ -500,12 +500,14 @@ function NearbyMap() {
           zoom={13}
           className="h-full w-full"
           style={{ height: '100%', width: '100%' }}
-          zoomControl={true}
+          zoomControl={false}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          
+          <ZoomControl position="bottomright" />
 
           {/* Recenter when user clicks GPS / Profile buttons */}
           {recenterTarget && <RecenterMap center={recenterTarget} />}
@@ -519,7 +521,7 @@ function NearbyMap() {
 
           {/* User location marker */}
           <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
-            <Popup>{t('nearby.youAreHere') || 'You are here'}</Popup>
+            <Popup minWidth={150}>{t('nearby.youAreHere') || 'You are here'}</Popup>
           </Marker>
 
           {/* Radius circle */}
@@ -544,11 +546,11 @@ function NearbyMap() {
             const subtitle = getSellerSubtitle(seller);
             return (
               <Marker key={sellerId} position={[lat, lng]} icon={sellerIcon}>
-                <Popup>
-                  <div style={{ minWidth: '180px' }}>
+                <Popup minWidth={220} maxWidth={320} autoPanPadding={[20, 20]}>
+                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: '200px' }}>
                     <h4 style={{ margin: '0 0 4px 0', fontWeight: '600' }}>{displayName}</h4>
-                    <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#666' }}>{subtitle}</p>
-                    <p style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#999' }}>{seller.location.city || ''}</p>
+                    <p style={{ margin: '0 0 2px 0', fontSize: '12px', color: '#666' }}>{subtitle}</p>
+                    <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#999' }}>{seller.location.city || ''}</p>
                     {seller.rating > 0 && (
                       <p style={{ margin: '0 0 8px 0', color: '#f59e0b' }}>⭐ {seller.rating.toFixed(1)}</p>
                     )}
@@ -593,14 +595,14 @@ function NearbyMap() {
           {/* Current navigation position marker */}
           {isNavigating && currentPosition && (
             <Marker position={[currentPosition.lat, currentPosition.lng]} icon={navigationIcon}>
-              <Popup>Your current position</Popup>
+              <Popup minWidth={150}>Your current position</Popup>
             </Marker>
           )}
         </MapContainer>
 
         {/* Navigation overlay */}
         {isNavigating && navigationRoute && (
-          <div className="absolute top-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-card text-card-foreground border border-border rounded-lg shadow-lg p-4 z-[1000]">
+          <div className="absolute top-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-card text-card-foreground border border-border rounded-lg shadow-lg p-4 z-[2000]">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full">

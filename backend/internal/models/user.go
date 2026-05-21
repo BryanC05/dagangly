@@ -46,6 +46,11 @@ type User struct {
 	PaymentProof       *string    `bson:"paymentProof" json:"paymentProof"`
 	PaymentSubmittedAt *time.Time `bson:"paymentSubmittedAt" json:"paymentSubmittedAt"`
 
+	// Seller payment & pickup (cash/QRIS marketplace)
+	QrisImageURL *string `bson:"qrisImageUrl,omitempty" json:"qrisImageUrl"`
+	QrisCode     *string `bson:"qrisCode,omitempty" json:"qrisCode"`
+	PickupHours  *string `bson:"pickupHours,omitempty" json:"pickupHours"`
+
 	// Social Media Links
 	SocialLinks      []SocialLink `bson:"socialLinks" json:"socialLinks"`           // Profile links
 	StoreSocialLinks []SocialLink `bson:"storeSocialLinks" json:"storeSocialLinks"` // Store links (separate from profile)

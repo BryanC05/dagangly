@@ -9,9 +9,13 @@ import { useThemeStore, lightColors, darkColors } from './src/store/themeStore';
 import { useLanguageStore } from './src/store/languageStore';
 import { useDriverStore } from './src/store/driverStore';
 import { ThemeProvider } from './src/theme/ThemeContext';
+import { NetworkProvider } from './src/context/NetworkContext';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
 import notificationService from './src/services/NotificationService';
+import { apiService } from './src/services/apiService';
+import { localDatabase } from './src/store/localDatabase';
+import { initializeMockData } from './src/data/mockApi';
 
 export default function App() {
   const { isAuthenticated, isLoading, initializeAuth } = useAuthStore();
@@ -34,6 +38,14 @@ export default function App() {
       initTheme();
       initLanguage();
       initDriverMode();
+
+      try {
+        await localDatabase.initialize();
+        await apiService.initialize();
+        console.log('[App] Offline services initialized');
+      } catch (e) {
+        console.log('[App] Offline services error:', e);
+      }
       
       try {
         await notificationService.initialize();
@@ -78,13 +90,15 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: safeColors.background }}>
       <SafeAreaProvider style={{ backgroundColor: safeColors.background }}>
         <ThemeProvider>
-          <NavigationContainer theme={navigationTheme}>
-            <StatusBar
-              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-              backgroundColor={safeColors.card}
-            />
-            {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
-          </NavigationContainer>
+          <NetworkProvider>
+            <NavigationContainer theme={navigationTheme}>
+              <StatusBar
+                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+                backgroundColor={safeColors.card}
+              />
+              {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
+            </NavigationContainer>
+          </NetworkProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

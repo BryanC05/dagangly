@@ -20,7 +20,7 @@ import { useLanguageStore } from '../store/languageStore';
 import { useDriverStore } from '../store/driverStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { useAuthStore } from '../store/authStore';
-import { API_HOST } from '../config';
+import { API_HOST, OFFLINE_TESTING_MODE } from '../config';
 import notificationService, { usePushNotifications } from '../services/NotificationService';
 import BackgroundEffect from '../components/BackgroundEffect';
 
@@ -895,6 +895,11 @@ function NotificationListener() {
 
     useEffect(() => {
         if (!isAuthenticated || !token) return;
+
+        if (OFFLINE_TESTING_MODE) {
+            console.log('[NotificationListener] Skipping WebSocket in offline mode');
+            return;
+        }
 
         fetchUnreadCount();
 

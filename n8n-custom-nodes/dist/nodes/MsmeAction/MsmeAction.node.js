@@ -1,87 +1,87 @@
-const { INodeType } = require('n8n-workflow');
+const { INodeType } = require("n8n-workflow");
 
 class MsmeAction {
   constructor() {
     this.description = {
-      displayName: 'MSME Action',
-      name: 'msmeAction',
-      icon: 'fa:cogs',
-      group: ['transform'],
+      displayName: "MSME Action",
+      name: "msmeAction",
+      icon: "fa:cogs",
+      group: ["transform"],
       version: 1,
-      description: 'Perform actions in MSME Marketplace',
+      description: "Perform actions in MSME Marketplace",
       defaults: {
-        name: 'MSME Action',
+        name: "MSME Action",
       },
-      inputs: ['main'],
-      outputs: ['main'],
+      inputs: ["main"],
+      outputs: ["main"],
       credentials: [
         {
-          name: 'msmeApi',
+          name: "msmeApi",
           required: true,
         },
       ],
       properties: [
         {
-          displayName: 'Operation',
-          name: 'operation',
-          type: 'options',
+          displayName: "Operation",
+          name: "operation",
+          type: "options",
           noDataExpression: true,
           options: [
             {
-              name: 'Update Order Status',
-              value: 'updateOrderStatus',
-              description: 'Update the status of an order',
-              action: 'Update order status',
+              name: "Update Order Status",
+              value: "updateOrderStatus",
+              description: "Update the status of an order",
+              action: "Update order status",
             },
             {
-              name: 'Get Order Details',
-              value: 'getOrderDetails',
-              description: 'Get full order information',
-              action: 'Get order details',
+              name: "Get Order Details",
+              value: "getOrderDetails",
+              description: "Get full order information",
+              action: "Get order details",
             },
           ],
-          default: 'updateOrderStatus',
+          default: "updateOrderStatus",
         },
         {
-          displayName: 'Order ID',
-          name: 'orderId',
-          type: 'string',
-          default: '={{ $json.data.orderId }}',
+          displayName: "Order ID",
+          name: "orderId",
+          type: "string",
+          default: "={{ $json.data.orderId }}",
           displayOptions: {
             show: {
-              operation: ['updateOrderStatus'],
+              operation: ["updateOrderStatus"],
             },
           },
           required: true,
         },
         {
-          displayName: 'New Status',
-          name: 'newStatus',
-          type: 'options',
+          displayName: "New Status",
+          name: "newStatus",
+          type: "options",
           displayOptions: {
             show: {
-              operation: ['updateOrderStatus'],
+              operation: ["updateOrderStatus"],
             },
           },
           options: [
-            { name: 'Pending', value: 'Pending' },
-            { name: 'Confirmed', value: 'Confirmed' },
-            { name: 'Preparing', value: 'Preparing' },
-            { name: 'Ready', value: 'Ready' },
-            { name: 'Delivered', value: 'Delivered' },
-            { name: 'Confirmation Sent', value: 'confirmation_sent' },
+            { name: "Pending", value: "Pending" },
+            { name: "Confirmed", value: "Confirmed" },
+            { name: "Preparing", value: "Preparing" },
+            { name: "Ready", value: "Ready" },
+            { name: "Delivered", value: "Delivered" },
+            { name: "Confirmation Sent", value: "confirmation_sent" },
           ],
-          default: 'Confirmed',
+          default: "Confirmed",
           required: true,
         },
         {
-          displayName: 'Order ID',
-          name: 'orderId',
-          type: 'string',
-          default: '={{ $json.data.orderId }}',
+          displayName: "Order ID",
+          name: "orderId",
+          type: "string",
+          default: "={{ $json.data.orderId }}",
           displayOptions: {
             show: {
-              operation: ['getOrderDetails'],
+              operation: ["getOrderDetails"],
             },
           },
           required: true,
@@ -93,37 +93,37 @@ class MsmeAction {
   async execute() {
     const items = this.getInputData();
     const returnData = [];
-    const credentials = await this.getCredentials('msmeApi');
+    const credentials = await this.getCredentials("msmeApi");
     
     for (let i = 0; i < items.length; i++) {
-      const operation = this.getNodeParameter('operation', i);
+      const operation = this.getNodeParameter("operation", i);
       
       try {
         let responseData;
 
-        if (operation === 'updateOrderStatus') {
-          const orderId = this.getNodeParameter('orderId', i);
-          const newStatus = this.getNodeParameter('newStatus', i);
+        if (operation === "updateOrderStatus") {
+          const orderId = this.getNodeParameter("orderId", i);
+          const newStatus = this.getNodeParameter("newStatus", i);
 
           responseData = await this.helpers.request({
-            method: 'PUT',
+            method: "PUT",
             url: `${credentials.baseUrl}/api/orders/${orderId}/status`,
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${credentials.apiKey}`,
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${credentials.apiKey}`,
             },
             body: { status: newStatus },
             json: true,
           });
 
-        } else if (operation === 'getOrderDetails') {
-          const orderId = this.getNodeParameter('orderId', i);
+        } else if (operation === "getOrderDetails") {
+          const orderId = this.getNodeParameter("orderId", i);
 
           responseData = await this.helpers.request({
-            method: 'GET',
+            method: "GET",
             url: `${credentials.baseUrl}/api/orders/${orderId}`,
             headers: {
-              'Authorization': `Bearer ${credentials.apiKey}`,
+              "Authorization": `Bearer ${credentials.apiKey}`,
             },
             json: true,
           });

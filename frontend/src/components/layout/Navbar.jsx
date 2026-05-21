@@ -116,24 +116,28 @@ const Navbar = () => {
     { to: "/forums", label: t('nav.forums') },
   ];
 
-  const accountLinks = [
+  const buyerAccountLinks = [
     { to: "/profile", label: t("nav.profile") || "Profil", icon: User },
     { to: "/orders", label: t("nav.orderPage") || t("nav.orders") || "Orders", icon: Package, badge: activeOrderCount },
     { to: "/saved-products", label: t("nav.savedProducts") || "Tersimpan", icon: Heart },
-    { to: "/wallet", label: t("wallet.title") || "Dompet", icon: Wallet },
-    ...(isSeller
-      ? [
-        { to: "/seller/dashboard", label: t("nav.dashboard"), icon: Store },
-        { to: "/seller/product-tracking", label: t("nav.productTracker"), icon: BarChart3 },
-        { to: "/seller/add-product", label: t("nav.addProduct"), icon: PlusCircle },
-        { to: "/logo-generator", label: t("nav.logoGenerator"), icon: Palette, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
-        { to: "/automation", label: t("nav.automations"), icon: Zap, badge: !isSeller ? 'seller' : (!membership?.isMember ? 'membership' : null) },
-        { to: "/inventory", label: t("inventory.title") || "Inventori", icon: Package },
-        { to: "/video-call", label: t("videoCall.title") || "Video Call", icon: Video },
-        { to: "/installments", label: t("installment.title") || "Cicilan", icon: CreditCard },
-      ]
-      : []),
   ];
+
+  const sellerAccountLinks = [
+    { to: "/seller/dashboard", label: t("nav.dashboard"), icon: Store },
+    { to: "/seller/add-product", label: t("nav.addProduct"), icon: PlusCircle },
+    { to: "/seller/product-tracking", label: t("nav.productTracker"), icon: BarChart3 },
+    { to: "/inventory", label: t("inventory.title") || "Inventori", icon: Package },
+  ];
+
+  const sellerToolsLinks = [
+    { to: "/logo-generator", label: t("nav.logoGenerator"), icon: Palette },
+    { to: "/automation", label: t("nav.automations"), icon: Zap },
+    { to: "/finance", label: "Finance", icon: BarChart3 },
+  ];
+
+  const accountLinks = isSeller
+    ? [...buyerAccountLinks, ...sellerAccountLinks]
+    : buyerAccountLinks;
 
   const isActive = (path) => {
     if (path === "/") return location.pathname === "/";
@@ -163,7 +167,8 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/88 backdrop-blur-2xl">
+    <>
+      <header className="sticky top-0 z-[9990] border-b border-border/70 bg-background/88 backdrop-blur-2xl">
       <div className="container flex h-20 items-center gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-emerald-400 shadow-[0_12px_24px_-14px_hsl(var(--primary))]">
@@ -398,11 +403,12 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+      </header>
 
       {mobileOpen && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <aside className="fixed top-16 right-0 z-50 h-[calc(100%-4rem)] w-80 max-w-[90vw] bg-card border-l border-border p-6 overflow-y-auto">
+          <div className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+          <aside className="fixed top-0 bottom-0 right-0 z-[9999] w-80 max-w-[90vw] bg-card border-l border-border p-6 pb-12 overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <span className="font-display text-lg font-bold tracking-wider">
@@ -506,7 +512,7 @@ const Navbar = () => {
           </aside>
         </>
       )}
-    </header>
+    </>
   );
 };
 

@@ -11,8 +11,8 @@ const ProductCard = ({ product }) => {
     const productId = product._id || product.id;
     const productImage = resolveImageUrl(product.images?.[0] || product.image);
     const sellerName = product.seller?.businessName || product.seller?.name || (typeof product.seller === 'string' ? 'Store' : null);
-    const productRating = product.rating || 4.5;
-    const reviewCount = product.reviewCount || product.reviews?.length || 0;
+    const productRating = product.totalReviews > 0 ? product.rating : null;
+    const reviewCount = product.totalReviews || product.reviewCount || 0;
     
     // Calculate discount if originalPrice exists
     const hasDiscount = product.originalPrice && product.originalPrice > product.price;
@@ -115,7 +115,9 @@ const ProductCard = ({ product }) => {
                     {/* Rating */}
                     <div className="flex items-center gap-1">
                         <Star className="h-3 w-3 fill-cyan-400 text-cyan-400" />
-                        <span className="text-xs text-gray-400">{productRating.toFixed(1)} ({reviewCount})</span>
+                        <span className="text-xs text-gray-400">
+                          {productRating != null ? `${productRating.toFixed(1)} (${reviewCount})` : 'No reviews yet'}
+                        </span>
                     </div>
                 </CardContent>
             </Card>

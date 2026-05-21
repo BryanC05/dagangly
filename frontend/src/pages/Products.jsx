@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useStaggerReveal } from "@/hooks/useScrollReveal";
 import ProductCard from "@/components/products/ProductCard";
 import { ProductsGridSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 1 });
+  const productsGrid = useStaggerReveal({ threshold: 0.02 });
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
@@ -315,7 +317,7 @@ const Products = () => {
               <p className="text-muted-foreground">
                 {loading ? t('common.loading') : `${t('products.showing')} ${products.length} ${t('products.of')} ${pagination.total} ${t('products.productsCount')}`}
               </p>
-              <Select value={sortBy} onValueChange={setSortBy} disabled>
+              <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={t('products.sortBy')} />
                 </SelectTrigger>
@@ -333,9 +335,14 @@ const Products = () => {
               <ProductsGridSkeleton count={12} />
             ) : products.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {products.map((product) => (
-                    <ProductCard key={product._id} product={product} />
+                <div
+                  ref={productsGrid.ref}
+                  className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 stagger-container ${productsGrid.isVisible ? 'revealed' : ''}`}
+                >
+                  {products.map((product, index) => (
+                    <div key={product._id} className="stagger-item" style={{ '--stagger-index': index }}>
+                      <ProductCard product={product} />
+                    </div>
                   ))}
                 </div>
 

@@ -42,7 +42,6 @@ export function resolveImageUrl(url) {
     'source.unsplash.com',
     'images.unsplash.com',
     'loremflickr.com',
-    'picsum.photos',
   ];
   try {
     const parsed = new URL(url);
@@ -50,7 +49,6 @@ export function resolveImageUrl(url) {
       return '';
     }
   } catch {
-    // Not an absolute URL, continue below.
   }
   if (url.includes('source.unsplash.com')) return sourceUnsplashToKeywordImage(url);
   if (url.startsWith('http://') || url.startsWith('https://')) return url;

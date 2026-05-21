@@ -2,6 +2,21 @@
 
 A full-stack web application connecting Micro, Small, and Medium Enterprises (MSMEs) with local buyers. Sellers can list their products, and buyers can discover and purchase items from nearby businesses.
 
+## Table of Contents
+1. [Brand](#brand)
+2. [Features](#features)
+   - [For Buyers](#for-buyers)
+   - [For Sellers (MSMEs)](#for-sellers-msmes)
+   - [Technical Features](#technical-features)
+3. [Tech Stack](#tech-stack)
+4. [Project Structure](#project-structure)
+5. [Setup Instructions](#setup-instructions)
+   - [Backend Setup (Go)](#backend-setup-go)
+   - [Frontend Setup](#frontend-setup)
+   - [Mobile Setup](#mobile-setup)
+6. [Contributing](#contributing)
+7. [License](#license)
+
 ## Brand
 
 - **Name**: Dagangly
@@ -14,8 +29,11 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 - Search products by name, description, or tags
 - Filter by price range and category
 - Find nearby sellers using interactive map
+- **Map-based Live Tracking** - Real-time tracking of order deliveries
+- **Barcode/QR Scanner** - Quickly find products by scanning
 - View seller ratings and reviews
 - Add products to cart
+- **Cart Abandonment Recovery** - Automatic reminders for left items
 - Save products for later
 - Place orders from local sellers
 - Track order status
@@ -32,6 +50,7 @@ A full-stack web application connecting Micro, Small, and Medium Enterprises (MS
 - **Business Registration** - Submit business application for admin approval
 - Add and manage products with images
 - Set stock quantities and pricing
+- **Dynamic UI Components** - Live stock badges and order status countdowns
 - Receive and manage orders
 - Update order status (Pending → Confirmed → Preparing → Ready → Delivered)
 - View sales dashboard with statistics
@@ -124,46 +143,12 @@ msme-marketplace/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── ProductCard.jsx
-│   │   │   ├── LocationPicker.jsx
-│   │   │   ├── NearbyMap.jsx
-│   │   │   ├── ScrollToTop.jsx
-│   │   │   ├── forums/
-│   │   │   ├── layout/
-│   │   │   ├── products/
-│   │   │   ├── logo/
-│   │   │   └── ui/
 │   │   ├── pages/
-│   │   │   ├── Home.jsx
-│   │   │   ├── Products.jsx
-│   │   │   ├── ProductDetail.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── Register.jsx
-│   │   │   ├── SellerDashboard.jsx
-│   │   │   ├── SellerStore.jsx
-│   │   │   ├── Sell.jsx
-│   │   │   ├── AddProduct.jsx
-│   │   │   ├── Orders.jsx
-│   │   │   ├── Profile.jsx
-│   │   │   ├── NearbyMap.jsx
-│   │   │   ├── Cart.jsx
-│   │   │   ├── SavedProducts.jsx
-│   │   │   ├── Chat.jsx
-│   │   │   ├── Messages.jsx
-│   │   │   ├── Forums.jsx
-│   │   │   ├── Forum.jsx
-│   │   │   ├── ThreadDetail.jsx
-│   │   │   ├── NewThread.jsx
-│   │   │   ├── LogoGenerator.jsx
-│   │   │   ├── Guide.jsx
-│   │   │   └── EditThread.jsx
 │   │   ├── store/
 │   │   ├── hooks/
 │   │   ├── utils/
 │   │   ├── config/
 │   │   ├── data/
-│   │   │   └── guideData.js
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   ├── package.json
@@ -225,27 +210,6 @@ go run ./cmd/server
 
 The backend will run on http://localhost:5000
 
-### Adding Test Data (Seed Simulation)
-
-To populate the database with test sellers and products for testing the Nearby feature:
-
-```bash
-cd backend
-npm install
-npm run seed:food
-```
-
-This will create 3 test seller accounts and 2 buyer accounts in the Bekasi area:
-
-**Seller Accounts:**
-- Dapur Summarecon (email: seller.summarecon@dagangly.test, password: test123)
-- BINUS Student Kitchen (email: seller.binusbekasi@dagangly.test, password: test123)
-- Warung Harapan Indah (email: seller.harapanindah@dagangly.test, password: test123)
-
-**Buyer Accounts:**
-- Budi Test Nearby (email: buyer.nearby1@dagangly.test, password: test123)
-- Nadia Test Nearby (email: buyer.nearby2@dagangly.test, password: test123)
-
 ### Frontend Setup
 
 1. Navigate to the frontend directory:
@@ -258,403 +222,40 @@ cd msme-marketplace/frontend
 npm install
 ```
 
-3. Configure environment variables:
-   - Create or update `.env`:
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-4. Start the development server:
+3. Start the development server:
 ```bash
 npm run dev
 ```
 
 The frontend will run on http://localhost:5173
 
-5. Build for production:
+### Mobile Setup
+
+1. Navigate to the mobile directory:
 ```bash
-npm run build
+cd msme-marketplace/mobile
 ```
 
-## Deployment
-
-### Deploying to Railway
-
-#### Backend (Go)
-
-1. Create a new project on Railway
-2. Connect your GitHub repository
-3. Add the following environment variables:
-   - `PORT` = `8080`
-   - `MONGODB_URI` = your MongoDB connection string
-   - `JWT_SECRET` = your JWT secret
-   - `HUGGINGFACE_API_KEY` = (optional)
-   - `DEEPAI_API_KEY` = (optional)
-   - `POLLINATIONS_API_KEY` = (optional)
-   - `CLAID_API_KEY` = (optional, enables product image enhancement)
-   - `CLAID_BASE_URL` = (optional, default `https://api.claid.ai/v1`)
-   - `CLAID_TIMEOUT_SECONDS` = (optional, default `45`)
-   - `PRODUCT_IMAGE_MAX_SIZE_MB` = (optional, default `5`)
-   - `PRODUCT_IMAGE_MAX_COUNT` = (optional, default `4`)
-   - `PRODUCT_ENHANCE_DAILY_LIMIT` = (optional, default `20`)
-4. Railway will automatically detect the Dockerfile and build
-
-#### Frontend
-
-1. Build the frontend:
+2. Install dependencies:
 ```bash
-npm run build
+npm install
 ```
 
-2. Deploy the `dist` folder to Railway, Vercel, or any static hosting
-
-### Deploying to Replit
-
-There are two distinct Replit deployment paths for this repository.
-
-#### Recommended: Static frontend on Replit, backend on Railway
-
-This is the safest option if your Railway backend is already working. Replit hosts only the Vite frontend, and the frontend calls your existing Railway API.
-
-Use the `Static pages` deployment type with:
-
+3. Start the Expo development server:
 ```bash
-Public directory: frontend/dist
-Build command: sh build-frontend.sh
+npx expo start
 ```
 
-Add this deployment secret in Replit:
-
-```bash
-VITE_API_URL=https://your-railway-backend-domain/api
-```
-
-If your frontend needs direct asset URLs, you can also set:
-
-```bash
-VITE_BACKEND_URL=https://your-railway-backend-domain
-```
-
-The `.replit` file includes a catch-all rewrite for SPA routing so React Router routes load `index.html`.
-
-#### Alternative: full backend deployment on Replit Autoscale
-
-Use these commands in the Replit deployment UI if it does not automatically read `.replit`:
-
-```bash
-Build command: sh build.sh
-Run command: sh run.sh
-```
-
-For the static-pages path, [`replit.nix`](./replit.nix) only installs the minimal frontend build tools needed by Replit.
-
-Required production environment variables:
-
-- `PORT`
-- `MONGODB_URI`
-- `JWT_SECRET`
-- `NODE_ENV=production`
-
-Optional variables such as `CLAID_API_KEY`, `GOOGLEMAP_API_KEY`, Instagram credentials, and webhook URLs can be added as needed for the related features.
-
-### Recommended Free Tier Stack
-
-For cost-effective deployment, this stack handles production workloads:
-
-| Service | Purpose | Free Tier Limits |
-|---------|---------|------------------|
-| **Cloudflare Pages** | Frontend hosting | Unlimited bandwidth & requests |
-| **Railway** | Go backend | 512MB RAM, $5 credit/month |
-| **MongoDB Atlas** | Database | 512MB storage, ~500 connections |
-
-### Scaling Capacity (Free Tier)
-
-| Load Level | Concurrent Users | Experience |
-|------------|------------------|------------|
-| **Comfortable** | 50-100 | Smooth, fast responses |
-| **Maximum** | 200-300 | Some slowdowns possible |
-| **Breaking Point** | 500+ | MongoDB connection limits |
-
-**Bottleneck Analysis:**
-- **Cloudflare Pages**: No limit - handles massive traffic easily
-- **Railway Free**: CPU/RAM limited - first bottleneck (50-200 users)
-- **MongoDB Atlas M0**: Connection pool (500) - second bottleneck (300 users)
-
-### Upgrade Triggers
-
-**Upgrade Railway when:**
-- Response times consistently >500ms
-- $5 monthly credit exhausted
-- Need >1GB RAM for caching
-
-**Upgrade MongoDB when:**
-- Storage approaches 400MB (of 512MB limit)
-- "Connection pool exhausted" errors appear
-- Need dedicated resources for consistent performance
-
-### Performance Optimization Tips
-
-To maximize free tier capacity:
-
-1. **Add Redis caching** (Railway offers free Redis)
-   - Cache product listings, user sessions
-   - Reduce MongoDB queries by 60-80%
-
-2. **Implement connection pooling** in Go backend
-   - Reuse MongoDB connections efficiently
-   - Prevents connection exhaustion
-
-3. **Add database indexes**
-   - Index frequently queried fields (location, category, status)
-   - Speeds up searches 10x
-
-4. **Use Cloudflare Workers KV**
-   - Edge cache for static API responses
-   - Reduces backend load
-
-5. **Enable Gzip compression** in Go backend
-   - Reduces response size by 70%
-
-6. **Implement pagination** for all list endpoints
-   - Never return >50 items per request
-   - Prevents memory spikes
-
-With these optimizations, you can push to **500+ concurrent users** on the free tier.
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register new user (buyer or seller)
-- `POST /api/auth/login` - User login
-- `PUT /api/auth/profile` - Update profile (authenticated)
-
-### Products
-- `GET /api/products` - Get all products (with filters, pagination, geolocation)
-- `GET /api/products/:id` - Get single product
-- `GET /api/products/seller/:sellerId` - Get products by seller
-- `GET /api/products/my-products` - Get seller's products (authenticated)
-- `POST /api/products` - Create product (seller only)
-- `PUT /api/products/:id` - Update product (seller only)
-- `DELETE /api/products/:id` - Delete product (seller only)
-
-### Product Images
-- `POST /api/product-images/process` - Upload and optionally enhance product image (authenticated)
-- `DELETE /api/product-images/cleanup` - Best-effort cleanup of uploaded product images (authenticated)
-
-### Users
-- `GET /api/users/nearby-sellers` - Get nearby sellers by geolocation
-- `GET /api/users/profile` - Get user profile (authenticated)
-- `PUT /api/users/profile` - Update user profile (authenticated)
-- `GET /api/users/sellers/count` - Get total seller count
-
-### Orders
-- `GET /api/orders/my-orders` - Get user's orders (authenticated)
-- `GET /api/orders/:id` - Get order by ID
-- `POST /api/orders` - Create new order
-- `PUT /api/orders/:id/status` - Update order status
-- `PUT /api/orders/:id/payment` - Update payment status
-
-### Chat
-- `GET /api/chat/rooms` - Get user's chat rooms
-- `POST /api/chat/rooms` - Create chat room
-- `POST /api/chat/rooms/direct` - Create direct chat room
-- `GET /api/chat/rooms/:roomId/messages` - Get messages
-- `POST /api/chat/rooms/:roomId/messages` - Send message
-- `WS /ws` - WebSocket for real-time chat
-
-### Forum
-- `GET /api/forum` - Get all forum threads
-- `GET /api/forum/:id` - Get single thread with replies
-- `POST /api/forum` - Create new thread (authenticated)
-- `PUT /api/forum/:id` - Update thread (authenticated)
-- `DELETE /api/forum/:id` - Delete thread (authenticated)
-- `POST /api/forum/:id/reply` - Add reply (authenticated)
-- `POST /api/forum/:id/like` - Like thread (authenticated)
-
-### Logo Generation
-- `POST /api/logo/generate` - Generate logo (authenticated)
-- `GET /api/logo/history` - Get logo history (authenticated)
-- `GET /api/logo/status` - Get generation status (authenticated)
-- `PUT /api/logo/select/:logoId` - Select logo (authenticated)
-- `DELETE /api/logo/:logoId` - Delete logo (authenticated)
-- `POST /api/logo/reset-limit` - Reset daily limit (testing)
-
-### Membership
-- `GET /api/users/membership/status` - Get membership status (authenticated)
-- `POST /api/users/membership/payment` - Submit payment proof (authenticated)
-- `GET /api/users/membership/pending` - Get pending memberships (admin)
-
-### Workflow Automation
-- `GET /api/workflows` - Get all workflows (authenticated)
-- `POST /api/workflows` - Create workflow (authenticated)
-- `PUT /api/workflows/:id/toggle` - Toggle workflow status (authenticated)
-- `DELETE /api/workflows/:id` - Delete workflow (authenticated)
-
-## Key Features Explained
-
-### Geolocation Search
-The app uses MongoDB's geospatial queries to find sellers within a specified radius. When a user allows location access, the app:
-1. Gets user's coordinates
-2. Queries the database for sellers within the selected radius
-3. Displays results on an interactive map
-4. Calculates distances between user and sellers
-
-### Role-Based Access
-- **Buyers**: Can browse products, add to cart, place orders
-- **Sellers**: Can manage products, view dashboard, process orders
-- Authentication middleware ensures proper access control
-
-### Order Management
-Orders flow through statuses:
-1. **Pending** - Order placed, awaiting confirmation
-2. **Confirmed** - Seller confirmed the order
-3. **Preparing** - Seller preparing the items
-4. **Ready** - Order ready for pickup/delivery
-5. **Delivered** - Order completed
-6. **Cancelled** - Order cancelled
-
-### Real-Time Chat
-- WebSocket-based messaging between buyers and sellers
-- Persistent chat rooms per conversation
-- Real-time message updates
-- Typing indicators
-
-### Community Forums
-- Create discussion threads on various topics
-- Reply to threads and engage with community
-- Browse forums by category
-- Edit and delete own posts
-- Like posts and replies
-
-### AI Logo Generation
-- Generate logos using AI (Flux/HuggingFace)
-- Custom logo upload support
-- Rate limiting (5 logos per user)
-- Logo history and selection
-- Requires seller + premium membership
-
-### Premium Membership
-- Monthly subscription (Rp 10.000/month)
-- Exclusive access to AI Logo Generator
-- Exclusive access to n8n Workflow Automation
-- Admin approval required for payment verification
-- Unlimited product listings
-- Priority search results
-- Verified badge
-
-### n8n Workflow Automation
-- Order confirmation webhooks
-- Inventory alert webhooks
-- Welcome email series
-- Real-time event triggers
-- Requires seller + premium membership
-
-### Multi-Language Support
-- Toggle between English and Hindi
-- Translations for all major UI elements
-- Persistent language preference
-
-### Theme Support
-- Toggle between light and dark modes
-- System preference detection
-- Theme persists across sessions
-
-## Repository Setup
-
-### Git Best Practices
-
-This repository follows standard Node.js best practices by **not tracking `node_modules` directories** in git. Dependencies are managed via `package.json` files and installed locally using `npm install`.
-
-**Why we don't commit `node_modules`:**
-- **Repository size**: `node_modules` can contain thousands of files and hundreds of megabytes
-- **Platform differences**: Binaries and symlinks vary between operating systems
-- **Security**: Avoids committing potentially vulnerable dependency versions
-- **Noise prevention**: Eliminates unnecessary diffs from dependency updates
-- **Reproducibility**: Use `package-lock.json` for deterministic installs
-
-**After cloning, always run:**
-```bash
-# Install backend dependencies
-cd backend && npm install
-
-# Install frontend dependencies  
-cd frontend && npm install
-
-# Install mobile dependencies (if using mobile app)
-cd mobile && npm install
-```
-
-## Development Notes
-
-### Running Both Frontend and Backend
-
-**Terminal 1 - Backend:**
-```bash
-cd backend
-go run ./cmd/server
-```
-
-**Terminal 2 - Frontend:**
-```bash
-cd frontend
-npm run dev
-```
-
-### Adding New Features
-1. Backend: Add handlers in `internal/handlers/`
-2. Backend: Update models if needed in `internal/models/`
-3. Backend: Register routes in `cmd/server/main.go`
-4. Frontend: Create/update pages in `src/pages/`
-5. Frontend: Add routes in `App.jsx`
-
-### Environment Variables
-
-**Backend (.env):**
-| Variable | Description |
-|----------|-------------|
-| PORT | Server port (default: 5000) |
-| MONGODB_URI | MongoDB connection string |
-| JWT_SECRET | Secret for JWT signing |
-| NODE_ENV | development or production |
-| LOGO_MODEL | Logo model to use (flux) |
-
-**Frontend (.env):**
-| Variable | Description |
-|----------|-------------|
-| VITE_API_URL | Backend API URL |
-
-## Future Enhancements
-
-- Detailed phased roadmap: [`MVP_ROADMAP.md`](./MVP_ROADMAP.md)
-- Monetization workflow and pricing model: [`MONETIZATION_WORKFLOW.md`](./MONETIZATION_WORKFLOW.md)
-- Centralized n8n automation architecture: [`N8N_AUTOMATION.md`](./N8N_AUTOMATION.md)
-- [x] Real-time chat between buyers and sellers
-- [x] Community forum system
-- [x] Multi-language support (English/Hindi)
-- [x] Dark/light theme support
-- [x] Mobile app (React Native/Expo)
-- [x] n8n Webhook Automations (Order Confirmations, Inventory Alerts)
-- [ ] Review and rating system
-- [ ] Push notifications for order updates
-- [ ] Advanced analytics for sellers
-- [ ] Delivery tracking system
-- [ ] Payment gateway integration
+Scan the QR code with the Expo Go app to run the app on your device.
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+We welcome contributions! To get started:
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Commit your changes with clear messages.
+4. Push your branch and create a pull request.
 
 ## License
 
-MIT License - feel free to use this project for your own purposes.
-
-## Support
-
-For issues or questions, please open an issue on the repository or contact the development team.
-
----
-
-Built with ❤️ for MSMEs everywhere!
+This project is licensed under the MIT License. See the LICENSE file for details.

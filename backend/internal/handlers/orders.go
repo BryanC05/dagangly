@@ -3,8 +3,11 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"msme-marketplace/internal/database"
@@ -109,12 +112,8 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	// Set initial status based on payment method
-	// QRIS and COD require payment confirmation, so start with payment_pending
-	initialStatus := "pending"
-	if req.PaymentMethod == "qris" || req.PaymentMethod == "cash" {
-		initialStatus = "payment_pending"
-	}
+	// QRIS and COD require payment confirmation before seller prepares order
+	initialStatus := "payment_pending"
 
 	// Validate delivery type
 	validDeliveryTypes := map[string]bool{"delivery": true, "pickup": true}
@@ -294,6 +293,22 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		}
 	}
 
+	usersCollection := database.GetDB().Collection("users")
+	paymentDetails := models.PaymentDetails{
+		EwalletProvider: req.PaymentDetails.EwalletProvider,
+		EwalletPhone:    req.PaymentDetails.EwalletPhone,
+		BankName:        req.PaymentDetails.BankName,
+		AccountNumber:   req.PaymentDetails.AccountNumber,
+		AccountHolder:   req.PaymentDetails.AccountHolder,
+	}
+	if req.PaymentMethod == "qris" {
+		var sellerUser models.User
+		if err := usersCollection.FindOne(context.Background(), bson.M{"_id": sellerID}).Decode(&sellerUser); err == nil {
+			paymentDetails.QRISURL = sellerUser.QrisImageURL
+			paymentDetails.QRISCode = sellerUser.QrisCode
+		}
+	}
+
 	order := models.Order{
 		Buyer:       userObjID,
 		Seller:      sellerID,
@@ -307,15 +322,9 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 			Pincode:     req.DeliveryAddress.Pincode,
 			Coordinates: coords,
 		},
-		PaymentStatus: "pending",
-		PaymentMethod: req.PaymentMethod,
-		PaymentDetails: models.PaymentDetails{
-			EwalletProvider: req.PaymentDetails.EwalletProvider,
-			EwalletPhone:    req.PaymentDetails.EwalletPhone,
-			BankName:        req.PaymentDetails.BankName,
-			AccountNumber:   req.PaymentDetails.AccountNumber,
-			AccountHolder:   req.PaymentDetails.AccountHolder,
-		},
+		PaymentStatus:  "pending",
+		PaymentMethod:  req.PaymentMethod,
+		PaymentDetails: paymentDetails,
 		Notes:        req.Notes,
 		DeliveryType: req.DeliveryType,
 		IsPreorder:   isScheduled,
@@ -342,7 +351,6 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	order.ID = result.InsertedID.(primitive.ObjectID)
 
 	// Notify seller about the new order
-	usersCollection := database.GetDB().Collection("users")
 	var buyer models.User
 	usersCollection.FindOne(context.Background(), bson.M{"_id": userObjID}).Decode(&buyer)
 
@@ -669,6 +677,9 @@ func (h *OrderHandler) UpdatePayment(c *gin.Context) {
 		if req.PaymentStatus == "completed" {
 			now := time.Now()
 			update["paymentDetails.paidAt"] = now
+			if order.Status == "payment_pending" {
+				update["status"] = "confirmed"
+			}
 		}
 	}
 
@@ -679,7 +690,12 @@ func (h *OrderHandler) UpdatePayment(c *gin.Context) {
 		update["paymentDetails.qrisCode"] = req.PaymentDetails.QRISCode
 	}
 	if req.PaymentDetails.TransferProof != nil {
+		if !isBuyer {
+			c.JSON(403, gin.H{"message": "Only buyers can upload payment proof"})
+			return
+		}
 		update["paymentDetails.transferProof"] = req.PaymentDetails.TransferProof
+		update["paymentStatus"] = "proof_submitted"
 	}
 	if req.PaymentDetails.EwalletProvider != nil {
 		update["paymentDetails.ewalletProvider"] = req.PaymentDetails.EwalletProvider
@@ -712,6 +728,103 @@ func (h *OrderHandler) UpdatePayment(c *gin.Context) {
 	var updatedOrder models.Order
 	ordersCollection.FindOne(context.Background(), bson.M{"_id": orderObjID}).Decode(&updatedOrder)
 
+	if req.PaymentDetails.TransferProof != nil {
+		go CreateAndSend(order.Seller, "payment_proof",
+			"Payment Proof Received",
+			fmt.Sprintf("Buyer submitted payment proof for order #%s", order.ID.Hex()[len(order.ID.Hex())-8:]),
+			map[string]interface{}{"orderId": order.ID.Hex()})
+	}
+	if req.PaymentStatus == "completed" {
+		go CreateAndSend(order.Buyer, "payment_confirmed",
+			"Payment Confirmed",
+			"Your payment was confirmed. The seller will prepare your order.",
+			map[string]interface{}{"orderId": order.ID.Hex(), "status": "confirmed"})
+	}
+
+	c.JSON(200, updatedOrder)
+}
+
+// UploadPaymentProof lets buyers upload QRIS/bank transfer proof for an order
+func (h *OrderHandler) UploadPaymentProof(c *gin.Context) {
+	userID := c.GetString("userID")
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid user ID"})
+		return
+	}
+
+	orderID := c.Param("id")
+	orderObjID, err := primitive.ObjectIDFromHex(orderID)
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid order ID"})
+		return
+	}
+
+	ordersCollection := database.GetDB().Collection("orders")
+	var order models.Order
+	if err := ordersCollection.FindOne(context.Background(), bson.M{"_id": orderObjID}).Decode(&order); err != nil {
+		c.JSON(404, gin.H{"message": "Order not found"})
+		return
+	}
+
+	if order.Buyer != userObjID {
+		c.JSON(403, gin.H{"message": "Only the buyer can upload payment proof"})
+		return
+	}
+
+	file, header, err := c.Request.FormFile("paymentProof")
+	if err != nil {
+		c.JSON(400, gin.H{"message": "No file uploaded"})
+		return
+	}
+	defer file.Close()
+
+	uploadDir := fmt.Sprintf("./uploads/orders/%s", orderID)
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		c.JSON(500, gin.H{"message": "Failed to create upload directory"})
+		return
+	}
+
+	ext := filepath.Ext(header.Filename)
+	if ext == "" {
+		ext = ".jpg"
+	}
+	filename := fmt.Sprintf("proof_%d%s", time.Now().Unix(), ext)
+	destPath := filepath.Join(uploadDir, filename)
+
+	out, err := os.Create(destPath)
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Failed to save file"})
+		return
+	}
+	defer out.Close()
+	if _, err := io.Copy(out, file); err != nil {
+		c.JSON(500, gin.H{"message": "Failed to save file"})
+		return
+	}
+
+	proofURL := fmt.Sprintf("/uploads/orders/%s/%s", orderID, filename)
+	now := time.Now()
+
+	_, err = ordersCollection.UpdateOne(context.Background(), bson.M{"_id": orderObjID}, bson.M{
+		"$set": bson.M{
+			"paymentDetails.transferProof": proofURL,
+			"paymentStatus":                "proof_submitted",
+			"updatedAt":                    now,
+		},
+	})
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Failed to update order"})
+		return
+	}
+
+	go CreateAndSend(order.Seller, "payment_proof",
+		"Payment Proof Received",
+		fmt.Sprintf("Buyer submitted payment proof for order #%s", order.ID.Hex()[len(order.ID.Hex())-8:]),
+		map[string]interface{}{"orderId": order.ID.Hex()})
+
+	var updatedOrder models.Order
+	ordersCollection.FindOne(context.Background(), bson.M{"_id": orderObjID}).Decode(&updatedOrder)
 	c.JSON(200, updatedOrder)
 }
 

@@ -120,6 +120,7 @@ func main() {
 		{
 			users.GET("/profile", userHandler.GetProfile)
 			users.PUT("/profile", userHandler.UpdateProfile)
+			users.POST("/seller/qris", userHandler.UploadSellerQris)
 			users.GET("/saved-products", userHandler.GetSavedProducts)
 			users.POST("/saved-products/:productId", userHandler.SaveProduct)
 			users.DELETE("/saved-products/:productId", userHandler.UnsaveProduct)
@@ -235,6 +236,7 @@ func main() {
 			orders.GET("/:id", orderHandler.GetOrderByID)
 			orders.PUT("/:id/status", orderHandler.UpdateOrderStatus)
 			orders.PUT("/:id/payment", orderHandler.UpdatePayment)
+			orders.POST("/:id/payment-proof", orderHandler.UploadPaymentProof)
 			orders.PUT("/:id/seller-response", orderHandler.SellerResponse)
 			orders.PUT("/:id/buyer-confirm", orderHandler.BuyerConfirm)
 			orders.GET("/:id/chat-room", orderHandler.GetOrderChatRoom)
@@ -550,6 +552,8 @@ func main() {
 	os.MkdirAll("./uploads/logos", 0755)
 	os.MkdirAll("./uploads/products", 0755)
 	os.MkdirAll("./uploads/forum", 0755)
+	os.MkdirAll("./uploads/orders", 0755)
+	os.MkdirAll("./uploads/qris", 0755)
 
 	port := cfg.Port
 	if port == "" {

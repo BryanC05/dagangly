@@ -3,11 +3,12 @@ import { View, Text, Image, TouchableOpacity, Dimensions, StyleSheet } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeStore } from '../store/themeStore';
 import { useAuthStore } from '../store/authStore';
-import { getImageUrl, formatPrice } from '../utils/helpers';
+import { formatPrice } from '../utils/helpers';
 import api from '../api/api';
 import { particleEvents } from './BackgroundEffect';
 import { tokens } from '../theme/tokens';
 import LiveStockBadge from './LiveStockBadge';
+import productImages from '../assets/productImages';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
@@ -15,7 +16,18 @@ const CARD_WIDTH = (width - 48) / 2;
 export default function ProductCard({ product, onPress }) {
     const { colors, isDarkMode } = useThemeStore();
     const { user, isAuthenticated } = useAuthStore();
-    const imageUrl = product.images?.[0] ? getImageUrl(product.images[0]) : '';
+
+    const getProductImage = () => {
+        const img = product.images?.[0];
+        if (!img) return null;
+        return productImages[img] || null;
+    };
+
+    const getProductImageUri = () => {
+        const img = product.images?.[0];
+        if (!img) return null;
+        return Image.resolveAssetSource(productImages[img])?.uri || null;
+    };
 
     const productId = product._id || product.id;
 
@@ -58,7 +70,6 @@ export default function ProductCard({ product, onPress }) {
         card: {
             width: CARD_WIDTH,
             borderRadius: 6,
-            overflow: 'hidden',
             marginBottom: 12,
             backgroundColor: colors.card,
             borderWidth: 1,
@@ -76,6 +87,8 @@ export default function ProductCard({ product, onPress }) {
             width: '100%',
             height: CARD_WIDTH,
             backgroundColor: isDarkMode ? '#1e293b' : '#f1f5f9',
+            borderTopLeftRadius: 5,
+            borderTopRightRadius: 5,
         },
         heartBtn: {
             position: 'absolute',
@@ -160,9 +173,9 @@ export default function ProductCard({ product, onPress }) {
             activeOpacity={0.9}
         >
             <View style={dynamicStyles.imageWrapper}>
-                {imageUrl ? (
+                {getProductImage() ? (
                     <Image
-                        source={{ uri: imageUrl }}
+                        source={getProductImage()}
                         style={dynamicStyles.image}
                         resizeMode="cover"
                     />
@@ -217,7 +230,9 @@ export default function ProductCard({ product, onPress }) {
                 <View style={dynamicStyles.ratingRow}>
                     <Ionicons name="star" size={12} style={dynamicStyles.starIcon} fill={colors.primary} />
                     <Text style={dynamicStyles.rating}>
-                        {product.rating ? product.rating.toFixed(1) : '4.5'} ({product.reviewCount || 0})
+                        {product.totalReviews > 0 && product.rating
+                            ? `${product.rating.toFixed(1)} (${product.totalReviews})`
+                            : 'No reviews yet'}
                     </Text>
                 </View>
                 <LiveStockBadge stock={product.stock || 0} />

@@ -16,6 +16,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import ProgressSteps from '@/components/ui/ProgressSteps';
 import DeliveryMapPicker from '@/components/DeliveryMapPicker';
+import { showError, showSuccess, showInfo } from '../utils/toast';
+import { resolveOrderId, formatScheduledPickup } from '../utils/orderStatus';
 
 function Cart() {
     const navigate = useNavigate();
@@ -43,6 +45,7 @@ function Cart() {
     const [loading, setLoading] = useState(false);
     const [deliveryLocation, setDeliveryLocation] = useState(null);
     const [distanceError, setDistanceError] = useState(null);
+    const [orderSuccess, setOrderSuccess] = useState(null);
 
     const subtotal = checkoutSeller ? getSellerTotal(checkoutSeller.sellerId) : 0;
     const deliveryFee = 0; // Delivery disabled — pickup only
@@ -135,7 +138,7 @@ function Cart() {
     const handleCheckout = async (e) => {
         e.preventDefault();
         if (!isAuthenticated) {
-            alert(t('cart.loginRequired'));
+            showInfo('Login required', t('cart.loginRequired'));
             openLogin('/cart');
             return;
         }
@@ -175,22 +178,31 @@ function Cart() {
                 deliveryDate: preorderDate || null
             };
 
-            await api.post('/orders', orderData);
+            const res = await api.post('/orders', orderData);
+            const created = res.data;
             clearSellerCart(checkoutSeller.sellerId);
-            // Invalidate orders cache so the Orders page fetches fresh data
             queryClient.invalidateQueries({ queryKey: ['orders'] });
 
-            // Trigger particle burst effect passing the mouse event coordinates
             window.dispatchEvent(new CustomEvent('trigger-cart-burst', {
                 detail: { x: e.clientX, y: e.clientY }
             }));
 
-            alert('Order placed successfully!');
+            setOrderSuccess({
+                orderId: resolveOrderId(created),
+                paymentMethod,
+                total,
+                sellerName: checkoutSeller.sellerName,
+                pickupTime: preorderTime,
+                pickupDate: preorderDate,
+            });
             setCheckoutSeller(null);
             setDeliveryLocation(null);
-            navigate('/orders');
+            showSuccess('Order placed!', paymentMethod === 'qris'
+                ? 'Scan the seller QRIS on your Orders page and upload proof after paying.'
+                : 'Pay with cash when you pick up.');
         } catch (error) {
             const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Failed to place order';
+            showError('Checkout failed', errorMsg);
             setDistanceError(errorMsg);
             if (error.response?.data?.distance) {
                 setDistanceError(`Location is ${error.response.data.distance.toFixed(2)}km away. Maximum allowed is 5km.`);
@@ -508,11 +520,47 @@ function Cart() {
         }
     };
 
+    if (orderSuccess) {
+        const schedule = formatScheduledPickup({
+            preorderTime: orderSuccess.pickupTime,
+            deliveryDate: orderSuccess.pickupDate,
+        });
+        return (
+            <div className="container py-12 max-w-lg mx-auto">
+                <Card className="border-emerald-200 bg-emerald-50/30">
+                    <CardContent className="p-8 text-center space-y-4">
+                        <Check className="h-14 w-14 text-emerald-500 mx-auto" />
+                        <h2 className="text-2xl font-bold">Order placed!</h2>
+                        <p className="text-muted-foreground">
+                            Order #{orderSuccess.orderId?.slice(-8).toUpperCase()} from {orderSuccess.sellerName}
+                        </p>
+                        <p className="text-lg font-semibold text-primary">
+                            Rp {orderSuccess.total?.toLocaleString('id-ID')}
+                        </p>
+                        {schedule && (
+                            <p className="text-sm">Scheduled pickup: {schedule}</p>
+                        )}
+                        <p className="text-sm text-muted-foreground">
+                            {orderSuccess.paymentMethod === 'qris'
+                                ? 'Go to Orders to view the QRIS code and upload payment proof.'
+                                : 'Pay with cash when you pick up at the store.'}
+                        </p>
+                        <div className="flex flex-col gap-2 pt-2">
+                            <Button size="lg" onClick={() => navigate('/orders')}>View orders</Button>
+                            <Button variant="outline" onClick={() => setOrderSuccess(null)}>Continue shopping</Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
     if (checkoutSeller) {
         return (
             <>
                 <div className="container py-8">
-                    <div className="max-w-2xl mx-auto">
+                    <div className="max-w-4xl mx-auto grid lg:grid-cols-[1fr_320px] gap-8">
+                        <div>
                         <Button variant="ghost" className="mb-4 gap-2" onClick={cancelCheckout}>
                             <ArrowLeft className="h-5 w-5" />
                             Back to Cart
@@ -521,39 +569,63 @@ function Cart() {
                         <div className="mt-8">
                             {renderStepContent()}
                         </div>
-                        <div className="flex gap-4 mt-8">
+                        <div className="flex gap-4 mt-8 lg:hidden">
                             {currentStep > 1 && (
-                                <Button
-                                    variant="outline"
-                                    size="lg"
-                                    className="flex-1 gap-2 h-12"
-                                    onClick={prevStep}
-                                >
+                                <Button variant="outline" size="lg" className="flex-1 gap-2 h-12" onClick={prevStep}>
                                     <ArrowLeft className="h-5 w-5" />
                                     {t('common.back')}
                                 </Button>
                             )}
                             {currentStep < 4 ? (
-                                <Button
-                                    size="lg"
-                                    className="flex-1 gap-2 h-12"
-                                    onClick={nextStep}
-                                >
+                                <Button size="lg" className="flex-1 gap-2 h-12" onClick={nextStep}>
                                     {t('common.next')}
                                     <ArrowRight className="h-5 w-5" />
                                 </Button>
                             ) : (
-                                <Button
-                                    size="lg"
-                                    className="flex-1 gap-2 h-12"
-                                    onClick={handleCheckout}
-                                    disabled={loading}
-                                >
+                                <Button size="lg" className="flex-1 gap-2 h-12" onClick={handleCheckout} disabled={loading}>
                                     {loading ? t('cart.processing') : t('cart.placeOrder')}
                                     {!loading && <Check className="h-5 w-5" />}
                                 </Button>
                             )}
                         </div>
+                        </div>
+                        <aside className="hidden lg:block">
+                            <Card className="sticky top-24 border-primary/20">
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Order summary</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <p className="text-sm text-muted-foreground">{checkoutSeller.sellerName}</p>
+                                    <div className="flex justify-between text-sm">
+                                        <span>Subtotal</span>
+                                        <span>Rp {subtotal.toLocaleString('id-ID')}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span>Pickup</span>
+                                        <span className="text-emerald-600">Free</span>
+                                    </div>
+                                    <Separator />
+                                    <div className="flex justify-between font-bold text-lg">
+                                        <span>Total</span>
+                                        <span className="text-primary">Rp {total.toLocaleString('id-ID')}</span>
+                                    </div>
+                                    {currentStep > 1 && (
+                                        <Button variant="outline" className="w-full gap-2" onClick={prevStep}>
+                                            <ArrowLeft className="h-4 w-4" /> Back
+                                        </Button>
+                                    )}
+                                    {currentStep < 4 ? (
+                                        <Button className="w-full gap-2" onClick={nextStep}>
+                                            Next <ArrowRight className="h-4 w-4" />
+                                        </Button>
+                                    ) : (
+                                        <Button className="w-full gap-2" onClick={handleCheckout} disabled={loading}>
+                                            {loading ? t('cart.processing') : t('cart.placeOrder')}
+                                        </Button>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </aside>
                     </div>
                 </div>
             </>

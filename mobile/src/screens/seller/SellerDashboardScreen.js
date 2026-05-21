@@ -9,6 +9,7 @@ import { formatPrice } from '../../utils/helpers';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useThemeStore } from '../../store/themeStore';
 import { useNavigation } from '@react-navigation/native';
+import SellerOnboardingChecklist from '../../components/SellerOnboardingChecklist';
 
 const MOCK_ANALYTICS = {
     period: '30',
@@ -31,7 +32,7 @@ const MOCK_PRODUCTS = [
 const FORCE_MOCK = false;
 
 export default function SellerDashboardScreen({ navigation }) {
-    const { user } = useAuthStore();
+    const { user, setUser } = useAuthStore();
     const { t } = useTranslation();
     const { colors, isDarkMode } = useThemeStore();
     
@@ -304,6 +305,15 @@ export default function SellerDashboardScreen({ navigation }) {
                 <Text style={{ fontSize: 12, fontWeight: '800', color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>Command Center</Text>
                 <Text style={styles.title}>Welcome, {user.businessName || user.name}!</Text>
             </View>
+
+            <SellerOnboardingChecklist
+                user={user}
+                productCount={analytics?.productCount || 0}
+                colors={colors}
+                navigation={navigation}
+                t={t}
+                onUpdated={(u) => u && setUser(u)}
+            />
 
             {/* Membership Banner */}
             <View style={styles.membershipCard}>

@@ -348,11 +348,15 @@ func (h *PaymentHandler) GetPaymentStatus(c *gin.Context) {
 		}
 
 		if updateStatus != order.PaymentStatus {
+			setFields := bson.M{
+				"paymentStatus": updateStatus,
+				"updatedAt":     time.Now(),
+			}
+			if updateStatus == "paid" && order.Status == "payment_pending" {
+				setFields["status"] = "confirmed"
+			}
 			ordersCollection.UpdateOne(context.Background(), bson.M{"_id": orderObjID}, bson.M{
-				"$set": bson.M{
-					"paymentStatus": updateStatus,
-					"updatedAt":     time.Now(),
-				},
+				"$set": setFields,
 			})
 		}
 	}
@@ -408,12 +412,17 @@ func (h *PaymentHandler) MidtransWebhook(c *gin.Context) {
 	transactionID := webhookData.TransactionID
 	order.PaymentDetails.TransactionID = &transactionID
 
+	updateFields := bson.M{
+		"paymentStatus":  paymentStatus,
+		"paymentDetails": order.PaymentDetails,
+		"updatedAt":      time.Now(),
+	}
+	if paymentStatus == "paid" && order.Status == "payment_pending" {
+		updateFields["status"] = "confirmed"
+	}
+
 	ordersCollection.UpdateOne(context.Background(), bson.M{"_id": orderObjID}, bson.M{
-		"$set": bson.M{
-			"paymentStatus":  paymentStatus,
-			"paymentDetails": order.PaymentDetails,
-			"updatedAt":      time.Now(),
-		},
+		"$set": updateFields,
 	})
 
 	if paymentStatus == "paid" {
