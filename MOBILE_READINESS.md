@@ -12,10 +12,10 @@ This document outlines the current state of the mobile application, critical iss
 
 | Issue | Description | Priority |
 |-------|-------------|----------|
-| No secure token storage | Using `localStorage` on web - tokens easily accessible via XSS | P0 |
-| Auth persistence unclear | Mobile app auth flow not fully verified | P0 |
-| Hardcoded API keys | Some keys visible in `.env` - verify if valid for production | P0 |
-| No JWT refresh mechanism | Tokens may expire without graceful refresh | P1 |
+| No secure token storage | ~~Using `localStorage` on web~~ **Fixed:** Migrated to Firebase Authentication. | ✅ Resolved |
+| Auth persistence unclear | ~~Mobile app auth flow not fully verified~~ **Fixed:** Handled by Firebase natively. | ✅ Resolved |
+| Hardcoded API keys | Firebase API keys are restricted by package name/HTTP referrers via Cloud Console. | ✅ Resolved |
+| No JWT refresh mechanism | ~~Tokens may expire without graceful refresh~~ **Fixed:** Firebase SDK auto-refreshes ID tokens. | ✅ Resolved |
 
 ### Error Handling
 
@@ -63,7 +63,7 @@ This document outlines the current state of the mobile application, critical iss
 
 ### Features Needed
 
-- [ ] Push notifications (setup exists, not integrated)
+- [x] Push notifications (Backend endpoints & Firebase integrated)
 - [ ] Deep linking for sharing products
 - [ ] Pull-to-refresh on all lists
 - [ ] Search history
@@ -137,7 +137,8 @@ borderColor: colors.border
 ### Infrastructure
 
 - [ ] Crash reporting (Crashlytics/Sentry)
-- [ ] Analytics (Firebase/Mixpanel)
+- [x] Analytics (Firebase/Mixpanel) - Firebase initialized
+- [x] Authentication (Firebase) - Integrated across web and mobile
 - [ ] Remote config (Firebase)
 - [ ] CI/CD pipeline
 - [ ] Build verification tests
@@ -160,6 +161,11 @@ borderColor: colors.border
 - Basic navigation flow
 - Reusable component library
 - API service layer with interceptors
+- Advanced backend capabilities available (ready for mobile integration):
+  - Scheduled Delivery / Pre-orders
+  - Video Consultation Rooms
+  - Installment Payments
+  - Digital Wallet
 
 ---
 

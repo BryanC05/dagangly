@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -24,26 +25,20 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Login form submitted!');
-    console.log('Login attempt with:', formData);
     setError('');
     setIsLoading(true);
 
     try {
-      console.log('Making API call to /auth/login');
-      const response = await api.post('/auth/login', formData);
-      const token = response?.data?.token;
-      const user = response?.data?.user;
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const firebaseUser = userCredential.user;
+      const token = await firebaseUser.getIdToken();
 
-      // Login must be JWT-based; reject malformed token payloads.
-      if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
-        throw new Error('Invalid authentication token received');
-      }
-
-      setAuth(user, token);
+      // Update local auth state with Firebase user data and token
+      setAuth({ uid: firebaseUser.uid, email: firebaseUser.email }, token);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Login failed. Please check your credentials.');
+      setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }

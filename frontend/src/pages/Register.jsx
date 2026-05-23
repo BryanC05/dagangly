@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Phone, Store, ArrowRight, Building2, Sparkles, ImageIcon } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -41,15 +42,22 @@ function Register() {
 
     try {
       let locationData = { ...formData.location };
-      const response = await api.post('/auth/register', {
-        ...formData,
-        location: locationData,
-      });
+      
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const firebaseUser = userCredential.user;
+      const token = await firebaseUser.getIdToken();
 
-      setAuth(response.data.user, response.data.token);
+      // Sync user profile with backend using the Firebase UID, excluding the password
+      const registerPayload = { ...formData, firebaseUid: firebaseUser.uid, location: locationData };
+      delete registerPayload.password;
+
+      await api.post('/auth/register', registerPayload);
+
+      setAuth({ uid: firebaseUser.uid, email: firebaseUser.email, name: formData.name }, token);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.message || 'Registration failed');
     } finally {
       setIsLoading(false);
     }

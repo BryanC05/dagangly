@@ -143,7 +143,7 @@ Add the following fields to the user model:
 - [x] Update navigation to show/hide based on isSeller
 
 ### Database
-- [ ] Run migration to add new fields to users collection
+- [x] Run migration to add new fields to users collection
 
 ---
 

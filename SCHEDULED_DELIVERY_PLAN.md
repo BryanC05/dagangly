@@ -603,10 +603,10 @@ ordersCollection.Indexes().CreateOne(
 ## Rollout Plan
 
 ### Phase 1: Backend Only
-- [ ] Update models
-- [ ] Implement API endpoints
-- [ ] Add background jobs
-- [ ] Test with Postman
+- [x] Update models
+- [x] Implement API endpoints (`SellerResponse`, `BuyerConfirm`)
+- [x] Add background jobs (deadline cleanup)
+- [x] Test with Postman
 
 ### Phase 2: Mobile Beta
 - [ ] Update CartScreen

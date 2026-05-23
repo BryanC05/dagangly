@@ -91,6 +91,7 @@ npx eas-cli@latest login
 - [x] `eas.json` with production profile and auto-increment
 - [x] Environment variables set for all build profiles
 - [x] `react-native-maps` installed and configured
+- [x] Firebase configured with `@react-native-firebase` and `google-services.json`
 
 ### Build Commands:
 
@@ -325,6 +326,8 @@ Google Play requires accurate data safety information. Here's how to fill it out
 | Photos/Videos | ✅ Yes | Product images, profile photos |
 | App interactions | ✅ Yes | Analytics, improving user experience |
 | Crash logs | ✅ Yes | Debugging, app stability |
+| Camera/Audio | ✅ Yes | Required for Video Call Consultation feature |
+| Financial Info | ✅ Yes | Digital Wallet, Installment processing |
 
 ### Data Sharing:
 - **With other users:** Yes - Seller info shared with buyers for orders

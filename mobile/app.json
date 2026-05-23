@@ -34,6 +34,7 @@
       "edgeToEdgeEnabled": true,
       "allowHttp": true,
       "package": "com.msmemarketplace.mobile",
+      "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
           "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
@@ -62,7 +63,15 @@
           "locationWhenInUsePermission": "Allow MSME Marketplace to use your location to show nearby sellers and products."
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": { "useFrameworks": "static" }
+        }
+      ]
     ],
     "extra": {
       "EXPO_PUBLIC_API_HOST": "https://dagangly-production.up.railway.app"

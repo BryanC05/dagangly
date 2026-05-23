@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "545811219533",
+    "project_id": "dagangly-24a52",
+    "storage_bucket": "dagangly-24a52.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:545811219533:android:642ff5d47948904f3ac804",
+        "android_client_info": {
+          "package_name": "com.msmemarketplace.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "545811219533-n69ochfh1q72fdb31uhddoaa6i2ar864.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpC1PIxg8V4_BdT_QSZc7ra0gU-8f41pk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "545811219533-n69ochfh1q72fdb31uhddoaa6i2ar864.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

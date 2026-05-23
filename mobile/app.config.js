@@ -30,6 +30,7 @@ export default {
       },
       edgeToEdgeEnabled: true,
       package: "com.msmemarketplace.mobile",
+      googleServicesFile: "./google-services.json",
       config: {
         googleMaps: {
           apiKey: process.env.GOOGLEMAP_API_KEY
@@ -59,6 +60,14 @@ export default {
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to show nearby sellers and products."
+        }
+      ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": { "useFrameworks": "static" }
         }
       ]
     ]
