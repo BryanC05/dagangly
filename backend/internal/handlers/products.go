@@ -820,8 +820,8 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 	}
 
 	// Add first product image if available, else use fallback
-	// Use a generic placeholder with a direct .jpg extension to satisfy Meta Graph API
-	fallbackImage := "https://i.ibb.co/6PjvJcQ/default-placeholder.jpg"
+	// Use a reliable placeholder image with a direct .jpg extension to satisfy Meta Graph API
+	fallbackImage := "https://placehold.co/800x800/eeeeee/999999.jpg?text=Product+Image"
 	imageURL := fallbackImage
 
 	if len(product.Images) > 0 && product.Images[0] != "" {
