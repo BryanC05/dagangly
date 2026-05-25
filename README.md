@@ -1,261 +1,128 @@
-# Dagangly - Indonesian MSME Marketplace
+# 🛍️ Dagangly (MSME Marketplace)
 
-A full-stack web application connecting Micro, Small, and Medium Enterprises (MSMEs) with local buyers. Sellers can list their products, and buyers can discover and purchase items from nearby businesses.
+Dagangly is a comprehensive, multi-platform e-commerce ecosystem designed to connect local buyers with Micro, Small, and Medium Enterprises (MSMEs/UMKM). 
 
-## Table of Contents
-1. [Brand](#brand)
-2. [Features](#features)
-   - [For Buyers](#for-buyers)
-   - [For Sellers (MSMEs)](#for-sellers-msmes)
-   - [Technical Features](#technical-features)
-3. [Tech Stack](#tech-stack)
-4. [Project Structure](#project-structure)
-5. [Setup Instructions](#setup-instructions)
-   - [Backend Setup (Go)](#backend-setup-go)
-   - [Frontend Setup](#frontend-setup)
-   - [Mobile Setup](#mobile-setup)
-6. [Contributing](#contributing)
-7. [License](#license)
+The platform provides robust tools for sellers to manage their business, automate workflows, and reach customers, while offering buyers a highly accessible, modern, and secure shopping experience.
 
-## Brand
+---
 
-- **Name**: Dagangly
-- **Tagline**: Indonesian MSME Marketplace - Connecting local sellers with nearby buyers
+## 🚀 Newly Implemented Features & Updates
 
-## Features
+The platform has recently undergone massive upgrades across all environments (Web, Mobile, and Backend). Here are the key highlights:
 
-### For Buyers
-- Browse products by category
-- Search products by name, description, or tags
-- Filter by price range and category
-- Find nearby sellers using interactive map
-- **Map-based Live Tracking** - Real-time tracking of order deliveries
-- **Barcode/QR Scanner** - Quickly find products by scanning
-- View seller ratings and reviews
-- Add products to cart
-- **Cart Abandonment Recovery** - Automatic reminders for left items
-- Save products for later
-- Place orders from local sellers
-- Track order status
-- Browse seller stores
-- Community forums for discussions
-- Real-time chat with sellers
-- Multi-language support (English/Indonesian)
-- Dark/light theme support
-- **Hero Slideshow** - Auto-advancing featured images on home page
-- **User Guide & Tutorials** - In-app help center with step-by-step tutorials for buyers and sellers
+### 🛒 Core Commerce & Order Management
+- **Scheduled Delivery Orders:** Buyers can request specific delivery dates and times. Includes a full negotiation flow allowing sellers to accept, decline, or request changes to the schedule.
+- **Payment Gateway Integration:** Fully integrated with **Midtrans** supporting Credit Cards, Bank Transfers (Virtual Accounts), E-Wallets (GoPay, OVO), and QRIS.
+- **Digital Wallet & Installments:** Users have an in-app digital wallet for quick checkouts and refunds, plus Buy Now Pay Later (BNPL) installment options (3, 6, 12 months).
+- **Review & Rating System:** Comprehensive rating system for both products and sellers, verified by delivered orders.
+- **Cart Abandonment Recovery:** Automated system to track and remind users of abandoned carts (1h, 24h).
 
-### For Sellers (MSMEs)
-- Register as Micro, Small, or Medium Enterprise
-- **Business Registration** - Submit business application for admin approval
-- Add and manage products with images
-- Set stock quantities and pricing
-- **Dynamic UI Components** - Live stock badges and order status countdowns
-- Receive and manage orders
-- Update order status (Pending → Confirmed → Preparing → Ready → Delivered)
-- View sales dashboard with statistics
-- Manage business profile
-- Participate in community forums
-- Real-time messaging with buyers
-- AI-powered logo generation (Premium)
-- n8n workflow automation (Premium)
-- **Instagram Auto-Post** - Automatically post products to Instagram when listed
+### 🏪 Seller Tools & Admin
+- **Business Registration Flow:** Seamless onboarding process requiring Admin approval before a user is granted Seller privileges.
+- **Advanced Analytics & Inventory:** Sellers get access to a rich dashboard showing revenue, top products, and low-stock alerts.
+- **Dynamic UI Components:** Real-time visual feedback including `LiveStockBadge` (urgency indicators), `OrderStatusCountdown`, and `BalanceAnimation`.
 
-### Technical Features
-- Geolocation-based search for nearby sellers
-- Interactive map using Leaflet
-- Real-time distance calculations
-- JWT-based authentication
-- Responsive design for mobile and desktop
-- Image upload support
-- Product photo enhancement via Claid (manual per image)
-- Category-based product filtering
-- Real-time chat with WebSocket
-- Community forum system
-- Multi-language i18n support
-- Theme management (dark/light mode)
-- Persistent cart and saved items
-- Premium membership system (Rp 10.000/month)
-- n8n webhook integrations for workflow automation
-- **Instagram Auto-Post** - Automatic product posting to Instagram Business accounts via Meta Graph API
+### 🤖 Automation Engine (n8n Integration)
+- **Workflow Automation:** Fully integrated with **n8n** (running via Docker) to automate seller tasks.
+- **Transactional Emails:** Automated Order Confirmations, Status Updates, and Low Inventory alerts sent via Gmail SMTP or SendGrid.
+- **Instagram Auto-Posting:** Sellers can link their Instagram accounts (via Meta Graph API). New product listings can automatically post to their Instagram feed, utilizing ImgBB for robust image binary handling.
 
-## Tech Stack
+### 💬 Communication & Community
+- **Video Call Consultations:** 1:1 WebRTC-powered video calls directly between buyers and sellers for product demonstrations.
+- **WhatsApp Integration:** Direct "Chat on WhatsApp" buttons on product and store pages.
+- **Fraud & Scam Reporting:** Built-in reporting system escalating issues to admins via SMTP/SendGrid or Mailto fallbacks.
+- **Social Media Hub:** Both buyers and sellers can attach auto-detected social media links (TikTok, IG, Twitter, WhatsApp) to their profiles and store pages.
 
-### Backend (Go)
-- Go with Gin framework
-- MongoDB with official Go driver
-- JWT for authentication
-- bcrypt for password hashing
-- Gorilla WebSocket for real-time chat
-- Geospatial queries with MongoDB 2dsphere indexes
+### ♿ Accessibility & UX Transformations
+- **Low Digital Literacy Support:** Implementation of a "Simple Mode", enlarged touch targets, simplified bottom navigation, and an intuitive visual onboarding tour.
+- **WCAG Compliance:** Full Screen Reader support (ARIA labels), keyboard navigation, color contrast compliance, and reduced motion capabilities.
+- **Voice Search:** Integrated Web Speech API allowing hands-free product discovery.
 
-### Frontend
-- React with Vite
-- React Router for navigation
-- TanStack Query (React Query) for data fetching
-- Zustand for state management
-- Native WebSocket for real-time chat
-- Leaflet with React-Leaflet for maps
-- shadcn/ui component library
-- Lucide React for icons
-- Tailwind CSS
-- i18next for multi-language support
+---
 
-## Project Structure
+## 💻 Tech Stack & Architecture
 
-```
-msme-marketplace/
-├── backend/
-│   ├── cmd/
-│   │   └── server/
-│   │       └── main.go
-│   ├── internal/
-│   │   ├── config/
-│   │   │   └── config.go
-│   │   ├── database/
-│   │   │   └── mongo.go
-│   │   ├── handlers/
-│   │   │   ├── auth.go
-│   │   │   ├── users.go
-│   │   │   ├── products.go
-│   │   │   ├── orders.go
-│   │   │   ├── chat.go
-│   │   │   ├── forum.go
-│   │   │   ├── workflows.go
-│   │   │   ├── logo.go
-│   │   │   └── webhooks.go
-│   │   ├── middleware/
-│   │   │   └── auth.go
-│   │   ├── models/
-│   │   │   ├── user.go
-│   │   │   ├── product.go
-│   │   │   ├── order.go
-│   │   │   ├── chatroom.go
-│   │   │   ├── forum.go
-│   │   │   └── workflow.go
-│   │   └── websocket/
-│   │       └── hub.go
-│   ├── uploads/
-│   ├── Dockerfile
-│   ├── go.mod
-│   ├── go.sum
-│   └── .env
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── store/
-│   │   ├── hooks/
-│   │   ├── utils/
-│   │   ├── config/
-│   │   ├── data/
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   ├── vite.config.js
-│   └── .env
-└── mobile/
-    └── (React Native/Expo mobile app)
-```
+### Frontend (Web)
+- **Framework:** React.js (Vite)
+- **Styling:** Tailwind CSS
+- **Features:** PWA Support, Responsive Design, Accessibility-First.
 
-## Setup Instructions
+### Mobile App
+- **Framework:** React Native (Expo)
+- **Distribution:** Configured for Android EAS Build (APK & AAB), Ready for Google Play Store.
+- **Features:** Google Maps integration for nearby sellers, Firebase Push Notifications, Biometric login.
+
+### Backend & Database
+- **Language:** Go (Golang) with Gin framework.
+- **Databases:** 
+  - **MongoDB:** Main application data (Users, Products, Orders, Wallets).
+  - **PostgreSQL:** Dedicated persistence for the n8n workflow engine.
+- **Storage:** Cloud object storage (AWS S3/Cloudinary) for persistent image uploads, resolving ephemeral filesystem 404 issues.
+
+---
+
+## 🏗️ Local Development Setup
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- Go (v1.21 or higher)
-- MongoDB (local or cloud instance like MongoDB Atlas)
-- Git
+- Docker & Docker Compose
+- Node.js 18+
+- Go 1.20+
+- MongoDB running locally or via Atlas
 
-> **Note:** This repository does not include `node_modules` directories. After cloning, you must run `npm install` in each project directory (backend, frontend, mobile) to install dependencies.
-
-### Backend Setup (Go)
-
-1. Navigate to the backend directory:
+### 1. Start the Automation Engine (n8n & Postgres)
 ```bash
-cd msme-marketplace/backend
+docker-compose up -d
 ```
+*n8n will be available at http://localhost:5678*
 
-2. Install dependencies:
+### 2. Start the Backend (Go)
+Ensure your `.env` is configured with MongoDB, Midtrans, and Webhook secrets.
 ```bash
-go mod download
-```
-
-3. Configure environment variables:
-   - Copy `.env` file and update values:
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/msme_marketplace
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-NODE_ENV=development
-HUGGINGFACE_API_KEY=your-huggingface-api-key
-DEEPAI_API_KEY=your-deepai-api-key
-POLLINATIONS_API_KEY=your-pollinations-api-key
-CLAID_API_KEY=your-claid-api-key
-CLAID_BASE_URL=https://api.claid.ai/v1
-CLAID_TIMEOUT_SECONDS=45
-PRODUCT_IMAGE_MAX_SIZE_MB=5
-PRODUCT_IMAGE_MAX_COUNT=4
-PRODUCT_ENHANCE_DAILY_LIMIT=20
-```
-
-4. Run the backend:
-```bash
-# Build and run
-go build -o server ./cmd/server
-./server
-
-# Or run directly
+cd backend
 go run ./cmd/server
 ```
+*API running at http://localhost:5000*
 
-The backend will run on http://localhost:5000
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
+### 3. Start the Web Frontend
 ```bash
-cd msme-marketplace/frontend
-```
-
-2. Install dependencies:
-```bash
+cd frontend
 npm install
-```
-
-3. Start the development server:
-```bash
 npm run dev
 ```
+*Web App running at http://localhost:5173*
 
-The frontend will run on http://localhost:5173
-
-### Mobile Setup
-
-1. Navigate to the mobile directory:
+### 4. Start the Mobile App
 ```bash
-cd msme-marketplace/mobile
-```
-
-2. Install dependencies:
-```bash
+cd mobile
 npm install
-```
-
-3. Start the Expo development server:
-```bash
 npx expo start
 ```
 
-Scan the QR code with the Expo Go app to run the app on your device.
+---
 
-## Contributing
+## 📚 Project Documentation
 
-We welcome contributions! To get started:
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Commit your changes with clear messages.
-4. Push your branch and create a pull request.
+For detailed implementation instructions, troubleshooting, and architecture guides, refer to the following specialized documentation files:
 
-## License
+**Feature Implementations:**
+- `NEW_FEATURES.md` - Master list of all recent capability additions.
+- `IMPLEMENTATION_PLAN.md` - Instagram Auto-posting & Social Links design.
+- `SCHEDULED_DELIVERY_PLAN.md` - Buyer-Seller delivery negotiation architecture.
+- `docs/BUSINESS_REGISTRATION.md` - Seller onboarding and approval flows.
+- `frontend/ACCESSIBILITY_PLAN.md` - UI simplification and WCAG compliance plan.
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+**Infrastructure & Automation:**
+- `N8N_WORKFLOW_GUIDE.md` - Complete setup guide for n8n, webhooks, and SMTP.
+- `N8N_IMGBB_SETUP.md` & `N8N_BINARY_UPLOAD.md` - Instagram graph API and image hosting workarounds.
+- `IMAGE_UPLOADS_TROUBLESHOOTING.md` - Fixing ephemeral file system 404s and CSP rules.
+- `REPORT_SETUP.md` - Email and Webhook configuration for fraud reporting.
+
+**Mobile Release:**
+- `mobile/PLAY_STORE_RELEASE_CHECKLIST.md` - Guide to EAS builds, Play Store forms, and Google Maps setup.
+
+---
+
+## 🛡️ Security Notes
+- Ensure `WEBHOOK_SECRET` is changed in production environments to secure n8n callbacks.
+- Secure your n8n UI with basic authentication (`N8N_BASIC_AUTH_ACTIVE=true`).
+- Lock down your `GOOGLEMAPS_API_KEY` strictly to your Android package name (`com.msmemarketplace.mobile`).
