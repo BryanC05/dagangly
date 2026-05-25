@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	// Replace with your actual module path if different
-	"msme-marketplace/backend/internal/models"
+	"msme-marketplace/internal/models"
 )
 
 const (
