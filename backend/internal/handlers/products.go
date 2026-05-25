@@ -820,7 +820,8 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 	}
 
 	// Add first product image if available, else use fallback
-	fallbackImage := "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800"
+	// Use a generic placeholder with a direct .jpg extension to satisfy Meta Graph API
+	fallbackImage := "https://i.ibb.co/6PjvJcQ/default-placeholder.jpg"
 	imageURL := fallbackImage
 
 	if len(product.Images) > 0 && product.Images[0] != "" {
@@ -833,7 +834,10 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 			fmt.Printf("[Instagram] Using external URL: %s\n", imageURL)
 		} else {
 			// Local file - attach Railway production URL
-			serverURL := "https://umkm-marketplace-production.up.railway.app"
+			serverURL := os.Getenv("SERVER_URL")
+			if serverURL == "" {
+				serverURL = "https://dagangly-production.up.railway.app"
+			}
 
 			if strings.HasPrefix(imagePath, "/") {
 				imageURL = serverURL + imagePath
@@ -888,67 +892,6 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 		debugPayload, _ := json.MarshalIndent(payload, "", "  ")
 		fmt.Printf("[Webhook Error] Payload sent: %s\n", string(debugPayload))
 	}
-}
-
-// uploadToImgBB uploads an image to ImgBB and returns the public URL
-func uploadToImgBB(imagePath string) string {
-	imgBBAPIKey := os.Getenv("IMGBB_API_KEY")
-	if imgBBAPIKey == "" {
-		fmt.Println("[ImgBB] API key not set, skipping upload")
-		return ""
-	}
-
-	// Clean up the path - remove leading slash if present
-	cleanPath := strings.TrimPrefix(imagePath, "/")
-	filePath := "." + string(os.PathSeparator) + cleanPath
-
-	// Check if file exists
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		fmt.Printf("[ImgBB] File not found: %s\n", filePath)
-		return ""
-	}
-
-	// Read the file
-	fileData, err := os.ReadFile(filePath)
-	if err != nil {
-		fmt.Printf("[ImgBB] Failed to read file: %v\n", err)
-		return ""
-	}
-
-	// Encode to base64
-	base64Data := base64.StdEncoding.EncodeToString(fileData)
-
-	// Prepare the request
-	imgBBURL := "https://api.imgbb.com/1/upload"
-	formData := url.Values{}
-	formData.Set("key", imgBBAPIKey)
-	formData.Set("image", base64Data)
-
-	// Send the request
-	resp, err := http.PostForm(imgBBURL, formData)
-	if err != nil {
-		fmt.Printf("[ImgBB] Failed to upload: %v\n", err)
-		return ""
-	}
-	defer resp.Body.Close()
-
-	// Parse the response
-	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		fmt.Printf("[ImgBB] Failed to parse response: %v\n", err)
-		return ""
-	}
-
-	// Check if successful
-	if data, ok := result["data"].(map[string]interface{}); ok {
-		if url, ok := data["url"].(string); ok {
-			fmt.Printf("[ImgBB] Upload successful: %s\n", url)
-			return url
-		}
-	}
-
-	fmt.Printf("[ImgBB] Upload failed: %v\n", result)
-	return ""
 }
 
 // uploadBase64ToImgBB uploads a base64 encoded image string directly to ImgBB
