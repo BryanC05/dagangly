@@ -52,8 +52,8 @@ def main():
         "tags": ["testing", "n8n", "automation"],
         "postToInstagram": True,
         "instagramCaption": f"Testing the automated backend webhook! \nProduct: {product_name} \n#Dagangly #Test",
-        # Using a direct .jpg URL (no redirects) so Instagram Graph API can fetch the media
-        "images": ["https://i.ibb.co/6PjvJcQ/default-placeholder.jpg"],
+        # Using a reliable direct .jpg URL (no redirects, proper Content-Type) that Instagram Graph API can fetch
+        "images": ["https://placehold.co/600x400.jpg"],
     }
 
     create_req = requests.post(
