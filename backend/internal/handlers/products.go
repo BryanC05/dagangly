@@ -475,7 +475,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		unit = req.Unit
 	}
 
-	// Process base64 images from mobile app to actual files
+	// Process base64 images from mobile app to ImgBB or actual files
 	var processedImages []string
 	for _, imgStr := range req.Images {
 		if strings.HasPrefix(imgStr, "data:image/") {
@@ -483,6 +483,12 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 			if len(parts) == 2 {
 				mimePart := parts[0]
 				b64Data := parts[1]
+
+				// Try uploading to ImgBB directly to prevent ephemeral filesystem 404s
+				if imgURL := uploadBase64ToImgBB(b64Data); imgURL != "" {
+					processedImages = append(processedImages, imgURL)
+					continue
+				}
 
 				imgBytes, err := base64.StdEncoding.DecodeString(b64Data)
 				if err == nil {
@@ -594,6 +600,12 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 				if len(parts) == 2 {
 					mimePart := parts[0]
 					b64Data := parts[1]
+
+					// Try uploading to ImgBB directly to prevent ephemeral filesystem 404s
+					if imgURL := uploadBase64ToImgBB(b64Data); imgURL != "" {
+						processedImages = append(processedImages, imgURL)
+						continue
+					}
 
 					imgBytes, err := base64.StdEncoding.DecodeString(b64Data)
 					if err == nil {
@@ -936,6 +948,43 @@ func uploadToImgBB(imagePath string) string {
 	}
 
 	fmt.Printf("[ImgBB] Upload failed: %v\n", result)
+	return ""
+}
+
+// uploadBase64ToImgBB uploads a base64 encoded image string directly to ImgBB
+func uploadBase64ToImgBB(base64Data string) string {
+	imgBBAPIKey := os.Getenv("IMGBB_API_KEY")
+	if imgBBAPIKey == "" {
+		fmt.Println("[ImgBB] API key not set, skipping base64 upload")
+		return ""
+	}
+
+	imgBBURL := "https://api.imgbb.com/1/upload"
+	formData := url.Values{}
+	formData.Set("key", imgBBAPIKey)
+	formData.Set("image", base64Data)
+
+	resp, err := http.PostForm(imgBBURL, formData)
+	if err != nil {
+		fmt.Printf("[ImgBB] Failed to upload base64: %v\n", err)
+		return ""
+	}
+	defer resp.Body.Close()
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		fmt.Printf("[ImgBB] Failed to parse response: %v\n", err)
+		return ""
+	}
+
+	if data, ok := result["data"].(map[string]interface{}); ok {
+		if url, ok := data["url"].(string); ok {
+			fmt.Printf("[ImgBB] Base64 upload successful: %s\n", url)
+			return url
+		}
+	}
+
+	fmt.Printf("[ImgBB] Base64 upload failed: %v\n", result)
 	return ""
 }
 
