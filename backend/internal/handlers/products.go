@@ -833,18 +833,10 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 			imageURL = imagePath
 			fmt.Printf("[Instagram] Using external URL: %s\n", imageURL)
 		} else {
-			// Local file - attach Railway production URL
-			serverURL := os.Getenv("SERVER_URL")
-			if serverURL == "" {
-				serverURL = "https://dagangly-production.up.railway.app"
-			}
-
-			if strings.HasPrefix(imagePath, "/") {
-				imageURL = serverURL + imagePath
-			} else {
-				imageURL = serverURL + "/" + imagePath
-			}
-			fmt.Printf("[Instagram] Using Railway local URL: %s\n", imageURL)
+			// Local file - Railway local URLs will return 404 to Meta's crawler
+			// Fall back to the public placeholder so the Instagram post succeeds
+			fmt.Printf("[Instagram] Local image detected (%s). Using public fallback image to prevent Meta 404 error.\n", imagePath)
+			imageURL = fallbackImage
 		}
 	}
 	fmt.Printf("[Instagram] Final image URL: %s\n", imageURL)
