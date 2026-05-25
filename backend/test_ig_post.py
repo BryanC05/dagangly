@@ -52,8 +52,8 @@ def main():
         "tags": ["testing", "n8n", "automation"],
         "postToInstagram": True,
         "instagramCaption": f"Testing the automated backend webhook! \nProduct: {product_name} \n#Dagangly #Test",
-        # Using a public unsplash image so Meta has something valid to download
-        "images": ["https://images.unsplash.com/photo-1550547660-d9450f859349?w=800"],
+        # Using a direct .jpg URL (no redirects) so Instagram Graph API can fetch the media
+        "images": ["https://i.ibb.co/6PjvJcQ/default-placeholder.jpg"],
     }
 
     create_req = requests.post(
