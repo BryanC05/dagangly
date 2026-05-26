@@ -57,7 +57,6 @@ The platform has recently undergone massive upgrades across all environments (We
 - **Databases:** 
   - **MongoDB:** Main application data (Users, Products, Orders, Wallets).
   - **PostgreSQL:** Dedicated persistence for the n8n workflow engine.
-- **Storage:** Cloud object storage (AWS S3/Cloudinary) for persistent image uploads, resolving ephemeral filesystem 404 issues.
 
 ---
 
