@@ -7,7 +7,8 @@ const path = require("path");
 
 console.log("Starting server...");
 
-const serverPath = path.join(__dirname, "backend", "server");
+const serverBinary = process.platform === "win32" ? "server.exe" : "server";
+const serverPath = path.join(__dirname, "backend", serverBinary);
 const backendDir = path.join(__dirname, "backend");
 
 if (!fs.existsSync(serverPath)) {

@@ -30,29 +30,29 @@ export default function Index() {
 
   const heroSlides = [
     {
-      image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80",
-      title: "Produk Lokal Berkualitas",
-      desc: "Temukan kerajinan tangan terbaik dari pengrajin Indonesia",
+      image: "/uploads/products/soto-ayam.webp",
+      title: "Soto Ayam",
+      desc: "Nikmati Soto Ayam yang segar dan lezat",
     },
     {
-      image: "https://images.unsplash.com/photo-1567620905732-2d1ecea66514?w=1200&q=80",
-      title: "Makanan Khas Nusantara",
-      desc: "Jelajahi kelezatan makanan tradisional Indonesia",
+      image: "/uploads/products/rendang.webp",
+      title: "Rendang",
+      desc: "Rendang Daging Khas Padang yang menggugah selera",
     },
     {
-      image: "https://images.unsplash.com/photo-1555529669-e69e7aa0f9a2?w=1200&q=80",
-      title: "Dukung Ekonomi Lokal",
-      desc: "Setiap pembelian mendukung pelaku UMKM",
+      image: "/uploads/products/sate-ayam.webp",
+      title: "Sate Ayam",
+      desc: "Sate Ayam Madura dengan bumbu kacang spesial",
     },
     {
-      image: "https://images.unsplash.com/photo-1445205170230-053bc82c5110?w=1200&q=80",
-      title: "Fashion Karya Anak Bangsa",
-      desc: "Desain unik bisnis lokal yang tak kalah kreatif",
+      image: "/uploads/products/nasi-goreng.webp",
+      title: "Nasi Goreng",
+      desc: "Nasi Goreng Spesial untuk hidangan lezatmu",
     },
     {
-      image: "https://images.unsplash.com/photo-1596462502278-27dc1c2cae24?w=1200&q=80",
-      title: "Kecantikan Alami",
-      desc: "Produk beauty alami dari bahan lokal",
+      image: "/uploads/products/kue-lapis.webp",
+      title: "Kue Lapis Legit",
+      desc: "Kue Lapis Legit Spesial, manis dan lembut",
     },
   ];
 
