@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
+import auth from "@react-native-firebase/auth";
 import api from "../api/api";
-import { OFFLINE_TESTING_MODE } from "../config";
+import { OFFLINE_TESTING_MODE, USE_FIREBASE_AUTH } from "../config";
 import { findMockUser, generateMockToken, validateMockToken, getMockUserById } from "../data/mockAuth";
 
 // Base64 decode function for React Native
@@ -49,6 +50,9 @@ export const useAuthStore = create((set, get) => ({
       await AsyncStorage.removeItem("mock_user");
       await AsyncStorage.removeItem("cart-storage");
     } else {
+      if (USE_FIREBASE_AUTH) {
+        try { await auth().signOut(); } catch {}
+      }
       await SecureStore.deleteItemAsync("token");
       await AsyncStorage.removeItem("cart-storage");
     }
@@ -59,12 +63,24 @@ export const useAuthStore = create((set, get) => ({
     if (OFFLINE_TESTING_MODE) {
       return initializeMockAuth(set);
     }
+    if (USE_FIREBASE_AUTH) {
+      return initializeFirebaseAuth(set);
+    }
     return initializeRealAuth(set, get);
   },
 
   login: async (email, password) => {
     if (OFFLINE_TESTING_MODE) {
       return mockLogin(email, password, set, get);
+    }
+    if (USE_FIREBASE_AUTH) {
+      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+      const firebaseUser = userCredential.user;
+      const token = await firebaseUser.getIdToken();
+      await SecureStore.setItemAsync("token", token);
+      const fbUser = { uid: firebaseUser.uid, email: firebaseUser.email };
+      set({ user: fbUser, token, isAuthenticated: true });
+      return fbUser;
     }
     const response = await api.post("/auth/login", { email, password });
     const { token, user } = response.data;
@@ -75,6 +91,20 @@ export const useAuthStore = create((set, get) => ({
   register: async (userData) => {
     if (OFFLINE_TESTING_MODE) {
       throw new Error("Registration is disabled in offline testing mode");
+    }
+    if (USE_FIREBASE_AUTH) {
+      const userCredential = await auth().createUserWithEmailAndPassword(userData.email, userData.password);
+      const firebaseUser = userCredential.user;
+      const token = await firebaseUser.getIdToken();
+
+      const registerPayload = { ...userData, firebaseUid: firebaseUser.uid };
+      delete registerPayload.password;
+      await api.post("/auth/register", registerPayload);
+
+      await SecureStore.setItemAsync("token", token);
+      const fbUser = { uid: firebaseUser.uid, email: firebaseUser.email, name: userData.name };
+      set({ user: fbUser, token, isAuthenticated: true });
+      return fbUser;
     }
     const response = await api.post("/auth/register", userData);
     const { token, user } = response.data;
@@ -126,6 +156,23 @@ async function initializeRealAuth(set, get) {
   const result = await Promise.race([authPromise, timeoutPromise]);
   if (result?.timedOut) {
     set({ isLoading: false });
+  }
+}
+
+// Firebase authentication
+async function initializeFirebaseAuth(set) {
+  try {
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      const token = await currentUser.getIdToken();
+      await SecureStore.setItemAsync("token", token);
+      const user = { uid: currentUser.uid, email: currentUser.email, name: currentUser.displayName };
+      set({ user, token, isAuthenticated: true, isLoading: false });
+    } else {
+      set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+    }
+  } catch {
+    set({ user: null, token: null, isAuthenticated: false, isLoading: false });
   }
 }
 

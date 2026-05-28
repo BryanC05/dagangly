@@ -240,6 +240,29 @@
   cursor: pointer;
 }
 
+/* Custom scrollbar for sidebar */
+.map-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.map-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.map-sidebar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+.map-sidebar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+.map-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
 @media (max-width: 768px) {
   .nearby-map-page {
     flex-direction: column;

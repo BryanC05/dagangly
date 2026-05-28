@@ -1,0 +1,156 @@
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+export const createStyles = (colors, isDarkMode, isMobile, isTablet) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  hero: {
+    height: isMobile ? 420 : 480,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  heroBackground: { ...StyleSheet.absoluteFillObject },
+  heroOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.55)' },
+  slideIndicatorContainer: {
+    position: 'absolute', bottom: 20, left: 0, right: 0,
+    flexDirection: 'row', justifyContent: 'center', gap: 8,
+  },
+  slideIndicator: { height: 4, borderRadius: 2 },
+  statRow: { flexDirection: 'row', gap: 10, marginBottom: 18 },
+  statCard: {
+    flex: 1, backgroundColor: colors.card, borderRadius: 18,
+    padding: 14, borderWidth: 1, borderColor: colors.border,
+  },
+  statValue: { fontSize: 18, fontWeight: '800', color: colors.text },
+  statLabel: { marginTop: 4, fontSize: 11, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.6 },
+  heroBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6,
+    borderRadius: 20, alignSelf: 'center', marginBottom: 16,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
+  },
+  heroBadgeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#fff' },
+  heroBadgeText: { fontSize: 11, color: '#fff', fontWeight: '600', letterSpacing: 0.5 },
+  heroTitle: {
+    fontSize: isMobile ? 28 : isTablet ? 34 : 38, fontWeight: '800', color: '#fff',
+    lineHeight: isMobile ? 36 : 42, marginBottom: 8, textAlign: 'center',
+  },
+  heroSubtitle: {
+    fontSize: 15, color: '#e0e0e0', lineHeight: 22, marginBottom: 20,
+    textAlign: 'center', maxWidth: '90%', alignSelf: 'center',
+  },
+  collapsibleHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingVertical: 12,
+  },
+  collapsibleTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+  collapsibleToggle: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, backgroundColor: colors.card,
+  },
+  collapsibleToggleText: { fontSize: 12, color: colors.textSecondary, fontWeight: '500' },
+  searchContainer: { flexDirection: 'row', gap: 10, maxWidth: '100%', marginBottom: 24 },
+  searchInput: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff',
+    borderRadius: 10, paddingHorizontal: 14, height: 48,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
+  },
+  searchIcon: { marginRight: 10 },
+  searchTextInput: { flex: 1, fontSize: 14, color: '#333', padding: 0 },
+  searchBtn: {
+    backgroundColor: colors.primary, borderRadius: 10, paddingHorizontal: 20,
+    justifyContent: 'center', alignItems: 'center', height: 48,
+    shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+  },
+  nearbyMapSection: { marginBottom: 24, paddingHorizontal: 20 },
+  nearbyMapCard: {
+    backgroundColor: colors.card, borderRadius: 20, overflow: 'hidden',
+    borderWidth: 1, borderColor: colors.border,
+  },
+  nearbyMapHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  nearbyMapTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  nearbyMapLabel: { fontSize: 12, color: colors.primary, fontWeight: '600', letterSpacing: 0.5 },
+  nearbyMapTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+  nearbyMapSubtitle: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  nearbyMapBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, backgroundColor: colors.primary + '15',
+  },
+  nearbyMapBtnText: { fontSize: 12, color: colors.primary, fontWeight: '600' },
+  nearbySellersRow: { paddingHorizontal: 12, paddingVertical: 12, gap: 8 },
+  nearbySellerItem: {
+    flexDirection: 'row', alignItems: 'center', padding: 10,
+    backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc', borderRadius: 10, gap: 12,
+  },
+  nearbySellerIcon: {
+    width: 40, height: 40, borderRadius: 10,
+    backgroundColor: colors.primary + '15', justifyContent: 'center', alignItems: 'center',
+  },
+  nearbySellerInfo: { flex: 1 },
+  nearbySellerName: { fontSize: 14, fontWeight: '600', color: colors.text },
+  nearbySellerLocation: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  nearbySellerDistance: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: colors.primary + '10', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6,
+  },
+  nearbySellerDistanceText: { fontSize: 11, color: colors.primary, fontWeight: '600' },
+  categorySection: { marginBottom: 24, paddingHorizontal: 20 },
+  sectionHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: isMobile ? 18 : isTablet ? 20 : 22, fontWeight: '700',
+    color: colors.text, letterSpacing: 0.3,
+  },
+  seeAll: { fontSize: 13, color: colors.primary, fontWeight: '600' },
+  catScroll: { gap: 12 },
+  catCard: {
+    backgroundColor: colors.card, borderRadius: 18, padding: 16, alignItems: 'center',
+    width: 90, borderWidth: 1, borderColor: colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+  },
+  catName: { fontSize: 11, fontWeight: '600', color: colors.text, textAlign: 'center', marginTop: 6 },
+  catCount: { fontSize: 10, color: colors.textSecondary, marginTop: 2 },
+  catIcon: { fontSize: 28 },
+  productsSection: { marginBottom: 24 },
+  productScroll: { paddingHorizontal: 16 },
+  sectionFrame: {
+    marginHorizontal: 20, marginBottom: 24, paddingVertical: 18, borderRadius: 22,
+    backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, overflow: 'hidden',
+  },
+  nearbySection: { marginBottom: 24, paddingHorizontal: 20 },
+  nearbyCard: {
+    backgroundColor: colors.card, borderRadius: 22, padding: 20,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  nearbyHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  nearbyLabel: { fontSize: 12, color: colors.primary, fontWeight: '600', letterSpacing: 0.5 },
+  nearbyTitle: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 8 },
+  nearbyDesc: { fontSize: 14, color: colors.textSecondary, marginBottom: 16, lineHeight: 20 },
+  nearbyBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.primary,
+    paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, alignSelf: 'flex-start',
+    shadowColor: colors.primary, shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25, shadowRadius: 6, elevation: 3,
+  },
+  nearbyBtnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  ctaSection: { marginBottom: 32, paddingHorizontal: 20 },
+  ctaCard: {
+    backgroundColor: colors.card, borderRadius: 24, padding: 24, alignItems: 'center',
+    borderWidth: 1, borderColor: colors.border,
+  },
+  ctaTitle: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 8, textAlign: 'center' },
+  ctaDesc: { fontSize: 14, color: colors.textSecondary, marginBottom: 16, textAlign: 'center', lineHeight: 20 },
+  ctaBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.primary,
+    paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8,
+    shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+  },
+  ctaBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+});

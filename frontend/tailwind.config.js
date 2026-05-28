@@ -11,6 +11,10 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: "hsl(var(--card))",
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
         surface: "hsl(var(--surface))",
         "surface-elevated": "hsl(var(--surface-elevated))",
         input: "hsl(var(--input))",

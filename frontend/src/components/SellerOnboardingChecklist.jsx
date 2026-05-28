@@ -58,7 +58,7 @@ export default function SellerOnboardingChecklist({ user, productCount = 0, onUp
   if (complete) return null;
 
   return (
-    <Card className="mb-6 border-amber-200 bg-amber-50/50">
+    <Card className="mb-6 border-[hsl(var(--warning)/0.25)] bg-[hsl(var(--warning)/0.05)]">
       <CardHeader>
         <CardTitle className="text-lg">Complete your store setup</CardTitle>
         <p className="text-sm text-muted-foreground">Buyers pay with cash or QRIS at pickup — finish these steps first.</p>
@@ -68,7 +68,7 @@ export default function SellerOnboardingChecklist({ user, productCount = 0, onUp
           <div key={step.label} className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {step.done ? (
-                <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
+                <CheckCircle className="h-5 w-5 text-success shrink-0" />
               ) : (
                 <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
               )}

@@ -10,6 +10,15 @@ export const OFFLINE_TESTING_MODE = process.env.EXPO_PUBLIC_OFFLINE_TESTING === 
 console.log("[Config] Offline Testing Mode:", OFFLINE_TESTING_MODE);
 
 // ============================================
+// FIREBASE AUTH MODE
+// When true, uses Firebase Auth (signInWithEmailAndPassword)
+// instead of JWT-based API auth.
+// Set EXPO_PUBLIC_USE_FIREBASE_AUTH=true to enable.
+// ============================================
+export const USE_FIREBASE_AUTH = process.env.EXPO_PUBLIC_USE_FIREBASE_AUTH === "true" || false;
+console.log("[Config] Firebase Auth Mode:", USE_FIREBASE_AUTH);
+
+// ============================================
 // API Configuration
 // ============================================
 

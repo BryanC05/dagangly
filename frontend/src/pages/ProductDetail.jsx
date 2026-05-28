@@ -219,42 +219,29 @@ function ProductDetail() {
     null;
 
   return (
-    <>
-      <div className="bg-background min-h-screen py-8">
+    <div className="bg-background min-h-screen py-6">
       <div className="container">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link to="/" className="hover:text-foreground">Beranda</Link>
-          <span>›</span>
-          <Link to="/products" className="hover:text-foreground">Produk</Link>
-          <span>›</span>
-          <span className="text-foreground">{product.name}</span>
-        </div>
+        <button onClick={handleBack} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+          Kembali
+        </button>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Product Images */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="aspect-square bg-muted rounded-xl overflow-hidden border border-border">
               {productImages[selectedImage] ? (
-                <img
-                  src={productImages[selectedImage]}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
+                <img src={productImages[selectedImage]} alt={product.name} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-muted" />
               )}
             </div>
-
             {productImages.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-1">
                 {productImages.map((img, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`aspect-square bg-muted rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === index ? 'border-primary' : 'border-transparent hover:border-muted-foreground'
-                      }`}
+                    className={`w-16 h-16 shrink-0 bg-muted rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === index ? 'border-primary' : 'border-transparent hover:border-muted-foreground'}`}
                   >
                     <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
                   </button>
@@ -263,276 +250,141 @@ function ProductDetail() {
             )}
           </div>
 
-          {/* Product Info */}
-          <div className="space-y-6">
-            {/* Seller Info with Business Logo */}
+          <div className="space-y-5">
             <div className="flex items-center gap-3">
-              {product.business?.logoInfo?.url && (
-                <img
-                  src={product.business.logoInfo.url}
-                  alt={product.business.name}
-                  className="w-10 h-10 rounded-full object-cover border border-border"
-                />
-              )}
-              <div>
-                <Link to={sellerId ? `/store/${sellerId}` : '#'} className="text-primary hover:underline text-sm font-medium">
-                  {product.business?.name || seller?.businessName || seller?.name || 'Toko'}
-                </Link>
-                {product.business?.isVerified && (
-                  <span className="ml-2 text-xs text-green-600 font-medium">Verified</span>
-                )}
-              </div>
+              <Link to={sellerId ? `/store/${sellerId}` : '#'} className="flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+                <Store className="h-4 w-4" />
+                {product.business?.name || seller?.businessName || seller?.name || 'Toko'}
+                {product.business?.isVerified && <Shield className="h-3 w-3 text-green-600" />}
+              </Link>
             </div>
 
-            {/* Product Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{product.name}</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">{product.name}</h1>
 
-            {/* Rating */}
             <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 fill-primary text-primary" />
-              <span className="text-foreground font-medium">{product.rating?.toFixed(1) || '4.5'}</span>
-              <span className="text-gray-400">({product.reviewCount || product.reviews?.length || 0} ulasan)</span>
+              <Star className="h-4 w-4 fill-primary text-primary" />
+              <span className="text-sm font-medium">{product.rating?.toFixed(1) || '4.5'}</span>
+              <span className="text-sm text-muted-foreground">({product.reviewCount || product.reviews?.length || 0} ulasan)</span>
             </div>
 
-            {/* Price */}
-            <div className="text-3xl font-bold text-primary">
+            <div className="text-2xl font-bold text-primary">
               Rp{getUnitPrice().toLocaleString('id-ID')}
             </div>
 
-            {/* Description */}
-            <div>
-              <p className="text-gray-400 leading-relaxed">
-                {product.description}
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {product.description}
+            </p>
 
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2">
-              {product.tags?.map((tag) => (
-                <Badge key={tag} variant="outline" className="bg-muted border-border text-muted-foreground">
-                  #{tag}
-                </Badge>
-              )) || (
-                <>
-                  <Badge variant="outline" className="bg-muted border-border text-muted-foreground">#produk-lokal</Badge>
-                  <Badge variant="outline" className="bg-muted border-border text-muted-foreground">#umkm</Badge>
-                </>
-              )}
-            </div>
-
-            {/* Price & Purchase Card */}
-            <Card>
-              <CardContent className="p-6 space-y-6">
-                {/* Variant Selector */}
-                {product.hasVariants && product.variants?.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium mb-3">Select Variant</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {product.variants.map((v) => (
-                        <button
-                          key={v.name}
-                          type="button"
-                          onClick={() => { setSelectedVariant(v); setQuantity(1); }}
-                          className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${selectedVariant?.name === v.name
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'bg-muted/50 hover:bg-muted border-border'
-                            } ${v.stock <= 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
-                          disabled={v.stock <= 0}
-                        >
-                          <span>{v.name}</span>
-                          <span className="block text-xs mt-0.5">Rp{v.price?.toLocaleString('id-ID')}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Option Groups */}
-                {product.optionGroups?.length > 0 && product.optionGroups.map((group) => (
-                  <div key={group.name}>
-                    <h4 className="text-sm font-medium mb-2">
-                      {group.name} {group.required && <span className="text-destructive">*</span>}
-                      {group.multiple && <span className="text-xs text-muted-foreground ml-1">(select multiple)</span>}
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {group.options.map((opt) => {
-                        const isSelected = selectedOptions[group.name]?.chosen?.includes(opt.name);
-                        return (
-                          <button
-                            key={opt.name}
-                            type="button"
-                            onClick={() => handleOptionSelect(group.name, opt.name, opt.priceAdjust || 0, group.multiple)}
-                            className={`px-3 py-1.5 rounded-lg border text-sm transition-colors ${isSelected
-                              ? 'bg-primary text-primary-foreground border-primary'
-                              : 'bg-muted/50 hover:bg-muted border-border'
-                              }`}
-                          >
-                            {opt.name}
-                            {opt.priceAdjust > 0 && <span className="text-xs ml-1">(+Rp{opt.priceAdjust.toLocaleString('id-ID')})</span>}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-
-                {getAvailableStock() > 0 && (
-                  <div className="space-y-4">
-                    {/* Quantity Selector */}
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center border border-border rounded-lg bg-muted">
-                        <button
-                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          disabled={quantity <= 1}
-                          className="w-10 h-10 flex items-center justify-center hover:bg-accent rounded-l-lg text-lg font-bold text-foreground disabled:opacity-50 transition-colors"
-                        >
-                          −
-                        </button>
-                        <span className="w-12 text-center font-medium text-foreground">{quantity}</span>
-                        <button
-                          onClick={() => setQuantity(Math.min(getAvailableStock(), quantity + 1))}
-                          disabled={quantity >= getAvailableStock()}
-                          className="w-10 h-10 flex items-center justify-center hover:bg-accent rounded-r-lg text-lg font-bold text-foreground disabled:opacity-50 transition-colors"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Add to Cart Button */}
-                    <Button
-                      onClick={(e) => {
-                        handleAddToCart();
-                        window.dispatchEvent(new CustomEvent('particle-burst', {
-                          detail: { type: 'add-to-cart', x: e.clientX, y: e.clientY },
-                        }));
-                      }}
-                      size="lg"
-                      className="w-full gap-2 bg-primary hover:bg-primary/90 h-12"
-                    >
-                      <ShoppingCart className="h-5 w-5" />
-                      Tambah ke Keranjang
-                    </Button>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="flex-1 gap-2 bg-transparent border-border text-foreground hover:bg-accent h-12"
-                        onClick={async (e) => {
-                          if (!isSaved) {
-                            window.dispatchEvent(new CustomEvent('particle-burst', {
-                              detail: { type: 'save', x: e.clientX, y: e.clientY },
-                            }));
-                          }
-                          await handleToggleSave();
-                        }}
-                        disabled={isSaveLoading}
-                      >
-                        <Heart className={`h-5 w-5 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="gap-2 bg-transparent border-border text-foreground hover:bg-accent h-12"
-                        onClick={() => {
-                          const url = window.location.href;
-                          if (navigator.share) {
-                            navigator.share({ title: product.name, url });
-                          } else {
-                            navigator.clipboard.writeText(url);
-                            toast.success('Link disalin!');
-                          }
-                        }}
-                      >
-                        <Share2 className="h-5 w-5" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Contact Section */}
-                <div className="pt-4 border-t space-y-3">
-                  {seller?.phone && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Phone className="h-4 w-4" />
-                      <span>{t('productDetail.contact')}: {seller.phone}</span>
-                    </div>
-                  )}
-
-                  {/* WhatsApp Button */}
-                  {whatsappUrl && (
-                    <Button
-                      asChild
-                      className="w-full gap-2 bg-[#25D366] hover:bg-[#20BD5A]"
-                    >
-                      <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                        <MessageSquare className="h-4 w-4" />
-                        WhatsApp Seller
-                      </a>
-                    </Button>
-                  )}
-
-                  {user && user.role === 'buyer' && sellerId && (
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2"
-                      onClick={() => navigate(`/chat?seller=${sellerId}&from=product&productId=${product._id}`)}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      {t('productDetail.chatWithSeller')}
-                    </Button>
-                  )}
-
-                  {user && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full gap-2 text-muted-foreground"
-                      onClick={async () => {
-                        const reason = prompt('Why are you reporting this product?');
-                        if (!reason) return;
-                        try {
-                          const { getApiUrl } = await import('../config');
-                          await fetch(`${getApiUrl()}/reports/`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-                            body: JSON.stringify({ targetType: 'product', targetId: product._id, reason }),
-                          });
-                          toast.success('Report submitted. Thank you!');
-                        } catch (e) { toast.error('Failed to submit report'); }
-                      }}
-                    >
-                      <Flag className="h-4 w-4" />
-                      Report Product
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Tags */}
             {product.tags?.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium mb-3 text-muted-foreground">{t('productDetail.tags')}</h4>
-                <div className="flex flex-wrap gap-2">
-                  {product.tags.map((tag, index) => (
-                    <Badge key={index} variant="outline">
-                      #{tag}
-                    </Badge>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-1.5">
+                {product.tags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="text-xs bg-muted border-border text-muted-foreground">
+                    #{tag}
+                  </Badge>
+                ))}
               </div>
             )}
 
-            {/* Reviews Section */}
+            <div className="bg-card border border-border rounded-xl p-5 space-y-5">
+              {product.hasVariants && product.variants?.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Variant</p>
+                  <div className="flex flex-wrap gap-2">
+                    {product.variants.map((v) => (
+                      <button
+                        key={v.name}
+                        onClick={() => { setSelectedVariant(v); setQuantity(1); }}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${selectedVariant?.name === v.name ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted/50 hover:bg-muted border-border'} ${v.stock <= 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        disabled={v.stock <= 0}
+                      >
+                        {v.name}
+                        <span className="block text-[10px] mt-0.5">Rp{v.price?.toLocaleString('id-ID')}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {product.optionGroups?.length > 0 && product.optionGroups.map((group) => (
+                <div key={group.name}>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                    {group.name} {group.required && <span className="text-destructive">*</span>}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {group.options.map((opt) => {
+                      const isSelected = selectedOptions[group.name]?.chosen?.includes(opt.name);
+                      return (
+                        <button
+                          key={opt.name}
+                          onClick={() => handleOptionSelect(group.name, opt.name, opt.priceAdjust || 0, group.multiple)}
+                          className={`px-3 py-1.5 rounded-lg border text-xs transition-colors ${isSelected ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted/50 hover:bg-muted border-border'}`}
+                        >
+                          {opt.name}
+                          {opt.priceAdjust > 0 && <span className="text-[10px] ml-1">(+Rp{opt.priceAdjust.toLocaleString('id-ID')})</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {getAvailableStock() > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center border border-border rounded-lg w-fit">
+                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} className="w-9 h-9 flex items-center justify-center hover:bg-accent rounded-l-lg text-lg disabled:opacity-50">−</button>
+                    <span className="w-10 text-center text-sm font-medium">{quantity}</span>
+                    <button onClick={() => setQuantity(Math.min(getAvailableStock(), quantity + 1))} disabled={quantity >= getAvailableStock()} className="w-9 h-9 flex items-center justify-center hover:bg-accent rounded-r-lg text-lg disabled:opacity-50">+</button>
+                  </div>
+
+                  <Button onClick={handleAddToCart} className="w-full gap-2 h-11">
+                    <ShoppingCart className="h-4 w-4" />
+                    Tambah ke Keranjang
+                  </Button>
+
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1 gap-2" onClick={handleToggleSave} disabled={isSaveLoading}>
+                      <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
+                      Simpan
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1 gap-2" onClick={() => navigator.clipboard.writeText(window.location.href) || toast.success('Link disalin!')}>
+                      <Share2 className="h-4 w-4" />
+                      Bagikan
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-destructive font-medium">Stok habis</p>
+              )}
+
+              <div className="pt-4 border-t border-border space-y-2">
+                {seller?.phone && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <Phone className="h-3 w-3" />
+                    {seller.phone}
+                  </p>
+                )}
+                {whatsappUrl && (
+                  <Button asChild variant="default" size="sm" className="w-full gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-xs">
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      WhatsApp Seller
+                    </a>
+                  </Button>
+                )}
+                {user && user.role === 'buyer' && sellerId && (
+                  <Button variant="outline" size="sm" className="w-full gap-2 text-xs" onClick={() => navigate(`/chat?seller=${sellerId}&from=product&productId=${product._id}`)}>
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    {t('productDetail.chatWithSeller')}
+                  </Button>
+                )}
+              </div>
+            </div>
+
             <ReviewSection productId={id} />
           </div>
         </div>
       </div>
-      </div>
-    </>
+    </div>
   );
 }
 

@@ -45,10 +45,10 @@ import FinanceDashboard from './pages/FinanceDashboard';
 import FinanceExpenses from './pages/FinanceExpenses';
 import FinanceCalculator from './pages/FinanceCalculator';
 
-const Home = lazy(() => import('./pages/new-ui/Index'));
-const Products = lazy(() => import('./pages/new-ui/Products'));
-const ProductDetail = lazy(() => import('./pages/new-ui/ProductDetail'));
-const NotFound = lazy(() => import('./pages/new-ui/NotFound'));
+const Home = lazy(() => import('./pages/Home'));
+const Products = lazy(() => import('./pages/Products'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 const Finance = lazy(() => import('./pages/FinanceDashboard'));
 const FinanceExp = lazy(() => import('./pages/FinanceExpenses'));
 const FinanceCalc = lazy(() => import('./pages/FinanceCalculator'));

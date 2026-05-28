@@ -14,41 +14,39 @@
 
 @layer base {
   :root {
-    --background: 210 20% 93%;
-    --foreground: 215 25% 15%;
+    --background: 210 10% 97%;
+    --foreground: 215 30% 12%;
     --card: 0 0% 100%;
-    --surface: 210 20% 96%;
-    --surface-elevated: 0 0% 100%;
-    --input: 210 20% 96%;
-    --sidebar-background: 210 20% 96%;
-    --muted-foreground: 215 15% 40%;
-    --text-tertiary: 215 15% 60%;
-    --border: 210 20% 82%;
-    --geometric-border: 185 40% 70%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
+    --surface: 210 8% 95%;
+    --input: 210 12% 92%;
+    --muted-foreground: 215 15% 33%;
+    --border: 210 15% 76%;
     --primary: 185 72% 48%;
     --primary-dark: 180 77% 26%;
     --primary-light: 171 77% 86%;
-    --secondary: 210 15% 85%;
-    --secondary-foreground: 215 25% 20%;
-    --muted: 210 15% 88%;
+    --secondary: 210 12% 86%;
+    --secondary-foreground: 215 25% 18%;
+    --muted: 210 12% 90%;
     --accent: 185 72% 48%;
     --success: 160 84% 39%;
     --destructive: 0 84% 60%;
     --warning: 38 92% 50%;
+    --ring: 185 72% 48%;
+    --radius: 0.5rem;
   }
 
   .dark {
     --background: 222 30% 8%;
     --foreground: 210 20% 90%;
     --card: 222 25% 11%;
+    --popover: 222 25% 11%;
+    --popover-foreground: 210 20% 90%;
     --surface: 222 25% 12%;
-    --surface-elevated: 222 25% 15%;
     --input: 222 20% 18%;
-    --sidebar-background: 222 30% 6%;
     --muted-foreground: 215 15% 55%;
-    --text-tertiary: 215 15% 40%;
     --border: 222 20% 18%;
-    --geometric-border: 185 40% 30%;
     --primary: 185 72% 48%;
     --primary-dark: 185 72% 48%;
     --primary-light: 173 60% 19%;
@@ -59,11 +57,97 @@
     --success: 158 64% 52%;
     --destructive: 0 91% 71%;
     --warning: 43 96% 56%;
+    --ring: 185 72% 48%;
   }
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+}
+
+@layer utilities {
+  .pattern-dots {
+    background-image: radial-gradient(rgba(0,0,0,0.08) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .dark .pattern-dots {
+    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  }
+
+  .pattern-dots-sm {
+    background-image: radial-gradient(rgba(0,0,0,0.06) 1px, transparent 1px);
+    background-size: 12px 12px;
+  }
+  .dark .pattern-dots-sm {
+    background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+  }
+
+  .pattern-grid {
+    background-image:
+      linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .dark .pattern-grid {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  }
+
+  .pattern-diagonal {
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 8px,
+      rgba(0,0,0,0.02) 8px,
+      rgba(0,0,0,0.02) 10px
+    );
+  }
+  .dark .pattern-diagonal {
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 8px,
+      rgba(255,255,255,0.015) 8px,
+      rgba(255,255,255,0.015) 10px
+    );
+  }
+
+  .geo-border {
+    position: relative;
+  }
+  .geo-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.05), hsl(var(--primary) / 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .geo-border-top {
+    border-top: 2px solid;
+    border-image: linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent) 1;
+  }
+
+  .geo-accent {
+    box-shadow: inset 0 -1px 0 0 hsl(var(--primary) / 0.15);
   }
 }

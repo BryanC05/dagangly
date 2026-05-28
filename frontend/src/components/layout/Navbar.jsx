@@ -6,27 +6,15 @@ import {
   X,
   ShoppingCart,
   User,
-  MapPin,
   Moon,
   Sun,
-  Languages,
-  Store,
   LogOut,
   Package,
   Heart,
-  Sparkles,
-  BarChart3,
+  Store,
   PlusCircle,
+  LayoutDashboard,
   ChevronDown,
-  Palette,
-  Zap,
-  Crown,
-  Folder,
-  BookOpen,
-  Wallet,
-  Shield,
-  Video,
-  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +38,6 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activeOrderCount, setActiveOrderCount] = useState(0);
-  const [membership, setMembership] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -62,29 +49,13 @@ const Navbar = () => {
   const { t } = useTranslation();
   const isSeller = user?.isSeller || false;
 
-  useEffect(() => {
-    const fetchMembership = async () => {
-      if (isAuthenticated && user?.isSeller) {
-        try {
-          const response = await api.get('/users/membership/status');
-          setMembership(response.data);
-        } catch (err) {
-          console.error('Failed to fetch membership:', err);
-        }
-      }
-    };
-    fetchMembership();
-  }, [isAuthenticated, user?.isSeller]);
-
   const cartCount = getTotalItems();
 
   useEffect(() => {
     if (!isAuthenticated || !localStorage.getItem("token")) {
       return;
     }
-    
     let isMounted = true;
-    
     api
       .get("/orders/my-orders")
       .then((res) => {
@@ -94,50 +65,10 @@ const Navbar = () => {
         }
       })
       .catch(() => {
-        if (isMounted) {
-          setActiveOrderCount(0);
-        }
+        if (isMounted) setActiveOrderCount(0);
       });
-      
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [isAuthenticated, user]);
-
-  const getProductsLabel = () => {
-    // Projects disabled
-    return t('nav.products') || 'Produk';
-  };
-
-  const navLinks = [
-    { to: "/", label: t('nav.home') },
-    { to: "/products", label: getProductsLabel(), isDropdown: false },
-    { to: "/nearby", label: t('nav.nearby') },
-    { to: "/forums", label: t('nav.forums') },
-  ];
-
-  const buyerAccountLinks = [
-    { to: "/profile", label: t("nav.profile") || "Profil", icon: User },
-    { to: "/orders", label: t("nav.orderPage") || t("nav.orders") || "Orders", icon: Package, badge: activeOrderCount },
-    { to: "/saved-products", label: t("nav.savedProducts") || "Tersimpan", icon: Heart },
-  ];
-
-  const sellerAccountLinks = [
-    { to: "/seller/dashboard", label: t("nav.dashboard"), icon: Store },
-    { to: "/seller/add-product", label: t("nav.addProduct"), icon: PlusCircle },
-    { to: "/seller/product-tracking", label: t("nav.productTracker"), icon: BarChart3 },
-    { to: "/inventory", label: t("inventory.title") || "Inventori", icon: Package },
-  ];
-
-  const sellerToolsLinks = [
-    { to: "/logo-generator", label: t("nav.logoGenerator"), icon: Palette },
-    { to: "/automation", label: t("nav.automations"), icon: Zap },
-    { to: "/finance", label: "Finance", icon: BarChart3 },
-  ];
-
-  const accountLinks = isSeller
-    ? [...buyerAccountLinks, ...sellerAccountLinks]
-    : buyerAccountLinks;
 
   const isActive = (path) => {
     if (path === "/") return location.pathname === "/";
@@ -147,10 +78,7 @@ const Navbar = () => {
   const submitSearch = (e) => {
     e.preventDefault();
     const query = search.trim();
-    if (!query) {
-      navigate("/products");
-      return;
-    }
+    if (!query) { navigate("/products"); return; }
     navigate(`/products?search=${encodeURIComponent(query)}`);
     setMobileOpen(false);
   };
@@ -161,352 +89,276 @@ const Navbar = () => {
     navigate("/");
   };
 
-  const handleNavigate = (to) => {
-    setMobileOpen(false);
-    navigate(to);
-  };
+  const navItems = [
+    { to: "/", label: t('nav.home') || "Home" },
+    { to: "/products", label: t('nav.products') || "Products" },
+    { to: "/nearby", label: t('nav.nearby') || "Nearby" },
+  ];
+
+  const userMenuItems = [
+    { to: "/profile", label: t("nav.profile") || "Profil", icon: User },
+    { to: "/orders", label: t("nav.orders") || "Orders", icon: Package, badge: activeOrderCount },
+    { to: "/saved-products", label: t("nav.savedProducts") || "Saved", icon: Heart },
+    { to: "/wallet", label: t("wallet.title") || "Wallet", icon: Package },
+  ];
+
+  const sellerMenuItems = [
+    { to: "/seller/dashboard", label: t("nav.dashboard") || "Dashboard", icon: LayoutDashboard },
+    { to: "/seller/add-product", label: t("nav.addProduct") || "Add Product", icon: PlusCircle },
+  ];
 
   return (
     <>
       <header className="sticky top-0 z-[9990] border-b border-border/70 bg-background/88 backdrop-blur-2xl">
-      <div className="container flex h-20 items-center gap-4">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-emerald-400 shadow-[0_12px_24px_-14px_hsl(var(--primary))]">
-            <span className="text-primary-foreground font-display font-bold text-lg">D</span>
-          </div>
-          <div className="hidden sm:block">
-            <span className="block font-display text-xl font-bold tracking-wider leading-none">
+        <div className="container flex h-16 items-center gap-3">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-primary to-emerald-400 shadow-[0_8px_20px_-12px_hsl(var(--primary))]">
+              <span className="text-primary-foreground font-display font-bold text-base">D</span>
+            </div>
+            <span className="hidden sm:block font-display text-lg font-bold tracking-wider leading-none">
               Dagang<span className="text-primary">ly</span>
             </span>
-            <span className="mt-1 block text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
-              Pasar UMKM Indonesia
-            </span>
-          </div>
-        </Link>
+          </Link>
 
-        
+          <form onSubmit={submitSearch} className="hidden flex-1 md:block max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t("nav.searchPlaceholder") || "Cari produk UMKM..."}
+                className="h-9 rounded-full border-border/70 bg-muted/70 pl-9 pr-20 text-sm"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <Button type="submit" size="sm" className="absolute right-1 top-1/2 h-7 -translate-y-1/2 rounded-full px-3 text-xs">
+                Cari
+              </Button>
+            </div>
+          </form>
 
-        <form onSubmit={submitSearch} className="hidden flex-1 lg:block">
-          <div className="relative max-w-xl">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              placeholder={t("nav.searchPlaceholder") || "Cari produk UMKM..."}
-              className="h-11 rounded-full border-border/70 bg-muted/70 pl-9 pr-24 text-foreground placeholder:text-muted-foreground shadow-sm"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <Button type="submit" size="sm" className="absolute right-1.5 top-1/2 h-8 -translate-y-1/2 rounded-full px-4">
-              Cari
-            </Button>
-          </div>
-        </form>
-
-        <nav className="hidden md:flex items-center gap-1 rounded-full border border-border/70 bg-background/80 px-2 py-1 shadow-sm">
-          {navLinks.map((link) => (
-            link.isDropdown ? (
-              <DropdownMenu key={link.to}>
-                <DropdownMenuTrigger asChild>
-                  <button className={`relative px-3 py-2 text-sm font-medium rounded-sm transition-colors flex items-center gap-1 ${isActive(link.to) ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-                    {link.label}
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-white/50 dark:bg-black/50 backdrop-blur-sm border-border">
-                  <DropdownMenuItem onSelect={() => navigate("/products")} className="cursor-pointer focus:bg-accent focus:text-accent-foreground">
-                    <ShoppingCart className="h-4 w-4 mr-2 text-foreground" />
-                    {t('nav.products')}
-                  </DropdownMenuItem>
-                  {/* Projects disabled */}
-                  {/* <DropdownMenuItem onSelect={() => navigate("/projects")} className="cursor-pointer focus:bg-accent focus:text-accent-foreground">
-                    <Folder className="h-4 w-4 mr-2 text-foreground" />
-                    {t('nav.projects')}
-                  </DropdownMenuItem> */}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
+          <nav className="hidden lg:flex items-center gap-1">
+            {navItems.map((item) => (
               <Link
-                key={link.to}
-                to={link.to}
-                className={`relative rounded-full px-3 py-2 text-sm font-medium transition-colors ${isActive(link.to) ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
-                  }`}
+                key={item.to}
+                to={item.to}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  isActive(item.to)
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
               >
-                {link.label}
+                {item.label}
               </Link>
-            )
-          ))}
-        </nav>
+            ))}
+          </nav>
 
-        <div className="flex items-center gap-1 ml-auto">
-          <NotificationBell />
+          <div className="flex items-center gap-1 ml-auto">
+            <NotificationBell />
 
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            asChild 
-            className={`relative ${isActive('/cart') ? 'text-primary bg-primary/10' : ''}`}
-          >
-            <Link to="/cart">
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
-                  {cartCount > 9 ? "9+" : cartCount}
-                </span>
-              )}
-            </Link>
-          </Button>
+            <Button variant="ghost" size="icon" asChild className={`relative ${isActive('/cart') ? 'text-primary' : ''}`}>
+              <Link to="/cart">
+                <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
+                    {cartCount > 9 ? "9+" : cartCount}
+                  </span>
+                )}
+              </Link>
+            </Button>
 
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={toggleLanguage} 
-            aria-label="Toggle Language" 
-            className="font-semibold text-xs min-w-[40px]"
-          >
-            {language === 'en' ? 'EN' : 'ID'}
-          </Button>
+            <Button variant="ghost" size="sm" onClick={toggleLanguage} className="text-xs font-semibold min-w-[36px]">
+              {language === 'en' ? 'EN' : 'ID'}
+            </Button>
 
-          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle Theme">
-            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-          </Button>
+            <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </Button>
 
-          <Button variant="ghost" size="icon" className="xl:hidden" onClick={() => setMobileOpen(true)}>
-            <Menu className="h-5 w-5" />
-          </Button>
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(true)}>
+              <Menu className="h-5 w-5" />
+            </Button>
 
-          <div className="hidden xl:flex items-center gap-2 ml-2">
-            {isAuthenticated ? (
-              <>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/orders" className={`relative ${isActive('/orders') ? 'border-primary text-primary bg-primary/5' : ''}`}>
-                    {t("nav.orders")}
-                    {activeOrderCount > 0 && (
-                      <span className="ml-1 inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
-                        {activeOrderCount > 9 ? "9+" : activeOrderCount}
-                      </span>
-                    )}
-                  </Link>
-                </Button>
+            <div className="hidden lg:flex items-center gap-2">
+              {isAuthenticated ? (
+                <>
+                  {isSeller && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                          <Store className="h-3.5 w-3.5" />
+                          {t("nav.sellerMenu") || "Seller"}
+                          <ChevronDown className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuLabel className="text-xs">{t("nav.sellerMenu") || "Seller Tools"}</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {sellerMenuItems.map((item) => (
+                          <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)}>
+                            <item.icon className="h-4 w-4 mr-2" />
+                            {item.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
 
-                {isSeller && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1.5">
-                        <Store className="h-4 w-4" />
-                        {t("nav.sellerMenu")}
-                        <ChevronDown className="h-3.5 w-3.5" />
+                      <Button size="sm" className="gap-1.5 text-xs">
+                        <User className="h-3.5 w-3.5" />
+                        {user?.name?.split(" ")[0] || t("nav.myAccount")}
+                        <ChevronDown className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-52 bg-white/50 dark:bg-black/50 backdrop-blur-sm border-border">
-                      <DropdownMenuLabel>{t("nav.sellerMenu")}</DropdownMenuLabel>
+                    <DropdownMenuContent align="end" className="w-44">
+                      <DropdownMenuLabel className="text-xs">{t("nav.myAccount")}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onSelect={() => handleNavigate("/seller/dashboard")}>
-                        <Store className="h-4 w-4 mr-2" />
-                        {t("nav.dashboard")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => handleNavigate("/seller/add-product")}>
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        {t("nav.addProduct")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => handleNavigate("/logo-generator")}>
-                        <Palette className="h-4 w-4 mr-2" />
-                        {t("nav.logoGenerator")}
-                        {!isSeller ? (
-                          <Store className="h-3 w-3 ml-auto text-orange-500" />
-                        ) : !membership?.isMember ? (
-                          <Crown className="h-3 w-3 ml-auto text-yellow-500" />
-                        ) : null}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => handleNavigate("/automation")}>
-                        <Zap className="h-4 w-4 mr-2" />
-                        {t("nav.automations")}
-                        {!isSeller ? (
-                          <Store className="h-3 w-3 ml-auto text-orange-500" />
-                        ) : !membership?.isMember ? (
-                          <Crown className="h-3 w-3 ml-auto text-yellow-500" />
-                        ) : null}
+                      {userMenuItems.map((item) => (
+                        <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)}>
+                          <item.icon className="h-4 w-4 mr-2" />
+                          {item.label}
+                          {item.badge > 0 && (
+                            <span className="ml-auto text-[10px] bg-primary text-primary-foreground rounded-full h-4 min-w-4 px-1 flex items-center justify-center font-bold">
+                              {item.badge > 9 ? "9+" : item.badge}
+                            </span>
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        {t("nav.logout")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                )}
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="sm" className="font-display tracking-wide gap-1.5">
-                      <User className="h-4 w-4" />
-                      {user?.name?.split(" ")[0] || t("nav.myAccount")}
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-52 bg-white/50 dark:bg-black/50 backdrop-blur-sm border-border">
-                    <DropdownMenuLabel>{t("nav.myAccount")}</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => handleNavigate("/guide")}>
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      {t("nav.guide")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleNavigate("/profile")}>
-                      <User className="h-4 w-4 mr-2" />
-                      {t("nav.profile")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleNavigate("/orders")}>
-                      <Package className="h-4 w-4 mr-2" />
-                      {t("nav.orders")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleNavigate("/saved-products")}>
-                      <Heart className="h-4 w-4 mr-2" />
-                      {t("nav.savedProducts")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleNavigate("/wallet")}>
-                      <Wallet className="h-4 w-4 mr-2" />
-                      {t("wallet.title")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleNavigate("/finance")}>
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      {t("finance")}
-                    </DropdownMenuItem>
-                    {!isSeller && (
-                      <DropdownMenuItem onSelect={() => handleNavigate("/register-business")}>
-                        <Store className="h-4 w-4 mr-2" />
-                        Register as Seller
-                      </DropdownMenuItem>
-                    )}
-                    {(user?.role === 'admin' || user?.role === 'superadmin') && (
-                      <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard")}>
-                        <Shield className="h-4 w-4 mr-2" />
-                        {t("admin.title")}
-                      </DropdownMenuItem>
-                    )}
-                    {(user?.role === 'admin' || user?.role === 'superadmin') && (
-                      <DropdownMenuItem onSelect={() => handleNavigate("/admin/registrations")}>
-                        <Store className="h-4 w-4 mr-2" />
-                        Seller Registrations
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={handleLogout} className="text-destructive focus:text-destructive">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      {t("nav.logout")}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" className="text-foreground hover:text-primary" onClick={openLogin}>
-                  {t("nav.login")}
-                </Button>
-                <Button size="sm" className="font-display tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground" onClick={openRegister}>
-                  {t("nav.register")}
-                </Button>
-              </>
-            )}
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" className="text-xs" onClick={openLogin}>
+                    {t("nav.login") || "Login"}
+                  </Button>
+                  <Button size="sm" className="text-xs" onClick={openRegister}>
+                    {t("nav.register") || "Register"}
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
       </header>
 
       {mobileOpen && (
         <>
           <div className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="fixed top-0 bottom-0 right-0 z-[9999] w-80 max-w-[90vw] bg-card border-l border-border p-6 pb-12 overflow-y-auto shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <span className="font-display text-lg font-bold tracking-wider">
-                  Dagang<span className="text-primary">ly</span>
-                </span>
-                <p className="mt-1 text-xs text-muted-foreground">Pasar UMKM Indonesia</p>
-              </div>
+          <aside className="fixed top-0 bottom-0 right-0 z-[9999] w-72 max-w-[85vw] bg-card border-l border-border p-5 pb-12 overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between mb-5">
+              <span className="font-display text-base font-bold tracking-wider">
+                Dagang<span className="text-primary">ly</span>
+              </span>
               <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
                 <X className="h-5 w-5" />
               </Button>
             </div>
 
-            <form onSubmit={submitSearch} className="relative mb-6">
+            <form onSubmit={submitSearch} className="relative mb-5">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={t("nav.searchPlaceholder") || "Cari produk..."}
-                className="pl-9 bg-surface"
+                className="pl-9 h-9 text-sm"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </form>
 
-            <nav className="flex flex-col gap-1">
-              {navLinks.map((link) => (
+            <nav className="flex flex-col gap-0.5 mb-4">
+              {[...navItems, { to: "/cart", label: t("nav.cart") || "Cart" }, { to: "/orders", label: t("nav.orders") || "Orders" }].map((item) => (
                 <Link
-                  key={link.to}
-                  to={link.to}
+                  key={item.to}
+                  to={item.to}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-medium transition-colors ${isActive(link.to)
+                  className={`px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                    isActive(item.to)
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
+                  }`}
                 >
-                  {link.icon && <link.icon className="h-4 w-4" />}
-                  {link.label}
+                  {item.label}
                 </Link>
               ))}
             </nav>
 
             {isAuthenticated && (
-              <>
-                <div className="my-4 border-t border-border" />
-                <div className="space-y-1">
-                  {accountLinks.map((link) => (
+              <div className="border-t border-border pt-4 mb-4">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3">
+                  {t("nav.myAccount")}
+                </p>
+                <div className="space-y-0.5">
+                  {userMenuItems.map((item) => (
                     <Link
-                      key={link.to}
-                      to={link.to}
+                      key={item.to}
+                      to={item.to}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center justify-between px-3 py-3 rounded-sm text-sm transition-colors ${
-                        isActive(link.to)
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                        isActive(item.to)
                           ? "bg-primary/10 text-primary"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                     >
-                      <span className="flex items-center gap-3">
-                        <link.icon className="h-4 w-4" />
-                        {link.label}
-                      </span>
-                      {link.badge === 'seller' ? (
-                        <Store className="h-4 w-4 text-orange-500" />
-                      ) : link.badge === 'membership' ? (
-                        <Crown className="h-4 w-4 text-yellow-500" />
-                      ) : link.badge ? (
-                        <span className="inline-flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
-                          {link.badge > 9 ? "9+" : link.badge}
-                        </span>
-                      ) : null}
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
                     </Link>
                   ))}
                 </div>
-              </>
+                {isSeller && (
+                  <>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 mt-4 px-3">
+                      {t("nav.sellerMenu") || "Seller"}
+                    </p>
+                    <div className="space-y-0.5">
+                      {sellerMenuItems.map((item) => (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          onClick={() => setMobileOpen(false)}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                            isActive(item.to)
+                              ? "bg-primary/10 text-primary"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             )}
 
-            <div className="my-4 border-t border-border" />
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" onClick={toggleLanguage}>
-                {language.toUpperCase()}
-              </Button>
-              <Button variant="outline" onClick={toggleTheme}>
-                {theme === "light" ? "Dark" : "Light"}
-              </Button>
-            </div>
-
-            <div className="mt-6 flex flex-col gap-2">
+            <div className="border-t border-border pt-4">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={toggleLanguage}>
+                  {language.toUpperCase()}
+                </Button>
+                <Button variant="outline" size="sm" onClick={toggleTheme}>
+                  {theme === "light" ? "Dark" : "Light"}
+                </Button>
+              </div>
               {isAuthenticated ? (
-                <Button variant="destructive" className="w-full" onClick={handleLogout}>
+                <Button variant="destructive" size="sm" className="w-full mt-3" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
                 </Button>
               ) : (
-                <>
-                  <Button variant="outline" className="w-full" onClick={() => { openLogin(); setMobileOpen(false); }}>
+                <div className="flex gap-2 mt-3">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => { openLogin(); setMobileOpen(false); }}>
                     Login
                   </Button>
-                  <Button className="w-full font-display tracking-wide" onClick={() => { openRegister(); setMobileOpen(false); }}>
+                  <Button size="sm" className="flex-1" onClick={() => { openRegister(); setMobileOpen(false); }}>
                     Register
                   </Button>
-                </>
+                </div>
               )}
             </div>
           </aside>

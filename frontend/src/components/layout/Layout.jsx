@@ -1,8 +1,10 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import BottomNav from "./BottomNav";
 import AnimatedOutlet from "./AnimatedOutlet";
 import AuthModal from "../ui/AuthModal";
 import { Toaster } from "@/components/ui/sonner";
+import OnboardingTour from "../ui/OnboardingTour";
 
 const Layout = () => {
   return (
@@ -13,7 +15,9 @@ const Layout = () => {
         <AnimatedOutlet />
       </main>
       <Footer />
+      <BottomNav />
       <AuthModal />
+      <OnboardingTour />
     </div>
   );
 };

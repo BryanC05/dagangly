@@ -370,12 +370,12 @@ function NearbyMap() {
           <h2 className="text-xl font-bold">{t('nearby.findNearbySellers')}</h2>
           <p className="text-sm text-muted-foreground">{t('nearby.discoverMSMEs')}</p>
           {isUsingDefaultLocation && (
-            <p className="mt-2 text-xs bg-yellow-100 text-yellow-800 p-2 rounded">
+            <p className="mt-2 text-xs bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))] p-2 rounded">
               📍 {t('nearby.defaultLocation')}
             </p>
           )}
           {isUsingProfileLocation && (
-            <p className="mt-2 text-xs bg-blue-100 text-blue-800 p-2 rounded">
+            <p className="mt-2 text-xs bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))] p-2 rounded">
               📍 Using your saved profile location
             </p>
           )}
@@ -401,7 +401,7 @@ function NearbyMap() {
             )}
           </div>
           {geolocationError && (
-            <p className="mt-2 text-xs bg-amber-100 text-amber-800 p-2 rounded">
+            <p className="mt-2 text-xs bg-[hsl(var(--destructive)/0.1)] text-destructive p-2 rounded">
               {geolocationError}
             </p>
           )}

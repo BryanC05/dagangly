@@ -1,23 +1,22 @@
-﻿import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Star, Heart } from "lucide-react";
+import { Star, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSavedProductsStore } from "@/store/savedProductsStore";
 import { useAuthStore } from "@/store/authStore";
 import { resolveImageUrl } from "@/utils/imageUrl";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, compact }) => {
     const productId = product._id || product.id;
     const productImage = resolveImageUrl(product.images?.[0] || product.image);
     const sellerName = product.seller?.businessName || product.seller?.name || (typeof product.seller === 'string' ? 'Store' : null);
     const productRating = product.totalReviews > 0 ? product.rating : null;
     const reviewCount = product.totalReviews || product.reviewCount || 0;
-    
-    // Calculate discount if originalPrice exists
+
     const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-    const discountPercent = hasDiscount 
-        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) 
+    const discountPercent = hasDiscount
+        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
         : 0;
 
     const { isProductSaved, toggleSaveProduct, isLoading } = useSavedProductsStore();
@@ -28,99 +27,87 @@ const ProductCard = ({ product }) => {
         e.preventDefault();
         e.stopPropagation();
         if (!isAuthenticated) return;
-        if (!isSaved) {
-            window.dispatchEvent(new CustomEvent('particle-burst', {
-                detail: { type: 'save', x: e.clientX, y: e.clientY },
-            }));
-        }
         await toggleSaveProduct(productId);
     };
 
+    if (compact) {
+        return (
+            <Link to={`/product/${productId}`} className="flex gap-3 bg-card border border-border rounded-lg p-3 hover:border-primary/30 hover:shadow-sm transition-all">
+                <div className="w-20 h-20 rounded-md overflow-hidden bg-muted shrink-0">
+                    {productImage ? (
+                        <img src={productImage} alt={product.name} className="h-full w-full object-cover" />
+                    ) : (
+                        <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">No img</div>
+                    )}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-sm truncate">{product.name}</h3>
+                    {sellerName && <p className="text-xs text-muted-foreground mt-0.5">{sellerName}</p>}
+                    <div className="flex items-center gap-2 mt-1">
+                        <p className="text-primary font-bold text-sm">Rp {product.price?.toLocaleString('id-ID')}</p>
+                        {hasDiscount && <p className="text-xs text-muted-foreground line-through">Rp {product.originalPrice?.toLocaleString('id-ID')}</p>}
+                    </div>
+                    {productRating != null && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                            <Star className="h-3 w-3 fill-primary text-primary" />
+                            <span className="text-xs text-muted-foreground">{productRating.toFixed(1)} ({reviewCount})</span>
+                        </div>
+                    )}
+                </div>
+            </Link>
+        );
+    }
+
     return (
         <Link to={`/product/${productId}`}>
-            <Card className="group overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 bg-card border-border">
+            <div className="group bg-card border border-border rounded-xl overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5">
                 <div className="relative aspect-square overflow-hidden bg-muted">
                     {productImage ? (
-                      <img
-                        src={productImage}
-                        alt={product.name}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    ) : null}
-                    {!productImage && (
-                      <div className="h-full w-full flex items-center justify-center text-gray-500 text-sm">
-                        No image
-                      </div>
+                        <img
+                            src={productImage}
+                            alt={product.name}
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            loading="lazy"
+                        />
+                    ) : (
+                        <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
                     )}
-                    
-                    {/* Discount Badge */}
                     {hasDiscount && (
-                        <Badge className="absolute top-2 left-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded font-medium">
+                        <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded font-semibold">
                             -{discountPercent}%
                         </Badge>
                     )}
-
-                    {/* Wishlist Button */}
                     <Button
                         variant="ghost"
                         size="icon"
-                        className={`absolute top-2 right-2 bg-background/60 hover:bg-background/80 backdrop-blur-sm rounded-full h-7 w-7 p-0 border-0 ${isSaved ? 'text-red-500' : 'text-foreground'}`}
+                        className={`absolute top-2 right-2 bg-background/60 hover:bg-background/80 backdrop-blur-sm rounded-full h-7 w-7 ${isSaved ? 'text-red-500' : 'text-muted-foreground'}`}
                         onClick={handleSaveClick}
                         disabled={isLoading}
-                        title="Save product"
                     >
-                        <Heart
-                            className={`h-3.5 w-3.5 transition-colors ${isSaved ? 'fill-red-500 text-red-500' : ''}`}
-                        />
+                        <Heart className={`h-3.5 w-3.5 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
                     </Button>
                 </div>
-                
-                <CardContent className="p-3">
-                    {/* Seller Info with Business Logo */}
-                    <div className="flex items-center gap-2 mb-2">
-                        {product.business?.logoInfo?.url && (
-                            <img
-                                src={product.business.logoInfo.url}
-                                alt={product.business.name}
-                                className="w-5 h-5 rounded-full object-cover border border-border"
-                            />
-                        )}
-                        {sellerName && (
-                            <p className="text-xs text-gray-500">
-                                {product.business?.name || sellerName}
-                            </p>
-                        )}
-                    </div>
-                    
-                    {/* Product Name */}
-                    <h3 className="font-medium text-sm text-card-foreground line-clamp-2 mb-2 min-h-[40px]">
+                <div className="p-3">
+                    {sellerName && (
+                        <p className="text-[10px] text-muted-foreground mb-1 truncate">{sellerName}</p>
+                    )}
+                    <h3 className="font-medium text-sm text-card-foreground line-clamp-2 mb-1.5 min-h-[2.5em]">
                         {product.name}
                     </h3>
-                    
-                    {/* Price */}
-                    <div className="mb-2 flex items-center gap-2">
-                        <p className="text-primary font-bold text-sm">
-                            Rp {product.price?.toLocaleString('id-ID')}
-                        </p>
+                    <div className="flex items-center gap-1.5">
+                        <p className="text-primary font-bold text-sm">Rp {product.price?.toLocaleString('id-ID')}</p>
                         {hasDiscount && (
-                            <p className="text-xs text-gray-500 line-through">
-                                Rp {product.originalPrice?.toLocaleString('id-ID')}
-                            </p>
+                            <p className="text-[10px] text-muted-foreground line-through">Rp {product.originalPrice?.toLocaleString('id-ID')}</p>
                         )}
                     </div>
-                    
-                    {/* Rating */}
-                    <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-cyan-400 text-cyan-400" />
-                        <span className="text-xs text-gray-400">
-                          {productRating != null ? `${productRating.toFixed(1)} (${reviewCount})` : 'No reviews yet'}
-                        </span>
-                    </div>
-                </CardContent>
-            </Card>
+                    {productRating != null && (
+                        <div className="flex items-center gap-1 mt-1">
+                            <Star className="h-3 w-3 fill-primary text-primary" />
+                            <span className="text-[10px] text-muted-foreground">{productRating.toFixed(1)}</span>
+                        </div>
+                    )}
+                </div>
+            </div>
         </Link>
     );
 };

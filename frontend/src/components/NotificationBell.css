@@ -12,19 +12,19 @@
 }
 
 .notification-bell:hover {
-  background: var(--color-surface, rgba(0, 0, 0, 0.05));
+  background: hsl(var(--muted));
 }
 
 .notification-bell-active {
-  background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
-  color: var(--color-primary, #3b82f6);
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
 }
 
 .notification-badge {
   position: absolute;
   top: 0;
   right: 0;
-  background: #ef4444;
+  background: hsl(var(--destructive));
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -36,7 +36,7 @@
   justify-content: center;
   padding: 0 4px;
   line-height: 1;
-  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 1px 3px hsl(var(--destructive) / 0.4);
   animation: badge-pop 0.3s ease;
 }
 
@@ -46,14 +46,12 @@
   100% { transform: scale(1); }
 }
 
-/* Dropdown overlay */
 .notification-overlay {
   position: fixed;
   inset: 0;
   z-index: 40;
 }
 
-/* Dropdown - positioned below bell icon */
 .notification-dropdown {
   position: absolute;
   top: 100%;
@@ -61,81 +59,10 @@
   margin-top: 8px;
   width: 380px;
   max-height: 480px;
-  background: var(--color-card, #fff);
-  border: 1px solid var(--color-border, #e5e7eb);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.05);
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.notification-dropdown-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--color-border, #e5e7eb);
-}
-
-.notification-dropdown-header h3 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.notification-dropdown-header button {
-  background: none;
-  border: none;
-  color: var(--color-primary, #3b82f6);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-
-.notification-dropdown-header button:hover {
-  background: var(--color-surface, rgba(59, 130, 246, 0.08));
-}
-
-.notification-dropdown-list {
-  overflow-y: auto;
-  flex: 1;
-  max-height: 360px;
-}
-
-.notification-dropdown-footer {
-  padding: 10px 16px;
-  border-top: 1px solid var(--color-border, #e5e7eb);
-  text-align: center;
-}
-
-.notification-dropdown-footer a {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-primary, #3b82f6);
-  text-decoration: none;
-}
-
-.notification-dropdown-footer a:hover {
-  text-decoration: underline;
-}
-
-/* Dropdown */
-.notification-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
-  width: 380px;
-  max-height: 480px;
-  background: var(--color-card, #fff);
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 40px hsl(var(--foreground) / 0.08), 0 2px 10px hsl(var(--foreground) / 0.04);
   z-index: 999;
   display: flex;
   flex-direction: column;
@@ -159,19 +86,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 .notification-dropdown-header h3 {
   margin: 0;
   font-size: 15px;
   font-weight: 600;
+  color: hsl(var(--foreground));
 }
 
 .notification-dropdown-header button {
   background: none;
   border: none;
-  color: var(--color-primary, #3b82f6);
+  color: hsl(var(--primary));
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -181,7 +109,7 @@
 }
 
 .notification-dropdown-header button:hover {
-  background: var(--color-surface, rgba(59, 130, 246, 0.08));
+  background: hsl(var(--primary) / 0.08);
 }
 
 .notification-dropdown-list {
@@ -197,19 +125,19 @@
   padding: 12px 16px;
   cursor: pointer;
   transition: background 0.15s;
-  border-bottom: 1px solid var(--color-border, rgba(0, 0, 0, 0.04));
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
 }
 
 .notification-item:hover {
-  background: var(--color-surface, rgba(0, 0, 0, 0.02));
+  background: hsl(var(--muted));
 }
 
 .notification-item.unread {
-  background: var(--color-primary-light, rgba(59, 130, 246, 0.06));
+  background: hsl(var(--primary) / 0.06);
 }
 
 .notification-item.unread:hover {
-  background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
+  background: hsl(var(--primary) / 0.1);
 }
 
 .notification-icon {
@@ -224,8 +152,8 @@
   font-size: 16px;
 }
 
-.notification-icon.order { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-.notification-icon.message { background: linear-gradient(135deg, #10b981, #059669); }
+.notification-icon.order { background: linear-gradient(135deg, hsl(var(--primary)), #2563eb); }
+.notification-icon.message { background: linear-gradient(135deg, hsl(var(--success)), #059669); }
 .notification-icon.payment { background: linear-gradient(135deg, #f59e0b, #d97706); }
 .notification-icon.delivery { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 .notification-icon.system { background: linear-gradient(135deg, #6b7280, #4b5563); }
@@ -239,12 +167,12 @@
   font-size: 13px;
   font-weight: 600;
   margin: 0 0 2px;
-  color: var(--color-text, #111);
+  color: hsl(var(--foreground));
 }
 
 .notification-message {
   font-size: 12px;
-  color: var(--color-text-secondary, #6b7280);
+  color: hsl(var(--muted-foreground));
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -253,7 +181,7 @@
 
 .notification-time {
   font-size: 11px;
-  color: var(--color-text-muted, #9ca3af);
+  color: hsl(var(--muted-foreground) / 0.7);
   margin-top: 3px;
 }
 
@@ -262,20 +190,20 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-primary, #3b82f6);
+  background: hsl(var(--primary));
   margin-top: 6px;
 }
 
 .notification-dropdown-footer {
   padding: 10px 16px;
-  border-top: 1px solid var(--color-border, #e5e7eb);
+  border-top: 1px solid hsl(var(--border));
   text-align: center;
 }
 
 .notification-dropdown-footer a {
   font-size: 13px;
   font-weight: 500;
-  color: var(--color-primary, #3b82f6);
+  color: hsl(var(--primary));
   text-decoration: none;
 }
 
@@ -286,7 +214,7 @@
 .notification-empty {
   padding: 32px 16px;
   text-align: center;
-  color: var(--color-text-secondary, #9ca3af);
+  color: hsl(var(--muted-foreground));
   font-size: 14px;
 }
 
@@ -295,7 +223,6 @@
   opacity: 0.4;
 }
 
-/* Responsive */
 @media (max-width: 480px) {
   .notification-dropdown {
     width: calc(100vw - 24px);

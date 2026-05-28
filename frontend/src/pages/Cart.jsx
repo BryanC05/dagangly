@@ -650,19 +650,17 @@ function Cart() {
                 </div>
 
                 {items.length === 0 ? (
-                    <Card className="py-16 text-center">
-                        <CardContent>
-                            <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                            <h2 className="text-xl font-semibold mb-2">{t('cart.empty')}</h2>
-                            <p className="text-muted-foreground mb-6">Your cart is empty</p>
-                            <Button asChild size="lg" className="gap-2 h-12">
-                                <Link to="/products">
-                                    <ShoppingBag className="h-5 w-5" />
-                                    {t('cart.continueShopping')}
-                                </Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <div className="text-center py-20">
+                        <ShoppingBag className="h-14 w-14 mx-auto text-muted-foreground mb-4" />
+                        <h2 className="text-lg font-semibold mb-1">{t('cart.empty')}</h2>
+                        <p className="text-sm text-muted-foreground mb-5">Your cart is empty</p>
+                        <Button asChild className="gap-2">
+                            <Link to="/products">
+                                <ShoppingBag className="h-4 w-4" />
+                                {t('cart.continueShopping')}
+                            </Link>
+                        </Button>
+                    </div>
                 ) : (
                     <div className="space-y-4">
                         {sellerGroups.map((group) => {
