@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore, USE_FIREBASE_AUTH } from '../store/authStore';
 import api from '../utils/api';
-import { signInWithGoogle } from '../utils/firebase';
+import { signInWithGoogle, signInWithFirebaseEmail } from '../utils/firebase';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [useFirebase, setUseFirebase] = useState(USE_FIREBASE_AUTH);
 
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
@@ -26,11 +27,23 @@ function Login() {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/auth/login', { email, password });
-      const token = response?.data?.token;
-      const user = response?.data?.user;
+      let token, user;
 
-      if (!token || typeof token !== "string" || token.split(".").length !== 3) {
+      if (useFirebase) {
+        // Step 1: Login to Firebase
+        const idToken = await signInWithFirebaseEmail(email, password);
+        // Step 2: Exchange for backend JWT
+        const response = await api.post('/auth/social-login', { idToken });
+        token = response?.data?.token;
+        user = response?.data?.user;
+      } else {
+        // Standard backend login
+        const response = await api.post('/auth/login', { email, password });
+        token = response?.data?.token;
+        user = response?.data?.user;
+      }
+
+      if (!token) {
         throw new Error("Invalid authentication token received");
       }
 
@@ -118,6 +131,19 @@ function Login() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2 mb-2">
+            <input 
+              type="checkbox" 
+              id="useFirebase" 
+              checked={useFirebase} 
+              onChange={() => setUseFirebase(!useFirebase)}
+              className="w-4 h-4 accent-primary"
+            />
+            <label htmlFor="useFirebase" className="text-xs text-muted-foreground cursor-pointer">
+              Login via Firebase (Optional)
+            </label>
           </div>
 
           <Button type="submit" className="w-full h-11 gap-2" disabled={isLoading}>

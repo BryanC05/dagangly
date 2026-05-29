@@ -1,5 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut
+} from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -26,5 +33,35 @@ export const signInWithGoogle = async () => {
   } catch (error) {
     console.error("Error signing in with Google", error);
     throw error;
+  }
+};
+
+export const signInWithFirebaseEmail = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const idToken = await userCredential.user.getIdToken();
+    return idToken;
+  } catch (error) {
+    console.error("Error signing in with Firebase Email", error);
+    throw error;
+  }
+};
+
+export const registerWithFirebaseEmail = async (email, password) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const idToken = await userCredential.user.getIdToken();
+    return idToken;
+  } catch (error) {
+    console.error("Error registering with Firebase Email", error);
+    throw error;
+  }
+};
+
+export const firebaseLogout = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Error signing out from Firebase", error);
   }
 };

@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// VITE_USE_FIREBASE_AUTH should be 'true' or 'false' in .env
+export const USE_FIREBASE_AUTH = import.meta.env.VITE_USE_FIREBASE_AUTH === 'true';
+
 const parseTokenPayload = (token) => {
   if (!token || typeof token !== 'string') return null;
   const parts = token.split('.');
@@ -46,6 +49,7 @@ export const useAuthStore = create(
       user: null,
       token: null,
       isAuthenticated: false,
+      authMode: USE_FIREBASE_AUTH ? 'firebase' : 'backend',
 
       setAuth: (user, token) => {
         if (!isValidJWT(token)) {

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Building2, Store } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore, USE_FIREBASE_AUTH } from '../store/authStore';
 import api from '../utils/api';
-import { signInWithGoogle } from '../utils/firebase';
+import { signInWithGoogle, registerWithFirebaseEmail } from '../utils/firebase';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ function Register() {
   const [showBusiness, setShowBusiness] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [useFirebase, setUseFirebase] = useState(USE_FIREBASE_AUTH);
 
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
@@ -36,22 +37,44 @@ function Register() {
     setIsLoading(true);
 
     try {
-      const payload = {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        phone: formData.phone,
-        isSeller: showBusiness,
-        ...(showBusiness && {
-          businessName: formData.businessName,
-          businessType: formData.businessType,
-          location: formData.location,
-        }),
-      };
+      let token, user;
 
-      const response = await api.post('/auth/register', payload);
-      const token = response?.data?.token;
-      const user = response?.data?.user;
+      if (useFirebase) {
+        // Step 1: Register in Firebase
+        const idToken = await registerWithFirebaseEmail(formData.email, formData.password);
+        
+        // Step 2: Create profile in backend
+        const payload = {
+          idToken,
+          name: formData.name,
+          phone: formData.phone,
+          isSeller: showBusiness,
+          ...(showBusiness && {
+            businessName: formData.businessName,
+            businessType: formData.businessType,
+            location: formData.location,
+          }),
+        };
+
+        const response = await api.post('/auth/social-login', payload);
+        token = response?.data?.token;
+        user = response?.data?.user;
+      } else {
+        // Standard backend register
+        const payload = {
+          ...formData,
+          isSeller: showBusiness,
+          ...(showBusiness && {
+            businessName: formData.businessName,
+            businessType: formData.businessType,
+            location: formData.location,
+          }),
+        };
+
+        const response = await api.post('/auth/register', payload);
+        token = response?.data?.token;
+        user = response?.data?.user;
+      }
 
       if (token) setAuth(user, token);
       navigate('/');
@@ -128,6 +151,19 @@ function Register() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="useFirebaseReg" 
+              checked={useFirebase} 
+              onChange={() => setUseFirebase(!useFirebase)}
+              className="w-4 h-4 accent-primary"
+            />
+            <label htmlFor="useFirebaseReg" className="text-xs text-muted-foreground cursor-pointer">
+              Register via Firebase (Optional)
+            </label>
           </div>
 
           <button type="button" onClick={() => setShowBusiness(!showBusiness)} className="flex items-center gap-2 text-sm text-primary hover:underline">
