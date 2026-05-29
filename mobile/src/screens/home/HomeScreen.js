@@ -434,7 +434,7 @@ export default function HomeScreen({ navigation }) {
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
                     {featuredProducts.map((item) => (
-                        <View key={item._id || item.id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
+                        <View key={item._id || item.id} style={{ width: (screenWidth - 56) / 2, marginRight: 12 }}>
                             <ProductCard
                                 product={item}
                                 onPress={() => navigation.navigate('ProductDetail', { productId: item._id || item.id })}
@@ -457,7 +457,7 @@ export default function HomeScreen({ navigation }) {
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
                         {trendingProducts.map((item) => (
-                            <View key={item._id || item.id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
+                            <View key={item._id || item.id} style={{ width: (screenWidth - 56) / 2, marginRight: 12 }}>
                                 <ProductCard
                                     product={item}
                                     onPress={() => navigation.navigate('ProductDetail', { productId: item._id || item.id })}
@@ -481,7 +481,7 @@ export default function HomeScreen({ navigation }) {
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
                         {dailyDeals.map((item) => (
-                            <View key={item._id || item.id} style={{ width: (width - 56) / 2, marginRight: 12 }}>
+                            <View key={item._id || item.id} style={{ width: (screenWidth - 56) / 2, marginRight: 12 }}>
                                 <ProductCard
                                     product={item}
                                     onPress={() => navigation.navigate('ProductDetail', { productId: item._id || item.id })}

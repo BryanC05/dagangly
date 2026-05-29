@@ -1,3 +1,5 @@
+import Constants from 'expo-constants';
+
 // EXPO_PUBLIC_API_HOST should be set via environment variable (from .env file)
 // For local development, set EXPO_PUBLIC_API_HOST=http://localhost:5000
 // Default falls back to production
@@ -6,7 +8,8 @@
 // OFFLINE TESTING MODE
 // Set to true for offline testing without backend
 // ============================================
-export const OFFLINE_TESTING_MODE = process.env.EXPO_PUBLIC_OFFLINE_TESTING === "true" || false;
+const rawOfflineTesting = process.env.EXPO_PUBLIC_OFFLINE_TESTING || Constants.expoConfig?.extra?.EXPO_PUBLIC_OFFLINE_TESTING;
+export const OFFLINE_TESTING_MODE = rawOfflineTesting === "true" || false;
 console.log("[Config] Offline Testing Mode:", OFFLINE_TESTING_MODE);
 
 // ============================================
@@ -15,7 +18,8 @@ console.log("[Config] Offline Testing Mode:", OFFLINE_TESTING_MODE);
 // instead of JWT-based API auth.
 // Set EXPO_PUBLIC_USE_FIREBASE_AUTH=true to enable.
 // ============================================
-export const USE_FIREBASE_AUTH = process.env.EXPO_PUBLIC_USE_FIREBASE_AUTH === "true" || false;
+const rawFirebaseAuth = process.env.EXPO_PUBLIC_USE_FIREBASE_AUTH || Constants.expoConfig?.extra?.EXPO_PUBLIC_USE_FIREBASE_AUTH;
+export const USE_FIREBASE_AUTH = rawFirebaseAuth === "true" || false;
 console.log("[Config] Firebase Auth Mode:", USE_FIREBASE_AUTH);
 
 // ============================================
@@ -29,7 +33,7 @@ const LOCAL_API_HOST = "http://localhost:5000";
 const RAILWAY_API_HOST = "https://dagangly-production.up.railway.app";
 
 // Get from env or use local by default for development
-const RAW_API_HOST = process.env.EXPO_PUBLIC_API_HOST || LOCAL_API_HOST;
+const RAW_API_HOST = process.env.EXPO_PUBLIC_API_HOST || Constants.expoConfig?.extra?.EXPO_PUBLIC_API_HOST || LOCAL_API_HOST;
 const isUsingLocal = RAW_API_HOST.startsWith("http://localhost") || 
                      RAW_API_HOST.includes("10.38.54.13") || 
                      RAW_API_HOST.includes("192.168.") ||

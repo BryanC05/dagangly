@@ -15,7 +15,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.msmemarketplace.mobile",
-      
+      googleServicesFile: "./GoogleService-Info.plist",
       config: {
         googleMapsApiKey: process.env.GOOGLEMAP_API_KEY
       },
@@ -28,7 +28,6 @@ export default {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
-      edgeToEdgeEnabled: true,
       package: "com.msmemarketplace.mobile",
       googleServicesFile: "./google-services.json",
       config: {
@@ -48,7 +47,9 @@ export default {
     extra: {
       eas: {
         projectId: "034edfa1-ecd5-47df-b050-47725a620224"
-      }
+      },
+      EXPO_PUBLIC_API_HOST: process.env.EXPO_PUBLIC_API_HOST || "http://localhost:5000",
+      EXPO_PUBLIC_USE_FIREBASE_AUTH: process.env.EXPO_PUBLIC_USE_FIREBASE_AUTH || "false"
     },
     updates: {
       enabled: false,

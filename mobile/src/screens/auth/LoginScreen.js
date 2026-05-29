@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { useTranslation } from '../../hooks/useTranslation';
+import { USE_FIREBASE_AUTH } from '../../config';
 
 export default function LoginScreen({ navigation }) {
     const { colors, isDarkMode } = useThemeStore();
@@ -15,7 +16,9 @@ export default function LoginScreen({ navigation }) {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [socialLoading, setSocialLoading] = useState(false);
     const login = useAuthStore((s) => s.login);
+    const socialLogin = useAuthStore((s) => s.socialLogin);
 
     const handleLogin = async () => {
         if (!email.trim() || !password.trim()) {
@@ -35,6 +38,77 @@ export default function LoginScreen({ navigation }) {
             Alert.alert(t.loginFailed, errorMessage);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        // If Firebase is disabled in config, show alert
+        if (USE_FIREBASE_AUTH === false) {
+            Alert.alert(
+                "Firebase Disabled", 
+                "Firebase authentication is disabled. Please set EXPO_PUBLIC_USE_FIREBASE_AUTH=true in your .env and restart Expo."
+            );
+            return;
+        }
+
+        setSocialLoading(true);
+        try {
+            // Refined check for Expo Go vs Development Build
+            const Constants = require('expo-constants').default;
+            const isExpoGo = Constants.appOwnership === 'expo' || !Constants.expoConfig?.extra?.eas?.projectId;
+
+            if (isExpoGo) {
+                Alert.alert(
+                    "Action Required", 
+                    "Social Login (Google) requires a Native Development Build.\n\nStandard Expo Go cannot run the native code required for Google Sign-in. Please use Email/Password or build the app natively using 'npx expo run:android'."
+                );
+                setSocialLoading(false);
+                return;
+            }
+
+            // Lazy load modules within try-catch to prevent crash if not found
+            let GoogleSignin;
+            try {
+                // Modular SDK Style (v22+)
+                const { getAuth, GoogleAuthProvider, signInWithCredential } = require("@react-native-firebase/auth");
+                GoogleSignin = require("@react-native-google-signin/google-signin").GoogleSignin;
+                
+                // Configure Google Sign-in
+                GoogleSignin.configure({
+                    webClientId: '545811219533-n69ochfh1q72fdb31uhddoaa6i2ar864.apps.googleusercontent.com',
+                    offlineAccess: true,
+                });
+
+                await GoogleSignin.hasPlayServices();
+                const response = await GoogleSignin.signIn();
+                
+                if (response.type === 'cancelled') {
+                    setSocialLoading(false);
+                    return;
+                }
+
+                const idToken = response.data.idToken;
+                if (!idToken) {
+                    throw new Error("No ID Token found. Please ensure you have configured your Firebase project correctly.");
+                }
+
+                const auth = getAuth();
+                const credential = GoogleAuthProvider.credential(idToken);
+                const userCredential = await signInWithCredential(auth, credential);
+                
+                const firebaseToken = await userCredential.user.getIdToken();
+                await socialLogin(firebaseToken);
+            } catch (moduleErr) {
+                if (moduleErr.message.includes("native code")) {
+                    throw new Error("Native modules not found. Ensure you are using a Development Build and not Expo Go.");
+                }
+                throw moduleErr;
+            }
+        } catch (error) {
+            console.error("[Social Auth Error]", error);
+            Alert.alert("Login Error", error.message || "Failed to sign in with Google.");
+        } finally {
+            setSocialLoading(false);
         }
     };
 
@@ -113,12 +187,49 @@ export default function LoginScreen({ navigation }) {
             shadowRadius: 8,
             elevation: 4,
         },
+        socialButton: {
+            flexDirection: 'row',
+            backgroundColor: isDarkMode ? '#1e293b' : '#fff',
+            borderRadius: 8,
+            height: 48,
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            marginTop: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        socialIcon: {
+            width: 20,
+            height: 20,
+            marginRight: 10,
+        },
+        dividerContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginVertical: 20,
+        },
+        dividerLine: {
+            flex: 1,
+            height: 1,
+            backgroundColor: colors.border,
+        },
+        dividerText: {
+            marginHorizontal: 10,
+            color: colors.textSecondary,
+            fontSize: 12,
+            textTransform: 'uppercase',
+        },
         buttonDisabled: { opacity: 0.7 },
         buttonText: { 
             color: colors.white, 
             fontSize: 15, 
             fontWeight: '700',
             letterSpacing: 0.5,
+        },
+        socialButtonText: {
+            color: colors.text,
+            fontSize: 15,
+            fontWeight: '600',
         },
         linkButton: { alignItems: 'center', marginTop: 20 },
         linkText: { fontSize: 14, color: colors.textSecondary },
@@ -194,12 +305,33 @@ export default function LoginScreen({ navigation }) {
                         <TouchableOpacity
                             style={[styles.button, loading && styles.buttonDisabled]}
                             onPress={handleLogin}
-                            disabled={loading}
+                            disabled={loading || socialLoading}
                         >
                             {loading ? (
                                 <ActivityIndicator color={colors.white} />
                             ) : (
                                 <Text style={styles.buttonText}>Masuk</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <View style={styles.dividerContainer}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.dividerText}>Atau</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
+
+                        <TouchableOpacity
+                            style={[styles.socialButton, socialLoading && styles.buttonDisabled]}
+                            onPress={handleGoogleLogin}
+                            disabled={loading || socialLoading}
+                        >
+                            {socialLoading ? (
+                                <ActivityIndicator color={colors.text} />
+                            ) : (
+                                <>
+                                    <Ionicons name="logo-google" size={18} color="#EA4335" style={{ marginRight: 10 }} />
+                                    <Text style={styles.socialButtonText}>Masuk dengan Google</Text>
+                                </>
                             )}
                         </TouchableOpacity>
 

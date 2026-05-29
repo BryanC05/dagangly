@@ -8,6 +8,7 @@ import (
 
 type User struct {
 	ID                    primitive.ObjectID    `bson:"_id,omitempty" json:"_id"`
+	FirebaseUID           string                `bson:"firebaseUid,omitempty" json:"firebaseUid,omitempty"`
 	Name                  string                `bson:"name" json:"name"`
 	Email                 string                `bson:"email" json:"email"`
 	Password              string                `bson:"password" json:"-"`

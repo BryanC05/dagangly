@@ -53,6 +53,9 @@ func main() {
 		log.Printf("⚠️ Redis not available - using in-memory fallback")
 	}
 
+	// Initialize Firebase Admin SDK (optional)
+	_ = database.InitFirebase()
+
 	r := gin.Default()
 
 	r.Use(middleware.CORSMiddleware())
@@ -112,6 +115,7 @@ func main() {
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
+			auth.POST("/social-login", authHandler.SocialLogin)
 			auth.PUT("/profile", middleware.AuthRequired(cfg.JWTSecret), authHandler.UpdateProfile)
 		}
 

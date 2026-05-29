@@ -201,71 +201,102 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	})
 }
 
-func (h *AuthHandler) UpdateProfile(c *gin.Context) {
-	userID := c.GetString("userID")
-	objID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		c.JSON(400, gin.H{"message": "Invalid user ID"})
-		return
-	}
-
+func (h *AuthHandler) SocialLogin(c *gin.Context) {
 	var req struct {
-		Name         string          `json:"name"`
-		Phone        string          `json:"phone"`
-		IsSeller     *bool           `json:"isSeller"`
-		BusinessName string          `json:"businessName"`
-		BusinessType string          `json:"businessType"`
-		Location     models.Location `json:"location"`
-		ProfileImage *string         `json:"profileImage"`
+		IDToken string `json:"idToken" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"message": err.Error()})
+		c.JSON(400, gin.H{"message": "Invalid request: " + err.Error()})
 		return
 	}
 
-	update := bson.M{}
-
-	if req.Name != "" {
-		update["name"] = req.Name
-	}
-	if req.Phone != "" {
-		update["phone"] = req.Phone
-	}
-	if req.ProfileImage != nil {
-		update["profileImage"] = req.ProfileImage
-	}
-	if req.IsSeller != nil {
-		update["isSeller"] = *req.IsSeller
-	}
-	if req.BusinessName != "" {
-		update["businessName"] = req.BusinessName
-	}
-	if req.BusinessType != "" {
-		update["businessType"] = req.BusinessType
-	}
-	hasLocation := len(req.Location.Coordinates) > 0 || req.Location.Address != "" || req.Location.City != ""
-	if hasLocation {
-		update["location"] = req.Location
+	// Verify Firebase token
+	token, err := database.VerifyIDToken(context.Background(), req.IDToken)
+	if err != nil {
+		c.JSON(401, gin.H{"message": "Invalid Firebase token: " + err.Error()})
+		return
 	}
 
-	update["updatedAt"] = time.Now()
+	firebaseUID := token.UID
+	email := ""
+	if emailVal, ok := token.Claims["email"].(string); ok {
+		email = emailVal
+	}
+	name := ""
+	if nameVal, ok := token.Claims["name"].(string); ok {
+		name = nameVal
+	}
+	picture := ""
+	if picVal, ok := token.Claims["picture"].(string); ok {
+		picture = picVal
+	}
 
 	collection := database.GetDB().Collection("users")
-	_, err = collection.UpdateOne(context.Background(), bson.M{"_id": objID}, bson.M{"$set": update})
-	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to update profile"})
-		return
-	}
 
 	var user models.User
-	err = collection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&user)
+	// Try to find by FirebaseUID first
+	err = collection.FindOne(context.Background(), bson.M{"firebaseUid": firebaseUID}).Decode(&user)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to get user"})
+		// Not found by UID, try by email
+		err = collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
+		if err == nil {
+			// Found by email, link FirebaseUID
+			_, _ = collection.UpdateOne(
+				context.Background(),
+				bson.M{"_id": user.ID},
+				bson.M{"$set": bson.M{"firebaseUid": firebaseUID, "updatedAt": time.Now()}},
+			)
+			user.FirebaseUID = firebaseUID
+		} else {
+			// Not found by email either, create new user
+			user = models.User{
+				FirebaseUID:  firebaseUID,
+				Name:         name,
+				Email:        email,
+				ProfileImage: &picture,
+				IsSeller:     false,
+				BusinessType: "none",
+				Location: models.Location{
+					Type:        "Point",
+					Coordinates: []float64{0, 0},
+				},
+				LogoGenerationCount: models.LogoGenerationCount{
+					Count:         0,
+					LastResetDate: time.Now(),
+				},
+				ImageEnhancementCount: models.ImageEnhancementCount{
+					Count:         0,
+					LastResetDate: time.Now(),
+				},
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+
+			result, err := collection.InsertOne(context.Background(), user)
+			if err != nil {
+				c.JSON(500, gin.H{"message": "Failed to create user"})
+				return
+			}
+			user.ID = result.InsertedID.(primitive.ObjectID)
+		}
+	}
+
+	// Generate our own JWT
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":       user.ID.Hex(),
+		"email":    user.Email,
+		"isSeller": user.IsSeller,
+		"exp":      time.Now().Add(7 * 24 * time.Hour).Unix(),
+	})
+	tokenString, err := jwtToken.SignedString([]byte(h.jwtSecret()))
+	if err != nil {
+		c.JSON(500, gin.H{"message": "Failed to generate authentication token"})
 		return
 	}
 
 	c.JSON(200, gin.H{
+		"token": tokenString,
 		"user": gin.H{
 			"id":                user.ID.Hex(),
 			"name":              user.Name,

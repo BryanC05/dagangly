@@ -1,10 +1,20 @@
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
-import auth from "@react-native-firebase/auth";
 import api from "../api/api";
 import { OFFLINE_TESTING_MODE, USE_FIREBASE_AUTH } from "../config";
 import { findMockUser, generateMockToken, validateMockToken, getMockUserById } from "../data/mockAuth";
+
+// Guarded Firebase Auth load
+let auth = null;
+if (USE_FIREBASE_AUTH) {
+  try {
+    // Only require if we actually intend to use it, to avoid crashing Expo Go
+    auth = require("@react-native-firebase/auth").default;
+  } catch (e) {
+    console.warn("[Auth] React Native Firebase not found. Firebase Auth will be unavailable. If you are using Expo Go, this is expected.");
+  }
+}
 
 // Base64 decode function for React Native
 const decodeBase64 = (input) => {
@@ -83,6 +93,13 @@ export const useAuthStore = create((set, get) => ({
       return fbUser;
     }
     const response = await api.post("/auth/login", { email, password });
+    const { token, user } = response.data;
+    await get().setAuth(user, token);
+    return user;
+  },
+
+  socialLogin: async (idToken) => {
+    const response = await api.post("/auth/social-login", { idToken });
     const { token, user } = response.data;
     await get().setAuth(user, token);
     return user;
