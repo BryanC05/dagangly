@@ -97,6 +97,23 @@ function Login() {
           </div>
         )}
 
+        <div className="bg-muted/50 p-1 rounded-lg flex mb-6">
+          <button 
+            type="button"
+            onClick={() => setUseFirebase(false)}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${!useFirebase ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Backend
+          </button>
+          <button 
+            type="button"
+            onClick={() => setUseFirebase(true)}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${useFirebase ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Firebase
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">{t('auth.email')}</Label>
@@ -131,19 +148,6 @@ function Login() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 mb-2">
-            <input 
-              type="checkbox" 
-              id="useFirebase" 
-              checked={useFirebase} 
-              onChange={() => setUseFirebase(!useFirebase)}
-              className="w-4 h-4 accent-primary"
-            />
-            <label htmlFor="useFirebase" className="text-xs text-muted-foreground cursor-pointer">
-              Login via Firebase (Optional)
-            </label>
           </div>
 
           <Button type="submit" className="w-full h-11 gap-2" disabled={isLoading}>
