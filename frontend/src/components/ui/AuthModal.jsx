@@ -210,7 +210,8 @@ export default function AuthModal() {
   const navigate = useNavigate();
   const { isOpen, mode, closeModal, switchMode, redirectTo } = useAuthModalStore();
 
-  const handleClose = () => {
+  const handleClose = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     closeModal();
     if (redirectTo) {
       navigate(redirectTo);
