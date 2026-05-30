@@ -116,7 +116,7 @@ func main() {
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
 			auth.POST("/social-login", authHandler.SocialLogin)
-			auth.PUT("/profile", middleware.AuthRequired(cfg.JWTSecret), authHandler.UpdateProfile)
+			// Profile update is handled by users group now
 		}
 
 		users := api.Group("/users")

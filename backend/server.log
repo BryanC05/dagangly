@@ -1,9 +1,9 @@
-2026/05/07 20:13:16 🚀 Starting Dagangly API Server
-2026/05/07 20:13:16 📋 Configuration loaded:
-2026/05/07 20:13:16    - Port: 5000
-2026/05/07 20:13:16    - NodeEnv: development
-2026/05/07 20:13:16    - MongoDB: mongodb+sr***e=Cluster0
-2026/05/07 20:13:16 🔗 Connecting to MongoDB...
+2026/05/30 20:43:23 🚀 Starting Dagangly API Server
+2026/05/30 20:43:23 📋 Configuration loaded:
+2026/05/30 20:43:23    - Port: 5000
+2026/05/30 20:43:23    - NodeEnv: development
+2026/05/30 20:43:23    - MongoDB: mongodb+sr***e=Cluster0
+2026/05/30 20:43:23 🔗 Connecting to MongoDB...
 ✅ Created 2dsphere index on users.location
 ✅ Created 2dsphere index on products.location
 ✅ Created index on products.seller,createdAt
@@ -18,9 +18,10 @@
 ✅ Created index on video_rooms.hostId
 ✅ Created index on video_rooms.participantId
 ✅ Connected to MongoDB
-2026/05/07 20:13:18 ✅ MongoDB connected successfully
-2026/05/07 20:13:18 ⚠️  REDIS_URL not set, Redis will not be available
-2026/05/07 20:13:18 ⚠️ Redis not available - using in-memory fallback
+2026/05/30 20:43:24 ✅ MongoDB connected successfully
+2026/05/30 20:43:24 ⚠️  REDIS_URL not set, Redis will not be available
+2026/05/30 20:43:24 ⚠️ Redis not available - using in-memory fallback
+🔥 Firebase Admin SDK initialized
 [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
@@ -31,15 +32,16 @@
 [GIN-debug] HEAD   /uploads/*filepath        --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (4 handlers)
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/health               --> main.main.func2 (4 handlers)
-2026/05/07 20:13:18 ✅ Websocket initialized
+2026/05/30 20:43:24 ✅ Websocket initialized
 [GIN-debug] GET    /ws                       --> msme-marketplace/internal/websocket.(*Hub).HandleWebSocket-fm (4 handlers)
-2026/05/07 20:13:18 🔧 Initializing handlers...
-2026/05/07 20:13:18 ✅ Handlers initialized
+2026/05/30 20:43:24 🔧 Initializing handlers...
+2026/05/30 20:43:24 ✅ Handlers initialized
 [GIN-debug] POST   /api/auth/register        --> msme-marketplace/internal/handlers.(*AuthHandler).Register-fm (4 handlers)
 [GIN-debug] POST   /api/auth/login           --> msme-marketplace/internal/handlers.(*AuthHandler).Login-fm (4 handlers)
-[GIN-debug] PUT    /api/auth/profile         --> msme-marketplace/internal/handlers.(*AuthHandler).UpdateProfile-fm (5 handlers)
+[GIN-debug] POST   /api/auth/social-login    --> msme-marketplace/internal/handlers.(*AuthHandler).SocialLogin-fm (4 handlers)
 [GIN-debug] GET    /api/users/profile        --> msme-marketplace/internal/handlers.(*UserHandler).GetProfile-fm (5 handlers)
 [GIN-debug] PUT    /api/users/profile        --> msme-marketplace/internal/handlers.(*UserHandler).UpdateProfile-fm (5 handlers)
+[GIN-debug] POST   /api/users/seller/qris    --> msme-marketplace/internal/handlers.(*UserHandler).UploadSellerQris-fm (5 handlers)
 [GIN-debug] GET    /api/users/saved-products --> msme-marketplace/internal/handlers.(*UserHandler).GetSavedProducts-fm (5 handlers)
 [GIN-debug] POST   /api/users/saved-products/:productId --> msme-marketplace/internal/handlers.(*UserHandler).SaveProduct-fm (5 handlers)
 [GIN-debug] DELETE /api/users/saved-products/:productId --> msme-marketplace/internal/handlers.(*UserHandler).UnsaveProduct-fm (5 handlers)
@@ -108,6 +110,7 @@
 [GIN-debug] GET    /api/orders/:id           --> msme-marketplace/internal/handlers.(*OrderHandler).GetOrderByID-fm (5 handlers)
 [GIN-debug] PUT    /api/orders/:id/status    --> msme-marketplace/internal/handlers.(*OrderHandler).UpdateOrderStatus-fm (5 handlers)
 [GIN-debug] PUT    /api/orders/:id/payment   --> msme-marketplace/internal/handlers.(*OrderHandler).UpdatePayment-fm (5 handlers)
+[GIN-debug] POST   /api/orders/:id/payment-proof --> msme-marketplace/internal/handlers.(*OrderHandler).UploadPaymentProof-fm (5 handlers)
 [GIN-debug] PUT    /api/orders/:id/seller-response --> msme-marketplace/internal/handlers.(*OrderHandler).SellerResponse-fm (5 handlers)
 [GIN-debug] PUT    /api/orders/:id/buyer-confirm --> msme-marketplace/internal/handlers.(*OrderHandler).BuyerConfirm-fm (5 handlers)
 [GIN-debug] GET    /api/orders/:id/chat-room --> msme-marketplace/internal/handlers.(*OrderHandler).GetOrderChatRoom-fm (5 handlers)
@@ -255,13 +258,61 @@
 [GIN-debug] GET    /api/installments/my      --> msme-marketplace/internal/handlers.(*InstallmentHandler).GetMyInstallments-fm (5 handlers)
 [GIN-debug] GET    /api/installments/plan/:planId --> msme-marketplace/internal/handlers.(*InstallmentHandler).GetInstallmentPlan-fm (5 handlers)
 [GIN-debug] POST   /api/installments/plan/:planId/pay --> msme-marketplace/internal/handlers.(*InstallmentHandler).PayInstallment-fm (5 handlers)
-2026/05/07 20:13:18 ✅ Database indexes ensured
-2026/05/07 20:13:18 🚀 About to start server on port 5000
+2026/05/30 20:43:24 ✅ Database indexes ensured
+2026/05/30 20:43:24 🚀 About to start server on port 5000
 🚀 Server running on port 5000
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 0.0.0.0:5000
-[GIN] 2026/05/07 - 20:13:34 | 200 |      96.243µs |             ::1 | GET      "/api/health"
-[GIN] 2026/05/07 - 20:13:34 | 200 |  120.309557ms |             ::1 | POST     "/api/auth/login"
-[GIN] 2026/05/07 - 20:19:14 | 200 |      56.405µs |             ::1 | GET      "/api/health"
-[GIN] 2026/05/07 - 20:20:39 | 200 |  109.099172ms |             ::1 | POST     "/api/auth/login"
+[GIN] 2026/05/30 - 20:45:43 | 204 |      89.135µs |             ::1 | OPTIONS  "/api/auth/social-login"
+[GIN] 2026/05/30 - 20:45:44 | 200 |  392.895895ms |             ::1 | POST     "/api/auth/social-login"
+[GIN] 2026/05/30 - 20:45:44 | 204 |       9.992µs |             ::1 | OPTIONS  "/api/orders/my-orders?_cb=1780148744288"
+[GIN] 2026/05/30 - 20:45:44 | 204 |     774.732µs |             ::1 | OPTIONS  "/api/orders/my-orders?_cb=1780148744288"
+[GIN] 2026/05/30 - 20:45:44 | 200 |   60.869642ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780148744288"
+[GIN] 2026/05/30 - 20:45:44 | 200 |   125.06806ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780148744288"
+[GIN] 2026/05/30 - 20:48:58 | 404 |       39.48µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:48:58 | 204 |       8.562µs |             ::1 | OPTIONS  "/api/orders/my-orders?_cb=1780148938139"
+[GIN] 2026/05/30 - 20:48:58 | 204 |      13.632µs |             ::1 | OPTIONS  "/api/orders/my-orders?_cb=1780148938139"
+[GIN] 2026/05/30 - 20:48:58 | 404 |       4.945µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:48:58 | 204 |       6.194µs |             ::1 | OPTIONS  "/api/orders/my-orders?_cb=1780148938139"
+[GIN] 2026/05/30 - 20:48:58 | 204 |      39.816µs |             ::1 | OPTIONS  "/api/orders/my-orders?_cb=1780148938139"
+[GIN] 2026/05/30 - 20:48:58 | 200 |     48.6699ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780148938139"
+[GIN] 2026/05/30 - 20:48:58 | 200 |   34.526221ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780148938139"
+[GIN] 2026/05/30 - 20:48:58 | 200 |   41.076521ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780148938139"
+[GIN] 2026/05/30 - 20:48:58 | 200 |   27.567842ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780148938139"
+[GIN] 2026/05/30 - 20:48:58 | 204 |       8.773µs |             ::1 | OPTIONS  "/api/products/categories/counts?_cb=1780148938355"
+[GIN] 2026/05/30 - 20:48:58 | 204 |       6.789µs |             ::1 | OPTIONS  "/api/products?limit=6&sort=newest&_cb=1780148938355"
+[GIN] 2026/05/30 - 20:48:58 | 204 |       9.018µs |             ::1 | OPTIONS  "/api/products/categories/counts?_cb=1780148938355"
+[GIN] 2026/05/30 - 20:48:58 | 204 |       8.011µs |             ::1 | OPTIONS  "/api/products?limit=6&sort=newest&_cb=1780148938355"
+[GIN] 2026/05/30 - 20:48:58 | 200 |   44.702119ms |             ::1 | GET      "/api/products/categories/counts?_cb=1780148938355"
+[GIN] 2026/05/30 - 20:48:58 | 200 |   77.912498ms |             ::1 | GET      "/api/products/categories/counts?_cb=1780148938355"
+[GIN] 2026/05/30 - 20:48:58 | 200 |   231.74631ms |             ::1 | GET      "/api/products?limit=6&sort=newest&_cb=1780148938355"
+[GIN] 2026/05/30 - 20:48:58 | 200 |   174.07376ms |             ::1 | GET      "/api/products?limit=6&sort=newest&_cb=1780148938355"
+[GIN] 2026/05/30 - 20:48:59 | 404 |       6.686µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:48:59 | 404 |      51.239µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:49:03 | 404 |       5.812µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:49:03 | 404 |        4.55µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:49:11 | 404 |      32.532µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:49:19 | 404 |     106.018µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:50:12 | 404 |      46.616µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:50:12 | 404 |      36.726µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:50:12 | 204 |       7.826µs |             ::1 | OPTIONS  "/api/orders/my-orders?_cb=1780149012813"
+[GIN] 2026/05/30 - 20:50:12 | 204 |       8.808µs |             ::1 | OPTIONS  "/api/orders/my-orders?_cb=1780149012813"
+[GIN] 2026/05/30 - 20:50:12 | 200 |   81.659561ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780149012813"
+[GIN] 2026/05/30 - 20:50:13 | 200 |  222.615375ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780149012813"
+[GIN] 2026/05/30 - 20:50:13 | 204 |        5.99µs |             ::1 | OPTIONS  "/api/products/categories/counts?_cb=1780149013111"
+[GIN] 2026/05/30 - 20:50:13 | 204 |      10.455µs |             ::1 | OPTIONS  "/api/products?limit=6&sort=newest&_cb=1780149013111"
+[GIN] 2026/05/30 - 20:50:13 | 204 |      37.113µs |             ::1 | OPTIONS  "/api/products/categories/counts?_cb=1780149013111"
+[GIN] 2026/05/30 - 20:50:13 | 204 |      13.072µs |             ::1 | OPTIONS  "/api/products?limit=6&sort=newest&_cb=1780149013111"
+[GIN] 2026/05/30 - 20:50:13 | 200 |    39.26097ms |             ::1 | GET      "/api/products/categories/counts?_cb=1780149013111"
+[GIN] 2026/05/30 - 20:50:13 | 200 |   37.408384ms |             ::1 | GET      "/api/products/categories/counts?_cb=1780149013111"
+[GIN] 2026/05/30 - 20:50:13 | 200 |  152.183969ms |             ::1 | GET      "/api/products?limit=6&sort=newest&_cb=1780149013111"
+[GIN] 2026/05/30 - 20:50:13 | 200 |  292.183006ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780149012813"
+[GIN] 2026/05/30 - 20:50:13 | 200 |    30.54871ms |             ::1 | GET      "/api/orders/my-orders?_cb=1780149012813"
+[GIN] 2026/05/30 - 20:50:13 | 200 |  150.732348ms |             ::1 | GET      "/api/products?limit=6&sort=newest&_cb=1780149013111"
+[GIN] 2026/05/30 - 20:50:14 | 404 |       7.409µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:50:14 | 404 |       8.895µs |             ::1 | GET      "/socket.io/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjA1YnJ5YW5jaGFuMDVAZ21haWwuY29tIiwiZXhwIjoxNzgwNzUzNTQ0LCJpZCI6IjZhMWFlYTA4Y2MzODZmMDg1ODc1M2JmZiIsImlzU2VsbGVyIjpmYWxzZX0.Qe8MOVIRLwP6GFzRFc6EXEYeVtH8W_oN2ATDZfnFMVg&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:50:18 | 404 |      11.743µs |             ::1 | GET      "/socket.io/?token=null&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:50:18 | 404 |       8.903µs |             ::1 | GET      "/socket.io/?token=null&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:50:34 | 404 |       4.273µs |             ::1 | GET      "/socket.io/?token=null&EIO=4&transport=websocket"
+[GIN] 2026/05/30 - 20:50:34 | 404 |         3.7µs |             ::1 | GET      "/socket.io/?token=null&EIO=4&transport=websocket"

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
@@ -17,19 +18,21 @@ var authClient *auth.Client
 func InitFirebase() error {
 	ctx := context.Background()
 	
-	// In a real production environment, you would provide a path to a service account JSON file
-	// via environment variable FIREBASE_SERVICE_ACCOUNT_PATH.
-	// For now, we initialize without specific credentials which works if running on GCP
-	// or if GOOGLE_APPLICATION_CREDENTIALS is set.
-	// If neither is available, it will fail, but we'll log it and continue.
-	
 	var app *firebase.App
 	var err error
 	
-	// Try to initialize with default credentials
-	app, err = firebase.NewApp(ctx, nil)
+	// We only need token verification, which doesn't strictly require a service account 
+	// if we provide the ProjectID and use option.WithoutAuthentication()
+	projectID := os.Getenv("FIREBASE_PROJECT_ID")
+	if projectID == "" {
+		projectID = "dagangly-24a52"
+	}
+	
+	config := &firebase.Config{ProjectID: projectID}
+	app, err = firebase.NewApp(ctx, config, option.WithoutAuthentication())
+	
 	if err != nil {
-		log.Printf("[Firebase] Failed to initialize with default credentials: %v", err)
+		log.Printf("[Firebase] Failed to initialize: %v", err)
 		return err
 	}
 
