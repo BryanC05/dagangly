@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/utils/api";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore, USE_FIREBASE_AUTH } from "@/store/authStore";
 import { useAuthModalStore } from "@/store/authModalStore";
+import { signInWithGoogle, signInWithFirebaseEmail, registerWithFirebaseEmail } from "@/utils/firebase";
 
 const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
   const { setAuth } = useAuthStore();
@@ -20,29 +21,58 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (mode === 'login') {
-      setLoading(true);
-      setError("");
-      try {
-        if (!email || !password) {
-          throw new Error("Tolong isi email dan password.");
-        }
+    setLoading(true);
+    setError("");
+
+    try {
+      let token, user;
+
+      if (mode === 'login') {
+        if (!email || !password) throw new Error("Please enter email and password.");
         const response = await api.post('/auth/login', { email, password });
-        const token = response?.data?.token;
-        const user = response?.data?.user;
-        if (!token || typeof token !== "string" || token.split(".").length !== 3) {
-          throw new Error("Invalid authentication token received");
-        }
-        setAuth(user, token);
-        handleClose();
-      } catch (err) {
-        setError(err.response?.data?.message || err.message || "Login failed.");
-      } finally {
-        setLoading(false);
+        token = response?.data?.token;
+        user = response?.data?.user;
+      } else {
+        if (!email || !password || !name) throw new Error("Please fill all fields.");
+        const response = await api.post('/auth/register', { 
+          name, email, password, phone: '0000000000', isSeller: false 
+        });
+        token = response?.data?.token;
+        user = response?.data?.user;
       }
-    } else {
-      setLoading(true);
-      setTimeout(() => setLoading(false), 1500);
+
+      if (!token || typeof token !== "string" || token.split(".").length !== 3) {
+        throw new Error("Invalid authentication token received");
+      }
+
+      setAuth(user, token);
+      handleClose();
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || `${mode === 'login' ? 'Login' : 'Registration'} failed.`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const idToken = await signInWithGoogle();
+      const response = await api.post('/auth/social-login', { idToken });
+      const token = response?.data?.token;
+      const user = response?.data?.user;
+
+      if (!token) throw new Error("Invalid authentication token received");
+
+      setAuth(user, token);
+      handleClose();
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError(err.response?.data?.message || err.message || 'Google login failed.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,6 +103,7 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
               onChange={(e) => setName(e.target.value)}
               placeholder="Your full name"
               className="bg-surface"
+              required
             />
           </div>
         )}
@@ -99,6 +130,7 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
               placeholder="Enter your password"
               required
               className="bg-surface pr-10"
+              minLength={mode === 'register' ? 6 : undefined}
             />
             <button
               type="button"
@@ -115,6 +147,43 @@ const AuthFormContent = ({ mode, handleClose, handleSwitchMode }) => {
           {!loading && <ArrowRight className="h-4 w-4 ml-1" />}
         </Button>
       </form>
+
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-muted" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-card px-4 text-muted-foreground">Or connect with</span>
+        </div>
+      </div>
+
+      <Button 
+        variant="outline" 
+        type="button" 
+        className="w-full h-10 gap-3 bg-surface hover:bg-muted/50 transition-colors border-muted-foreground/20" 
+        onClick={handleGoogleLogin}
+        disabled={loading}
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24">
+          <path
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.32v2.77h3.57c2.08-3.23 3.28-7.76 3.28-8.1z"
+            fill="#4285F4"
+          />
+          <path
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            fill="#34A853"
+          />
+          <path
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            fill="#FBBC05"
+          />
+          <path
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            fill="#EA4335"
+          />
+        </svg>
+        <span className="font-medium text-foreground">Sign {mode === 'login' ? 'in' : 'up'} with Google</span>
+      </Button>
 
       <p className="text-center text-sm text-muted-foreground mt-6">
         {mode === 'login' ? (
@@ -155,18 +224,23 @@ export default function AuthModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={handleClose}
         >
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="w-full max-w-sm p-4"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="w-full max-w-sm p-4 relative"
             onClick={(e) => e.stopPropagation()}
           >
+            <button 
+              onClick={handleClose}
+              className="absolute right-6 top-6 z-10 text-muted-foreground hover:text-foreground bg-surface rounded-full p-1 border border-border"
+            >
+              <X className="w-4 h-4" />
+            </button>
             <div className="endfield-card bg-card p-8">
-
               <AuthFormContent mode={mode} handleClose={handleClose} handleSwitchMode={switchMode} />
             </div>
 
