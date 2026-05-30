@@ -4,6 +4,7 @@ import { Eye, EyeOff, ArrowRight, Building2, Store } from 'lucide-react';
 import { useAuthStore, USE_FIREBASE_AUTH } from '../store/authStore';
 import api from '../utils/api';
 import { signInWithGoogle, registerWithFirebaseEmail } from '../utils/firebase';
+import { getFriendlyAuthError } from '../utils/errorHelpers';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,7 +80,7 @@ function Register() {
       if (token) setAuth(user, token);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Registration failed');
+      setError(getFriendlyAuthError(err));
     } finally {
       setIsLoading(false);
     }
@@ -102,8 +103,7 @@ function Register() {
       setAuth(user, token);
       navigate('/');
     } catch (err) {
-      console.error("Google login error:", err);
-      setError(err.response?.data?.message || err.message || 'Google login failed.');
+      setError(getFriendlyAuthError(err));
     } finally {
       setIsLoading(false);
     }
@@ -125,23 +125,6 @@ function Register() {
             {error}
           </div>
         )}
-
-        <div className="bg-muted/50 p-1 rounded-lg flex mb-6">
-          <button 
-            type="button"
-            onClick={() => setUseFirebase(false)}
-            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${!useFirebase ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            Backend
-          </button>
-          <button 
-            type="button"
-            onClick={() => setUseFirebase(true)}
-            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${useFirebase ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            Firebase
-          </button>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
@@ -168,6 +151,19 @@ function Register() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="useFirebaseReg" 
+              checked={useFirebase} 
+              onChange={() => setUseFirebase(!useFirebase)}
+              className="w-4 h-4 accent-primary cursor-pointer"
+            />
+            <label htmlFor="useFirebaseReg" className="text-xs text-muted-foreground cursor-pointer select-none">
+              Register via Firebase Provider (Optional)
+            </label>
           </div>
 
           <button type="button" onClick={() => setShowBusiness(!showBusiness)} className="flex items-center gap-2 text-sm text-primary hover:underline">
@@ -215,23 +211,23 @@ function Register() {
           </Button>
         </form>
 
-        <div className="relative my-6">
+        <div className="relative my-8">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t border-muted" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            <span className="bg-background px-4 text-muted-foreground">Or connect with</span>
           </div>
         </div>
 
         <Button 
           variant="outline" 
           type="button" 
-          className="w-full h-11 gap-2 bg-surface" 
+          className="w-full h-11 gap-3 bg-surface hover:bg-muted/50 transition-colors border-muted-foreground/20" 
           onClick={handleGoogleLogin}
           disabled={isLoading}
         >
-          <svg className="h-4 w-4" viewBox="0 0 24 24">
+          <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.32v2.77h3.57c2.08-3.23 3.28-7.76 3.28-8.1z"
               fill="#4285F4"
@@ -249,7 +245,7 @@ function Register() {
               fill="#EA4335"
             />
           </svg>
-          Google
+          <span className="font-medium text-foreground">Sign up with Google</span>
         </Button>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
