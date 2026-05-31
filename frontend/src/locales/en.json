@@ -954,11 +954,6 @@
     "noProducts": "No products in your inventory",
     "noProductsDesc": "Add products to track your stock levels"
   },
-  "voiceSearch": {
-    "title": "Voice Search",
-    "listening": "Listening...",
-    "notSupported": "Voice search is not supported in this browser"
-  },
   "finance": "Finance",
   "expenses": "Expenses",
   "expensesDesc": "Track your business expenses",

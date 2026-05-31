@@ -4,7 +4,6 @@ import {
     FlatList, RefreshControl, Dimensions, ActivityIndicator, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Speech from 'expo-speech';
 import { useThemeStore } from '../../store/themeStore';
 import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../api/api';
@@ -33,7 +32,6 @@ export default function ProductsScreen({ navigation, route }) {
     const [activeFilter, setActiveFilter] = useState('all');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [isListening, setIsListening] = useState(false);
     const searchTimeoutRef = useRef(null);
 
     const categories = language === 'id' ? CATEGORIES_ID : CATEGORIES_EN;
@@ -143,35 +141,6 @@ export default function ProductsScreen({ navigation, route }) {
         }
         setLoading(true);
         fetchProducts(1);
-    };
-
-    const handleVoiceSearch = async () => {
-        if (isListening) {
-            setIsListening(false);
-            return;
-        }
-        
-        setIsListening(true);
-        
-        Speech.stop();
-        
-        Speech.speak(language === 'id' ? 'Mendengarkan...' : 'Listening...', {
-            language: language === 'id' ? 'id-ID' : 'en-US',
-            onDone: () => {
-                setTimeout(() => {
-                    setIsListening(false);
-                }, 500);
-            },
-            onError: () => {
-                setIsListening(false);
-            }
-        });
-        
-        setTimeout(() => {
-            setIsListening(false);
-            const demoQuery = language === 'id' ? 'Produk contoh' : 'Example product';
-            handleSearchChange(demoQuery);
-        }, 2000);
     };
 
     const onRefresh = async () => {
@@ -406,13 +375,6 @@ export default function ProductsScreen({ navigation, route }) {
                             <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
                         </TouchableOpacity>
                     )}
-                    <TouchableOpacity onPress={handleVoiceSearch}>
-                        <Ionicons 
-                            name={isListening ? "mic" : "mic-outline"} 
-                            size={20} 
-                            color={isListening ? colors.primary : colors.textSecondary} 
-                        />
-                    </TouchableOpacity>
                 </View>
                 <TouchableOpacity 
                     style={styles.sortBtn} 

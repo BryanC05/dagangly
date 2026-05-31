@@ -956,11 +956,6 @@
     "correction": "Koreksi",
     "noProducts": "Produk tidak ditemukan"
   },
-  "voiceSearch": {
-    "title": "Pencarian Suara",
-    "listening": "Mendengarkan...",
-    "notSupported": "Pencarian suara tidak didukung di browser ini"
-  },
   "finance": "Keuangan",
   "expenses": "Pengeluaran",
   "expensesDesc": "Lacak pengeluaran bisnis Anda",
