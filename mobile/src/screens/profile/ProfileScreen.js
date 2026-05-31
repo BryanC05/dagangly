@@ -295,7 +295,7 @@ export default function ProfileScreen({ navigation, route }) {
         { icon: 'cube-outline', label: t.inventory || 'Inventory', onPress: () => navigation.navigate('Inventory'), color: '#14b8a6' },
         { icon: 'wallet-outline', label: t.finance || 'Finance', onPress: () => navigation.navigate('FinanceDashboard'), color: '#10b981' },
         { icon: 'chatbubbles-outline', label: t.forum || 'Forum', onPress: () => navigation.navigate('Forum'), color: '#8b5cf6' },
-        { icon: 'shield-checkmark-outline', label: t.membershipApprovals || 'Membership Approvals', onPress: () => navigation.navigate('AdminMembership'), color: '#f59e0b' },
+        { icon: 'settings-outline', label: t.adminDashboard || 'Admin Dashboard', onPress: () => navigation.navigate('AdminDashboard'), color: '#f59e0b' },
         { icon: 'book-outline', label: t.guide || 'Guide', onPress: () => navigation.navigate('Guide'), color: '#0ea5e9' },
         {
             icon: isDarkMode ? 'moon' : 'moon-outline', label: t.darkMode || 'Dark Mode',

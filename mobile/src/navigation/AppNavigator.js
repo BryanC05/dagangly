@@ -48,6 +48,7 @@ import NearbySellersScreen from '../screens/location/NearbySellersScreen';
 import LiveTrackingMap from '../screens/location/LiveTrackingMap';
 import DeliveryHubScreen from '../screens/delivery/DeliveryHubScreen';
 import AdminMembershipScreen from '../screens/admin/AdminMembershipScreen';
+import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import WishlistScreen from '../screens/wishlist/WishlistScreen';
 import SocialLinksScreen from '../screens/profile/SocialLinksScreen';
@@ -606,6 +607,17 @@ function ProfileStackNavigator() {
                 options={{
                     headerStyle: { backgroundColor: colors.card },
                     headerTitleStyle: { fontWeight: '600', fontSize: 16, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+            <ProfileStack.Screen
+                name="AdminDashboard"
+                component={AdminDashboardScreen}
+                options={{
+                    title: 'Admin Dashboard',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
                     headerShadowVisible: false,
                     headerTintColor: colors.text,
                 }}
