@@ -53,6 +53,8 @@ function ProductDetail() {
   const { t } = useTranslation();
   const [whatsappUrl, setWhatsappUrl] = useState(null);
 
+  const sellerId = product?.seller?._id || product?.seller?.id;
+
   // Fetch seller's WhatsApp
   useEffect(() => {
     const fetchWhatsApp = async () => {
@@ -212,11 +214,11 @@ function ProductDetail() {
     ? product.images.map((img) => resolveImageUrl(img)).filter(Boolean)
     : [];
   const seller = typeof product.seller === 'object' && product.seller !== null ? product.seller : null;
-  const sellerId =
+  const resolvedSellerId =
     (typeof product.seller === 'string' ? product.seller : null) ||
     seller?._id ||
     seller?.id ||
-    null;
+    sellerId; // Fallback to the one computed at the top
 
   return (
     <div className="bg-background min-h-screen py-6">
@@ -252,7 +254,7 @@ function ProductDetail() {
 
           <div className="space-y-5">
             <div className="flex items-center gap-3">
-              <Link to={sellerId ? `/store/${sellerId}` : '#'} className="flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+              <Link to={resolvedSellerId ? `/store/${resolvedSellerId}` : '#'} className="flex items-center gap-2 text-sm font-medium text-primary hover:underline">
                 <Store className="h-4 w-4" />
                 {product.business?.name || seller?.businessName || seller?.name || 'Toko'}
                 {product.business?.isVerified && <Shield className="h-3 w-3 text-green-600" />}
@@ -371,8 +373,8 @@ function ProductDetail() {
                     </a>
                   </Button>
                 )}
-                {user && user.role === 'buyer' && sellerId && (
-                  <Button variant="outline" size="sm" className="w-full gap-2 text-xs" onClick={() => navigate(`/chat?seller=${sellerId}&from=product&productId=${product._id}`)}>
+                {user && user.role === 'buyer' && resolvedSellerId && (
+                  <Button variant="outline" size="sm" className="w-full gap-2 text-xs" onClick={() => navigate(`/chat?seller=${resolvedSellerId}&from=product&productId=${product._id}`)}>
                     <MessageCircle className="h-3.5 w-3.5" />
                     {t('productDetail.chatWithSeller')}
                   </Button>
