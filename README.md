@@ -6,9 +6,14 @@ The platform provides robust tools for sellers to manage their business, automat
 
 ---
 
-## 🚀 Newly Implemented Features & Updates
+## 🌟 100% Production Ready
 
-The platform has recently undergone massive upgrades across all environments (Web, Mobile, and Backend). Here are the key highlights:
+The Dagangly platform has achieved full production readiness across all environments (Backend, Web, and Mobile). The recent architectural overhaul included a complete rewrite of the backend, the implementation of robust hybrid authentication, and 100% feature parity between the web and mobile applications.
+
+### 🔐 Hybrid Authentication (Firebase + JWT)
+- **Seamless Login:** Users can authenticate using traditional Email/Password or **Google Social Login** via Firebase.
+- **Unified Security:** Whether authenticating manually or via Google, the Go backend verifies the credentials and issues a secure, standardized JWT.
+- **Cross-Platform Support:** Fully implemented with clean, user-friendly error handling on both the React Web App and the React Native Mobile App.
 
 ### 🛒 Core Commerce & Order Management
 - **Scheduled Delivery Orders:** Buyers can request specific delivery dates and times. Includes a full negotiation flow allowing sellers to accept, decline, or request changes to the schedule.
@@ -17,10 +22,10 @@ The platform has recently undergone massive upgrades across all environments (We
 - **Review & Rating System:** Comprehensive rating system for both products and sellers, verified by delivered orders.
 - **Cart Abandonment Recovery:** Automated system to track and remind users of abandoned carts (1h, 24h).
 
-### 🏪 Seller Tools & Admin
+### 🏪 Seller Tools & Full Admin Panel
 - **Business Registration Flow:** Seamless onboarding process requiring Admin approval before a user is granted Seller privileges.
 - **Advanced Analytics & Inventory:** Sellers get access to a rich dashboard showing revenue, top products, and low-stock alerts.
-- **Dynamic UI Components:** Real-time visual feedback including `LiveStockBadge` (urgency indicators), `OrderStatusCountdown`, and `BalanceAnimation`.
+- **Mobile Admin Parity:** System administrators can manage memberships, business registrations, user bans, and resolve order disputes directly from the mobile app.
 
 ### 🤖 Automation Engine (n8n Integration)
 - **Workflow Automation:** Fully integrated with **n8n** (running via Docker) to automate seller tasks.
@@ -28,36 +33,37 @@ The platform has recently undergone massive upgrades across all environments (We
 - **Instagram Auto-Posting:** Sellers can link their Instagram accounts (via Meta Graph API). New product listings can automatically post to their Instagram feed, utilizing ImgBB for robust image binary handling.
 
 ### 💬 Communication & Community
-- **Video Call Consultations:** 1:1 WebRTC-powered video calls directly between buyers and sellers for product demonstrations.
-- **WhatsApp Integration:** Direct "Chat on WhatsApp" buttons on product and store pages.
-- **Fraud & Scam Reporting:** Built-in reporting system escalating issues to admins via SMTP/SendGrid or Mailto fallbacks.
+- **Video Call Consultations:** 1:1 WebRTC-powered (Jit.si) video calls directly between buyers and sellers for product demonstrations.
+- **Real-Time Chat:** WebSocket-powered chat rooms for order discussions and direct buyer-seller messaging.
+- **WhatsApp Integration:** Direct "WhatsApp Seller" buttons dynamically generated on product and store pages.
 - **Social Media Hub:** Both buyers and sellers can attach auto-detected social media links (TikTok, IG, Twitter, WhatsApp) to their profiles and store pages.
 
 ### ♿ Accessibility & UX Transformations
 - **Low Digital Literacy Support:** Implementation of a "Simple Mode", enlarged touch targets, simplified bottom navigation, and an intuitive visual onboarding tour.
 - **WCAG Compliance:** Full Screen Reader support (ARIA labels), keyboard navigation, color contrast compliance, and reduced motion capabilities.
-- **Voice Search:** Integrated Web Speech API allowing hands-free product discovery.
+*(Note: Experimental Voice Search features were removed to simplify the codebase and improve app performance).*
 
 ---
 
 ## 💻 Tech Stack & Architecture
 
+### Backend & Database
+- **Language:** Go (Golang) 1.24+ with Gin framework. (Successfully migrated from Node.js/Express).
+- **Authentication:** Firebase Admin SDK (for token verification) + Custom JWT.
+- **Databases:** 
+  - **MongoDB:** Main application data (Users, Products, Orders, Wallets).
+  - **Redis:** Caching and WebSocket pub/sub.
+  - **PostgreSQL:** Dedicated persistence for the n8n workflow engine.
+
 ### Frontend (Web)
 - **Framework:** React.js (Vite)
-- **Styling:** Tailwind CSS
-- **Features:** PWA Support, Responsive Design, Accessibility-First.
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Features:** Firebase Web SDK, PWA Support, Responsive Design, Accessibility-First.
 
 ### Mobile App
 - **Framework:** React Native (Expo)
 - **Distribution:** Configured for Android EAS Build (APK & AAB), Ready for Google Play Store.
-- **Features:** Google Maps integration for nearby sellers, Firebase Push Notifications, Biometric login.
-
-### Backend & Database
-- **Language:** Go (Golang) with Gin framework.
-- **Databases:** 
-  - **MongoDB:** Main application data (Users, Products, Orders, Wallets).
-  - **PostgreSQL:** Dedicated persistence for the n8n workflow engine.
-- **Storage:** Cloud object storage (AWS S3/Cloudinary) for persistent image uploads, resolving ephemeral filesystem 404 issues.
+- **Features:** Firebase Native SDK (Modular v22+), Google Maps integration for nearby sellers, Push Notifications.
 
 ---
 
@@ -66,8 +72,8 @@ The platform has recently undergone massive upgrades across all environments (We
 ### Prerequisites
 - Docker & Docker Compose
 - Node.js 18+
-- Go 1.20+
-- MongoDB running locally or via Atlas
+- Go 1.24+
+- MongoDB & Redis running locally or via Cloud (Atlas/Upstash)
 
 ### 1. Start the Automation Engine (n8n & Postgres)
 ```bash
@@ -76,14 +82,15 @@ docker-compose up -d
 *n8n will be available at http://localhost:5678*
 
 ### 2. Start the Backend (Go)
-Ensure your `.env` is configured with MongoDB, Midtrans, and Webhook secrets.
+Create a `.env` in the `backend/` directory (see `backend/.env.example`).
 ```bash
 cd backend
-go run ./cmd/server
+go run ./cmd/server/main.go
 ```
 *API running at http://localhost:5000*
 
 ### 3. Start the Web Frontend
+Create a `.env` in the `frontend/` directory (see `frontend/.env.example`).
 ```bash
 cd frontend
 npm install
@@ -92,11 +99,13 @@ npm run dev
 *Web App running at http://localhost:5173*
 
 ### 4. Start the Mobile App
+Ensure `mobile/.env` is configured with `EXPO_PUBLIC_API_HOST` and `EXPO_PUBLIC_USE_FIREBASE_AUTH=true`.
 ```bash
 cd mobile
 npm install
-npx expo start
+npx expo start --clear
 ```
+*(Note: To test Google Social Login on mobile, you must use a Native Development Build via `npx expo run:android` or `npx expo run:ios`, as it is not supported in the standard Expo Go app).*
 
 ---
 
@@ -104,20 +113,9 @@ npx expo start
 
 For detailed implementation instructions, troubleshooting, and architecture guides, refer to the following specialized documentation files:
 
-**Feature Implementations:**
-- `NEW_FEATURES.md` - Master list of all recent capability additions.
-- `IMPLEMENTATION_PLAN.md` - Instagram Auto-posting & Social Links design.
-- `SCHEDULED_DELIVERY_PLAN.md` - Buyer-Seller delivery negotiation architecture.
-- `docs/BUSINESS_REGISTRATION.md` - Seller onboarding and approval flows.
-- `frontend/ACCESSIBILITY_PLAN.md` - UI simplification and WCAG compliance plan.
-
-**Infrastructure & Automation:**
+- `PRODUCTION_CHECKLIST.md` - The master sign-off sheet proving 100% feature completion.
+- `GOLANG_MIGRATION_PLAN.md` & `GOLANG_MIGRATION_PROGRESS.md` - Details of the backend rewrite.
 - `N8N_WORKFLOW_GUIDE.md` - Complete setup guide for n8n, webhooks, and SMTP.
-- `N8N_IMGBB_SETUP.md` & `N8N_BINARY_UPLOAD.md` - Instagram graph API and image hosting workarounds.
-- `IMAGE_UPLOADS_TROUBLESHOOTING.md` - Fixing ephemeral file system 404s and CSP rules.
-- `REPORT_SETUP.md` - Email and Webhook configuration for fraud reporting.
-
-**Mobile Release:**
 - `mobile/PLAY_STORE_RELEASE_CHECKLIST.md` - Guide to EAS builds, Play Store forms, and Google Maps setup.
 
 ---
@@ -125,4 +123,4 @@ For detailed implementation instructions, troubleshooting, and architecture guid
 ## 🛡️ Security Notes
 - Ensure `WEBHOOK_SECRET` is changed in production environments to secure n8n callbacks.
 - Secure your n8n UI with basic authentication (`N8N_BASIC_AUTH_ACTIVE=true`).
-- Lock down your `GOOGLEMAPS_API_KEY` strictly to your Android package name (`com.msmemarketplace.mobile`).
+- **Firebase Security:** Make sure to restrict your Firebase API Keys in the Google Cloud Console to your specific Vercel domains and Android App package names.
