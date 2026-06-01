@@ -53,6 +53,19 @@ function ProductDetail() {
   const { t } = useTranslation();
   const [whatsappUrl, setWhatsappUrl] = useState(null);
 
+  const handleBack = () => {
+    const returnUrl = sessionStorage.getItem('productDetailReturnUrl') || '/products';
+    navigate(returnUrl);
+  };
+
+  const { data: product, isLoading } = useQuery({
+    queryKey: ['product', id],
+    queryFn: async () => {
+      const response = await api.get(`/products/${id}`);
+      return response.data;
+    },
+  });
+
   const sellerId = product?.seller?._id || product?.seller?.id;
 
   // Fetch seller's WhatsApp
@@ -68,32 +81,6 @@ function ProductDetail() {
     };
     fetchWhatsApp();
   }, [sellerId]);
-
-  // Track where user came from for back navigation
-  useEffect(() => {
-    const chatReturnUrl = sessionStorage.getItem('chatReturnUrl');
-    if (!chatReturnUrl || chatReturnUrl !== location.pathname) {
-      const referrer = document.referrer;
-      if (referrer && referrer.includes('/products')) {
-        sessionStorage.setItem('productDetailReturnUrl', '/products');
-      } else if (!sessionStorage.getItem('productDetailReturnUrl')) {
-        sessionStorage.setItem('productDetailReturnUrl', '/products');
-      }
-    }
-  }, [location.pathname]);
-
-  const handleBack = () => {
-    const returnUrl = sessionStorage.getItem('productDetailReturnUrl') || '/products';
-    navigate(returnUrl);
-  };
-
-  const { data: product, isLoading } = useQuery({
-    queryKey: ['product', id],
-    queryFn: async () => {
-      const response = await api.get(`/products/${id}`);
-      return response.data;
-    },
-  });
 
   // Compute dynamic price
   const getUnitPrice = () => {

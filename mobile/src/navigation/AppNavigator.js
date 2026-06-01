@@ -49,6 +49,9 @@ import LiveTrackingMap from '../screens/location/LiveTrackingMap';
 import DeliveryHubScreen from '../screens/delivery/DeliveryHubScreen';
 import AdminMembershipScreen from '../screens/admin/AdminMembershipScreen';
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
+import AdminRegistrationsScreen from '../screens/admin/AdminRegistrationsScreen';
+import AdminDisputesScreen from '../screens/admin/AdminDisputesScreen';
+import AdminUsersScreen from '../screens/admin/AdminUsersScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import WishlistScreen from '../screens/wishlist/WishlistScreen';
 import SocialLinksScreen from '../screens/profile/SocialLinksScreen';
@@ -627,6 +630,39 @@ function ProfileStackNavigator() {
                 component={AdminMembershipScreen}
                 options={{
                     title: 'Membership Approvals',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+            <ProfileStack.Screen
+                name="AdminRegistrations"
+                component={AdminRegistrationsScreen}
+                options={{
+                    title: 'Business Registrations',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+            <ProfileStack.Screen
+                name="AdminDisputes"
+                component={AdminDisputesScreen}
+                options={{
+                    title: 'Manage Disputes',
+                    headerStyle: { backgroundColor: colors.card },
+                    headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.text,
+                }}
+            />
+            <ProfileStack.Screen
+                name="AdminUsers"
+                component={AdminUsersScreen}
+                options={{
+                    title: 'User Management',
                     headerStyle: { backgroundColor: colors.card },
                     headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text },
                     headerShadowVisible: false,
