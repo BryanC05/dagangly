@@ -1,46 +1,85 @@
-# Rincian Biaya Proyek (Skala Mini-Produksi)
+# 💰 Production Cost Analysis & Estimates
 
-Menjalankan setup mini-produksi untuk marketplace **Dagangly** sangat ramah anggaran (budget-friendly). Karena backend menggunakan Go, penggunaan memori server akan sangat kecil (sekitar 15-30 MB untuk core API), yang membuat biaya hosting menjadi sangat murah.
+This document details the expected costs for running **Dagangly** in a real-world production environment. The architecture is highly optimized for cost-efficiency, leveraging the lightweight Go backend and generous free tiers for external services.
 
-Berikut adalah rincian estimasi biaya untuk memelihara dan mempublikasikan proyek ini pada skala mini-produksi:
+## 1. Hosting & Infrastructure
 
-## 1. Backend & Database (Railway + MongoDB)
-* **Railway Hosting (Go API & n8n):** Railway menawarkan paket "Hobby" yang dimulai dari **$5/bulan**. Karena Go sangat efisien dalam penggunaan sumber daya, API Anda hampir tidak akan menyentuh batas penggunaan. Jika Anda juga meng-host container Docker n8n dan PostgreSQL (untuk data n8n) di Railway, RAM yang digunakan akan sedikit lebih banyak, namun totalnya akan tetap nyaman di kisaran **$5 hingga $10/bulan** untuk skala mini.
-* **Database (MongoDB):** Anda dapat menggunakan **MongoDB Atlas Free Tier (M0)**. Paket ini memberikan penyimpanan 512MB, yang mana lebih dari cukup untuk menampung ribuan pengguna, produk, dan pesan chat pada tahap awal produksi. **Biaya: $0/bulan**.
+### 🚀 Backend Server (Railway)
+*   **Technology:** Go (Golang) API
+*   **Cost Expectation:** **~$5.00/month**
+*   **Details:** Railway charges based on actual CPU and RAM usage. Because the backend was migrated to Go, it is incredibly memory-efficient (typically hovering around 20MB - 50MB of RAM). A standard "Hobby" plan minimum deposit covers this easily for a small-to-medium scale marketplace.
 
-## 2. Web Frontend
-* **Hosting (React/Vite):** Karena frontend Anda adalah aplikasi React statis, Anda tidak perlu meng-host-nya di Railway. Anda bisa melakukan deploy ke **Vercel, Netlify, atau Cloudflare Pages** menggunakan paket gratis (free tier) mereka. **Biaya: $0/bulan**.
-* **Custom Domain:** Agar terlihat profesional (misalnya `dagangly.com` atau `dagangly.id`), Anda membutuhkan nama domain. **Biaya: ~$10 hingga $15/tahun**.
+### 🌐 Frontend Web App (Vercel / Netlify / Cloudflare Pages)
+*   **Technology:** React.js (Vite)
+*   **Cost Expectation:** **$0.00/month**
+*   **Details:** The frontend is a static bundle of HTML/CSS/JS that simply talks to your Go backend. All major platforms offer extremely generous free tiers for static frontend hosting (usually 100GB+ of bandwidth per month for free).
 
-## 3. Mobile App (Android)
-* **Google Play Store:** Untuk mempublikasikan aplikasi Android Anda (file AAB), Google mewajibkan pembuatan akun Developer. Ini adalah biaya **$25 sekali bayar** (one-time fee). Tidak ada biaya bulanan atau tahunan untuk Android.
-* **Toko Aplikasi Alternatif (Opsional):** Seperti yang dicatat dalam `PLAY_STORE_RELEASE_CHECKLIST.md`, Anda juga dapat mendistribusikan APK secara gratis via direct download, Samsung Galaxy Store, atau APKPure. **Biaya: $0**.
-* **Expo/EAS Builds:** Paket gratis Expo memungkinkan Anda mem-build aplikasi di cloud (hingga 30 build gratis per bulan). Untuk skala mini-produksi, ini biasanya sudah sangat cukup. **Biaya: $0/bulan**.
-* *(Catatan: Apple App Store (iOS) membutuhkan biaya $99/tahun, namun kita asumsikan hanya Android untuk saat ini).*
+### 🤖 Automation Engine (n8n on Railway)
+*   **Technology:** Node.js (n8n Docker Container)
+*   **Cost Expectation:** **~$5.00 - $10.00/month**
+*   **Details:** Unlike the Go backend, n8n is a heavy Node.js application. If you host it on Railway alongside your Go app, it will consume significantly more RAM. 
 
-## 4. Third-Party APIs & Services
-* **Google Maps API:** Digunakan untuk fitur penjual terdekat (nearby sellers). Google memberikan **kredit bulanan gratis sebesar $200**. Aplikasi skala mini akan dengan mudah berada di bawah batas limit ini. **Biaya: $0/bulan**.
-* **Email / SMTP:** Workflow n8n Anda menggunakan Gmail App Passwords untuk SMTP. **Biaya: $0**.
-* **AI Image Generation & Enhancements:** Layanan seperti Claid atau Pollinations biasanya menawarkan paket gratis yang cukup besar. Selama Anda menjaga limit harian (`PRODUCT_ENHANCE_DAILY_LIMIT=20`), Anda belum perlu mengeluarkan biaya di sini. **Biaya: $0**.
+## 2. Databases & Storage
 
----
+### 🗄️ Primary Database (MongoDB Atlas)
+*   **Technology:** MongoDB
+*   **Cost Expectation:** **$0.00/month** (Initially) -> **$9.00+/month** (Scaling)
+*   **Details:** The `M0 Free Tier` provides 512MB of storage, which is enough to handle thousands of users and products. When you outgrow this, the Serverless (`$0.10/million reads`) or Dedicated (`M10 - ~$9/mo`) plans are required.
 
-## Ringkasan Biaya (Estimasi Tahun Pertama)
+### 🗃️ Automation Database (Railway PostgreSQL)
+*   **Technology:** PostgreSQL
+*   **Cost Expectation:** **~$1.00 - $3.00/month**
+*   **Details:** Used exclusively to store n8n workflows and execution logs. Storage and memory footprint is minimal.
 
-| Kategori | Tipe Biaya | Jumlah |
+### 🖼️ Image Storage (Firebase Storage / AWS S3)
+*   **Technology:** Cloud Object Storage
+*   **Cost Expectation:** **$0.00/month**
+*   **Details:** Firebase Storage provides 5GB of free storage and 1GB/day of bandwidth. This is sufficient for thousands of product images before incurring a few cents per gigabyte on the "Blaze" plan.
+
+## 3. Third-Party Services & APIs
+
+### 🔐 Authentication (Firebase Auth)
+*   **Technology:** Google Identity Platform
+*   **Cost Expectation:** **$0.00/month**
+*   **Details:** Firebase Authentication (Email/Password and Google Social Login) is **100% free with unlimited MAUs (Monthly Active Users)**.
+
+### 🗺️ Geolocation (Google Maps API)
+*   **Technology:** Google Maps SDK (Android/Web)
+*   **Cost Expectation:** **$0.00/month**
+*   **Details:** Google provides a **$200 free monthly credit**. This covers roughly 100,000 map loads per month. Unless Dagangly becomes massively popular overnight, you will not pay a dime.
+
+### 💳 Payment Gateway (Midtrans)
+*   **Technology:** Midtrans Payment API
+*   **Cost Expectation:** **Transaction Based (No monthly fee)**
+*   **Details:** Midtrans does not charge monthly fees. They take a percentage cut of successful transactions:
+    *   **QRIS / GoPay / ShopeePay:** ~0.7% to 2% per transaction.
+    *   **Virtual Accounts (Bank Transfer):** Flat fee of ~Rp 4,000 per transaction.
+
+### 📧 Transactional Emails (Gmail SMTP / SendGrid)
+*   **Cost Expectation:** **$0.00/month**
+*   **Details:** SendGrid offers 100 free emails/day. Using Gmail App Passwords via n8n provides 500 free emails/day.
+
+### ✨ AI Services (Claid.ai / Pollinations)
+*   **Cost Expectation:** **$0.00/month**
+*   **Details:** The current implementation uses the free tiers and rate-limits requests on the backend to avoid hitting paid tiers accidentally.
+
+## 4. Mobile App Distribution
+
+### 📱 Android Play Store
+*   **Cost Expectation:** **$25.00 (One-time fee)**
+*   **Details:** Google charges a single lifetime fee to open a Developer Account. After that, you can publish unlimited updates and apps.
+*   *(Apple App Store for iOS requires a recurring $99/year fee).*
+
+## 📊 Summary Estimate (First Year)
+
+| Category | Type | Estimated Cost |
 | :--- | :--- | :--- |
-| **Google Play Console** | Sekali Bayar | **$25** |
-| **Nama Domain** | Tahunan | **~$15/tahun** |
-| **Railway (Backend & n8n)** | Bulanan | **~$5 - $10/bulan** |
-| **MongoDB Atlas** | Bulanan | **$0** (Free Tier) |
-| **Frontend Hosting** | Bulanan | **$0** (Free Tier) |
-| **External APIs (Maps, SMTP)**| Bulanan | **$0** (Free Tier) |
+| **Google Play Developer Account** | One-Time | **$25.00** |
+| **Custom Domain Name (`.com` / `.id`)** | Annual | **~$15.00/year** |
+| **Railway (Go Backend + n8n + DBs)** | Monthly | **~$10.00 - $15.00/month** |
+| **Frontend Hosting & Auth** | Monthly | **$0.00** (Generous Free Tiers) |
+| **External APIs (Maps, Storage)**| Monthly | **$0.00** (Covered by Free Tiers) |
+| **Payments** | Per Transaction | **~1.5% cut from sales** |
 
-### Total Estimasi Anggaran:
-* **Biaya Awal / Total Tahun Pertama:** ~$100 hingga $160 untuk satu tahun penuh.
-* **Biaya Bulanan Berjalan:** Hanya sekitar **~$5 hingga $10**.
-
----
-
-**Tips Pro untuk Railway:** 
-Untuk memaksimalkan anggaran Railway Anda, atur batas memori yang ketat pada container n8n Anda, karena Node.js/n8n akan memakan RAM yang jauh lebih besar dibandingkan aplikasi Go Anda. Server Go itu sendiri bisa berjalan dengan sangat nyaman hanya dengan sebagian kecil CPU dan RAM 128MB.
+**🔥 Total Operating Budget:** 
+You can confidently run and scale the Dagangly marketplace for **less than $20 a month** in direct server costs, with a ~$40 upfront cost for your domain and Android developer license.
