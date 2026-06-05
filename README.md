@@ -17,7 +17,7 @@ The Dagangly platform has achieved full production readiness across all environm
 
 ### 🛒 Core Commerce & Order Management
 - **Scheduled Delivery Orders:** Buyers can request specific delivery dates and times. Includes a full negotiation flow allowing sellers to accept, decline, or request changes to the schedule.
-- **Payment Gateway Integration:** Fully integrated with **Midtrans** supporting Credit Cards, Bank Transfers (Virtual Accounts), E-Wallets (GoPay, OVO), and QRIS.
+- **Payment Processing:** Manual payment verification system supporting **Cash on Delivery (COD)** and **QRIS**. Buyers can upload proof-of-transfer screenshots directly within the order panel for seller approval.
 - **Digital Wallet & Installments:** Users have an in-app digital wallet for quick checkouts and refunds, plus Buy Now Pay Later (BNPL) installment options (3, 6, 12 months).
 - **Review & Rating System:** Comprehensive rating system for both products and sellers, verified by delivered orders.
 - **Cart Abandonment Recovery:** Automated system to track and remind users of abandoned carts (1h, 24h).

@@ -26,12 +26,12 @@ This document outlines the structured timeline and action plan executed to bring
 ### Action Plan
 1.  **Product Management:** Implement CRUD operations for sellers to list products, add variants, and track inventory.
 2.  **Cart & Checkout:** Build the shopping cart logic, including location-based distance validation for delivery vs. pickup.
-3.  **Payment Gateway Integration:** Wire up the **Midtrans API** to handle Credit Cards, Virtual Accounts, and QRIS payments. Create webhook listeners to automatically update order statuses.
+3.  **Payment Processing:** Implement a manual payment verification system supporting **Cash on Delivery (COD)** and **QRIS**. Build the `OrderPaymentPanel` allowing buyers to upload payment proof screenshots for seller verification.
 4.  **Digital Wallet & Installments:** Develop a robust ledger system for the in-app wallet and logic to calculate multi-month (BNPL) installment plans.
 
 ### 📦 Output
 - Fully functional shopping cart and multi-step checkout UI.
-- Secure payment processing via Midtrans.
+- Manual payment processing with proof-of-transfer uploads.
 - Order tracking system with visual timelines.
 
 ---
@@ -75,7 +75,7 @@ This document outlines the structured timeline and action plan executed to bring
 1.  **Infrastructure Provisioning:** 
     - Deploy the Go Backend and MongoDB to **Railway**.
     - Deploy the React Web app to **Vercel**.
-2.  **Security & Secrets:** Configure production `.env` files. Ensure Firebase API keys, Midtrans Server Keys, and Webhook Secrets are injected securely and bound by Content Security Policies (CSP).
+2.  **Security & Secrets:** Configure production `.env` files. Ensure Firebase API keys and Webhook Secrets are injected securely and bound by Content Security Policies (CSP).
 3.  **Mobile Distribution:** Run EAS Builds (`npx expo run:android`) to generate production AAB files.
 4.  **Google Play Registration:** Pay the $25 developer fee and submit the app for review using the `PLAY_STORE_RELEASE_CHECKLIST.md`.
 
