@@ -1,7 +1,7 @@
 services:
   - type: web
     name: dagangly-api
-    env: go
+    runtime: go
     rootDir: backend
     buildCommand: go build -o server ./cmd/server
     startCommand: ./server
