@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -852,7 +850,7 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 	defer resp.Body.Close()
 
 	var containerResult struct {
-		ID    string `json:"id"`
+		ID    string      `json:"id"`
 		Error interface{} `json:"error"`
 	}
 	json.NewDecoder(resp.Body).Decode(&containerResult)
@@ -879,7 +877,7 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 	defer resp2.Body.Close()
 
 	var publishResult struct {
-		ID    string `json:"id"`
+		ID    string      `json:"id"`
 		Error interface{} `json:"error"`
 	}
 	json.NewDecoder(resp2.Body).Decode(&publishResult)
