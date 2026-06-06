@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: dagangly-api
+    env: go
+    rootDir: backend
+    buildCommand: go build -o server ./cmd/server
+    startCommand: ./server
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: LOGO_MODEL
+        value: flux
+      - key: POLLINATIONS_API_KEY
+        sync: false
+      - key: HUGGINGFACE_MODEL
+        value: black-forest-labs/FLUX.1-dev
+      - key: CLAID_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GOOGLEMAP_API_KEY
+        sync: false
+      - key: N8N_WEBHOOK_URL
+        sync: false
+      - key: IG_ACCESS_TOKEN
+        sync: false
+      - key: IG_ACCOUNT_ID
+        sync: false
+      - key: INSTAGRAM_APP_ID
+        sync: false
+      - key: INSTAGRAM_APP_SECRET
+        sync: false
+      - key: INSTAGRAM_REDIRECT_URI
+        sync: false
+      - key: IMGBB_API_KEY
+        sync: false
