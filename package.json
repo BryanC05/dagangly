@@ -1,9 +1,24 @@
 {
+  "name": "dagangly",
+  "version": "1.0.0",
+  "description": "MSME Marketplace with Go Backend and React Frontend",
   "scripts": {
     "build": "node build.js",
-    "start": "node run.js"
+    "start": "node run.js",
+    "seed": "node backend/seed-simulation.js",
+    "seed:firebase": "FIREBASE_AUTH_MODE=true node backend/seed-simulation.js",
+    "clear:sim": "node backend/clear-simulation-data.js"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^17.3.1",
+    "mongodb": "^7.0.0",
     "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "firebase-admin": "^13.10.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
