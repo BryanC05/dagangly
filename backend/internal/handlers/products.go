@@ -767,20 +767,14 @@ func (h *ProductHandler) GetCategoryCounts(c *gin.Context) {
 	c.JSON(200, categoryCounts)
 }
 
-// triggerInstagramPost triggers the n8n webhook for Instagram posting
+// triggerInstagramPost directly posts to the Instagram Graph API
 func triggerInstagramPost(product models.Product, user models.User, caption string) {
-	n8nWebhookURL := strings.TrimSpace(os.Getenv("N8N_WEBHOOK_URL"))
-	if n8nWebhookURL == "" {
-		fmt.Println("N8N_WEBHOOK_URL not set, skipping Instagram post")
-		return
-	}
-
-	// Get Instagram preference
+	// Get Instagram preference and account details
 	usersCollection := database.GetDB().Collection("users")
 	var updatedUser models.User
 	err := usersCollection.FindOne(context.Background(), bson.M{"_id": user.ID}).Decode(&updatedUser)
 	if err != nil {
-		fmt.Printf("Failed to get user for Instagram posting: %v\n", err)
+		fmt.Printf("[Instagram] Failed to get user: %v\n", err)
 		return
 	}
 
@@ -789,60 +783,9 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 		preference = "dagangly" // Default to Dagangly account
 	}
 
-	// Build webhook payload
-	productLink := fmt.Sprintf("https://dagangly.app/product/%s", product.ID.Hex())
+	var igUserID string
+	var igAccessToken string
 
-	// Ensure caption is never the literal string "empty" or completely blank
-	finalCaption := strings.TrimSpace(caption)
-	if finalCaption == "" || finalCaption == "empty" {
-		businessNameStr := "Store"
-		if user.BusinessName != nil {
-			businessNameStr = *user.BusinessName
-		}
-
-		finalCaption = fmt.Sprintf("Check out our new product: %s!\n\nPrice: Rp %.0f\n\nLink: %s\n\n#%s #%s #UMKM",
-			product.Name,
-			product.Price,
-			productLink,
-			strings.ReplaceAll(businessNameStr, " ", ""),
-			strings.ReplaceAll(product.Category, " ", ""))
-	}
-
-	payload := map[string]interface{}{
-		"event":        "instagram.post",
-		"productName":  product.Name,
-		"productPrice": fmt.Sprintf("Rp %.0f", product.Price),
-		"storeName":    user.BusinessName,
-		"productLink":  productLink,
-		"productImage": "",
-		"preference":   preference,
-		"caption":      finalCaption,
-	}
-
-	// Add first product image if available, else use fallback
-	// Use a reliable placeholder image with a direct .jpg extension to satisfy Meta Graph API
-	fallbackImage := "https://placehold.co/800x800/eeeeee/999999.jpg?text=Product+Image"
-	imageURL := fallbackImage
-
-	if len(product.Images) > 0 && product.Images[0] != "" {
-		imagePath := product.Images[0]
-		fmt.Printf("[Instagram] Processing image path: %s\n", imagePath)
-
-		if strings.HasPrefix(imagePath, "http") {
-			// External URL (e.g., from test script)
-			imageURL = imagePath
-			fmt.Printf("[Instagram] Using external URL: %s\n", imageURL)
-		} else {
-			// Local file - Railway local URLs will return 404 to Meta's crawler
-			// Fall back to the public placeholder so the Instagram post succeeds
-			fmt.Printf("[Instagram] Local image detected (%s). Using public fallback image to prevent Meta 404 error.\n", imagePath)
-			imageURL = fallbackImage
-		}
-	}
-	fmt.Printf("[Instagram] Final image URL: %s\n", imageURL)
-	payload["productImage"] = imageURL
-
-	// If preference is "own", get the user's Instagram account token
 	if preference == "own" && len(updatedUser.InstagramAccounts) > 0 {
 		var defaultAccount models.InstagramAccount
 		for _, acc := range updatedUser.InstagramAccounts {
@@ -851,38 +794,100 @@ func triggerInstagramPost(product models.Product, user models.User, caption stri
 				break
 			}
 		}
-		// If no default, use first account
-		if defaultAccount.InstagramUserID == "" && len(updatedUser.InstagramAccounts) > 0 {
+		if defaultAccount.InstagramUserID == "" {
 			defaultAccount = updatedUser.InstagramAccounts[0]
 		}
-
-		payload["instagramUserID"] = strings.TrimSpace(defaultAccount.InstagramUserID)
-		payload["accessToken"] = strings.TrimSpace(defaultAccount.AccessToken)
+		igUserID = strings.TrimSpace(defaultAccount.InstagramUserID)
+		igAccessToken = strings.TrimSpace(defaultAccount.AccessToken)
 	} else {
-		// Use platform Dagangly account — TrimSpace to remove any trailing newlines from env vars
-		payload["instagramUserID"] = strings.TrimSpace(os.Getenv("IG_ACCOUNT_ID"))
-		payload["accessToken"] = strings.TrimSpace(os.Getenv("IG_ACCOUNT_TOKEN"))
+		igUserID = strings.TrimSpace(os.Getenv("IG_ACCOUNT_ID"))
+		igAccessToken = strings.TrimSpace(os.Getenv("IG_ACCESS_TOKEN"))
+		if igAccessToken == "" {
+			igAccessToken = strings.TrimSpace(os.Getenv("IG_ACCOUNT_TOKEN"))
+		}
 	}
 
-	// Send webhook to n8n
-	payloadBytes, _ := json.Marshal(payload)
-	resp, err := http.Post(n8nWebhookURL, "application/json", bytes.NewBuffer(payloadBytes))
+	if igUserID == "" || igAccessToken == "" {
+		fmt.Println("[Instagram] Credentials missing, skipping post")
+		return
+	}
+
+	// Prepare Content
+	productLink := fmt.Sprintf("https://dagangly.app/product/%s", product.ID.Hex())
+	finalCaption := strings.TrimSpace(caption)
+	if finalCaption == "" || finalCaption == "empty" {
+		businessNameStr := "Store"
+		if user.BusinessName != nil {
+			businessNameStr = *user.BusinessName
+		}
+		finalCaption = fmt.Sprintf("Check out our new product: %s!\n\nPrice: Rp %.0f\n\nLink: %s\n\n#%s #%s #UMKM",
+			product.Name, product.Price, productLink,
+			strings.ReplaceAll(businessNameStr, " ", ""),
+			strings.ReplaceAll(product.Category, " ", ""))
+	}
+
+	// Image URL (Meta needs a public URL)
+	fallbackImage := "https://placehold.co/800x800/eeeeee/999999.jpg?text=Product+Image"
+	imageURL := fallbackImage
+	if len(product.Images) > 0 && product.Images[0] != "" {
+		if strings.HasPrefix(product.Images[0], "http") {
+			imageURL = product.Images[0]
+		}
+	}
+
+	fmt.Printf("[Instagram] Triggering direct post for: %s\n", product.Name)
+
+	// STEP 1: Create Media Container
+	containerURL := fmt.Sprintf("https://graph.facebook.com/v18.0/%s/media", igUserID)
+	form := url.Values{}
+	form.Set("image_url", imageURL)
+	form.Set("caption", finalCaption)
+	form.Set("access_token", igAccessToken)
+
+	resp, err := http.PostForm(containerURL, form)
 	if err != nil {
-		fmt.Printf("Failed to trigger Instagram post webhook: %v\n", err)
+		fmt.Printf("[Instagram Error] Step 1 Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		fmt.Printf("[Webhook] Instagram post triggered successfully for product: %s\n", product.Name)
-	} else {
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		fmt.Printf("[Webhook Error] Instagram post webhook failed with status: %d\n", resp.StatusCode)
-		fmt.Printf("[Webhook Error] Response body: %s\n", string(bodyBytes))
+	var containerResult struct {
+		ID    string `json:"id"`
+		Error interface{} `json:"error"`
+	}
+	json.NewDecoder(resp.Body).Decode(&containerResult)
 
-		// For debugging, print the payload (hide tokens if you want, but this is a debug print)
-		debugPayload, _ := json.MarshalIndent(payload, "", "  ")
-		fmt.Printf("[Webhook Error] Payload sent: %s\n", string(debugPayload))
+	if containerResult.ID == "" {
+		fmt.Printf("[Instagram Error] Container creation failed: %v\n", containerResult.Error)
+		return
+	}
+
+	fmt.Printf("[Instagram] Container created: %s. Waiting 5s for processing...\n", containerResult.ID)
+	time.Sleep(5 * time.Second)
+
+	// STEP 2: Publish Media Container
+	publishURL := fmt.Sprintf("https://graph.facebook.com/v18.0/%s/media_publish", igUserID)
+	publishForm := url.Values{}
+	publishForm.Set("creation_id", containerResult.ID)
+	publishForm.Set("access_token", igAccessToken)
+
+	resp2, err := http.PostForm(publishURL, publishForm)
+	if err != nil {
+		fmt.Printf("[Instagram Error] Step 2 Failed: %v\n", err)
+		return
+	}
+	defer resp2.Body.Close()
+
+	var publishResult struct {
+		ID    string `json:"id"`
+		Error interface{} `json:"error"`
+	}
+	json.NewDecoder(resp2.Body).Decode(&publishResult)
+
+	if publishResult.ID != "" {
+		fmt.Printf("[Instagram] 🎉 SUCCESS! Post ID: %s\n", publishResult.ID)
+	} else {
+		fmt.Printf("[Instagram Error] Publishing failed: %v\n", publishResult.Error)
 	}
 }
 
