@@ -95,8 +95,8 @@ const Home = () => {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-background min-h-[65vh] md:min-h-[75vh]">
-        <div className="absolute inset-0 -z-10">
+      <section className="relative overflow-hidden h-[420px] md:h-[520px]">
+        <div className="absolute inset-0 z-0 bg-background">
           {heroSlides.map((slide, index) => {
             const isActive = index === currentSlide;
             const isPrev = index === (currentSlide - 1 + heroSlides.length) % heroSlides.length;
@@ -106,7 +106,7 @@ const Home = () => {
                 key={index}
                 className="absolute inset-0"
                 style={{
-                  backgroundImage: `url(${resolveImageUrl(slide.image)})`,
+                  backgroundImage: `url("${resolveImageUrl(slide.image)}")`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center center',
                   opacity: isActive ? 1 : 0,
@@ -116,9 +116,9 @@ const Home = () => {
               />
             );
           })}
-          <div className="absolute inset-0 bg-black/55" style={{ zIndex: 2 }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" style={{ zIndex: 2 }} />
-          <div className="absolute inset-0 pattern-dots opacity-40" style={{ zIndex: 2 }} />
+          <div className="absolute inset-0 bg-black/50" style={{ zIndex: 2 }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" style={{ zIndex: 2 }} />
+          <div className="absolute inset-0 pattern-dots opacity-30" style={{ zIndex: 2 }} />
         </div>
 
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
@@ -126,8 +126,8 @@ const Home = () => {
             <button
               key={index}
               onClick={() => { setCurrentSlide(index); resetSlideTimer(); }}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                index === currentSlide ? 'bg-primary w-8' : 'bg-white/40 hover:bg-white/70 w-2'
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                index === currentSlide ? 'bg-primary w-6' : 'bg-white/30 hover:bg-white/60 w-1.5'
               }`}
               aria-label={`Slide ${index + 1}`}
             />
@@ -136,41 +136,41 @@ const Home = () => {
 
         <button
           onClick={() => { setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length); resetSlideTimer(); }}
-          className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors hidden md:flex"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors hidden md:flex"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={() => { setCurrentSlide(prev => (prev + 1) % heroSlides.length); resetSlideTimer(); }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors hidden md:flex"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors hidden md:flex"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        <div className="container py-20 md:py-28 relative z-10">
+        <div className="container h-full flex items-center justify-center relative z-10">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/10 text-white/90 text-xs font-medium mb-5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 text-white/90 text-[10px] font-bold tracking-widest mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               MARKETPLACE UMKM INDONESIA
             </div>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-3 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-3 leading-tight">
               {heroSlides[currentSlide].title}
             </h1>
-            <p className="text-base md:text-lg text-gray-300 mb-8 max-w-lg mx-auto">
+            <p className="text-sm md:text-base text-white/80 mb-6 max-w-lg mx-auto font-medium">
               {heroSlides[currentSlide].desc}
             </p>
 
             <form onSubmit={handleSearch} className="max-w-md mx-auto">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <Input
                   type="search"
                   placeholder="Cari produk, toko, atau kategori..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 h-12 text-base bg-white/95 border-0 text-gray-900 placeholder:text-gray-400 rounded-xl shadow-lg"
+                  className="pl-10 h-11 text-sm bg-white/95 border-0 text-gray-900 placeholder:text-gray-400 rounded-xl shadow-md"
                 />
-                <Button type="submit" size="sm" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 px-5 rounded-lg">
+                <Button type="submit" size="sm" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 px-4 rounded-lg text-xs">
                   Cari
                 </Button>
               </div>
@@ -179,46 +179,46 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-10 bg-card border-y border-border">
+      <section className="py-6 md:py-8 bg-card border-y border-border">
         <div className="container">
-          <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+          <div className="grid grid-cols-3 gap-2 md:gap-6 max-w-2xl mx-auto">
             {[
-              { icon: Store, count: 28, label: "Penjual UMKM" },
-              { icon: ShoppingBag, count: 350, label: "Produk Tersedia" },
-              { icon: MapPin, count: 5, label: "Kota Tersedia" },
+              { icon: Store, count: 28, label: "Penjual" },
+              { icon: ShoppingBag, count: 350, label: "Produk" },
+              { icon: MapPin, count: 5, label: "Kota" },
             ].map((stat, i) => (
               <div key={i} className="text-center">
-                <div className="flex items-center justify-center gap-1.5 mb-0.5">
-                  <stat.icon className="h-4 w-4 text-primary" />
-                  <span className="text-xl md:text-2xl font-bold text-foreground">{stat.count}+</span>
+                <div className="flex items-center justify-center gap-1 md:gap-2 mb-0.5 md:mb-1">
+                  <stat.icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
+                  <span className="text-lg md:text-2xl font-extrabold text-foreground">{stat.count}+</span>
                 </div>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-tight md:tracking-normal">{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-10">
+      <section className="py-10 md:py-12">
         <div className="container">
-          <div className="flex items-center justify-between mb-6 geo-border-top pt-3">
-            <h2 className="text-lg font-bold text-foreground">Kategori</h2>
-            <Link to="/products" className="text-primary text-sm font-medium hover:underline">
-              Lihat semua &rarr;
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">Kategori</h2>
+            <Link to="/products" className="text-primary text-xs md:text-sm font-bold hover:underline flex items-center gap-1">
+              Lihat semua <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Link>
           </div>
           <div
             ref={categoryGrid.ref}
-            className={`grid grid-cols-4 md:grid-cols-8 gap-3 stagger-container ${categoryGrid.isVisible ? 'revealed' : ''}`}
+            className={`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 stagger-container ${categoryGrid.isVisible ? 'revealed' : ''}`}
           >
             {categories.map((category, index) => {
               const count = categoryCounts[category.id] || 0;
               return (
                 <Link key={category.id} to={`/products?category=${category.id}`} className="stagger-item" style={{ '--stagger-index': index }}>
-                  <div className="bg-card border border-border rounded-xl p-3 md:p-4 text-center hover:border-primary/30 hover:shadow-sm transition-all">
-                    <span className="text-2xl block mb-1.5">{category.icon}</span>
-                    <p className="text-xs font-medium text-card-foreground">{category.name}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{count} produk</p>
+                  <div className="bg-card border border-border/60 rounded-xl p-3 md:p-4 text-center hover:border-primary/50 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                    <span className="text-2xl md:text-3xl block mb-1 md:mb-2">{category.icon}</span>
+                    <p className="text-xs md:text-sm font-bold text-card-foreground">{category.name}</p>
+                    <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">{count} produk</p>
                   </div>
                 </Link>
               );
@@ -227,13 +227,12 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-10 bg-card relative overflow-hidden">
-        <div className="absolute inset-0 pattern-dots-sm opacity-30 pointer-events-none" />
+      <section className="py-10 md:py-12 bg-surface/30 border-t border-border">
         <div className="container relative">
-          <div className="flex items-center justify-between mb-6 geo-border-top pt-3">
-            <h2 className="text-lg font-bold text-foreground">Produk Unggulan</h2>
-            <Link to="/products" className="text-primary text-sm font-medium hover:underline">
-              Lihat semua &rarr;
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">Produk Unggulan</h2>
+            <Link to="/products" className="text-primary text-xs md:text-sm font-bold hover:underline flex items-center gap-1">
+              Lihat semua <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Link>
           </div>
           <div

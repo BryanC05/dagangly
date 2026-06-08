@@ -81,7 +81,7 @@ npx eas build --platform android --profile production
   "production": {
     "autoIncrement": true,
     "env": {
-      "EXPO_PUBLIC_API_HOST": "https://umkm-marketplace-production.up.railway.app"
+      "EXPO_PUBLIC_API_HOST": "https://dagangly-api.onrender.com"
     }
   }
 }

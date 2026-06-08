@@ -1,78 +1,89 @@
 .analytics-section {
     margin-bottom: 32px;
-    padding: 20px;
-    border: 1px solid var(--color-border, #e5e7eb);
-    border-radius: 14px;
-    background: var(--color-card, #fff);
+    padding: 24px;
+    border: 1px solid hsl(var(--border) / 0.6);
+    border-radius: 16px;
+    background: hsl(var(--card));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .analytics-title {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--color-foreground, #1f2937);
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    color: hsl(var(--foreground));
 }
 
 .analytics-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 16px;
+    margin-bottom: 28px;
 }
 
 .analytics-stat {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px;
-    border-radius: 10px;
-    background: var(--color-surface, #f9fafb);
+    gap: 12px;
+    padding: 16px;
+    border-radius: 12px;
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--border) / 0.4);
 }
 
 .analytics-stat .stat-value {
     display: block;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--color-foreground, #1f2937);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: hsl(var(--foreground));
+    font-family: monospace;
 }
 
 .analytics-stat .stat-label {
     display: block;
-    font-size: 11px;
-    color: var(--color-text-secondary, #6b7280);
+    font-size: 12px;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .stat-icon-green {
-    color: #16a34a;
+    color: hsl(var(--success));
 }
 
 .stat-icon-blue {
-    color: #3b82f6;
+    color: hsl(var(--primary));
 }
 
 .stat-icon-orange {
-    color: #f59e0b;
+    color: hsl(var(--warning));
 }
 
 .analytics-chart {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: hsl(var(--muted) / 0.2);
+    border-radius: 12px;
 }
 
 .chart-title {
     font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--color-foreground, #1f2937);
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: hsl(var(--foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .chart-bars {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
-    height: 120px;
+    gap: 10px;
+    height: 140px;
 }
 
 .chart-col {
@@ -93,56 +104,60 @@
 .chart-bar {
     width: 100%;
     min-height: 4px;
-    border-radius: 4px 4px 0 0;
-    background: linear-gradient(to top, #3b82f6, #60a5fa);
-    transition: height 0.3s;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(to top, hsl(var(--primary)), hsl(var(--primary) / 0.6));
+    transition: all 0.3s ease;
 }
 
 .chart-label {
     font-size: 10px;
-    color: var(--color-text-secondary, #9ca3af);
-    margin-top: 4px;
+    font-weight: 700;
+    color: hsl(var(--muted-foreground));
+    margin-top: 8px;
 }
 
 .top-products {
-    margin-top: 16px;
+    margin-top: 24px;
 }
 
 .top-product-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--color-border, #f3f4f6);
-    font-size: 13px;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
+    font-size: 14px;
 }
 
 .top-rank {
-    font-weight: 700;
-    width: 28px;
-    color: var(--color-primary, #3b82f6);
+    font-weight: 800;
+    width: 32px;
+    color: hsl(var(--primary));
 }
 
 .top-name {
     flex: 1;
-    font-weight: 500;
-    color: var(--color-foreground, #1f2937);
+    font-weight: 700;
+    color: hsl(var(--foreground));
 }
 
 .top-sold {
-    color: var(--color-text-secondary, #6b7280);
+    color: hsl(var(--muted-foreground));
     font-size: 12px;
+    font-weight: 600;
 }
 
 .top-revenue {
-    font-weight: 600;
-    color: var(--color-foreground, #1f2937);
+    font-weight: 800;
+    color: hsl(var(--foreground));
+    font-family: monospace;
 }
 
 .analytics-loading {
     text-align: center;
-    padding: 24px;
-    color: var(--color-text-secondary, #9ca3af);
+    padding: 30px;
+    color: hsl(var(--muted-foreground));
+    font-weight: 600;
 }
 
 @media (max-width: 640px) {

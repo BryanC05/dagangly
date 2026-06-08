@@ -86,3 +86,21 @@ All seeded seller accounts use password: `test123`. Example logins:
 | `indah.batik@marketplace.test` | Batik Modern Indah |
 | `lina.skincare@marketplace.test` | Skincare Alami |
 | `tech.gadget@marketplace.test` | Gadget & Accessories |
+
+---
+
+## 6. Infrastructure Migration (Render)
+To improve reliability and simplify the deployment workflow, the production backend was migrated from Railway to Render.
+
+### **Changes**
+- **Production Backend URL**: Updated from `https://dagangly-production.up.railway.app` to `https://dagangly-api.onrender.com`.
+- **Mobile Configuration (`mobile/`)**:
+  - Updated `mobile/src/config/index.js` to set `RENDER_API_HOST` as the fallback/production host.
+  - Updated `mobile/eas.json` production, preview, and development profiles to use the new Render URL.
+  - Updated `mobile/app.json` `extra` field for local fallback consistency.
+- **Web Frontend (`frontend/`)**:
+  - Updated `frontend/src/config/index.js` fallback URLs.
+  - Updated `frontend/index.html` Content-Security-Policy to allow connections to the Render domain.
+- **Documentation Update**:
+  - Refined `README.md`, `PROJECT_COST.md`, and all deployment guides (`DEPLOYMENT_GUIDE.md`, `MOBILE_APP_UPDATE_GUIDE.md`, etc.) to reflect Render as the primary hosting provider.
+  - Updated `backend/test_ig_post.py` to point to the new production API.

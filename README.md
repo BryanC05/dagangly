@@ -87,7 +87,7 @@ Create a `.env` in the `backend/` directory (see `backend/.env.example`).
 cd backend
 go run ./cmd/server/main.go
 ```
-*API running at http://localhost:5000*
+*API running at http://localhost:5000 (Production: https://dagangly-api.onrender.com)*
 
 ### 3. Start the Web Frontend
 Create a `.env` in the `frontend/` directory (see `frontend/.env.example`).

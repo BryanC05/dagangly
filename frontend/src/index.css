@@ -14,63 +14,63 @@
 
 @layer base {
   :root {
-    --background: 210 10% 97%;
+    --background: 210 20% 99%;
     --foreground: 215 30% 12%;
     --card: 0 0% 100%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 25% 10%;
-    --surface: 210 8% 95%;
+    --surface: 210 10% 96%;
     --input: 210 12% 92%;
-    --muted-foreground: 215 15% 33%;
-    --border: 210 15% 76%;
-    --primary: 185 72% 48%;
-    --primary-dark: 180 77% 26%;
-    --primary-light: 171 77% 86%;
-    --secondary: 210 12% 86%;
+    --muted-foreground: 215 15% 40%;
+    --border: 210 10% 88%;
+    --primary: 185 85% 45%;
+    --primary-dark: 185 90% 30%;
+    --primary-light: 185 80% 90%;
+    --secondary: 210 12% 94%;
     --secondary-foreground: 215 25% 18%;
-    --muted: 210 12% 90%;
-    --accent: 185 72% 48%;
+    --muted: 210 10% 96%;
+    --accent: 185 85% 45%;
     --success: 160 84% 39%;
     --destructive: 0 84% 60%;
     --warning: 38 92% 50%;
-    --ring: 185 72% 48%;
-    --radius: 0.5rem;
+    --ring: 185 85% 45%;
+    --radius: 1rem;
   }
 
   .dark {
-    --background: 222 30% 8%;
-    --foreground: 210 20% 90%;
-    --card: 222 25% 11%;
-    --popover: 222 25% 11%;
-    --popover-foreground: 210 20% 90%;
-    --surface: 222 25% 12%;
-    --input: 222 20% 18%;
-    --muted-foreground: 215 15% 55%;
-    --border: 222 20% 18%;
-    --primary: 185 72% 48%;
-    --primary-dark: 185 72% 48%;
-    --primary-light: 173 60% 19%;
-    --secondary: 222 20% 16%;
-    --secondary-foreground: 210 20% 85%;
-    --muted: 222 20% 16%;
-    --accent: 185 72% 48%;
+    --background: 222 35% 6%;
+    --foreground: 210 25% 95%;
+    --card: 222 30% 9%;
+    --popover: 222 30% 9%;
+    --popover-foreground: 210 25% 95%;
+    --surface: 222 25% 10%;
+    --input: 222 20% 15%;
+    --muted-foreground: 215 15% 60%;
+    --border: 222 20% 16%;
+    --primary: 185 85% 45%;
+    --primary-dark: 185 85% 45%;
+    --primary-light: 185 60% 15%;
+    --secondary: 222 20% 14%;
+    --secondary-foreground: 210 20% 90%;
+    --muted: 222 20% 14%;
+    --accent: 185 85% 45%;
     --success: 158 64% 52%;
     --destructive: 0 91% 71%;
     --warning: 43 96% 56%;
-    --ring: 185 72% 48%;
+    --ring: 185 85% 45%;
   }
 }
 
 @layer base {
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 16px;
     line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight;
+    @apply font-extrabold tracking-tight;
   }
 
   ::selection {

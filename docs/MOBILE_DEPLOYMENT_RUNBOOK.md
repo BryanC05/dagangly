@@ -21,7 +21,7 @@ npm install
 ## 3. Configure EAS Environment and Secrets
 
 Required values:
-- `EXPO_PUBLIC_API_HOST=https://umkm-marketplace-production.up.railway.app`
+- `EXPO_PUBLIC_API_HOST=https://dagangly-api.onrender.com`
 - `MAPS_API_KEY=<your-android-google-maps-key>`
 
 Set secret in EAS:

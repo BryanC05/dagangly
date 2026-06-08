@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Plus, Edit2, Trash2, Package, TrendingUp, DollarSign, ShoppingBag, Save, X, AlertTriangle, 
   BarChart3, Crown, CreditCard, CheckCircle, Clock, Sparkles, Send, Bot, Calendar, ArrowUpRight, 
-  ChevronDown, Activity, Terminal, Star, Users, Building2
+  ArrowDownRight, ChevronDown, Activity, Terminal, Star, Users, Building2
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useTranslation } from '../hooks/useTranslation';
@@ -404,13 +404,9 @@ function SellerDashboard() {
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount || 0);
 
   // Get number of days based on selected period
-  const getDaysFromPeriod = (period) => {
-    switch(period) {
-      case '7': return 7;
-      case '30': return 30;
-      case '90': return 90;
-      default: return 7;
-    }
+  const getDaysFromPeriod = (p) => {
+    const days = parseInt(p);
+    return isNaN(days) ? 7 : days;
   };
   
   const chartData = (sales?.recentDays || []).slice(0, getDaysFromPeriod(period)).map(day => ({
@@ -542,19 +538,17 @@ function SellerDashboard() {
               <p className="text-xs font-bold uppercase tracking-widest text-emerald-500 mb-1">Seller Command Center</p>
               <h1 className="text-3xl font-bold tracking-tight">Welcome, {user.businessName || user.name}!</h1>
             </div>
-            <div className="flex gap-2 flex-wrap">
-              <Link to="/seller/product-tracking" className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-[#252525] rounded-md transition-colors shadow-sm">
-                <BarChart3 size={16} /> Deliveries
+            <div className="flex gap-2 flex-wrap mt-2 md:mt-0 w-full md:w-auto">
+              <Link to="/seller/product-tracking" className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold border border-border/60 bg-card hover:bg-muted/50 rounded-xl transition-all shadow-sm">
+                <BarChart3 size={14} /> Deliveries
               </Link>
-              <Link to="/logo-generator" className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-[#252525] rounded-md transition-colors shadow-sm">
-                <Sparkles size={16} /> Logo
-                {!membership?.isMember && <Crown size={12} className="text-amber-500" />}
+              <Link to="/logo-generator" className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold border border-border/60 bg-card hover:bg-muted/50 rounded-xl transition-all shadow-sm">
+                <Sparkles size={14} className="text-amber-500" /> Logo
               </Link>
-              <Link to="/automation" className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-[#252525] rounded-md transition-colors shadow-sm">
-                <Activity size={16} /> Automation
-                {!membership?.isMember && <Crown size={12} className="text-amber-500" />}
+              <Link to="/automation" className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold border border-border/60 bg-card hover:bg-muted/50 rounded-xl transition-all shadow-sm">
+                <Activity size={14} className="text-emerald-500" /> Automation
               </Link>
-              <Link to="/seller/add-product" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-md hover:bg-blue-500 shadow-sm transition-colors">
+              <Link to="/seller/add-product" className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-black bg-primary text-primary-foreground rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
                 <Plus size={16} /> Add Product
               </Link>
             </div>

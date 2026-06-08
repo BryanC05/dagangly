@@ -8,7 +8,7 @@ EMAIL = "rani.summarecon@marketplace.test"
 PASSWORD = "test123"
 
 # Base API URL
-API_URL = "https://dagangly-production.up.railway.app/api"
+API_URL = "https://dagangly-api.onrender.com/api"
 
 
 def main():

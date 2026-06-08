@@ -7,7 +7,7 @@ services:
     startCommand: ./server
     envVars:
       - key: PORT
-        value: 10000
+        value: 5000
       - key: NODE_ENV
         value: production
       - key: MONGODB_URL

@@ -108,7 +108,7 @@ The backend sends this payload when a product is created with Instagram posting 
   "productPrice": "Rp 150000",
   "storeName": "Dapur Summarecon",
   "productLink": "https://dagangly.app/product/69aa637061b3016de9532c1f",
-  "productImage": "https://umkm-marketplace-production.up.railway.app/uploads/products/image.png",
+  "productImage": "https://dagangly-api.onrender.com/uploads/products/image.png",
   "instagramUserID": "17841443191636686",
   "accessToken": "EA...",
   "preference": "dagangly",

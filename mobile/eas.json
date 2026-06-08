@@ -8,7 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_HOST": "https://dagangly-production.up.railway.app"
+        "EXPO_PUBLIC_API_HOST": "https://dagangly-api.onrender.com"
       }
     },
     "preview": {
@@ -17,13 +17,13 @@
       },
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_HOST": "https://dagangly-production.up.railway.app"
+        "EXPO_PUBLIC_API_HOST": "https://dagangly-api.onrender.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_HOST": "https://dagangly-production.up.railway.app"
+        "EXPO_PUBLIC_API_HOST": "https://dagangly-api.onrender.com"
       }
     }
   },

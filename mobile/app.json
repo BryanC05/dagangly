@@ -74,7 +74,7 @@
       ]
     ],
     "extra": {
-      "EXPO_PUBLIC_API_HOST": "https://dagangly-production.up.railway.app"
+      "EXPO_PUBLIC_API_HOST": "https://dagangly-api.onrender.com"
     }
   }
 }

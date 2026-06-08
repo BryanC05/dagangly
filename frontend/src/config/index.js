@@ -4,9 +4,9 @@ const ensureNoTrailingSlash = (value) => value.replace(/\/+$/, "");
 const rawApiUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").trim();
 const normalizedApiUrl = ensureNoTrailingSlash(rawApiUrl) || "/api";
 
-// Fallback API - production Railway (when localhost not available)
-const FALLBACK_API_URL = "https://dagangly-production.up.railway.app/api";
-const FALLBACK_BACKEND_URL = "https://dagangly-production.up.railway.app";
+// Fallback API - production Render (when localhost not available)
+const FALLBACK_API_URL = "https://dagangly-api.onrender.com/api";
+const FALLBACK_BACKEND_URL = "https://dagangly-api.onrender.com";
 
 const rawBackendUrl = (import.meta.env.VITE_BACKEND_URL || "").trim();
 const normalizedBackendUrl = rawBackendUrl ? ensureNoTrailingSlash(rawBackendUrl) : "";

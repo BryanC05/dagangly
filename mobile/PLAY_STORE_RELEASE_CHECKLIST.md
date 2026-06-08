@@ -59,7 +59,7 @@ npx eas-cli@latest login
 ## 2. Pre-Release Checks
 
 - [x] Backend is deployed and reachable from mobile (`mobile/src/config/index.js`).
-  - **Configured:** `https://umkm-marketplace-production.up.railway.app`
+  - **Configured:** `https://dagangly-api.onrender.com`
 - [x] `EXPO_PUBLIC_API_HOST` is set in EAS `production` profile env.
   - **Location:** `mobile/eas.json` production profile
 - [ ] `GOOGLEMAPS_API_KEY` is configured as EAS secret for Android builds. 🔴 **CRITICAL**

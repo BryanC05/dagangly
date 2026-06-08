@@ -58,16 +58,16 @@ const Sell = () => {
 
     return (
         <>
-            <div className="container py-8">
+            <div className="container py-12">
                 {/* Hero Section */}
                 <div className="text-center mb-12">
-                    <Badge variant="secondary" className="mb-4">
+                    <Badge variant="secondary" className="mb-4 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
                         {t('sell.benefitsTitle') || 'Start Your Business Journey'}
                     </Badge>
-                    <h1 className="text-3xl md:text-4xl font-bold mb-4">
+                    <h1 className="text-3xl md:text-5xl font-extrabold mb-5 tracking-tight">
                         {t('sell.title') || 'Sell Your Products on MSMEHub'}
                     </h1>
-                    <p className="text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
                         {t('sell.subtitle') || 'Join thousands of MSMEs already growing their business. List your products, reach local customers, and build your brand.'}
                     </p>
                 </div>

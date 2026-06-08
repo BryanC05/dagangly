@@ -35,11 +35,11 @@ const Footer = () => {
       <div className="container py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-sm bg-primary flex items-center justify-center">
-                <Store className="h-5 w-5 text-primary-foreground" />
+            <Link to="/" className="flex items-center gap-2.5 mb-6 group">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 transition-transform group-hover:scale-110 group-hover:-rotate-3">
+                <Store className="h-5.5 w-5.5 text-primary-foreground" />
               </div>
-              <span className="font-display text-2xl font-bold tracking-wider">
+              <span className="font-display text-2xl font-black tracking-tight">
                 Dagang<span className="text-primary">ly</span>
               </span>
             </Link>

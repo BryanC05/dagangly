@@ -38,19 +38,10 @@ function sourceUnsplashToKeywordImage(url) {
 
 export function resolveImageUrl(url) {
   if (!url) return '';
-  const blockedExternalHosts = [
-    'source.unsplash.com',
-    'images.unsplash.com',
-    'loremflickr.com',
-  ];
-  try {
-    const parsed = new URL(url);
-    if (blockedExternalHosts.some((host) => parsed.hostname === host || parsed.hostname.endsWith(`.${host}`))) {
-      return '';
-    }
-  } catch {
-  }
+  
+  // Handle Unsplash specifically if needed
   if (url.includes('source.unsplash.com')) return sourceUnsplashToKeywordImage(url);
+  
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   if (url.startsWith('data:') || url.startsWith('blob:')) return url;
 

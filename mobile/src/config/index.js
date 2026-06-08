@@ -29,8 +29,8 @@ console.log("[Config] Firebase Auth Mode:", USE_FIREBASE_AUTH);
 // Primary (local development)
 const LOCAL_API_HOST = "http://localhost:5000";
 
-// Fallback (production Railway)
-const RAILWAY_API_HOST = "https://dagangly-production.up.railway.app";
+// Fallback (production Render)
+const RENDER_API_HOST = "https://dagangly-api.onrender.com";
 
 // Get from env or use local by default for development
 const RAW_API_HOST = process.env.EXPO_PUBLIC_API_HOST || Constants.expoConfig?.extra?.EXPO_PUBLIC_API_HOST || LOCAL_API_HOST;
@@ -44,9 +44,9 @@ export const API_URL = `${API_HOST}/api`;
 export const SOCKET_URL = API_HOST;
 
 // Fallback configuration
-export const FALLBACK_API_HOST = RAILWAY_API_HOST;
-export const FALLBACK_API_URL = `${RAILWAY_API_HOST}/api`;
-export const FALLBACK_SOCKET_URL = RAILWAY_API_HOST;
+export const FALLBACK_API_HOST = RENDER_API_HOST;
+export const FALLBACK_API_URL = `${RENDER_API_HOST}/api`;
+export const FALLBACK_SOCKET_URL = RENDER_API_HOST;
 
 export const isLocalApi = () => isUsingLocal;
 export { isUsingLocal };
@@ -55,7 +55,7 @@ export { isUsingLocal };
 export const getActiveApiUrl = () => OFFLINE_TESTING_MODE ? null : API_URL;
 
 // Get fallback API URL
-export const getFallbackApiUrl = () => API_FALLBACK_URL;
+export const getFallbackApiUrl = () => FALLBACK_API_URL;
 
 // ============================================
 // Offline Mode Utilities

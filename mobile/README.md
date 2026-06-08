@@ -177,7 +177,7 @@ npm install
 cp .env.example .env
 ```
 ```env
-EXPO_PUBLIC_API_HOST=https://your-backend-url.up.railway.app
+EXPO_PUBLIC_API_HOST=https://dagangly-api.onrender.com
 MAPS_API_KEY=your_android_google_maps_api_key
 ```
 `EXPO_PUBLIC_API_HOST` is embedded in the app bundle for API/WebSocket endpoints.
@@ -265,7 +265,7 @@ Set via environment (`EXPO_PUBLIC_API_HOST`), not by editing source files:
 
 | Variable | Description |
 |----------|-------------|
-| EXPO_PUBLIC_API_HOST | Backend URL (default fallback: Railway production) |
+| EXPO_PUBLIC_API_HOST | Backend URL (default fallback: Render production) |
 | MAPS_API_KEY | Android Google Maps API key (use EAS secret for cloud builds) |
 
 ### App Configuration

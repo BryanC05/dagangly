@@ -81,44 +81,44 @@ function Login() {
   };
 
   return (
-    <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
+    <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-20">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary via-primary to-emerald-400 flex items-center justify-center shadow-lg">
-            <span className="text-primary-foreground font-display font-bold text-2xl">D</span>
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary via-primary to-emerald-400 flex items-center justify-center shadow-2xl rotate-3">
+            <span className="text-primary-foreground font-display font-black text-3xl">D</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">{t('auth.welcomeBack')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t('auth.loginDesc')}</p>
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">{t('auth.welcomeBack')}</h1>
+          <p className="text-base text-muted-foreground mt-2">{t('auth.loginDesc')}</p>
         </div>
 
         {error && (
-          <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-lg mb-5 border border-destructive/20 text-center">
+          <div className="bg-destructive/10 text-destructive text-sm font-bold p-4 rounded-2xl mb-6 border border-destructive/20 text-center">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">{t('auth.email')}</Label>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-sm font-bold text-muted-foreground ml-1">{t('auth.email')}</Label>
             <Input
               id="email"
               type="email"
               placeholder="your@email.com"
-              className="h-11 text-sm bg-surface"
+              className="h-12 text-base bg-surface border-transparent focus:border-primary/50 rounded-xl transition-all"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">{t('auth.password')}</Label>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-sm font-bold text-muted-foreground ml-1">{t('auth.password')}</Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder={t('auth.enterPassword')}
-                className="h-11 text-sm bg-surface pr-10"
+                className="h-12 text-base bg-surface border-transparent focus:border-primary/50 rounded-xl transition-all pr-12"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -126,45 +126,45 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-3 mb-2 ml-1">
             <input 
               type="checkbox" 
               id="useFirebase" 
               checked={useFirebase} 
               onChange={() => setUseFirebase(!useFirebase)}
-              className="w-4 h-4 accent-primary cursor-pointer"
+              className="w-5 h-5 accent-primary cursor-pointer rounded-lg"
             />
-            <label htmlFor="useFirebase" className="text-xs text-muted-foreground cursor-pointer select-none">
-              Login via Firebase Provider (Optional)
+            <label htmlFor="useFirebase" className="text-sm font-medium text-muted-foreground cursor-pointer select-none">
+              Login via Firebase Provider
             </label>
           </div>
 
-          <Button type="submit" className="w-full h-11 gap-2" disabled={isLoading}>
+          <Button type="submit" className="w-full h-12 gap-2 text-base font-black rounded-xl shadow-lg shadow-primary/20" disabled={isLoading}>
             {isLoading ? t('auth.loggingIn') : t('auth.login')}
-            {!isLoading && <ArrowRight className="h-4 w-4" />}
+            {!isLoading && <ArrowRight className="h-5 w-5" />}
           </Button>
         </form>
 
-        <div className="relative my-8">
+        <div className="relative my-10">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-muted" />
+            <span className="w-full border-t border-muted/50" />
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-4 text-muted-foreground">Or connect with</span>
+          <div className="relative flex justify-center text-xs font-black uppercase tracking-widest">
+            <span className="bg-background px-6 text-muted-foreground">Or connect with</span>
           </div>
         </div>
 
         <Button 
           variant="outline" 
           type="button" 
-          className="w-full h-11 gap-3 bg-surface hover:bg-muted/50 transition-colors border-muted-foreground/20" 
+          className="w-full h-12 gap-3 bg-white hover:bg-muted/30 transition-all border-border rounded-xl font-bold shadow-sm" 
           onClick={handleGoogleLogin}
           disabled={isLoading}
         >

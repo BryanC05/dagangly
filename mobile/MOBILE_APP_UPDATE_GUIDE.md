@@ -50,33 +50,37 @@ Choose a cloud hosting provider:
 
 | Provider | Free Tier | Setup Difficulty |
 |----------|-----------|-----------------|
-| [Railway](https://railway.app) | $5 credit/month | Easy |
 | [Render](https://render.com) | Free (spins down after inactivity) | Easy |
+| [Railway](https://railway.app) | Paid/Credit-based | Easy |
 | [Fly.io](https://fly.io) | Free tier available | Medium |
 | VPS (DigitalOcean, etc.) | ~$5/month | Advanced |
 
-#### Example: Deploy to Railway
+#### Example: Deploy to Render
 
 1. Push your project to GitHub
-2. Go to [railway.app](https://railway.app) and sign in with GitHub
-3. Create a new project → "Deploy from GitHub Repo"
-4. Select your repository and point it to the `/backend` folder
-5. Add environment variables:
-   - `MONGODB_URI` – your MongoDB Atlas connection string
+2. Go to [dashboard.render.com](https://dashboard.render.com) and sign in with GitHub
+3. Create a new "Web Service" → Connect your repository
+4. Configuration:
+   - **Root Directory:** `backend`
+   - **Runtime:** `Go`
+   - **Build Command:** `go build -o server ./cmd/server`
+   - **Start Command:** `./server`
+5. Add Environment Variables:
+   - `MONGODB_URL` – your MongoDB Atlas connection string
    - `JWT_SECRET` – a secure random string
    - `PORT` – `5000`
-6. Railway will give you a URL like `https://your-app.railway.app`
+6. Render will give you a URL like `https://dagangly-api.onrender.com`
 
 #### Update the Mobile App API URL
 
-After deploying, update `mobile/src/api/api.js` to point to your deployed backend:
+After deploying, update `mobile/src/config/index.js` to point to your deployed backend:
 
 ```javascript
 // Change from localhost:
-const API_URL = 'http://192.168.x.x:5000/api';
+const LOCAL_API_HOST = "http://localhost:5000";
 
 // To your deployed backend:
-const API_URL = 'https://your-app.railway.app/api';
+const RENDER_API_HOST = "https://dagangly-api.onrender.com";
 ```
 
 ### Step 2: Build a Standalone APK (Android)

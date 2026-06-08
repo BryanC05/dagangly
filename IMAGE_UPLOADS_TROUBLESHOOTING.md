@@ -1,7 +1,7 @@
 # Image Upload Troubleshooting Guide: 404s and CSP Blocks
 
 ## The Problem
-When running the UMKM Marketplace backend on ephemeral cloud hosting (like the free tier of Railway, Heroku, or Render), you might notice that previously uploaded product images suddenly fail to load, resulting in:
+When running the UMKM Marketplace backend on ephemeral cloud hosting (like the free tier of Render, Heroku, or Railway), you might notice that previously uploaded product images suddenly fail to load, resulting in:
 1. `404 Not Found` errors in the network tab.
 2. Content Security Policy (CSP) violations if you try to hotlink external images.
 
@@ -10,7 +10,7 @@ When running the UMKM Marketplace backend on ephemeral cloud hosting (like the f
 
 **Root Cause:** The backend currently saves uploaded images (like product photos and business logos) directly to its local filesystem (e.g., inside an `uploads/` directory on the server). 
 
-Platforms like Railway use **ephemeral containers**. This means that every time the app is redeployed, restarted, or wakes up from sleep:
+Platforms like Render use **ephemeral containers**. This means that every time the app is redeployed, restarted, or wakes up from sleep:
 - A brand new, fresh container is spun up.
 - The old container and its persistent hard drive (including all user-uploaded files) are completely deleted.
 - Only the source code from Git is preserved.
@@ -33,7 +33,7 @@ If you attempt to load an image URL from a domain that is *not* explicitly on th
 If you need to support a new external image host, you must edit `frontend/index.html` and append the new domain to the `img-src` directive of the CSP meta tag.
 
 Currently allowed image domains include:
-- `https://umkm-marketplace-production.up.railway.app`
+- `https://dagangly-api.onrender.com`
 - `https://images.unsplash.com`
 - `https://source.unsplash.com`
 - `https://picsum.photos`

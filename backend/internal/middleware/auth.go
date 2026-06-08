@@ -62,48 +62,19 @@ func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 
-		// Always set headers for cross-origin images and static files
+		// Set CORS headers
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH, WS, WSS")
 
-		// Dynamic origin check
+		// Echo back the origin to allow all sources (required for dynamic local dev ports)
 		if origin != "" {
-			isAllowed := false
-			
-			// Exact matches
-			allowedOrigins := []string{
-				"http://localhost:5173",
-				"http://localhost:3000",
-				"https://dagangly.pages.dev",
-				"https://umkm-marketplace.pages.dev",
-				"https://dagangly.vercel.app",
-			}
-
-			for _, allowed := range allowedOrigins {
-				if origin == allowed {
-					isAllowed = true
-					break
-				}
-			}
-
-			// Subdomain matches (e.g. *.vercel.app)
-			if !isAllowed {
-				if strings.HasSuffix(origin, ".vercel.app") || 
-				   strings.HasSuffix(origin, ".pages.dev") ||
-				   strings.Contains(origin, "localhost:") {
-					isAllowed = true
-				}
-			}
-
-			if isAllowed {
-				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
-			}
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 		} else {
-			// For requests without Origin (like some mobile webview calls)
 			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		}
 
+		// Handle preflight
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return

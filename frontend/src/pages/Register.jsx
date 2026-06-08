@@ -110,80 +110,80 @@ function Register() {
   };
 
   return (
-    <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
+    <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-20">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary via-primary to-emerald-400 flex items-center justify-center shadow-lg">
-            <span className="text-primary-foreground font-display font-bold text-2xl">D</span>
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary via-primary to-emerald-400 flex items-center justify-center shadow-2xl rotate-3">
+            <span className="text-primary-foreground font-display font-black text-3xl">D</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">{t('auth.createAccount')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t('auth.createAccountDesc')}</p>
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">{t('auth.createAccount')}</h1>
+          <p className="text-base text-muted-foreground mt-2">{t('auth.createAccountDesc')}</p>
         </div>
 
         {error && (
-          <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-lg mb-5 border border-destructive/20 text-center">
+          <div className="bg-destructive/10 text-destructive text-sm font-bold p-4 rounded-2xl mb-6 border border-destructive/20 text-center">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="name" className="text-xs font-medium text-muted-foreground">{t('auth.name')}</Label>
-            <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="h-11 text-sm bg-surface" placeholder={t('auth.enterName')} required />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-sm font-bold text-muted-foreground ml-1">{t('auth.name')}</Label>
+            <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="h-12 text-base bg-surface border-transparent focus:border-primary/50 rounded-xl transition-all" placeholder={t('auth.enterName')} required />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">{t('auth.email')}</Label>
-              <Input id="email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="h-11 text-sm bg-surface" placeholder={t('auth.enterEmail')} required />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-bold text-muted-foreground ml-1">{t('auth.email')}</Label>
+              <Input id="email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="h-12 text-base bg-surface border-transparent focus:border-primary/50 rounded-xl transition-all" placeholder={t('auth.enterEmail')} required />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-xs font-medium text-muted-foreground">{t('auth.phone')}</Label>
-              <Input id="phone" type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="h-11 text-sm bg-surface" placeholder={t('auth.enterPhone')} required />
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-sm font-bold text-muted-foreground ml-1">{t('auth.phone')}</Label>
+              <Input id="phone" type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="h-12 text-base bg-surface border-transparent focus:border-primary/50 rounded-xl transition-all" placeholder={t('auth.enterPhone')} required />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">{t('auth.password')}</Label>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-sm font-bold text-muted-foreground ml-1">{t('auth.password')}</Label>
             <div className="relative">
-              <Input id="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="h-11 text-sm bg-surface pr-10" placeholder="Min 6 characters" minLength={6} required />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <Input id="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="h-12 text-base bg-surface border-transparent focus:border-primary/50 rounded-xl transition-all pr-12" placeholder="Min 6 characters" minLength={6} required />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 mb-2 ml-1">
             <input 
               type="checkbox" 
               id="useFirebaseReg" 
               checked={useFirebase} 
               onChange={() => setUseFirebase(!useFirebase)}
-              className="w-4 h-4 accent-primary cursor-pointer"
+              className="w-5 h-5 accent-primary cursor-pointer rounded-lg"
             />
-            <label htmlFor="useFirebaseReg" className="text-xs text-muted-foreground cursor-pointer select-none">
-              Register via Firebase Provider (Optional)
+            <label htmlFor="useFirebaseReg" className="text-sm font-medium text-muted-foreground cursor-pointer select-none">
+              Register via Firebase Provider
             </label>
           </div>
 
-          <button type="button" onClick={() => setShowBusiness(!showBusiness)} className="flex items-center gap-2 text-sm text-primary hover:underline">
+          <button type="button" onClick={() => setShowBusiness(!showBusiness)} className="flex items-center gap-2 text-sm font-bold text-primary hover:underline ml-1">
             <Building2 className="h-4 w-4" />
-            {showBusiness ? 'Saya bukan penjual' : 'Saya ingin berjualan'}
+            {showBusiness ? 'Saya bukan penjual' : 'Saya ingin berjualan (UMKM)'}
           </button>
 
           {showBusiness && (
-            <div className="border border-border rounded-lg p-4 space-y-3 bg-muted/30">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">{t('auth.businessName')}</Label>
+            <div className="border border-border/60 rounded-2xl p-5 space-y-4 bg-muted/20">
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-muted-foreground ml-1">{t('auth.businessName')}</Label>
                 <div className="relative">
-                  <Store className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input value={formData.businessName} onChange={(e) => setFormData({ ...formData, businessName: e.target.value })} className="h-11 text-sm bg-surface pl-9" placeholder={t('auth.enterBusinessName')} />
+                  <Store className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input value={formData.businessName} onChange={(e) => setFormData({ ...formData, businessName: e.target.value })} className="h-12 text-base bg-surface border-transparent focus:border-primary/50 rounded-xl transition-all pl-11" placeholder={t('auth.enterBusinessName')} />
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">{t('auth.businessType')}</Label>
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-muted-foreground ml-1">{t('auth.businessType')}</Label>
                 <Select value={formData.businessType} onValueChange={(value) => setFormData({ ...formData, businessType: value })}>
-                  <SelectTrigger className="h-11">
+                  <SelectTrigger className="h-12 rounded-xl bg-surface border-transparent">
                     <SelectValue placeholder={t('auth.selectBusinessType')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -193,37 +193,37 @@ function Register() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">Alamat</Label>
-                <Input value={formData.location.address} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, address: e.target.value } })} className="h-11 text-sm bg-surface" placeholder="Alamat" />
-                <div className="grid grid-cols-3 gap-2">
-                  <Input value={formData.location.city} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, city: e.target.value } })} className="h-10 text-sm bg-surface" placeholder="Kota" />
-                  <Input value={formData.location.state} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, state: e.target.value } })} className="h-10 text-sm bg-surface" placeholder="Provinsi" />
-                  <Input value={formData.location.pincode} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, pincode: e.target.value } })} className="h-10 text-sm bg-surface" placeholder="Kode Pos" />
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-muted-foreground ml-1">Alamat Bisnis</Label>
+                <Input value={formData.location.address} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, address: e.target.value } })} className="h-12 text-base bg-surface border-transparent focus:border-primary/50 rounded-xl transition-all mb-2" placeholder="Alamat Lengkap" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <Input value={formData.location.city} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, city: e.target.value } })} className="h-11 text-sm bg-surface border-transparent rounded-xl" placeholder="Kota" />
+                  <Input value={formData.location.state} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, state: e.target.value } })} className="h-11 text-sm bg-surface border-transparent rounded-xl" placeholder="Provinsi" />
+                  <Input value={formData.location.pincode} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, pincode: e.target.value } })} className="h-11 text-sm bg-surface border-transparent rounded-xl" placeholder="Kode Pos" />
                 </div>
               </div>
             </div>
           )}
 
-          <Button type="submit" className="w-full h-11 gap-2" disabled={isLoading}>
+          <Button type="submit" className="w-full h-12 gap-2 text-base font-black rounded-xl shadow-lg shadow-primary/20" disabled={isLoading}>
             {isLoading ? t('auth.creatingAccount') : t('auth.createAccount')}
-            {!isLoading && <ArrowRight className="h-4 w-4" />}
+            {!isLoading && <ArrowRight className="h-5 w-5" />}
           </Button>
         </form>
 
-        <div className="relative my-8">
+        <div className="relative my-10">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-muted" />
+            <span className="w-full border-t border-muted/50" />
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-4 text-muted-foreground">Or connect with</span>
+          <div className="relative flex justify-center text-xs font-black uppercase tracking-widest">
+            <span className="bg-background px-6 text-muted-foreground">Or connect with</span>
           </div>
         </div>
 
         <Button 
           variant="outline" 
           type="button" 
-          className="w-full h-11 gap-3 bg-surface hover:bg-muted/50 transition-colors border-muted-foreground/20" 
+          className="w-full h-12 gap-3 bg-white hover:bg-muted/30 transition-all border-border rounded-xl font-bold shadow-sm" 
           onClick={handleGoogleLogin}
           disabled={isLoading}
         >
