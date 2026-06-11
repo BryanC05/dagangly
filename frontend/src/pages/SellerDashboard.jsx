@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { 
   Plus, Edit2, Trash2, Package, TrendingUp, DollarSign, ShoppingBag, Save, X, AlertTriangle, 
   BarChart3, Crown, CreditCard, CheckCircle, Clock, Sparkles, Send, Bot, Calendar, ArrowUpRight, 
@@ -158,6 +159,7 @@ function SellerDashboard() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const sellerId = user?._id || user?.id;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [period, setPeriod] = useState('30');
   const {
@@ -248,6 +250,27 @@ function SellerDashboard() {
       alert(`Failed to remove bank details: ${error.response?.data?.error || error.message}`);
     },
   });
+
+  useEffect(() => {
+    const payment = searchParams.get('payment');
+    if (payment === 'success') {
+      toast.success('Premium membership activated successfully! Welcome to the premium club.');
+      refetchMembership();
+      const newParams = new URLSearchParams(window.location.search);
+      newParams.delete('payment');
+      setSearchParams(newParams);
+    } else if (payment === 'pending') {
+      toast.info('Payment pending. Your membership will update as soon as payment is settled.');
+      const newParams = new URLSearchParams(window.location.search);
+      newParams.delete('payment');
+      setSearchParams(newParams);
+    } else if (payment === 'error') {
+      toast.error('Membership payment failed. Please try again.');
+      const newParams = new URLSearchParams(window.location.search);
+      newParams.delete('payment');
+      setSearchParams(newParams);
+    }
+  }, [searchParams, setSearchParams, refetchMembership]);
 
   const handleBankSubmit = (e) => {
     e.preventDefault();
