@@ -21,7 +21,7 @@ import './Orders.css';
 
 const statusConfig = {
   pending: { icon: Clock, color: 'var(--status-pending)', bg: 'var(--status-pending-bg)', label: 'Pending' },
-  payment_pending: { icon: Clock, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)', label: 'Payment Pending' },
+  payment_pending: { icon: Clock, color: 'var(--status-payment-pending)', bg: 'var(--status-payment-pending-bg)', label: 'Payment Pending' },
   confirmed: { icon: CheckCircle, color: 'var(--status-confirmed)', bg: 'var(--status-confirmed-bg)', label: 'Accepted' },
   preparing: { icon: ChefHat, color: 'var(--status-preparing)', bg: 'var(--status-preparing-bg)', label: 'Preparing' },
   ready: { icon: Package, color: 'var(--status-ready)', bg: 'var(--status-ready-bg)', label: 'Ready' },

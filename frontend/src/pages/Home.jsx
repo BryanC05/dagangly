@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/products/ProductCard";
@@ -24,13 +25,30 @@ const normalizeProductsPayload = (payload) => {
   return { products: [], pagination: { total: 0 } };
 };
 
+const slideVariants = {
+  enter: (direction) => ({
+    x: direction > 0 ? '100%' : '-100%',
+    opacity: 0
+  }),
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1
+  },
+  exit: (direction) => ({
+    zIndex: 0,
+    x: direction < 0 ? '100%' : '-100%',
+    opacity: 0
+  })
+};
+
 const Home = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryCounts, setCategoryCounts] = useState({});
   const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [[page, direction], setPage] = useState([0, 0]);
   const slideInterval = useRef(null);
 
   const categoryGrid = useStaggerReveal();
@@ -44,12 +62,18 @@ const Home = () => {
     { image: "/images/hero/bakso-malang.webp", title: "Bakso Malang Jumbo", desc: "Bakso daging sapi asli dengan kuah kaldu gurih" },
   ];
 
+  const currentSlide = Math.abs(page % heroSlides.length);
+
+  const paginate = (newDirection) => {
+    setPage([page + newDirection, newDirection]);
+  };
+
   useEffect(() => {
     slideInterval.current = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+      paginate(1);
     }, 5000);
     return () => clearInterval(slideInterval.current);
-  }, [heroSlides.length]);
+  }, [page]); // Re-run effect when page changes to reset interval correctly
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,7 +102,7 @@ const Home = () => {
   const resetSlideTimer = () => {
     clearInterval(slideInterval.current);
     slideInterval.current = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+      paginate(1);
     }, 5000);
   };
 
@@ -97,25 +121,26 @@ const Home = () => {
     <>
       <section className="relative overflow-hidden h-[420px] md:h-[520px]">
         <div className="absolute inset-0 z-0 bg-background">
-          {heroSlides.map((slide, index) => {
-            const isActive = index === currentSlide;
-            const isPrev = index === (currentSlide - 1 + heroSlides.length) % heroSlides.length;
-            if (!isActive && !isPrev) return null;
-            return (
-              <div
-                key={index}
-                className="absolute inset-0"
-                style={{
-                  backgroundImage: `url("${resolveImageUrl(slide.image)}")`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center center',
-                  opacity: isActive ? 1 : 0,
-                  transition: 'opacity 0.7s ease-in-out',
-                  zIndex: isActive ? 1 : 0,
-                }}
-              />
-            );
-          })}
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={page}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 }
+              }}
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `url("${resolveImageUrl(heroSlides[currentSlide].image)}")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+              }}
+            />
+          </AnimatePresence>
           <div className="absolute inset-0 bg-black/50" style={{ zIndex: 2 }} />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" style={{ zIndex: 2 }} />
           <div className="absolute inset-0 pattern-dots opacity-30" style={{ zIndex: 2 }} />
@@ -125,7 +150,11 @@ const Home = () => {
           {heroSlides.map((_, index) => (
             <button
               key={index}
-              onClick={() => { setCurrentSlide(index); resetSlideTimer(); }}
+              onClick={() => { 
+                const newDirection = index > currentSlide ? 1 : -1;
+                setPage([index, newDirection]); 
+                resetSlideTimer(); 
+              }}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 index === currentSlide ? 'bg-primary w-6' : 'bg-white/30 hover:bg-white/60 w-1.5'
               }`}
@@ -135,13 +164,13 @@ const Home = () => {
         </div>
 
         <button
-          onClick={() => { setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length); resetSlideTimer(); }}
+          onClick={() => { paginate(-1); resetSlideTimer(); }}
           className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors hidden md:flex"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
-          onClick={() => { setCurrentSlide(prev => (prev + 1) % heroSlides.length); resetSlideTimer(); }}
+          onClick={() => { paginate(1); resetSlideTimer(); }}
           className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors hidden md:flex"
         >
           <ChevronRight className="w-5 h-5" />
@@ -149,16 +178,33 @@ const Home = () => {
 
         <div className="container h-full flex items-center justify-center relative z-10">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 text-white/90 text-[10px] font-bold tracking-widest mb-4">
+            <motion.div 
+              key={`badge-${currentSlide}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 text-white/90 text-[10px] font-bold tracking-widest mb-4"
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               MARKETPLACE UMKM INDONESIA
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-3 leading-tight">
-              {heroSlides[currentSlide].title}
-            </h1>
-            <p className="text-sm md:text-base text-white/80 mb-6 max-w-lg mx-auto font-medium">
-              {heroSlides[currentSlide].desc}
-            </p>
+            </motion.div>
+            
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-3 leading-tight">
+                  {heroSlides[currentSlide].title}
+                </h1>
+                <p className="text-sm md:text-base text-white/80 mb-6 max-w-lg mx-auto font-medium">
+                  {heroSlides[currentSlide].desc}
+                </p>
+              </motion.div>
+            </AnimatePresence>
 
             <form onSubmit={handleSearch} className="max-w-md mx-auto">
               <div className="relative">

@@ -67,6 +67,18 @@ function FitBoundsOnce({ userLocation, sellers, hasFitted }) {
   return null;
 }
 
+// Component to fit bounds to a navigation route
+function FitRoute({ routePath }) {
+  const map = useMap();
+  useEffect(() => {
+    if (routePath && routePath.length > 1) {
+      const bounds = L.latLngBounds(routePath);
+      map.fitBounds(bounds, { padding: [100, 100], maxZoom: 16 });
+    }
+  }, [routePath, map]);
+  return null;
+}
+
 function NearbyMap() {
   const [userLocation, setUserLocation] = useState(null);
   const [profileLocation, setProfileLocation] = useState(null);
@@ -518,6 +530,9 @@ function NearbyMap() {
             sellers={filteredSellers}
             hasFitted={hasFittedMarkersRef}
           />
+
+          {/* Fit bounds to navigation route */}
+          {isNavigating && routePath.length > 1 && <FitRoute routePath={routePath} />}
 
           {/* User location marker */}
           <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>

@@ -15,6 +15,16 @@
   --status-cancelled: #f56565;
   --status-cancelled-bg: rgba(245, 101, 101, 0.1);
 
+  --color-foreground: hsl(var(--foreground));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-primary: hsl(var(--primary));
+  --color-secondary: hsl(var(--secondary));
+  --color-card: hsl(var(--card));
+  --color-muted: hsl(var(--muted));
+  --color-background: hsl(var(--background));
+  --color-primary-foreground: hsl(var(--card));
+
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
@@ -48,12 +58,12 @@
 .orders-header h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-foreground, #111);
+  color: var(--color-foreground);
 }
 
 .orders-subtitle {
   font-size: 0.875rem;
-  color: var(--color-muted-foreground, #666);
+  color: var(--color-muted-foreground);
   margin-top: 0.25rem;
 }
 
@@ -62,7 +72,7 @@
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--color-border, #e5e5e5);
+  border-bottom: 1px solid var(--color-border);
   padding-bottom: 0;
 }
 
@@ -72,7 +82,7 @@
   border: none;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-muted-foreground, #888);
+  color: var(--color-muted-foreground);
   cursor: pointer;
   position: relative;
   transition: color 0.2s;
@@ -84,18 +94,18 @@
 }
 
 .filter-tab:hover {
-  color: var(--color-foreground, #333);
+  color: var(--color-foreground);
 }
 
 .filter-tab.active {
-  color: var(--color-primary, #667eea);
-  border-bottom-color: var(--color-primary, #667eea);
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
 }
 
 .tab-count {
   font-size: 0.75rem;
-  background: var(--color-secondary, #f0f0f0);
-  color: var(--color-muted-foreground, #666);
+  background: var(--color-secondary);
+  color: var(--color-muted-foreground);
   padding: 0.125rem 0.5rem;
   border-radius: 10px;
   min-width: 1.25rem;
@@ -103,40 +113,40 @@
 }
 
 .filter-tab.active .tab-count {
-  background: var(--color-primary, #667eea);
-  color: var(--color-primary-foreground, white);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
 }
 
 /* Empty State */
 .empty-orders {
   text-align: center;
   padding: 4rem 2rem;
-  background: var(--color-card, white);
+  background: var(--color-card);
   border-radius: 16px;
-  border: 1px solid var(--color-border, #e5e5e5);
+  border: 1px solid var(--color-border);
 }
 
 .empty-icon-wrapper {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: var(--color-secondary, #f5f5f5);
+  background: var(--color-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem;
-  color: var(--color-muted-foreground, #999);
+  color: var(--color-muted-foreground);
 }
 
 .empty-orders h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-foreground, #333);
+  color: var(--color-foreground);
   margin-bottom: 0.5rem;
 }
 
 .empty-orders p {
-  color: var(--color-muted-foreground, #666);
+  color: var(--color-muted-foreground);
   margin-bottom: 0;
 }
 
@@ -144,10 +154,10 @@
 .no-filtered-orders {
   text-align: center;
   padding: 3rem;
-  color: var(--color-muted-foreground, #666);
-  background: var(--color-card, white);
+  color: var(--color-muted-foreground);
+  background: var(--color-card);
   border-radius: 12px;
-  border: 1px solid var(--color-border, #e5e5e5);
+  border: 1px solid var(--color-border);
 }
 
 /* Skeleton Loading */
@@ -160,7 +170,7 @@
 .skeleton-card {
   height: 80px;
   border-radius: 12px;
-  background: linear-gradient(90deg, var(--color-secondary, #f0f0f0) 25%, var(--color-muted, #e5e5e5) 50%, var(--color-secondary, #f0f0f0) 75%);
+  background: linear-gradient(90deg, var(--color-secondary) 25%, var(--color-muted) 50%, var(--color-secondary) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -185,9 +195,9 @@
 }
 
 .order-card {
-  background: var(--color-card, white);
+  background: var(--color-card);
   border-radius: 12px;
-  border: 1px solid var(--color-border, #e5e5e5);
+  border: 1px solid var(--color-border);
   overflow: visible;
   transition: box-shadow 0.2s, border-color 0.2s;
   width: 100%;
@@ -245,7 +255,7 @@
 
 .order-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  background: var(--color-secondary, #f9f9f9);
+  background: var(--color-secondary);
 }
 
 .order-card.expanded {
@@ -283,7 +293,7 @@
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-muted-foreground, #999);
+  color: var(--color-muted-foreground);
   font-weight: 500;
 }
 
@@ -291,7 +301,7 @@
   font-family: ui-monospace, monospace;
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--color-foreground, #333);
+  color: var(--color-foreground);
 }
 
 .order-date {
@@ -299,7 +309,7 @@
   align-items: center;
   gap: 0.375rem;
   font-size: 0.8rem;
-  color: var(--color-muted-foreground, #888);
+  color: var(--color-muted-foreground);
 }
 
 .order-type-chip {
@@ -344,7 +354,7 @@
 .order-total-compact {
   font-weight: 700;
   font-size: 0.95rem;
-  color: var(--color-primary, #667eea);
+  color: var(--color-primary);
 }
 
 .seller-action-btn {
@@ -374,9 +384,9 @@
 }
 
 .expand-toggle {
-  background: var(--color-secondary, #f0f0f0);
+  background: var(--color-secondary);
   border: none;
-  color: var(--color-muted-foreground, #666);
+  color: var(--color-muted-foreground);
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
@@ -389,8 +399,8 @@
 }
 
 .expand-toggle:hover {
-  color: var(--color-foreground, #333);
-  background: var(--color-muted, #e0e0e0);
+  color: var(--color-foreground);
+  background: var(--color-muted);
 }
 
 .expand-toggle:active {
@@ -399,7 +409,7 @@
 
 /* Order Body - Expandable */
 .order-body {
-  border-top: 1px solid var(--color-border, #eee);
+  border-top: 1px solid var(--color-border);
   animation: slideDown 0.2s ease;
   width: 100%;
   overflow-x: auto;
@@ -432,7 +442,7 @@
   gap: 1rem;
   align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--color-border, #f0f0f0);
+  border-bottom: 1px solid var(--color-border);
   width: 100%;
   box-sizing: border-box;
 }
@@ -446,7 +456,7 @@
   height: 56px;
   border-radius: 8px;
   overflow: hidden;
-  background: var(--color-secondary, #f5f5f5);
+  background: var(--color-secondary);
   flex-shrink: 0;
 }
 
@@ -474,7 +484,7 @@
 .item-details h4 {
   font-weight: 500;
   font-size: 0.9rem;
-  color: var(--color-foreground, #333);
+  color: var(--color-foreground);
   margin-bottom: 0.25rem;
   white-space: normal;
   overflow: visible;
@@ -482,13 +492,13 @@
 }
 
 .item-details p {
-  color: var(--color-muted-foreground, #888);
+  color: var(--color-muted-foreground);
   font-size: 0.8rem;
 }
 
 .item-total {
   font-weight: 600;
-  color: var(--color-primary, #667eea);
+  color: var(--color-primary);
   font-size: 0.9rem;
   white-space: normal;
   flex-shrink: 0;
@@ -501,8 +511,8 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 1rem 1.25rem;
-  background: var(--color-secondary, #fafafa);
-  border-top: 1px solid var(--color-border, #eee);
+  background: var(--color-secondary);
+  border-top: 1px solid var(--color-border);
   gap: 1.5rem;
   width: 100%;
   box-sizing: border-box;
@@ -528,14 +538,14 @@
 }
 
 .meta-label {
-  color: var(--color-muted-foreground, #999);
+  color: var(--color-muted-foreground);
   font-weight: 500;
   min-width: 60px;
   flex-shrink: 0;
 }
 
 .meta-value {
-  color: var(--color-foreground, #444);
+  color: var(--color-foreground);
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -549,7 +559,7 @@
 }
 
 .order-type-meta.delivery {
-  color: var(--color-foreground, #444);
+  color: var(--color-foreground);
 }
 
 .order-type-meta.pickup {
@@ -560,12 +570,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--color-muted-foreground, #888);
+  color: var(--color-muted-foreground);
   margin-left: 0.5rem;
 }
 
 .payment-badge {
-  background: var(--color-secondary, #eee);
+  background: var(--color-secondary);
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
   font-weight: 500;
@@ -573,7 +583,7 @@
 
 .note-text {
   font-style: italic;
-  color: var(--color-muted-foreground, #888);
+  color: var(--color-muted-foreground);
 }
 
 /* Total Section */
@@ -593,14 +603,14 @@
 
 .total-row>span:first-child {
   font-size: 0.8rem;
-  color: var(--color-muted-foreground, #888);
+  color: var(--color-muted-foreground);
   font-weight: 500;
 }
 
 .total-amount {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-primary, #667eea);
+  color: var(--color-primary);
 }
 
 .update-status-btn {
@@ -644,12 +654,12 @@
 .preorder-date {
   font-size: 18px;
   font-weight: 800;
-  color: var(--color-foreground, #333);
+  color: var(--color-foreground);
 }
 
 .preorder-time {
   font-size: 14px;
-  color: var(--color-muted-foreground, #666);
+  color: var(--color-muted-foreground);
   margin-top: 2px;
 }
 
@@ -677,7 +687,7 @@
 }
 
 .preorder-request-badge.pending {
-  background-color: var(--color-muted-foreground, #666);
+  background-color: var(--color-muted-foreground);
 }
 
 .preorder-meta {
@@ -686,7 +696,7 @@
   gap: 8px;
   margin-bottom: 8px;
   font-size: 13px;
-  color: var(--color-foreground, #333);
+  color: var(--color-foreground);
 }
 
 .preorder-confirm-btn {
@@ -705,11 +715,11 @@
 
 .dark .preorder-date,
 .dark .preorder-meta {
-  color: var(--color-foreground, #f8f8f8);
+  color: var(--color-foreground);
 }
 
 .dark .preorder-time {
-  color: var(--color-muted-foreground, #bdbdbd);
+  color: var(--color-muted-foreground);
 }
 
 /* Responsive */
