@@ -17,7 +17,7 @@ The Dagangly platform has achieved full production readiness across all environm
 
 ### 🛒 Core Commerce & Order Management
 - **Scheduled Delivery Orders:** Buyers can request specific delivery dates and times. Includes a full negotiation flow allowing sellers to accept, decline, or request changes to the schedule.
-- **Payment Processing:** Manual payment verification system supporting **Cash on Delivery (COD)** and **QRIS**. Buyers can upload proof-of-transfer screenshots directly within the order panel for seller approval.
+- **Payment Processing:** Integrated **Midtrans Snap SDK (QRIS, VA, E-Wallet)** checkout logic for seller premium memberships, complementing standard manual transfer receipt upload and Cash on Delivery (COD) workflows.
 - **Digital Wallet & Installments:** Users have an in-app digital wallet for quick checkouts and refunds, plus Buy Now Pay Later (BNPL) installment options (3, 6, 12 months).
 - **Review & Rating System:** Comprehensive rating system for both products and sellers, verified by delivered orders.
 - **Cart Abandonment Recovery:** Automated system to track and remind users of abandoned carts (1h, 24h).
@@ -113,10 +113,16 @@ npx expo start --clear
 
 For detailed implementation instructions, troubleshooting, and architecture guides, refer to the following specialized documentation files:
 
-- `PRODUCTION_CHECKLIST.md` - The master sign-off sheet proving 100% feature completion.
-- `GOLANG_MIGRATION_PLAN.md` & `GOLANG_MIGRATION_PROGRESS.md` - Details of the backend rewrite.
-- `N8N_WORKFLOW_GUIDE.md` - Complete setup guide for n8n, webhooks, and SMTP.
-- `mobile/PLAY_STORE_RELEASE_CHECKLIST.md` - Guide to EAS builds, Play Store forms, and Google Maps setup.
+* **Plans & Specifications (`plans/`)**:
+  * [midtrans_implementation.md](plans/midtrans_implementation.md) - Go backend & React frontend Midtrans integration specification.
+  * [pwa_implementation.md](plans/pwa_implementation.md) - PWA shell caching and installation documentation.
+  * [GOLANG_MIGRATION_PLAN.md](plans/GOLANG_MIGRATION_PLAN.md) - Plan for the Go backend rewrite.
+  * [ACCESSIBILITY_PLAN.md](plans/ACCESSIBILITY_PLAN.md) - Accessibility audit and improvements plan.
+* **Troubleshooting & Guides (`docs/`)**:
+  * [N8N_WORKFLOW_GUIDE.md](docs/n8n/N8N_WORKFLOW_GUIDE.md) - Complete setup guide for n8n, webhooks, and SMTP.
+  * [PRODUCTION_CHECKLIST.md](docs/general/PRODUCTION_CHECKLIST.md) - The master sign-off checklist.
+  * [PLAY_STORE_RELEASE_CHECKLIST.md](docs/general/PLAY_STORE_RELEASE_CHECKLIST.md) - Play Store release checklist.
+  * [GOLANG_MIGRATION_PROGRESS.md](docs/general/GOLANG_MIGRATION_PROGRESS.md) - Migration status log.
 
 ---
 
