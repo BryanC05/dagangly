@@ -12,7 +12,7 @@ Dokumen ini merinci perkiraan biaya untuk menjalankan **Dagangly** di lingkungan
 *   **Detail:** Dagangly kini menggunakan **Render Hobby Plan (Free)**. Karena backend Go sangat efisien dalam penggunaan memori (20MB-50MB RAM), aplikasi dapat berjalan stabil tanpa biaya langganan bulanan. 
 *   *Catatan:* Layanan gratis Render akan "tidur" jika tidak ada aktivitas selama 15 menit, dan butuh beberapa detik untuk bangun saat dipanggil kembali.
 
-### 🌐 Frontend Web App (Vercel / Netlify / Cloudflare Pages)
+### 🌐 Frontend Web App (Vercel / Cloudflare Pages)
 *   **Teknologi:** React.js (Vite)
 *   **Estimasi Biaya:** **Rp 0/bulan**
 *   **Detail:** Frontend adalah kumpulan file statis (HTML/CSS/JS) yang hanya berkomunikasi dengan backend Go Anda. Semua platform besar menawarkan *free tier* yang sangat besar untuk hosting frontend statis (biasanya gratis bandwidth hingga 100GB+/bulan).
