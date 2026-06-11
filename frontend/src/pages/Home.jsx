@@ -17,6 +17,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
+import SEO from "@/components/SEO";
 
 const normalizeProductsPayload = (payload) => {
   if (Array.isArray(payload)) return { products: payload, pagination: { total: payload.length } };
@@ -119,6 +120,7 @@ const Home = () => {
 
   return (
     <>
+      <SEO title="Dagangly - Indonesian MSME Marketplace" description="Buy and sell authentic local products near you." />
       <section className="relative overflow-hidden h-[420px] md:h-[520px]">
         <div className="absolute inset-0 z-0 bg-background">
           <AnimatePresence initial={false} custom={direction}>

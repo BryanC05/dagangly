@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useAccessibilityStore } from '../store/accessibilityStore';
 
 // ─── Layer 1: Slow warm gradient that cycles through Indonesian-inspired tones ───
 const GradientBackground = () => (
@@ -47,14 +48,15 @@ const GradientBackground = () => (
 const InteractiveBackground = () => {
     const [isClient, setIsClient] = useState(false);
     const containerRef = useRef(null);
+    const reducedMotion = useAccessibilityStore((state) => state.reducedMotion);
 
     useEffect(() => {
         setIsClient(true);
 
-        // Disable particle effects on mobile or when reduced motion is preferred
+        // Disable particle effects on mobile or when reduced motion is preferred or enabled in settings
         const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (isMobile || prefersReducedMotion) return;
+        if (isMobile || prefersReducedMotion || reducedMotion) return;
 
         let rafId;
         let lastSpawnTime = 0;
@@ -208,7 +210,7 @@ const InteractiveBackground = () => {
             window.removeEventListener('particle-burst', handleParticleBurst);
             if (rafId) cancelAnimationFrame(rafId);
         };
-    }, []);
+    }, [reducedMotion]);
 
     if (!isClient) return null;
 

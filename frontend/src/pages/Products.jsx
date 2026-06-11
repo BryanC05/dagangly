@@ -16,6 +16,7 @@ import {
 import { Search, X, Package, SlidersHorizontal, Grid3X3, List, ArrowRight } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
+import SEO from "@/components/SEO";
 
 const normalizeProductsPayload = (payload) => {
   if (Array.isArray(payload)) return { products: payload, pagination: { page: 1, total: payload.length, pages: 1 } };
@@ -100,6 +101,7 @@ const Products = () => {
 
   return (
     <div className="bg-background min-h-screen">
+      <SEO title="Discover Products - Dagangly" description="Browse handcrafts, local foods, cosmetics and electronics." />
       <div className="container py-6 md:py-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>

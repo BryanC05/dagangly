@@ -917,6 +917,45 @@ func (h *UserHandler) ExtendMembership(c *gin.Context) {
 	})
 }
 
+// DirectActivateMembership directly upgrades user membership for automated simulated checkout
+func (h *UserHandler) DirectActivateMembership(c *gin.Context) {
+	userID := c.GetString("userID")
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	collection := database.GetDB().Collection("users")
+	now := time.Now()
+	expiry := now.AddDate(0, 1, 0) // 1 month
+
+	update := bson.M{
+		"$set": bson.M{
+			"isMember":           true,
+			"membershipStatus":   "active",
+			"memberSince":        now,
+			"memberExpiry":       expiry,
+			"paymentProof":       nil,
+			"paymentSubmittedAt": nil,
+			"updatedAt":          now,
+		},
+	}
+
+	_, err = collection.UpdateOne(context.Background(), bson.M{"_id": objID}, update)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to activate membership"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success":      true,
+		"message":      "Membership upgraded successfully via simulated Midtrans checkout!",
+		"isMember":     true,
+		"memberExpiry": expiry,
+	})
+}
+
 type RegisterBusinessRequest struct {
 	BusinessName     string `json:"businessName" binding:"required"`
 	BusinessAddress  string `json:"businessAddress" binding:"required"`

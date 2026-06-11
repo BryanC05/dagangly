@@ -510,14 +510,28 @@ function AddProduct() {
 
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="description">Description *</Label>
+                <div className="flex items-center gap-1.5">
+                  <Label htmlFor="description">Description *</Label>
+                  <div className="relative group">
+                    <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+                    <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-72 p-3 bg-card text-card-foreground border border-border text-xs rounded-lg shadow-xl z-50">
+                      <p className="font-bold text-primary mb-1">AI Writing Tips:</p>
+                      <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+                        <li>Enter a clear, descriptive <strong>Product Name</strong> first.</li>
+                        <li>Add relevant tags and select a category for best results.</li>
+                        <li>Click <strong>Enhance with AI</strong> to generate a high-converting description.</li>
+                        <li>Review and refine the generated text as needed.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
                 <Button
                   type="button"
                   onClick={handleGenerateDescription}
                   disabled={isGeneratingAI || !formData.name}
                   variant="outline"
                   size="sm"
-                  className="h-8 gap-1.5 text-xs border-primary/30 hover:border-primary text-primary"
+                  className="h-8 gap-1.5 text-xs border-primary/30 hover:border-primary text-primary transition-all duration-300"
                 >
                   {isGeneratingAI ? (
                     <div className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
@@ -527,6 +541,14 @@ function AddProduct() {
                   {isGeneratingAI ? 'Generating...' : 'Enhance with AI'}
                 </Button>
               </div>
+              
+              <div className="bg-primary/5 border border-primary/10 rounded-lg p-3 flex items-start gap-2.5 text-xs text-muted-foreground mb-1">
+                <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-foreground">💡 Smart Copilot:</span> Type a product name, then click <strong className="text-primary font-semibold">Enhance with AI</strong> to instantly auto-generate a detailed, persuasive description.
+                </div>
+              </div>
+
               <Textarea
                 id="description"
                 value={formData.description}

@@ -49,9 +49,11 @@ import {
   Sparkles,
   ImageIcon,
   Instagram,
+  Accessibility,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useAuthModalStore } from "@/store/authModalStore";
+import { useAccessibilityStore } from "@/store/accessibilityStore";
 import { useTranslation } from "@/hooks/useTranslation";
 import api from "@/utils/api";
 import { resolveImageUrl } from "@/utils/imageUrl";
@@ -238,6 +240,7 @@ const Profile = () => {
   const { id } = useParams();
   const { user, isAuthenticated, setUser } = useAuthStore();
   const { openLogin } = useAuthModalStore();
+  const { fontSize, setFontSize, reducedMotion, setReducedMotion } = useAccessibilityStore();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -679,6 +682,78 @@ const Profile = () => {
         <div className="mb-8">
           <BusinessSection />
         </div>
+
+        {/* Accessibility Preferences Section */}
+        {isOwnProfile && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                  <Accessibility className="h-5 w-5" />
+                </span>
+                Accessibility Preferences
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl border border-border/60 bg-muted/20">
+                <div>
+                  <h3 className="font-semibold text-sm">Reduced Motion</h3>
+                  <p className="text-xs text-muted-foreground">Disable global background star particles and active animations to reduce resource consumption.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newValue = !reducedMotion;
+                      setReducedMotion(newValue);
+                      if (newValue) {
+                        document.documentElement.classList.add('reduce-motion');
+                      } else {
+                        document.documentElement.classList.remove('reduce-motion');
+                      }
+                    }}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${reducedMotion ? 'bg-primary' : 'bg-muted'}`}
+                    aria-pressed={reducedMotion}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${reducedMotion ? 'translate-x-5' : 'translate-x-0'}`}
+                    />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl border border-border/60 bg-muted/20">
+                <div>
+                  <h3 className="font-semibold text-sm">Font Size Scale</h3>
+                  <p className="text-xs text-muted-foreground">Adjust text size across the entire application for better readability.</p>
+                </div>
+                <div className="flex gap-2">
+                  {[
+                    { value: 'small', label: 'Small' },
+                    { value: 'medium', label: 'Medium' },
+                    { value: 'large', label: 'Large' },
+                    { value: 'extra-large', label: 'Extra Large' },
+                  ].map((option) => (
+                    <Button
+                      key={option.value}
+                      variant={fontSize === option.value ? 'default' : 'outline'}
+                      size="sm"
+                      className="text-xs h-8 px-3 rounded-lg"
+                      onClick={() => {
+                        setFontSize(option.value);
+                        const scale = { small: 0.85, medium: 1, large: 1.15, 'extra-large': 1.3 }[option.value] || 1;
+                        document.documentElement.style.setProperty('--font-size-scale', scale);
+                      }}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Tabs */}
         <Tabs defaultValue={isSellerUser ? "products" : "orders"}>

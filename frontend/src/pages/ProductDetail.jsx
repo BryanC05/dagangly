@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import { Skeleton } from '@/components/ui/skeleton';
 import ReviewSection from '../components/ReviewSection';
+import SEO from '@/components/SEO';
 
 function MarkdownContent({ content }) {
   if (!content) return null;
@@ -153,6 +154,7 @@ function ProductDetail() {
   if (isLoading) {
     return (
       <>
+        <SEO title="Loading Product... - Dagangly" />
         <div className="container py-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Image Skeleton */}
@@ -185,6 +187,7 @@ function ProductDetail() {
   if (!product) {
     return (
       <>
+        <SEO title="Product Not Found - Dagangly" />
         <div className="container py-20">
           <div className="text-center py-12">
             <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -209,6 +212,7 @@ function ProductDetail() {
 
   return (
     <div className="bg-background min-h-screen py-6">
+      <SEO title={`${product?.name} - Dagangly`} description={product?.description} />
       <div className="container">
         <button onClick={handleBack} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
           <ArrowLeft className="h-4 w-4" />

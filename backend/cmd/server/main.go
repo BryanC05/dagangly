@@ -133,6 +133,7 @@ func main() {
 			// Membership routes
 			users.GET("/membership/status", userHandler.GetMembershipStatus)
 			users.POST("/membership/payment", userHandler.SubmitMembershipPayment)
+			users.POST("/membership/checkout", userHandler.DirectActivateMembership)
 
 			// Instagram routes
 			users.GET("/instagram/status", handlers.InstagramStatus)

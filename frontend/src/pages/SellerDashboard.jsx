@@ -275,6 +275,21 @@ function SellerDashboard() {
     },
   });
 
+  const checkoutMembershipMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post('/users/membership/checkout');
+      return response.data;
+    },
+    onSuccess: (data) => {
+      setShowPaymentDialog(false);
+      refetchMembership();
+      alert(data.message || 'Membership upgraded successfully!');
+    },
+    onError: (error) => {
+      alert(`Checkout failed: ${error.response?.data?.error || error.message}`);
+    },
+  });
+
   const handlePaymentSubmit = (e) => {
     e.preventDefault();
     if (!paymentFile) {
@@ -580,22 +595,23 @@ function SellerDashboard() {
                     </DialogTrigger>
                     <DialogContent className="dark:bg-[#1a1a1a] dark:border-gray-800">
                       <DialogHeader>
-                        <DialogTitle>Submit Payment Proof</DialogTitle>
+                        <DialogTitle>Upgrade to Premium</DialogTitle>
                       </DialogHeader>
-                      <form onSubmit={handlePaymentSubmit} className="space-y-4">
+                      <div className="space-y-4 pt-2">
                         <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50">
-                          <p className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Transfer to:</p>
-                          <p className="text-xl font-bold font-mono text-gray-900 dark:text-white">Bank BCA 1234567890</p>
-                          <p className="text-sm text-gray-500">a/n MSME Marketplace</p>
+                          <p className="text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Upgrade Plan:</p>
+                          <p className="text-xl font-bold font-mono text-gray-900 dark:text-white">Rp 10.000 / month</p>
+                          <p className="text-xs text-gray-500 mt-1">Unlock unlimited product listings and receive priority search placement.</p>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Upload Payment Proof</label>
-                          <input type="file" accept="image/*" onChange={(e) => setPaymentFile(e.target.files[0])} className="w-full border dark:border-gray-700 rounded-md p-2 bg-transparent" required />
-                        </div>
-                        <Button type="submit" className="w-full" disabled={uploadPaymentMutation.isPending}>
-                          {uploadPaymentMutation.isPending ? 'Submitting...' : 'Submit Payment Proof'}
+                        <Button 
+                          type="button" 
+                          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold" 
+                          onClick={() => checkoutMembershipMutation.mutate()}
+                          disabled={checkoutMembershipMutation.isPending}
+                        >
+                          {checkoutMembershipMutation.isPending ? 'Processing Payment...' : 'Pay with Midtrans (VA/QRIS)'}
                         </Button>
-                      </form>
+                      </div>
                     </DialogContent>
                   </Dialog>
                 </div>
