@@ -728,7 +728,7 @@ const Profile = () => {
                   <h3 className="font-semibold text-sm">Font Size Scale</h3>
                   <p className="text-xs text-muted-foreground">Adjust text size across the entire application for better readability.</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {[
                     { value: 'small', label: 'Small' },
                     { value: 'medium', label: 'Medium' },
@@ -757,7 +757,7 @@ const Profile = () => {
 
         {/* Tabs */}
         <Tabs defaultValue={isSellerUser ? "products" : "orders"}>
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex flex-wrap h-auto p-1 border border-border/60 rounded-xl gap-1 justify-start bg-transparent">
             {isSellerUser && (
               <TabsTrigger value="products" className="gap-2">
                 <Package className="h-4 w-4" />
