@@ -16,11 +16,13 @@ import {
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useAuthStore } from "@/store/authStore";
+import { useSellerAnalyticsStore } from "@/store/sellerAnalyticsStore";
 
 function FinanceDashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { useMockData } = useSellerAnalyticsStore();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalSales: 0,

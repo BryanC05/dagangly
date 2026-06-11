@@ -245,8 +245,9 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-10 md:py-12">
-        <div className="container">
+      <section className="py-10 md:py-12 relative overflow-hidden">
+        <div className="absolute inset-0 pattern-dots-sm opacity-[0.08] pointer-events-none" />
+        <div className="container relative z-10">
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">Kategori</h2>
             <Link to="/products" className="text-primary text-xs md:text-sm font-bold hover:underline flex items-center gap-1">
@@ -261,7 +262,7 @@ const Home = () => {
               const count = categoryCounts[category.id] || 0;
               return (
                 <Link key={category.id} to={`/products?category=${category.id}`} className="stagger-item" style={{ '--stagger-index': index }}>
-                  <div className="bg-card border border-border/60 rounded-xl p-3 md:p-4 text-center hover:border-primary/50 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                  <div className="bg-card/75 backdrop-blur-md border border-border/50 shadow-sm rounded-xl p-3 md:p-4 text-center hover:border-primary/50 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                     <span className="text-2xl md:text-3xl block mb-1 md:mb-2">{category.icon}</span>
                     <p className="text-xs md:text-sm font-bold text-card-foreground">{category.name}</p>
                     <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">{count} produk</p>
@@ -273,8 +274,9 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-10 md:py-12 bg-surface/30 border-t border-border">
-        <div className="container relative">
+      <section className="py-10 md:py-12 bg-surface/30 border-t border-border relative overflow-hidden">
+        <div className="absolute inset-0 pattern-grid opacity-[0.03] pointer-events-none" />
+        <div className="container relative z-10">
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">Produk Unggulan</h2>
             <Link to="/products" className="text-primary text-xs md:text-sm font-bold hover:underline flex items-center gap-1">
