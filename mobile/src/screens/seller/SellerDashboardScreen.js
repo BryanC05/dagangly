@@ -75,9 +75,6 @@ export default function SellerDashboardScreen({ navigation }) {
 
     // Membership state
     const [membership, setMembership] = useState(null);
-    const [showPaymentModal, setShowPaymentModal] = useState(false);
-    const [paymentImage, setPaymentImage] = useState(null);
-    const [uploading, setUploading] = useState(false);
 
     // Bank Account state
     const [showBankModal, setShowBankModal] = useState(false);
@@ -130,46 +127,33 @@ export default function SellerDashboardScreen({ navigation }) {
         fetchData();
     };
 
-    const pickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            quality: 0.8,
-        });
-
-        if (!result.canceled) {
-            setPaymentImage(result.assets[0]);
-        }
-    };
-
-    const submitPayment = async () => {
-        if (!paymentImage) {
-            Alert.alert('Error', 'Please select a payment proof image');
-            return;
-        }
-
-        setUploading(true);
-        try {
-            const formData = new FormData();
-            formData.append('paymentProof', {
-                uri: paymentImage.uri,
-                name: 'payment.jpg',
-                type: 'image/jpeg',
-            });
-
-            await api.post('/users/membership/payment', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-
-            Alert.alert('Success', 'Payment submitted! Please wait for admin approval.');
-            setShowPaymentModal(false);
-            setPaymentImage(null);
-            fetchData();
-        } catch (error) {
-            Alert.alert('Error', error.response?.data?.error || 'Failed to submit payment');
-        } finally {
-            setUploading(false);
-        }
+    const handleUpgradeMembership = async () => {
+        Alert.alert(
+            'Upgrade to Premium',
+            'Upgrade your membership to Premium for Rp 10.000/month via Midtrans (VA/QRIS)?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Pay with Midtrans',
+                    onPress: async () => {
+                        setLoading(true);
+                        try {
+                            const response = await api.post('/users/membership/checkout');
+                            if (response.data?.success) {
+                                Alert.alert('Success', 'Premium membership activated successfully! Welcome to the premium club.');
+                                fetchData();
+                            } else {
+                                Alert.alert('Error', 'Failed to activate membership. Please try again.');
+                            }
+                        } catch (error) {
+                            Alert.alert('Error', error.response?.data?.error || 'Server error during payment.');
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const saveBankDetails = async () => {
@@ -338,8 +322,8 @@ export default function SellerDashboardScreen({ navigation }) {
                 ) : (
                     <View>
                         <Text style={styles.membershipText}>Rp 10.000/month</Text>
-                        <TouchableOpacity style={styles.upgradeBtn} onPress={() => setShowPaymentModal(true)}>
-                            <Text style={styles.upgradeBtnText}>Pay Now</Text>
+                        <TouchableOpacity style={styles.upgradeBtn} onPress={handleUpgradeMembership}>
+                            <Text style={styles.upgradeBtnText}>Pay with Midtrans (VA/QRIS)</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -548,39 +532,7 @@ export default function SellerDashboardScreen({ navigation }) {
                 </View>
             </Modal>
 
-            {/* Payment Modal (Membership) */}
-            <Modal visible={showPaymentModal} animationType="slide" transparent>
-                {/* Same as before */}
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Submit Payment</Text>
-                            <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
-                                <Ionicons name="close" size={24} color={colors.textSecondary} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: 16, borderRadius: 12, marginBottom: 16 }}>
-                            <Text style={{ fontSize: 12, color: '#f59e0b' }}>Transfer to:</Text>
-                            <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginVertical: 4 }}>Bank BCA 1234567890</Text>
-                            <Text style={{ fontSize: 12, color: '#f59e0b' }}>a/n MSME Marketplace</Text>
-                            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text, marginTop: 8 }}>Amount: Rp 10.000</Text>
-                        </View>
-                        <TouchableOpacity style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: colors.border, borderRadius: 12, overflow: 'hidden', marginBottom: 16 }} onPress={pickImage}>
-                            {paymentImage ? (
-                                <Image source={{ uri: paymentImage.uri }} style={{ width: '100%', height: 200, resizeMode: 'cover' }} />
-                            ) : (
-                                <View style={{ padding: 40, alignItems: 'center' }}>
-                                    <Ionicons name="camera" size={32} color={colors.textTertiary} />
-                                    <Text style={{ marginTop: 8, color: colors.textSecondary, fontSize: 14 }}>Select Payment Proof</Text>
-                                </View>
-                            )}
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.submitBtn, uploading && styles.submitBtnDisabled]} onPress={submitPayment} disabled={uploading}>
-                            <Text style={styles.submitBtnText}>{uploading ? 'Submitting...' : 'Submit Payment'}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
+
         </ScrollView>
     );
 }
