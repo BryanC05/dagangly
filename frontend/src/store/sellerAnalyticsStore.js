@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 import api from '../utils/api';
 
-const DEFAULT_SELLER_EMAIL = 'rani.summarecon@marketplace.test';
-
 export const useSellerAnalyticsStore = create((set) => ({
   analytics: null,
   sales: null,
@@ -11,9 +9,8 @@ export const useSellerAnalyticsStore = create((set) => ({
   loading: false,
   error: null,
   useMockData: false,
-  mockSellerEmail: DEFAULT_SELLER_EMAIL,
 
-  fetchSellerAnalytics: async (period = '30', sellerEmail = DEFAULT_SELLER_EMAIL) => {
+  fetchSellerAnalytics: async (period = '30') => {
     set({ loading: true, error: null });
     
     // Get current API URL to debug
@@ -22,7 +19,7 @@ export const useSellerAnalyticsStore = create((set) => ({
     });
     
     try {
-      const params = sellerEmail ? `?period=${period}&email=${encodeURIComponent(sellerEmail)}` : `?period=${period}`;
+      const params = `?period=${period}`;
       console.log('Calling API: /analytics/seller' + params);
       const res = await api.get(`/analytics/seller${params}`);
       console.log('API response:', res.data);
@@ -33,11 +30,11 @@ export const useSellerAnalyticsStore = create((set) => ({
     }
   },
 
-  fetchSales: async (period = '30', sellerEmail = DEFAULT_SELLER_EMAIL) => {
+  fetchSales: async (period = '30') => {
     set({ loading: true, error: null });
     
     try {
-      const params = sellerEmail ? `?period=${period}&email=${encodeURIComponent(sellerEmail)}` : `?period=${period}`;
+      const params = `?period=${period}`;
       const res = await api.get(`/analytics/sales${params}`);
       set({ sales: res.data, loading: false });
     } catch (err) {
@@ -46,12 +43,11 @@ export const useSellerAnalyticsStore = create((set) => ({
     }
   },
 
-  fetchCustomers: async (sellerEmail = DEFAULT_SELLER_EMAIL) => {
+  fetchCustomers: async () => {
     set({ loading: true, error: null });
     
     try {
-      const params = sellerEmail ? `?email=${encodeURIComponent(sellerEmail)}` : '';
-      const res = await api.get(`/analytics/customers${params}`);
+      const res = await api.get(`/analytics/customers`);
       set({ customers: res.data, loading: false });
     } catch (err) {
       console.error('Failed to fetch customers:', err);
@@ -59,12 +55,11 @@ export const useSellerAnalyticsStore = create((set) => ({
     }
   },
 
-  fetchProductPerformance: async (sellerEmail = DEFAULT_SELLER_EMAIL) => {
+  fetchProductPerformance: async () => {
     set({ loading: true, error: null });
     
     try {
-      const params = sellerEmail ? `?email=${encodeURIComponent(sellerEmail)}` : '';
-      const res = await api.get(`/analytics/products${params}`);
+      const res = await api.get(`/analytics/products`);
       set({ products: res.data, loading: false });
     } catch (err) {
       console.error('Failed to fetch product performance:', err);
