@@ -8,13 +8,13 @@ import {
   DollarSign, 
   ArrowDownRight,
   Wallet,
+  Receipt,
   FileText,
   Bot,
   Package
 } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
-import { loadMockFinanceData, getSellers } from "@/utils/mockFinance";
 import { useAuthStore } from "@/store/authStore";
 
 function FinanceDashboard() {
@@ -28,7 +28,6 @@ function FinanceDashboard() {
     netProfit: 0,
     orderCount: 0,
   });
-  const [useMockData, setUseMockData] = useState(false);
   const [sellers, setSellers] = useState([]);
   const [selectedSeller, setSelectedSeller] = useState("all");
 
@@ -38,8 +37,7 @@ function FinanceDashboard() {
       navigate("/");
       return;
     }
-    setSellers(getSellers());
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,13 +55,8 @@ function FinanceDashboard() {
           netProfit: response.data.netProfit || 0,
           orderCount: response.data.orderCount || 0,
         });
-        setUseMockData(false);
       } catch (error) {
-        console.log("Using mock finance data for demo", error);
-        const sellerId = selectedSeller === "all" ? undefined : selectedSeller;
-        const mockData = loadMockFinanceData(sellerId);
-        setStats(mockData.summary);
-        setUseMockData(true);
+        console.log("Error fetching finance data:", error);
       } finally {
         setLoading(false);
       }
@@ -80,6 +73,7 @@ function FinanceDashboard() {
       minimumFractionDigits: 0,
     }).format(amount || 0);
   };
+
 
   const menuCards = [
     {

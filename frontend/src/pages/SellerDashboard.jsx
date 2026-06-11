@@ -183,35 +183,14 @@ function SellerDashboard() {
   const [editValues, setEditValues] = useState({ price: 0, stock: 0 });
   const [confirmModal, setConfirmModal] = useState({ show: false, productId: null, productName: '' });
 
-  // Force mock products for demo
-  const FORCE_MOCK_PRODUCTS = false;
-  
-  // Hardcoded mock products for Rani (Dapur Summarecon)
-  const getMockProducts = () => {
-    console.log('Generating mock products...');
-    const products = [
-      { _id: 'mock-1', name: 'Nasi Goreng Special', price: 45000, stock: 25, status: 'active', category: 'food', images: [] },
-      { _id: 'mock-2', name: 'Mie Ayam Jamur', price: 35000, stock: 18, status: 'active', category: 'food', images: [] },
-      { _id: 'mock-3', name: 'Soto Ayam Kudus', price: 40000, stock: 12, status: 'active', category: 'food', images: [] },
-      { _id: 'mock-4', name: 'Bakso Granada', price: 38000, stock: 20, status: 'active', category: 'food', images: [] },
-    ];
-    console.log('Mock products:', products);
-    return products;
-  };
-
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ['sellerProducts', sellerId],
     queryFn: async () => {
-      if (FORCE_MOCK_PRODUCTS) return getMockProducts();
-      try {
-        if (!sellerId) return getMockProducts();
-        const response = await api.get(`/products/seller/${sellerId}`);
-        return response.data;
-      } catch (err) {
-        console.log('Using mock products:', err.message);
-        return getMockProducts();
-      }
+      if (!sellerId) return [];
+      const response = await api.get(`/products/seller/${sellerId}`);
+      return response.data;
     },
+    enabled: !!sellerId,
   });
 
   const { data: orders } = useQuery({

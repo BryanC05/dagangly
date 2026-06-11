@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
-import { getInvoices, getSellers } from "@/utils/mockFinance";
 
 function FinanceInvoices() {
   const { t } = useTranslation();
@@ -23,7 +22,6 @@ function FinanceInvoices() {
   const [invoices, setInvoices] = useState([]);
   const [filteredInvoices, setFilteredInvoices] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [useMockData, setUseMockData] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sellers, setSellers] = useState([]);
   const [selectedSeller, setSelectedSeller] = useState("all");
@@ -35,18 +33,12 @@ function FinanceInvoices() {
         setInvoices(response.data);
         setFilteredInvoices(response.data);
       } catch (error) {
-        console.log("Using mock invoice data for demo");
-        const mockInvoices = getInvoices();
-        setInvoices(mockInvoices);
-        setFilteredInvoices(mockInvoices);
-        setUseMockData(true);
+        console.log("Error fetching invoice data:", error);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-    
-    setSellers(getSellers());
   }, []);
 
   useEffect(() => {
@@ -99,213 +91,202 @@ function FinanceInvoices() {
     );
   };
 
-  const stats = {
-    total: filteredInvoices.length,
-    paid: filteredInvoices.filter(i => i.status === "paid").length,
-    unpaid: filteredInvoices.filter(i => i.status === "unpaid").length,
-    totalAmount: filteredInvoices.reduce((sum, i) => sum + i.amount, 0),
-    paidAmount: filteredInvoices
-      .filter(i => i.status === "paid")
-      .reduce((sum, i) => sum + i.amount, 0),
-    unpaidAmount: filteredInvoices
-      .filter(i => i.status === "unpaid")
-      .reduce((sum, i) => sum + i.amount, 0),
-  };
-
   if (loading) {
     return (
       <div className="container py-8">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-24 bg-muted rounded"></div>
-            ))}
+          <div className="h-8 bg-muted rounded w-1/3 mb-8"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {[1, 2, 3].map(i => <div key={i} className="h-24 bg-muted rounded-xl"></div>)}
           </div>
+          <div className="h-64 bg-muted rounded-xl"></div>
         </div>
       </div>
     );
   }
 
+  const totalUnpaid = filteredInvoices
+    .filter(inv => inv.status === "unpaid" || inv.status === "overdue")
+    .reduce((sum, inv) => sum + inv.amount, 0);
+
+  const totalPaid = filteredInvoices
+    .filter(inv => inv.status === "paid")
+    .reduce((sum, inv) => sum + inv.amount, 0);
+
   return (
-    <div className="container py-8">
-      {/* Header */}
-      <div className="mb-6">
-        <Link to="/finance" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
-          <ArrowLeft size={18} />
-          <span>{t("back") || "Back to Finance"}</span>
+    <div className="container py-8 max-w-5xl mx-auto">
+      <div className="flex items-center gap-4 mb-8">
+        <Link to="/finance">
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
         </Link>
-        <h1 className="text-3xl font-bold">{t("invoices") || "Invoices"}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t("invoicesDesc") || "Manage invoices from your orders"}
-        </p>
-      </div>
-
-      {/* Demo Banner */}
-      {useMockData && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 flex items-center gap-3">
-          <div className="bg-amber-100 p-2 rounded-full">
-            <span className="text-xl">📋</span>
-          </div>
-          <div>
-            <p className="font-medium text-amber-800">Demo Mode - Mock Data</p>
-            <p className="text-sm text-amber-600">
-              Showing sample data. Connect backend to see real invoices.
-            </p>
-          </div>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold tracking-tight">{t("invoices") || "Invoices"}</h1>
+          <p className="text-muted-foreground">
+            {t("invoicesDesc") || "Manage customer invoices and payments"}
+          </p>
         </div>
-      )}
+      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">{t("total") || "Total"}</div>
-            <div className="text-xl font-bold">{stats.total}</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-200 dark:border-blue-900/50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-blue-500 text-white rounded-lg">
+                <FileText className="h-5 w-5" />
+              </div>
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">Total Invoices</h3>
+            </div>
+            <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">{filteredInvoices.length}</p>
           </CardContent>
         </Card>
-        <Card className="bg-green-50">
-          <CardContent className="pt-4">
-            <div className="text-sm text-green-700">{t("paid") || "Paid"}</div>
-            <div className="text-xl font-bold text-green-700">{stats.paid}</div>
-            <div className="text-xs text-green-600">{formatCurrency(stats.paidAmount)}</div>
+        
+        <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 border-amber-200 dark:border-amber-900/50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-amber-500 text-white rounded-lg">
+                <Receipt className="h-5 w-5" />
+              </div>
+              <h3 className="font-medium text-amber-900 dark:text-amber-100">Unpaid</h3>
+            </div>
+            <p className="text-3xl font-bold text-amber-700 dark:text-amber-300">{formatCurrency(totalUnpaid)}</p>
           </CardContent>
         </Card>
-        <Card className="bg-red-50">
-          <CardContent className="pt-4">
-            <div className="text-sm text-red-700">{t("unpaid") || "Unpaid"}</div>
-            <div className="text-xl font-bold text-red-700">{stats.unpaid}</div>
-            <div className="text-xs text-red-600">{formatCurrency(stats.unpaidAmount)}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-blue-50 col-span-2 md:col-span-3 lg:col-span-1">
-          <CardContent className="pt-4">
-            <div className="text-sm text-blue-700">{t("totalAmount") || "Total Amount"}</div>
-            <div className="text-lg font-bold text-blue-700">{formatCurrency(stats.totalAmount)}</div>
+
+        <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-200 dark:border-green-900/50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-green-500 text-white rounded-lg">
+                <DollarSign className="h-5 w-5" />
+              </div>
+              <h3 className="font-medium text-green-900 dark:text-green-100">Paid</h3>
+            </div>
+            <p className="text-3xl font-bold text-green-700 dark:text-green-300">{formatCurrency(totalPaid)}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardContent className="pt-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Seller Filter */}
-            {sellers.length > 0 && (
-              <select
-                value={selectedSeller}
-                onChange={(e) => setSelectedSeller(e.target.value)}
-                className="px-3 py-2 border rounded-md"
-              >
-                <option value="all">All Sellers</option>
-                {sellers.map(seller => (
-                  <option key={seller.sellerId} value={seller.sellerId}>
-                    {seller.sellerName}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            {/* Status Filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border rounded-md"
-            >
-              <option value="all">{t("all") || "All Status"}</option>
-              <option value="paid">{t("paid") || "Paid"}</option>
-              <option value="unpaid">{t("unpaid") || "Unpaid"}</option>
-            </select>
-
-            {/* Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder={t("search") || "Search invoice, order, customer..."}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-md"
-              />
+      <Card>
+        <CardHeader className="border-b pb-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-primary" />
+              Invoice History
+            </CardTitle>
+            
+            <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+              <div className="relative w-full md:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  placeholder="Search invoices..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground hidden md:block" />
+                <select 
+                  value={statusFilter} 
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full md:w-auto px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="paid">Paid</option>
+                  <option value="unpaid">Unpaid</option>
+                  <option value="overdue">Overdue</option>
+                </select>
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Invoices Table */}
-      <Card>
+        </CardHeader>
+        
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">{t("invoice") || "Invoice"}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">{t("order") || "Order"}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">{t("seller") || "Seller"}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">{t("product") || "Product"}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">{t("customer") || "Customer"}</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium">{t("amount") || "Amount"}</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium">{t("date") || "Date"}</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium">{t("status") || "Status"}</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium">{t("action") || "Action"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInvoices.length === 0 ? (
+          {filteredInvoices.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center">
+              <FileText className="h-12 w-12 text-muted/50 mb-3" />
+              <p>No invoices found matching your filters.</p>
+              {(statusFilter !== "all" || searchTerm) && (
+                <Button 
+                  variant="link" 
+                  onClick={() => {
+                    setStatusFilter("all");
+                    setSearchTerm("");
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-muted/50 text-muted-foreground text-xs uppercase">
                   <tr>
-                    <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
-                      <Receipt className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      <p>{t("noInvoices") || "No invoices found"}</p>
-                    </td>
+                    <th className="px-6 py-3 font-medium">Invoice ID</th>
+                    <th className="px-6 py-3 font-medium">Customer</th>
+                    <th className="px-6 py-3 font-medium">Date</th>
+                    <th className="px-6 py-3 font-medium">Amount</th>
+                    <th className="px-6 py-3 font-medium">Status</th>
+                    <th className="px-6 py-3 font-medium text-right">Action</th>
                   </tr>
-                ) : (
-                  filteredInvoices.map((invoice) => (
-                    <tr key={invoice.invoiceId} className="border-t hover:bg-muted/30">
-                      <td className="px-4 py-3">
-                        <span className="font-medium text-primary">{invoice.invoiceId}</span>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {filteredInvoices.map((inv) => (
+                    <tr key={inv.invoiceId} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-6 py-4 font-medium">
+                        {inv.invoiceId}
+                        <div className="text-xs text-muted-foreground font-normal mt-0.5">Order: {inv.orderId}</div>
                       </td>
-                      <td className="px-4 py-3 text-sm">{invoice.orderId}</td>
-                      <td className="px-4 py-3 text-sm">{invoice.sellerName}</td>
-                      <td className="px-4 py-3 text-sm">{invoice.product}</td>
-                      <td className="px-4 py-3 text-sm">{invoice.customer}</td>
-                      <td className="px-4 py-3 text-right font-medium">
-                        {formatCurrency(invoice.amount)}
+                      <td className="px-6 py-4">
+                        {inv.customer}
+                        <div className="text-xs text-muted-foreground mt-0.5 max-w-[150px] truncate" title={inv.product}>
+                          {inv.product}
+                        </div>
                       </td>
-                      <td className="px-4 py-3 text-center text-sm">
-                        {formatDate(invoice.date)}
+                      <td className="px-6 py-4 text-muted-foreground">{formatDate(inv.date)}</td>
+                      <td className="px-6 py-4 font-bold">{formatCurrency(inv.amount)}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          inv.status === 'paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                          inv.status === 'overdue' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                          'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                        }`}>
+                          {inv.status === 'paid' && <CheckCircle className="h-3 w-3" />}
+                          {inv.status === 'overdue' && <XCircle className="h-3 w-3" />}
+                          {inv.status === 'unpaid' && <FileText className="h-3 w-3" />}
+                          {inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        {invoice.status === "paid" ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                            <CheckCircle className="h-3 w-3" />
-                            {t("paid") || "Paid"}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">
-                            <XCircle className="h-3 w-3" />
-                            {t("unpaid") || "Unpaid"}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {invoice.status === "unpaid" && (
-                          <Button
+                      <td className="px-6 py-4 text-right">
+                        {inv.status !== 'paid' ? (
+                          <Button 
+                            variant="outline" 
                             size="sm"
-                            variant="outline"
-                            onClick={() => handleMarkAsPaid(invoice.invoiceId)}
-                            className="text-xs"
+                            className="h-8 text-xs font-medium border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 dark:border-green-900 dark:text-green-400 dark:hover:bg-green-900/50"
+                            onClick={() => handleMarkAsPaid(inv.invoiceId)}
                           >
-                            <DollarSign className="h-3 w-3 mr-1" />
-                            {t("markPaid") || "Mark Paid"}
+                            Mark Paid
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="h-8 text-xs text-muted-foreground"
+                          >
+                            View
                           </Button>
                         )}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

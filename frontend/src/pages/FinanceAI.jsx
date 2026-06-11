@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import api from "@/utils/api";
-import { loadMockFinanceData, getProductFinancials } from "@/utils/mockFinance";
 
 function FinanceAI() {
   const { t } = useTranslation();
