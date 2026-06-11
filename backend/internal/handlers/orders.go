@@ -1248,7 +1248,21 @@ func (h *OrderHandler) SellerResponse(c *gin.Context) {
 	var updatedOrder models.Order
 	ordersCollection.FindOne(context.Background(), bson.M{"_id": orderObjID}).Decode(&updatedOrder)
 
-	// TODO: Send notification to buyer
+	// Notify buyer about seller's response
+	statusLabels := map[string]string{
+		"seller_accepted":        "Seller accepted your schedule",
+		"seller_declined":        "Seller declined your request",
+		"awaiting_buyer_confirm": "Seller requested schedule changes",
+	}
+	title := statusLabels[updatedOrder.RequestStatus]
+	if title == "" {
+		title = "Order Updated"
+	}
+
+	go CreateAndSend(order.Buyer, "order_update", title,
+		fmt.Sprintf("Store %s: %s", order.Seller.Hex(), title),
+		map[string]interface{}{"orderId": orderID, "requestStatus": updatedOrder.RequestStatus},
+	)
 
 	c.JSON(200, updatedOrder)
 }
@@ -1336,7 +1350,11 @@ func (h *OrderHandler) BuyerConfirm(c *gin.Context) {
 	var updatedOrder models.Order
 	ordersCollection.FindOne(context.Background(), bson.M{"_id": orderObjID}).Decode(&updatedOrder)
 
-	// TODO: Send notification to seller
+	// Notify seller that buyer confirmed
+	go CreateAndSend(order.Seller, "order_confirmed", "Order Confirmed",
+		fmt.Sprintf("Buyer confirmed order #%s", orderID[len(orderID)-8:]),
+		map[string]interface{}{"orderId": orderID, "status": "pending"},
+	)
 
 	c.JSON(200, updatedOrder)
 }
@@ -1378,7 +1396,11 @@ func (h *OrderHandler) CleanupExpiredRequests() {
 			continue
 		}
 
-		// TODO: Send notification to buyer about auto-decline
+		// Send notification to buyer about auto-decline
+		go CreateAndSend(order.Buyer, "order_cancelled", "Order Expired",
+			fmt.Sprintf("Order #%s was auto-declined as the seller did not respond within 24 hours.", order.ID.Hex()[len(order.ID.Hex())-8:]),
+			map[string]interface{}{"orderId": order.ID.Hex(), "status": "cancelled"},
+		)
 	}
 }
 
