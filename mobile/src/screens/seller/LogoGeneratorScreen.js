@@ -77,8 +77,8 @@ export default function LogoGeneratorScreen({ navigation }) {
     useEffect(() => {
         const checkBusiness = async () => {
             try {
-                const response = await api.get('/business');
-                if (response.data.success && response.data.business) {
+                const response = await api.get('/business/my');
+                if (response.data.business) {
                     setHasBusiness(true);
                 } else {
                     setHasBusiness(false);

@@ -172,6 +172,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// Self-heal isSeller status
+	if user.BusinessID != nil && !user.IsSeller {
+		user.IsSeller = true
+		_, _ = collection.UpdateOne(context.Background(), bson.M{"_id": user.ID}, bson.M{"$set": bson.M{"isSeller": true}})
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":       user.ID.Hex(),
 		"email":    user.Email,
@@ -280,6 +286,12 @@ func (h *AuthHandler) SocialLogin(c *gin.Context) {
 			}
 			user.ID = result.InsertedID.(primitive.ObjectID)
 		}
+	}
+
+	// Self-heal isSeller status
+	if user.BusinessID != nil && !user.IsSeller {
+		user.IsSeller = true
+		_, _ = collection.UpdateOne(context.Background(), bson.M{"_id": user.ID}, bson.M{"$set": bson.M{"isSeller": true}})
 	}
 
 	// Generate our own JWT

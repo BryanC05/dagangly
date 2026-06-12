@@ -1,50 +1,105 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAccessibilityStore } from '../store/accessibilityStore';
 
-// ─── Layer 1: Slow warm gradient that cycles through Indonesian-inspired tones ───
-const GradientBackground = () => (
+// ─── Layer 1: Persona 5 Strikers Animated Background ───
+const PersonaBackground = () => (
     <div
-        className="absolute inset-0 pointer-events-none z-[-2]"
+        className="absolute inset-0 pointer-events-none z-[-2] overflow-hidden"
         aria-hidden="true"
     >
         <style>{`
-            @keyframes warmGradientCycle {
-                0%   { background-position: 0% 50%; }
-                50%  { background-position: 100% 50%; }
-                100% { background-position: 0% 50%; }
+            @keyframes floatDiagonal {
+                0% { transform: translate(0, 0) rotate(-12deg); }
+                50% { transform: translate(15px, -15px) rotate(-10deg); }
+                100% { transform: translate(0, 0) rotate(-12deg); }
             }
-            .warm-gradient-bg {
+            @keyframes floatDiagonalOpposite {
+                0% { transform: translate(0, 0) rotate(15deg); }
+                50% { transform: translate(-20px, 10px) rotate(13deg); }
+                100% { transform: translate(0, 0) rotate(15deg); }
+            }
+            .persona-bg {
                 position: absolute;
                 inset: 0;
-                background: linear-gradient(
-                    -45deg,
-                    hsl(33,  90%, 97%),
-                    hsl(42,  90%, 95%),
-                    hsl(25,  80%, 96%),
-                    hsl(50,  85%, 94%),
-                    hsl(18,  75%, 96%)
-                );
-                background-size: 400% 400%;
-                animation: warmGradientCycle 30s ease infinite;
-                opacity: 1;
+                background-color: #f7f7f7;
+                background-image: radial-gradient(rgba(0,102,255,0.1) 1px, transparent 1px);
+                background-size: 24px 24px;
             }
-            .dark .warm-gradient-bg {
-                background: linear-gradient(
-                    -45deg,
-                    hsl(220, 25%, 9%),
-                    hsl(240, 20%, 11%),
-                    hsl(260, 20%, 10%),
-                    hsl(210, 25%, 9%),
-                    hsl(230, 22%, 8%)
+            .dark .persona-bg {
+                background-color: #050505;
+                background-image: radial-gradient(rgba(230,0,18,0.15) 1px, transparent 1px);
+                background-size: 24px 24px;
+            }
+            .slash-panel-1 {
+                position: absolute;
+                top: -10%;
+                left: -15%;
+                width: 50%;
+                height: 120%;
+                background: #0066FF;
+                transform: rotate(-12deg);
+                opacity: 0.85;
+                box-shadow: 10px 0px 0px #000;
+                animation: floatDiagonal 20s ease-in-out infinite;
+            }
+            .dark .slash-panel-1 {
+                background: #E60012;
+                box-shadow: 10px 0px 0px #fff;
+                opacity: 0.35;
+            }
+            .slash-panel-2 {
+                position: absolute;
+                bottom: -20%;
+                right: -10%;
+                width: 35%;
+                height: 90%;
+                background: #000;
+                transform: rotate(15deg);
+                opacity: 0.9;
+                box-shadow: -5px -5px 0px #0066FF;
+                animation: floatDiagonalOpposite 25s ease-in-out infinite;
+            }
+            .dark .slash-panel-2 {
+                background: #111;
+                box-shadow: -5px -5px 0px #E60012;
+                opacity: 0.8;
+            }
+            .slash-stripe {
+                position: absolute;
+                top: 30%;
+                right: 20%;
+                width: 15%;
+                height: 150%;
+                background: repeating-linear-gradient(
+                    45deg,
+                    #0066FF,
+                    #0066FF 8px,
+                    transparent 8px,
+                    transparent 16px
                 );
-                background-size: 400% 400%;
+                transform: rotate(-15deg);
+                opacity: 0.15;
+            }
+            .dark .slash-stripe {
+                background: repeating-linear-gradient(
+                    45deg,
+                    #E60012,
+                    #E60012 8px,
+                    transparent 8px,
+                    transparent 16px
+                );
+                opacity: 0.08;
             }
         `}</style>
-        <div className="warm-gradient-bg" />
+        <div className="persona-bg">
+            <div className="slash-panel-1" />
+            <div className="slash-panel-2" />
+            <div className="slash-stripe" />
+        </div>
     </div>
 );
 
-// ─── Main: Mouse spotlight + ⭐ cursor trail + cart burst + layers above ───
+// ─── Main: Mouse spotlight + ★ cursor trail + cart/particle burst ───
 const InteractiveBackground = () => {
     const [isClient, setIsClient] = useState(false);
     const containerRef = useRef(null);
@@ -53,7 +108,7 @@ const InteractiveBackground = () => {
     useEffect(() => {
         setIsClient(true);
 
-        // Disable particle effects on mobile or when reduced motion is preferred or enabled in settings
+        // Disable particle effects on mobile or when reduced motion is preferred
         const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (isMobile || prefersReducedMotion || reducedMotion) return;
@@ -66,12 +121,19 @@ const InteractiveBackground = () => {
 
             rafId = requestAnimationFrame(() => {
                 const now = Date.now();
-                // Spawn a ⭐ star every ~100ms to reduce DOM churn
+                // Spawn a particle every ~100ms
                 if (now - lastSpawnTime > 100 && containerRef.current) {
                     lastSpawnTime = now;
 
                     const particle = document.createElement('div');
-                    particle.textContent = '⭐';
+                    
+                    const shapes = ['★', '◆', '▲', '■', '⚡', '★', '◆'];
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const colors = [isDark ? '#E60012' : '#0066FF', '#000000', '#FFFFFF'];
+                    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    particle.textContent = shape;
                     particle.style.position = 'absolute';
                     particle.style.left = `${e.clientX}px`;
                     particle.style.top = `${e.clientY}px`;
@@ -79,6 +141,12 @@ const InteractiveBackground = () => {
                     particle.style.pointerEvents = 'none';
                     particle.style.userSelect = 'none';
                     particle.style.zIndex = '50';
+                    particle.style.color = color;
+                    
+                    // Style with outline to ensure visibility
+                    particle.style.textShadow = color === '#000000'
+                        ? '1px 1px 0px #fff, -1px -1px 0px #fff'
+                        : '1px 1px 0px #000';
 
                     const angle = Math.random() * Math.PI * 2;
                     const velocity = 40 + Math.random() * 100;
@@ -88,7 +156,7 @@ const InteractiveBackground = () => {
 
                     particle.style.transition = 'transform 1s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 1s ease-out';
                     particle.style.transform = 'translate(-50%, -50%) scale(0.5)';
-                    particle.style.opacity = '0.5'; // 50% as requested
+                    particle.style.opacity = '0.75';
 
                     containerRef.current.appendChild(particle);
 
@@ -106,66 +174,28 @@ const InteractiveBackground = () => {
             });
         };
 
-        const handleCartBurst = (e) => {
-            const { x, y } = e.detail || {};
-            if (!containerRef.current || !x || !y) return;
-
-            const colors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7'];
-            const icons = ['🛒', '✨', '🛍️', '🎉'];
-
-            for (let i = 0; i < 15; i++) {
-                const particle = document.createElement('div');
-                particle.textContent = icons[Math.floor(Math.random() * icons.length)];
-                particle.style.cssText = `
-                    position: absolute;
-                    left: ${x}px;
-                    top: ${y}px;
-                    color: ${colors[Math.floor(Math.random() * colors.length)]};
-                    font-size: ${16 + Math.random() * 24}px;
-                    pointer-events: none;
-                    user-select: none;
-                    z-index: 60;
-                    opacity: 1;
-                    transform: translate(-50%, -50%) scale(0.1);
-                    transition: transform 1.5s cubic-bezier(0.1, 0.8, 0.2, 1), opacity 1.5s ease-out;
-                `;
-                containerRef.current.appendChild(particle);
-
-                const angle = Math.random() * Math.PI * 2;
-                const vel = 100 + Math.random() * 300;
-                const dx = Math.cos(angle) * vel;
-                const dy = Math.sin(angle) * vel + (Math.random() * 150 - 50);
-                const rot = (Math.random() - 0.5) * 1080;
-
-                requestAnimationFrame(() => {
-                    particle.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${rot}deg) scale(${1 + Math.random()})`;
-                    particle.style.opacity = '0';
-                });
-
-                setTimeout(() => {
-                    if (particle.parentNode === containerRef.current) {
-                        containerRef.current.removeChild(particle);
-                    }
-                }, 1500);
-            }
-        };
-
         const spawnBurst = (x, y, icons, count = 12, velocityRange = 300) => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const colors = [isDark ? '#E60012' : '#0066FF', '#000000', '#FFFFFF'];
             for (let i = 0; i < count; i++) {
                 const particle = document.createElement('div');
-                particle.textContent = icons[Math.floor(Math.random() * icons.length)];
+                const shape = icons[Math.floor(Math.random() * icons.length)];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.textContent = shape;
 
-                // Append to body — the container has overflow:hidden which clips fixed children
                 particle.style.cssText = `
                     position: fixed;
                     left: ${x}px;
                     top: ${y}px;
+                    color: ${color};
                     font-size: ${24 + Math.random() * 24}px;
                     pointer-events: none;
                     user-select: none;
                     z-index: 9999;
                     opacity: 1;
                     transform: translate(-50%, -50%) scale(0.3);
+                    text-shadow: ${color === '#000000' ? '1px 1px 0px #fff, -1px -1px 0px #fff' : '1px 1px 0px #000'};
                     transition: transform 1.4s cubic-bezier(0.1, 0.8, 0.2, 1), opacity 1.4s ease-out;
                 `;
                 document.body.appendChild(particle);
@@ -176,7 +206,6 @@ const InteractiveBackground = () => {
                 const dy = Math.sin(angle) * vel - (50 + Math.random() * 100);
                 const rot = (Math.random() - 0.5) * 720;
 
-                // Double rAF so browser paints initial state before the transition fires
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         particle.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${rot}deg) scale(1.2)`;
@@ -190,13 +219,19 @@ const InteractiveBackground = () => {
             }
         };
 
+        const handleCartBurst = (e) => {
+            const { x, y } = e.detail || {};
+            if (!x || !y) return;
+            spawnBurst(x, y, ['★', '◆', '▲', '■', '⚡', '🛒', '🛍️'], 15, 260);
+        };
+
         const handleParticleBurst = (e) => {
             const { type, x, y } = e.detail || {};
             if (!x || !y) return;
             if (type === 'add-to-cart') {
-                spawnBurst(x, y, ['🛒', '🍜', '⭐', '✨', '🛍️'], 20, 280);
+                spawnBurst(x, y, ['★', '◆', '▲', '■', '⚡', '🛒', '🛍️'], 20, 280);
             } else if (type === 'save') {
-                spawnBurst(x, y, ['❤️', '💖', '💕', '✨', '💝'], 18, 240);
+                spawnBurst(x, y, ['★', '◆', '▲', '■', '⚡', '❤️', '💖'], 18, 240);
             }
         };
 
@@ -216,10 +251,10 @@ const InteractiveBackground = () => {
 
     return (
         <>
-            {/* Gradient layer sits beneath everything */}
-            <GradientBackground />
+            {/* Persona custom background panels */}
+            <PersonaBackground />
 
-            {/* Particle container — ⭐ trail lives here */}
+            {/* Particle container */}
             <div
                 ref={containerRef}
                 className="interactive-bg-container pointer-events-none fixed inset-0 z-0 overflow-hidden"

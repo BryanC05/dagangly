@@ -8,8 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Store, Mail, Phone, MapPin, Edit, Camera, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import api from '@/utils/api';
+import { useAuthStore } from '@/store/authStore';
 
 export default function BusinessSection() {
+    const { setUser } = useAuthStore();
     const [business, setBusiness] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
@@ -21,6 +23,7 @@ export default function BusinessSection() {
         description: '',
         email: '',
         phone: '',
+        businessType: 'micro',
         address: '',
         city: '',
         state: '',
@@ -40,6 +43,7 @@ export default function BusinessSection() {
                     description: response.data.business.description || '',
                     email: response.data.business.email || '',
                     phone: response.data.business.phone || '',
+                    businessType: response.data.business.businessType || 'micro',
                     address: response.data.business.address || '',
                     city: response.data.business.city || '',
                     state: response.data.business.state || '',
@@ -67,6 +71,15 @@ export default function BusinessSection() {
             const response = await api.post('/business', form);
             setBusiness(response.data.business);
             setEditing(false);
+
+            // Sync user profile to update isSeller status dynamically
+            try {
+                const profileResponse = await api.get('/users/profile');
+                setUser(profileResponse.data);
+            } catch (err) {
+                console.error('Failed to sync profile after business registration:', err);
+            }
+
             toast({
                 title: 'Success',
                 description: 'Business registered successfully!',
@@ -86,7 +99,7 @@ export default function BusinessSection() {
         if (!business?._id) return;
         setSaving(true);
         try {
-            await api.put(`/business/${business._id}`, form);
+            await api.put('/business', form);
             await fetchBusiness();
             setEditing(false);
             toast({
@@ -237,7 +250,7 @@ export default function BusinessSection() {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="city">City</Label>
                             <Input
@@ -255,6 +268,19 @@ export default function BusinessSection() {
                                 onChange={(e) => setForm({ ...form, state: e.target.value })}
                                 placeholder="State"
                             />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="businessType">Business Type *</Label>
+                            <select
+                                id="businessType"
+                                value={form.businessType}
+                                onChange={(e) => setForm({ ...form, businessType: e.target.value })}
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
+                            >
+                                <option value="micro">Micro</option>
+                                <option value="small">Small</option>
+                                <option value="medium">Medium</option>
+                            </select>
                         </div>
                     </div>
 

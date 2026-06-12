@@ -101,12 +101,6 @@ const Sell = () => {
                             description: t('sell.benefit5Desc') || "Create professional logos for your brand",
                             premium: true,
                         },
-                        {
-                            icon: Zap,
-                            title: t('sell.benefit6Title') || "Automation Tools",
-                            description: t('sell.benefit6Desc') || "Streamline order confirmations & alerts",
-                            premium: true,
-                        },
                     ].map((benefit) => (
                         <Card key={benefit.title} className="text-center">
                             <CardContent className="pt-6">
@@ -135,18 +129,14 @@ const Sell = () => {
                             {t('membership.title') || 'Unlock Premium Features'}
                         </h3>
                         <p className="text-muted-foreground mb-4 max-w-lg mx-auto">
-                            {t('membership.subtitle') || 'Get exclusive access to AI Logo Generator and Workflow Automation'}
+                            {t('membership.subtitle') || 'Get exclusive access to AI Logo Generator and priority search placement'}
                         </p>
                         <div className="flex flex-wrap justify-center gap-3 mb-4">
                             <Badge variant="secondary" className="gap-1">
                                 <Sparkles className="h-3 w-3" />
                                 {t('membership.benefit1Title') || 'AI Logo Generator'}
                             </Badge>
-                            <Badge variant="secondary" className="gap-1">
-                                <Zap className="h-3 w-3" />
-                                {t('membership.benefit2Title') || 'Workflow Automation'}
-                            </Badge>
-                            <Badge variant="secondary" className="gap-1">
+                             <Badge variant="secondary" className="gap-1">
                                 <Award className="h-3 w-3" />
                                 {t('membership.benefit4Title') || 'Priority Results'}
                             </Badge>

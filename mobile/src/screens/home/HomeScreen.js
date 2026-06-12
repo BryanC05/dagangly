@@ -252,13 +252,14 @@ export default function HomeScreen({ navigation }) {
                     <Text style={styles.heroBadgeText}>MARKETPLACE UMKM INDONESIA</Text>
                 </View>
 
-                <Text style={styles.heroTitle}>
-                    {heroSlides[currentSlide].title}
-                </Text>
-
-                <Text style={styles.heroSubtitle}>
-                    {heroSlides[currentSlide].desc}
-                </Text>
+                <View style={styles.heroTextContainer}>
+                    <Text style={styles.heroTitle}>
+                        {heroSlides[currentSlide].title}
+                    </Text>
+                    <Text style={styles.heroSubtitle}>
+                        {heroSlides[currentSlide].desc}
+                    </Text>
+                </View>
 
                 <View style={styles.searchContainer}>
                     <View style={styles.searchInput}>

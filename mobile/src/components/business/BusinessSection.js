@@ -7,9 +7,11 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../theme/ThemeContext';
 import api from '../../api/api';
+import { useAuthStore } from '../../store/authStore';
 
 export default function BusinessSection({ user, onBusinessUpdate }) {
     const { colors } = useTheme();
+    const { setUser } = useAuthStore();
     const [business, setBusiness] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
@@ -63,10 +65,19 @@ export default function BusinessSection({ user, onBusinessUpdate }) {
 
         setSaving(true);
         try {
-            const response = await api.post('/business/', form);
+            const response = await api.post('/business', form);
             setBusiness(response.data.business);
             setEditing(false);
             onBusinessUpdate?.(response.data.business);
+
+            // Sync user profile to update isSeller status dynamically
+            try {
+                const profileResponse = await api.get('/users/profile');
+                setUser(profileResponse.data);
+            } catch (err) {
+                console.error('Failed to sync profile after business registration:', err);
+            }
+
             Alert.alert('Success', 'Business registered successfully!');
         } catch (error) {
             Alert.alert('Error', error.response?.data?.message || 'Failed to create business');
@@ -78,7 +89,7 @@ export default function BusinessSection({ user, onBusinessUpdate }) {
     const handleUpdateBusiness = async () => {
         setSaving(true);
         try {
-            const response = await api.put('/business/', form);
+            const response = await api.put('/business', form);
             await fetchBusiness();
             setEditing(false);
             onBusinessUpdate?.(business);

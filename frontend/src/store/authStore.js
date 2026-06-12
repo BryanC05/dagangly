@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import api from '@/utils/api';
 
 // VITE_USE_FIREBASE_AUTH should be 'true' or 'false' in .env
 export const USE_FIREBASE_AUTH = import.meta.env.VITE_USE_FIREBASE_AUTH === 'true';
@@ -71,10 +72,16 @@ export const useAuthStore = create(
         localStorage.removeItem('saved-products-storage');
       },
 
-      initializeAuth: () => {
+      initializeAuth: async () => {
         const token = localStorage.getItem('token');
         if (isValidJWT(token)) {
           set({ token, isAuthenticated: true });
+          try {
+            const response = await api.get('/users/profile');
+            set({ user: normalizeUser(response.data) });
+          } catch (err) {
+            console.error('Failed to auto-fetch profile on initializeAuth:', err);
+          }
         } else if (token) {
           localStorage.removeItem('token');
         }

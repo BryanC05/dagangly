@@ -5,54 +5,51 @@ import { useAuthModalStore } from './store/authModalStore';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import { useLanguageStore } from './store/languageStore';
-import SocialLinks from './pages/SocialLinks';
-import SellerDashboard from './pages/SellerDashboard';
-import AddProduct from './pages/AddProduct';
-import SellerProductTracking from './pages/SellerProductTracking';
-import Orders from './pages/Orders';
-import Profile from './pages/Profile';
-import Cart from './pages/Cart';
-import NearbyMap from './pages/NearbyMap';
-import SellerStore from './pages/SellerStore';
-import Chat from './pages/Chat';
-import Forum from './pages/Forum';
-import ThreadDetail from './pages/ThreadDetail';
-import NewThread from './pages/NewThread';
-import EditThread from './pages/EditThread';
-import Sell from './pages/Sell';
-import Messages from './pages/Messages';
-import Forums from './pages/Forums';
-import SavedProducts from './pages/SavedProducts';
-import Automation from './pages/Automation/Automation';
-import LogoGenerator from './pages/LogoGenerator';
-import Projects from './pages/Projects';
-import ProjectDetail from './pages/ProjectDetail';
-import TrackingPage from './pages/TrackingPage';
-import AdminMembership from './pages/AdminMembership';
-import AdminPendingRegistrations from './pages/AdminPendingRegistrations';
-import AdminDashboard from './pages/AdminDashboard';
-import Notifications from './pages/Notifications';
-import Invoice from './pages/Invoice';
-import Guide from './pages/Guide';
-import Wallet from './pages/Wallet';
-import VideoCallPage from './pages/VideoCall';
-import InstallmentsPage from './pages/Installments';
-import InventoryPage from './pages/Inventory';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/layout/Layout';
 import { WebSocketProvider } from './contexts/WebSocketContext';
-import FinanceDashboard from './pages/FinanceDashboard';
-import FinanceExpenses from './pages/FinanceExpenses';
-import FinanceCalculator from './pages/FinanceCalculator';
 
+// Lazy-load ALL pages for optimal code-splitting
 const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const NotFound = lazy(() => import('./pages/NotFound'));
-const Finance = lazy(() => import('./pages/FinanceDashboard'));
-const FinanceExp = lazy(() => import('./pages/FinanceExpenses'));
-const FinanceCalc = lazy(() => import('./pages/FinanceCalculator'));
-const FinanceInv = lazy(() => import('./pages/FinanceInvoices'));
+const SocialLinks = lazy(() => import('./pages/SocialLinks'));
+const SellerDashboard = lazy(() => import('./pages/SellerDashboard'));
+const AddProduct = lazy(() => import('./pages/AddProduct'));
+const SellerProductTracking = lazy(() => import('./pages/SellerProductTracking'));
+const Orders = lazy(() => import('./pages/Orders'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Cart = lazy(() => import('./pages/Cart'));
+const NearbyMap = lazy(() => import('./pages/NearbyMap'));
+const SellerStore = lazy(() => import('./pages/SellerStore'));
+const Chat = lazy(() => import('./pages/Chat'));
+const Forum = lazy(() => import('./pages/Forum'));
+const ThreadDetail = lazy(() => import('./pages/ThreadDetail'));
+const NewThread = lazy(() => import('./pages/NewThread'));
+const EditThread = lazy(() => import('./pages/EditThread'));
+const Sell = lazy(() => import('./pages/Sell'));
+const Messages = lazy(() => import('./pages/Messages'));
+const Forums = lazy(() => import('./pages/Forums'));
+const SavedProducts = lazy(() => import('./pages/SavedProducts'));
+const LogoGenerator = lazy(() => import('./pages/LogoGenerator'));
+const Projects = lazy(() => import('./pages/Projects'));
+const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
+const TrackingPage = lazy(() => import('./pages/TrackingPage'));
+const AdminMembership = lazy(() => import('./pages/AdminMembership'));
+const AdminPendingRegistrations = lazy(() => import('./pages/AdminPendingRegistrations'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Invoice = lazy(() => import('./pages/Invoice'));
+const Guide = lazy(() => import('./pages/Guide'));
+const Wallet = lazy(() => import('./pages/Wallet'));
+const VideoCallPage = lazy(() => import('./pages/VideoCall'));
+const InstallmentsPage = lazy(() => import('./pages/Installments'));
+const InventoryPage = lazy(() => import('./pages/Inventory'));
+const FinanceDashboard = lazy(() => import('./pages/FinanceDashboard'));
+const FinanceExpenses = lazy(() => import('./pages/FinanceExpenses'));
+const FinanceCalculator = lazy(() => import('./pages/FinanceCalculator'));
+const FinanceInvoices = lazy(() => import('./pages/FinanceInvoices'));
 const ProductProfitCalc = lazy(() => import('./pages/ProductProfitCalculator'));
 const FinanceAI = lazy(() => import('./pages/FinanceAI'));
 const ProductExpenses = lazy(() => import('./pages/ProductExpenses'));
@@ -122,45 +119,44 @@ function App() {
                 <Route path="/" element={<Suspense fallback={<LoadingFallback />}><Home /></Suspense>} />
                 <Route path="/products" element={<Suspense fallback={<LoadingFallback />}><Products /></Suspense>} />
                 <Route path="/product/:id" element={<Suspense fallback={<LoadingFallback />}><ProductDetail /></Suspense>} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/nearby" element={<NearbyMap />} />
-                <Route path="/store/:id" element={<SellerStore />} />
-                <Route path="/seller/dashboard" element={<SellerDashboard />} />
-                <Route path="/seller/add-product" element={<AddProduct />} />
+                <Route path="/cart" element={<Suspense fallback={<LoadingFallback />}><Cart /></Suspense>} />
+                <Route path="/nearby" element={<Suspense fallback={<LoadingFallback />}><NearbyMap /></Suspense>} />
+                <Route path="/store/:id" element={<Suspense fallback={<LoadingFallback />}><SellerStore /></Suspense>} />
+                <Route path="/seller/dashboard" element={<Suspense fallback={<LoadingFallback />}><SellerDashboard /></Suspense>} />
+                <Route path="/seller/add-product" element={<Suspense fallback={<LoadingFallback />}><AddProduct /></Suspense>} />
                 <Route path="/add-product" element={<Navigate to="/seller/add-product" replace />} />
-                <Route path="/seller/product-tracking" element={<SellerProductTracking />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/profile/:id" element={<Profile />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/sell" element={<Sell />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/forums" element={<Forums />} />
-                <Route path="/forum" element={<Forum />} />
-                <Route path="/forum/new" element={<NewThread />} />
-                <Route path="/forum/:id/edit" element={<EditThread />} />
-                <Route path="/forum/:id" element={<ThreadDetail />} />
-                <Route path="/saved-products" element={<SavedProducts />} />
-                <Route path="/automation" element={<Automation />} />
-                <Route path="/social-links" element={<SocialLinks />} />
-                <Route path="/logo-generator" element={<LogoGenerator />} />
-                <Route path="/admin/membership" element={<AdminMembership />} />
-                <Route path="/admin/registrations" element={<AdminPendingRegistrations />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/wallet" element={<Wallet />} />
-                <Route path="/video-call" element={<VideoCallPage />} />
-                <Route path="/installments" element={<InstallmentsPage />} />
-                <Route path="/inventory" element={<InventoryPage />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/invoice/:orderId" element={<Invoice />} />
-                <Route path="/guide" element={<Guide />} />
-                <Route path="/finance" element={<Suspense fallback={<LoadingFallback />}><Finance /></Suspense>} />
-                <Route path="/finance/expenses" element={<Suspense fallback={<LoadingFallback />}><FinanceExp /></Suspense>} />
-                <Route path="/finance/calculator" element={<Suspense fallback={<LoadingFallback />}><FinanceCalc /></Suspense>} />
+                <Route path="/seller/product-tracking" element={<Suspense fallback={<LoadingFallback />}><SellerProductTracking /></Suspense>} />
+                <Route path="/orders" element={<Suspense fallback={<LoadingFallback />}><Orders /></Suspense>} />
+                <Route path="/profile" element={<Suspense fallback={<LoadingFallback />}><Profile /></Suspense>} />
+                <Route path="/profile/:id" element={<Suspense fallback={<LoadingFallback />}><Profile /></Suspense>} />
+                <Route path="/chat" element={<Suspense fallback={<LoadingFallback />}><Chat /></Suspense>} />
+                <Route path="/sell" element={<Suspense fallback={<LoadingFallback />}><Sell /></Suspense>} />
+                <Route path="/messages" element={<Suspense fallback={<LoadingFallback />}><Messages /></Suspense>} />
+                <Route path="/forums" element={<Suspense fallback={<LoadingFallback />}><Forums /></Suspense>} />
+                <Route path="/forum" element={<Suspense fallback={<LoadingFallback />}><Forum /></Suspense>} />
+                <Route path="/forum/new" element={<Suspense fallback={<LoadingFallback />}><NewThread /></Suspense>} />
+                <Route path="/forum/:id/edit" element={<Suspense fallback={<LoadingFallback />}><EditThread /></Suspense>} />
+                <Route path="/forum/:id" element={<Suspense fallback={<LoadingFallback />}><ThreadDetail /></Suspense>} />
+                <Route path="/saved-products" element={<Suspense fallback={<LoadingFallback />}><SavedProducts /></Suspense>} />
+                <Route path="/social-links" element={<Suspense fallback={<LoadingFallback />}><SocialLinks /></Suspense>} />
+                <Route path="/logo-generator" element={<Suspense fallback={<LoadingFallback />}><LogoGenerator /></Suspense>} />
+                <Route path="/admin/membership" element={<Suspense fallback={<LoadingFallback />}><AdminMembership /></Suspense>} />
+                <Route path="/admin/registrations" element={<Suspense fallback={<LoadingFallback />}><AdminPendingRegistrations /></Suspense>} />
+                <Route path="/admin/dashboard" element={<Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense>} />
+                <Route path="/wallet" element={<Suspense fallback={<LoadingFallback />}><Wallet /></Suspense>} />
+                <Route path="/video-call" element={<Suspense fallback={<LoadingFallback />}><VideoCallPage /></Suspense>} />
+                <Route path="/installments" element={<Suspense fallback={<LoadingFallback />}><InstallmentsPage /></Suspense>} />
+                <Route path="/inventory" element={<Suspense fallback={<LoadingFallback />}><InventoryPage /></Suspense>} />
+                <Route path="/notifications" element={<Suspense fallback={<LoadingFallback />}><Notifications /></Suspense>} />
+                <Route path="/invoice/:orderId" element={<Suspense fallback={<LoadingFallback />}><Invoice /></Suspense>} />
+                <Route path="/guide" element={<Suspense fallback={<LoadingFallback />}><Guide /></Suspense>} />
+                <Route path="/finance" element={<Suspense fallback={<LoadingFallback />}><FinanceDashboard /></Suspense>} />
+                <Route path="/finance/expenses" element={<Suspense fallback={<LoadingFallback />}><FinanceExpenses /></Suspense>} />
+                <Route path="/finance/calculator" element={<Suspense fallback={<LoadingFallback />}><FinanceCalculator /></Suspense>} />
                 <Route path="/finance/profit-calculator" element={<Suspense fallback={<LoadingFallback />}><ProductProfitCalc /></Suspense>} />
                 <Route path="/finance/ai" element={<Suspense fallback={<LoadingFallback />}><FinanceAI /></Suspense>} />
                 <Route path="/finance/product-expenses" element={<Suspense fallback={<LoadingFallback />}><ProductExpenses /></Suspense>} />
-                <Route path="/finance/invoices" element={<Suspense fallback={<LoadingFallback />}><FinanceInv /></Suspense>} />
+                <Route path="/finance/invoices" element={<Suspense fallback={<LoadingFallback />}><FinanceInvoices /></Suspense>} />
                 <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFound /></Suspense>} />
               </Route>
             </Routes>

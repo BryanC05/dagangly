@@ -44,10 +44,14 @@ export default {
         "text-tertiary": "hsl(var(--text-tertiary))",
       },
       borderRadius: {
-        sm: "6px",
-        md: "10px",
-        lg: "16px",
+        sm: "0px",
+        md: "2px",
+        lg: "4px",
         full: "9999px",
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["'Bebas Neue'", "Impact", "sans-serif"],
       }
     },
   },

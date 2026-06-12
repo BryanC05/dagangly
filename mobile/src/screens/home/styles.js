@@ -31,12 +31,17 @@ export const createStyles = (colors, isDarkMode, isMobile, isTablet) => StyleShe
   },
   heroBadgeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#fff' },
   heroBadgeText: { fontSize: 11, color: '#fff', fontWeight: '600', letterSpacing: 0.5 },
+  heroTextContainer: {
+    height: isMobile ? 120 : 155,
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
   heroTitle: {
     fontSize: isMobile ? 28 : isTablet ? 34 : 38, fontWeight: '800', color: '#fff',
-    lineHeight: isMobile ? 36 : 42, marginBottom: 8, textAlign: 'center',
+    lineHeight: isMobile ? 36 : 42, marginBottom: 4, textAlign: 'center',
   },
   heroSubtitle: {
-    fontSize: 15, color: '#e0e0e0', lineHeight: 22, marginBottom: 20,
+    fontSize: 15, color: '#e0e0e0', lineHeight: 22, marginBottom: 0,
     textAlign: 'center', maxWidth: '90%', alignSelf: 'center',
   },
   collapsibleHeader: {

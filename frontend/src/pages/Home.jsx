@@ -180,33 +180,30 @@ const Home = () => {
 
         <div className="container h-full flex items-center justify-center relative z-10">
           <div className="max-w-2xl mx-auto text-center">
-            <motion.div 
-              key={`badge-${currentSlide}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+            <div 
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 text-white/90 text-[10px] font-bold tracking-widest mb-4"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               MARKETPLACE UMKM INDONESIA
-            </motion.div>
-            
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-              >
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-3 leading-tight">
-                  {heroSlides[currentSlide].title}
-                </h1>
-                <p className="text-sm md:text-base text-white/80 mb-6 max-w-lg mx-auto font-medium">
-                  {heroSlides[currentSlide].desc}
-                </p>
-              </motion.div>
-            </AnimatePresence>
+            </div>
+            <div className="h-[140px] sm:h-[150px] md:h-[165px] flex flex-col justify-center mb-6">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-3 leading-tight">
+                    {heroSlides[currentSlide].title}
+                  </h1>
+                  <p className="text-sm md:text-base text-white/80 mb-0 max-w-lg mx-auto font-medium">
+                    {heroSlides[currentSlide].desc}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
             <form onSubmit={handleSearch} className="max-w-md mx-auto">
               <div className="relative">

@@ -89,7 +89,6 @@ func main() {
 	driverHandler := handlers.NewDriverHandler()
 	chatHandler := handlers.NewChatHandler()
 	forumHandler := handlers.NewForumHandler()
-	workflowHandler := handlers.NewWorkflowHandler()
 	logoHandler := handlers.NewLogoHandler()
 	businessHandler := handlers.NewBusinessHandler()
 	navigationHandler := handlers.NewNavigationHandler()
@@ -334,15 +333,6 @@ func main() {
 			forum.POST("/:id/reply", middleware.AuthRequired(cfg.JWTSecret), forumHandler.CreateReply)
 			forum.POST("/:id/like", middleware.AuthRequired(cfg.JWTSecret), forumHandler.LikeThread)
 			forum.POST("/reply/:id/like", middleware.AuthRequired(cfg.JWTSecret), forumHandler.LikeReply)
-		}
-
-		workflows := api.Group("/workflows")
-		workflows.Use(middleware.AuthRequired(cfg.JWTSecret))
-		{
-			workflows.GET("", workflowHandler.GetWorkflows)
-			workflows.POST("", workflowHandler.CreateWorkflow)
-			workflows.PATCH("/:id/toggle", workflowHandler.ToggleWorkflow)
-			workflows.DELETE("/:id", workflowHandler.DeleteWorkflow)
 		}
 
 		webhooks := api.Group("/webhooks")

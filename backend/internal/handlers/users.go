@@ -51,6 +51,10 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 
 	// Populate business data if user has a business
 	if user.BusinessID != nil {
+		if !user.IsSeller {
+			user.IsSeller = true
+			_, _ = collection.UpdateOne(context.Background(), bson.M{"_id": objID}, bson.M{"$set": bson.M{"isSeller": true}})
+		}
 		businessCollection := database.GetDB().Collection("businesses")
 		var business models.Business
 		err := businessCollection.FindOne(context.Background(), bson.M{"_id": *user.BusinessID}).Decode(&business)

@@ -173,6 +173,7 @@ func (h *BusinessHandler) CreateBusiness(c *gin.Context) {
 				"businessId":   business.ID,
 				"businessName": req.Name,
 				"businessType": req.BusinessType,
+				"isSeller":     true,
 				"updatedAt":    now,
 			},
 		},
@@ -397,6 +398,7 @@ func (h *BusinessHandler) DeleteBusiness(c *gin.Context) {
 		bson.M{
 			"$set": bson.M{
 				"businessId": nil,
+				"isSeller":   false,
 				"updatedAt":  time.Now(),
 			},
 		},
