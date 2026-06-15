@@ -254,6 +254,21 @@ export default function LoginScreen({ navigation }) {
         >
             <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
                 <View style={styles.card}>
+                    {navigation.canGoBack() && (
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={{
+                                position: 'absolute',
+                                top: 16,
+                                left: 16,
+                                zIndex: 10,
+                                padding: 8,
+                            }}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="arrow-back" size={24} color={colors.text} />
+                        </TouchableOpacity>
+                    )}
                     <View style={styles.header}>
                         <Text style={styles.title}>Masuk</Text>
                         <Text style={styles.subtitle}>Selamat datang kembali</Text>

@@ -17,10 +17,15 @@ export default function MessagesScreen({ navigation }) {
     const [refreshing, setRefreshing] = useState(false);
     const [activeTab, setActiveTab] = useState('direct');
     const user = useAuthStore((s) => s.user);
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     const { t, language } = useTranslation();
     const { colors } = useThemeStore();
 
     const fetchRooms = useCallback(async () => {
+        if (!isAuthenticated) {
+            setLoading(false);
+            return;
+        }
         try {
             const response = await api.get('/chat/rooms');
             console.log('Chat rooms response:', JSON.stringify(response.data, null, 2));
@@ -30,7 +35,7 @@ export default function MessagesScreen({ navigation }) {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [isAuthenticated]);
 
     // Refresh when screen is focused
     useFocusEffect(
@@ -163,6 +168,41 @@ unreadBadge: {
         emptyTitle: { fontSize: 16, fontWeight: '600', color: colors.textSecondary, marginTop: 12 },
         emptyText: { fontSize: 13, color: colors.textTertiary, marginTop: 4, textAlign: 'center', paddingHorizontal: 32 },
     });
+
+    if (!isAuthenticated) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 24 }]}>
+                <View style={{
+                    width: 100, height: 100, borderRadius: 50,
+                    backgroundColor: colors.primary + '15',
+                    justifyContent: 'center', alignItems: 'center',
+                    marginBottom: 16
+                }}>
+                    <Ionicons name="chatbubbles" size={50} color={colors.primary} />
+                </View>
+                <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textSecondary, marginTop: 12 }}>
+                    {t.loginRequired || 'Login Required'}
+                </Text>
+                <Text style={{ fontSize: 13, color: colors.textTertiary, marginTop: 4, textAlign: 'center', paddingHorizontal: 32, lineHeight: 18 }}>
+                    Please log in to chat with sellers and view order discussions.
+                </Text>
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: colors.primary,
+                        borderRadius: 12,
+                        paddingHorizontal: 32,
+                        paddingVertical: 12,
+                        marginTop: 20,
+                    }}
+                    onPress={() => navigation.navigate('Login')}
+                >
+                    <Text style={{ color: colors.white, fontWeight: '700', fontSize: 14 }}>
+                        {t.login || 'Log In'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     const renderRoom = ({ item: room }) => {
         const other = getOtherParticipant(room);

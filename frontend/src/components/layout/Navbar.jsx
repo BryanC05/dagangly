@@ -34,7 +34,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import api from "@/utils/api";
 import NotificationBell from "@/components/NotificationBell";
 
-const Navbar = ({ onOpenPersonaMenu }) => {
+const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activeOrderCount, setActiveOrderCount] = useState(0);
@@ -174,17 +174,7 @@ const Navbar = ({ onOpenPersonaMenu }) => {
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
 
-            <Button 
-              variant="outline" 
-              onClick={onOpenPersonaMenu} 
-              className="relative overflow-hidden group border-primary bg-primary text-white hover:bg-white hover:text-black hover:border-black px-4 h-9 font-black -skew-x-12 transition-all duration-200 shadow-[3px_3px_0px_#000] rounded-none"
-              aria-label="Open Persona Menu"
-            >
-              <span className="skew-x-12 flex items-center gap-1.5 text-xs tracking-wider">
-                <span className="text-white group-hover:text-primary animate-pulse">★</span>
-                SYSTEM
-              </span>
-            </Button>
+
 
             <Button variant="ghost" size="icon" className="lg:hidden text-white hover:text-primary hover:bg-neutral-900 rounded-none" onClick={() => setMobileOpen(true)}>
               <Menu className="h-5 w-5" />

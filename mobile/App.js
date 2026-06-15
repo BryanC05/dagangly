@@ -12,6 +12,11 @@ import { ThemeProvider } from './src/theme/ThemeContext';
 import { NetworkProvider } from './src/context/NetworkContext';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import LoginScreen from './src/screens/auth/LoginScreen';
+import RegisterScreen from './src/screens/auth/RegisterScreen';
+
+const RootStack = createNativeStackNavigator();
 import notificationService from './src/services/NotificationService';
 import { apiService } from './src/services/apiService';
 import { localDatabase } from './src/store/localDatabase';
@@ -96,7 +101,11 @@ export default function App() {
                 barStyle={isDarkMode ? 'light-content' : 'dark-content'}
                 backgroundColor={safeColors.card}
               />
-              {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
+              <RootStack.Navigator screenOptions={{ headerShown: false }}>
+                <RootStack.Screen name="MainTabs" component={AppNavigator} />
+                <RootStack.Screen name="Login" component={LoginScreen} />
+                <RootStack.Screen name="Register" component={RegisterScreen} />
+              </RootStack.Navigator>
             </NavigationContainer>
           </NetworkProvider>
         </ThemeProvider>

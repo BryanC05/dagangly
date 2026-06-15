@@ -44,7 +44,7 @@ const handleOpenLink = async (url) => {
 
 export default function ProfileScreen({ navigation, route }) {
     const { userId: viewingUserId } = route?.params || {};
-    const { user, logout, setUser } = useAuthStore();
+    const { user, logout, setUser, isAuthenticated } = useAuthStore();
     const { isDarkMode, toggleTheme, initTheme } = useThemeStore();
     const { language, toggleLanguage, initLanguage } = useLanguageStore();
     const { t } = useTranslation();
@@ -307,6 +307,70 @@ export default function ProfileScreen({ navigation, route }) {
             showValue: language === 'id' ? 'ID' : 'EN',
         },
     ], [t, navigation, unreadNotifCount, isDarkMode, language]);
+
+    if (isOwnProfile && !isAuthenticated) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 24 }]}>
+                <View style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 20,
+                    padding: 32,
+                    width: '100%',
+                    alignItems: 'center',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 8,
+                    elevation: 3,
+                }}>
+                    <View style={{
+                        width: 90, height: 90, borderRadius: 45,
+                        backgroundColor: colors.primary + '15',
+                        justifyContent: 'center', alignItems: 'center',
+                        marginBottom: 24
+                    }}>
+                        <Ionicons name="person" size={48} color={colors.primary} />
+                    </View>
+                    <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text, marginBottom: 8, textAlign: 'center' }}>
+                        {t.loginRequired || 'Login Required'}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 32, textAlign: 'center', lineHeight: 20 }}>
+                        {t.loginRequiredProfileDesc || 'Please log in to manage your profile, view orders, track packages, and register your business.'}
+                    </Text>
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: colors.primary,
+                            borderRadius: 12,
+                            width: '100%',
+                            paddingVertical: 14,
+                            alignItems: 'center',
+                            marginBottom: 12,
+                        }}
+                        onPress={() => navigation.navigate('Login')}
+                    >
+                        <Text style={{ color: colors.white, fontSize: 16, fontWeight: '700' }}>
+                            {t.login || 'Log In'}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            borderWidth: 1.5,
+                            borderColor: colors.border,
+                            borderRadius: 12,
+                            width: '100%',
+                            paddingVertical: 14,
+                            alignItems: 'center',
+                        }}
+                        onPress={() => navigation.navigate('Register')}
+                    >
+                        <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700' }}>
+                            {t.register || 'Sign Up'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    }
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>

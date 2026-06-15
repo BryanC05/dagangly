@@ -353,7 +353,20 @@ export default function CartScreen({ navigation }) {
                         ))}
                         <TouchableOpacity
                             style={[styles.checkoutBtn, { margin: 16 }]}
-                            onPress={() => startCheckout(seller)}
+                            onPress={() => {
+                                if (!isAuthenticated) {
+                                    Alert.alert(
+                                        t.loginRequired || 'Login Required',
+                                        t.loginRequiredCheckout || 'Please log in to checkout.',
+                                        [
+                                            { text: t.cancel || 'Cancel', style: 'cancel' },
+                                            { text: t.login || 'Log In', onPress: () => navigation.navigate('Login') }
+                                        ]
+                                    );
+                                    return;
+                                }
+                                startCheckout(seller);
+                            }}
                         >
                             <Text style={styles.checkoutBtnText}>{t.checkout}</Text>
                             <Ionicons name="arrow-forward" size={18} color={colors.white} />
