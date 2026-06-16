@@ -115,8 +115,11 @@ const Navbar = () => {
             <div className="relative h-9 w-9 bg-primary -skew-x-12 flex items-center justify-center border-2 border-white shadow-[2px_2px_0_#000]">
               <span className="text-white font-display font-black text-lg skew-x-12">D</span>
             </div>
-            <span className="hidden sm:block font-display text-2xl font-black uppercase tracking-tighter leading-none italic">
-              DAGANG<span className="bg-primary text-white px-1.5 py-0.5 -skew-x-12 inline-block font-black">LY</span>
+            <span className="hidden sm:inline-flex items-center font-display text-2xl font-black uppercase tracking-tighter leading-none italic">
+              <span>DAGANG</span>
+              <span className="bg-primary text-white px-1.5 py-0.5 -skew-x-12 inline-block font-black ml-1">
+                <span className="skew-x-12 inline-block">LY</span>
+              </span>
             </span>
           </Link>
 

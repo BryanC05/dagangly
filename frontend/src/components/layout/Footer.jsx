@@ -39,8 +39,11 @@ const Footer = () => {
               <div className="relative w-10 h-10 bg-primary flex items-center justify-center border-2 border-white shadow-[2px_2px_0_#000] -skew-x-12 transition-transform group-hover:scale-105">
                 <Store className="h-5.5 w-5.5 text-white skew-x-12" />
               </div>
-              <span className="font-display text-2xl font-black tracking-tighter uppercase italic">
-                DAGANG<span className="bg-primary text-white px-1.5 py-0.5 -skew-x-12 inline-block font-black">LY</span>
+              <span className="inline-flex items-center font-display text-2xl font-black tracking-tighter uppercase italic">
+                <span>DAGANG</span>
+                <span className="bg-primary text-white px-1.5 py-0.5 -skew-x-12 inline-block font-black ml-1">
+                  <span className="skew-x-12 inline-block">LY</span>
+                </span>
               </span>
             </Link>
             <p className="text-sm text-neutral-400 leading-relaxed max-w-md">
