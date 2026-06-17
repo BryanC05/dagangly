@@ -238,7 +238,42 @@ func (h *UserHandler) GetSellersCount(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{"count": count})
+	// Calculate unique cities count for verified sellers
+	pipeline := []bson.M{
+		{"$match": bson.M{
+			"isSeller":      true,
+			"isVerified":    true,
+			"location.city": bson.M{"$ne": ""},
+		}},
+		{"$group": bson.M{
+			"_id": "$location.city",
+		}},
+		{"$count": "count"},
+	}
+
+	cursor, err := collection.Aggregate(context.Background(), pipeline)
+	var citiesCount int64 = 0
+	if err == nil {
+		defer cursor.Close(context.Background())
+		var results []bson.M
+		if err := cursor.All(context.Background(), &results); err == nil && len(results) > 0 {
+			if cVal, ok := results[0]["count"].(int32); ok {
+				citiesCount = int64(cVal)
+			} else if cVal, ok := results[0]["count"].(int64); ok {
+				citiesCount = cVal
+			}
+		}
+	}
+
+	// Fallback to at least 1 city if there is at least one seller and count is 0
+	if count > 0 && citiesCount == 0 {
+		citiesCount = 1
+	}
+
+	c.JSON(200, gin.H{
+		"count":       count,
+		"citiesCount": citiesCount,
+	})
 }
 
 func (h *UserHandler) GetNearbySellers(c *gin.Context) {

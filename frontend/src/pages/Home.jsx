@@ -49,6 +49,7 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryCounts, setCategoryCounts] = useState({});
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [stats, setStats] = useState({ sellers: 0, products: 0, cities: 0 });
   const [[page, direction], setPage] = useState([0, 0]);
   const slideInterval = useRef(null);
 
@@ -79,15 +80,32 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, prodRes] = await Promise.allSettled([
+        const [catRes, prodRes, sellerRes] = await Promise.allSettled([
           api.get('/products/categories/counts'),
           api.get('/products?limit=6&sort=newest'),
+          api.get('/users/sellers/count'),
         ]);
         if (catRes.status === 'fulfilled') setCategoryCounts(catRes.value.data);
+        
+        let fetchedProductsCount = 0;
         if (prodRes.status === 'fulfilled') {
           const normalized = normalizeProductsPayload(prodRes.value.data);
           setFeaturedProducts(normalized.products || []);
+          fetchedProductsCount = normalized.pagination?.total || 0;
         }
+
+        let fetchedSellersCount = 0;
+        let fetchedCitiesCount = 0;
+        if (sellerRes.status === 'fulfilled') {
+          fetchedSellersCount = sellerRes.value.data.count || 0;
+          fetchedCitiesCount = sellerRes.value.data.citiesCount || 0;
+        }
+
+        setStats({
+          sellers: fetchedSellersCount,
+          products: fetchedProductsCount,
+          cities: fetchedCitiesCount,
+        });
       } catch (error) {
         console.error('Failed to fetch home data:', error);
       }
@@ -231,9 +249,9 @@ const Home = () => {
         <div className="container">
           <div className="grid grid-cols-3 gap-2 md:gap-6 max-w-2xl mx-auto">
             {[
-              { icon: Store, count: 28, label: "Penjual" },
-              { icon: ShoppingBag, count: 350, label: "Produk" },
-              { icon: MapPin, count: 5, label: "Kota" },
+              { icon: Store, count: stats.sellers, label: "Penjual" },
+              { icon: ShoppingBag, count: stats.products, label: "Produk" },
+              { icon: MapPin, count: stats.cities, label: "Kota" },
             ].map((stat, i) => (
               <div key={i} className="text-center">
                 <div className="flex items-center justify-center gap-1 md:gap-2 mb-0.5 md:mb-1">
