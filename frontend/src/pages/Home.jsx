@@ -44,7 +44,7 @@ const slideVariants = {
 };
 
 const Home = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryCounts, setCategoryCounts] = useState({});
@@ -57,11 +57,31 @@ const Home = () => {
   const featuredGrid = useStaggerReveal();
 
   const heroSlides = [
-    { image: "/images/hero/nasi-goreng.webp", title: "Nasi Goreng Special", desc: "Bumbu rahasia pilihan untuk rasa yang tak terlupakan" },
-    { image: "/images/hero/rendang.webp", title: "Rendang Daging Sapi", desc: "Rendang asli Padang, masakan terenak di dunia" },
-    { image: "/images/hero/sate-ayam.webp", title: "Sate Ayam Khas Solo", desc: "Sate ayam dengan bumbu kacang spesial" },
-    { image: "/images/hero/kopi-susu.jpg", title: "Kopi Susu Gula Aren", desc: "Racikan kopi susu manis khas Indonesia" },
-    { image: "/images/hero/bakso-malang.webp", title: "Bakso Malang Jumbo", desc: "Bakso daging sapi asli dengan kuah kaldu gurih" },
+    {
+      image: "/images/hero/nasi-goreng.webp",
+      title: language === 'id' ? "Nasi Goreng Spesial" : "Special Fried Rice",
+      desc: language === 'id' ? "Bumbu rahasia pilihan untuk rasa yang tak terlupakan" : "Select secret seasoning for an unforgettable taste"
+    },
+    {
+      image: "/images/hero/rendang.webp",
+      title: language === 'id' ? "Rendang Daging Sapi" : "Beef Rendang",
+      desc: language === 'id' ? "Rendang asli Padang, masakan terenak di dunia" : "Authentic Padang rendang, the most delicious dish in the world"
+    },
+    {
+      image: "/images/hero/sate-ayam.webp",
+      title: language === 'id' ? "Sate Ayam Khas Solo" : "Solo Style Chicken Satay",
+      desc: language === 'id' ? "Sate ayam dengan bumbu kacang spesial" : "Chicken satay with special peanut sauce"
+    },
+    {
+      image: "/images/hero/kopi-susu.jpg",
+      title: language === 'id' ? "Kopi Susu Gula Aren" : "Palm Sugar Milk Coffee",
+      desc: language === 'id' ? "Racikan kopi susu manis khas Indonesia" : "Sweet Indonesian milk coffee blend"
+    },
+    {
+      image: "/images/hero/bakso-malang.webp",
+      title: language === 'id' ? "Bakso Malang Jumbo" : "Jumbo Malang Meatballs",
+      desc: language === 'id' ? "Bakso daging sapi asli dengan kuah kaldu gurih" : "Real beef meatballs with savory broth"
+    },
   ];
 
   const currentSlide = Math.abs(page % heroSlides.length);
@@ -126,14 +146,14 @@ const Home = () => {
   };
 
   const categories = [
-    { id: "food", name: "Makanan", icon: "🍜" },
-    { id: "fashion", name: "Fashion", icon: "👕" },
-    { id: "handicrafts", name: "Kerajinan", icon: "🎨" },
-    { id: "beauty", name: "Kecantikan", icon: "💄" },
-    { id: "electronics", name: "Elektronik", icon: "📱" },
-    { id: "home", name: "Rumah Tangga", icon: "🏠" },
-    { id: "agriculture", name: "Pertanian", icon: "🌾" },
-    { id: "services", name: "Jasa", icon: "🛠️" },
+    { id: "food", name: language === 'id' ? "Makanan" : "Food & Beverages", icon: "🍜" },
+    { id: "fashion", name: language === 'id' ? "Fashion" : "Fashion & Apparel", icon: "👕" },
+    { id: "handicrafts", name: language === 'id' ? "Kerajinan" : "Handicrafts", icon: "🎨" },
+    { id: "beauty", name: language === 'id' ? "Kecantikan" : "Health & Beauty", icon: "💄" },
+    { id: "electronics", name: language === 'id' ? "Elektronik" : "Electronics", icon: "📱" },
+    { id: "home", name: language === 'id' ? "Rumah Tangga" : "Home & Living", icon: "🏠" },
+    { id: "agriculture", name: language === 'id' ? "Pertanian" : "Agriculture", icon: "🌾" },
+    { id: "services", name: language === 'id' ? "Jasa" : "Services", icon: "🛠️" },
   ];
 
   return (
@@ -202,7 +222,7 @@ const Home = () => {
               className="inline-flex items-center gap-2 px-4 py-1.5 border-3 border-black bg-black text-primary text-[10px] font-black italic uppercase tracking-widest mb-4 shadow-[2px_2px_0px_0px_#fff]"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              MARKETPLACE UMKM INDONESIA
+              {language === 'id' ? 'MARKETPLACE UMKM INDONESIA' : 'INDONESIAN MSME MARKETPLACE'}
             </div>
             <div className="h-[180px] sm:h-[190px] md:h-[210px] flex flex-col justify-center mb-6">
               <AnimatePresence mode="wait">
@@ -228,7 +248,7 @@ const Home = () => {
                 <Search className="absolute left-4.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-black font-black z-10" />
                 <input
                   type="search"
-                  placeholder="Cari produk, toko, atau kategori..."
+                  placeholder={language === 'id' ? "Cari produk, toko, atau kategori..." : "Search products, stores, or categories..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-11 pr-4 h-12 text-sm bg-white border-3 border-black dark:border-[#FACC15] text-black placeholder:text-gray-400 placeholder:italic placeholder:font-black rounded-full shadow-[3px_3px_0px_0px_#F97316] focus:outline-none focus:translate-x-[1px] focus:translate-y-[1px] focus:shadow-[4px_4px_0px_0px_#F97316] font-black italic tracking-wide transition-all"
@@ -238,7 +258,7 @@ const Home = () => {
                 type="submit" 
                 className="persona-pill-btn shrink-0"
               >
-                Cari!
+                {language === 'id' ? 'Cari!' : 'Search!'}
               </button>
             </form>
           </div>
@@ -249,9 +269,9 @@ const Home = () => {
         <div className="container">
           <div className="grid grid-cols-3 gap-2 md:gap-6 max-w-2xl mx-auto">
             {[
-              { icon: Store, count: stats.sellers, label: "Penjual" },
-              { icon: ShoppingBag, count: stats.products, label: "Produk" },
-              { icon: MapPin, count: stats.cities, label: "Kota" },
+              { icon: Store, count: stats.sellers, label: t("home.activeSellers") },
+              { icon: ShoppingBag, count: stats.products, label: t("home.productsListed") },
+              { icon: MapPin, count: stats.cities, label: t("home.citiesCovered") },
             ].map((stat, i) => (
               <div key={i} className="text-center">
                 <div className="flex items-center justify-center gap-1 md:gap-2 mb-0.5 md:mb-1">
@@ -269,9 +289,9 @@ const Home = () => {
         <div className="absolute inset-0 pattern-dots-sm opacity-[0.08] pointer-events-none" />
         <div className="container relative z-10">
           <div className="flex items-center justify-between mb-6 md:mb-8">
-            <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">Kategori</h2>
+            <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">{t("home.categoriesCount") || "Categories"}</h2>
             <Link to="/products" className="text-primary text-xs md:text-sm font-bold hover:underline flex items-center gap-1">
-              Lihat semua <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              {t("home.viewAll") || "View all"} <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Link>
           </div>
           <div
@@ -285,7 +305,7 @@ const Home = () => {
                   <div className="bg-card/75 backdrop-blur-md border border-border/50 shadow-sm rounded-xl p-3 md:p-4 text-center hover:border-primary/50 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                     <span className="text-2xl md:text-3xl block mb-1 md:mb-2">{category.icon}</span>
                     <p className="text-xs md:text-sm font-bold text-card-foreground">{category.name}</p>
-                    <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">{count} produk</p>
+                    <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">{count} {language === 'id' ? 'produk' : 'products'}</p>
                   </div>
                 </Link>
               );
@@ -298,9 +318,9 @@ const Home = () => {
         <div className="absolute inset-0 pattern-grid opacity-[0.03] pointer-events-none" />
         <div className="container relative z-10">
           <div className="flex items-center justify-between mb-6 md:mb-8">
-            <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">Produk Unggulan</h2>
+            <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">{t("home.featuredProducts") || "Featured Products"}</h2>
             <Link to="/products" className="text-primary text-xs md:text-sm font-bold hover:underline flex items-center gap-1">
-              Lihat semua <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              {t("home.viewAll") || "View all"} <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Link>
           </div>
           <div
@@ -314,7 +334,7 @@ const Home = () => {
                 </div>
               ))
             ) : (
-              <p className="text-muted-foreground col-span-full text-center py-8 text-sm">Memuat produk...</p>
+              <p className="text-muted-foreground col-span-full text-center py-8 text-sm">{language === 'id' ? 'Memuat produk...' : 'Loading products...'}</p>
             )}
           </div>
         </div>

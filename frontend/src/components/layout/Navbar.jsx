@@ -123,6 +123,7 @@ const Navbar = () => {
             </span>
           </Link>
 
+
           <form onSubmit={submitSearch} className="hidden flex-1 md:block max-w-sm">
             <div className="relative -skew-x-6 border-2 border-black bg-white shadow-[2px_2px_0_#000] overflow-hidden">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/50 skew-x-6" />
@@ -134,7 +135,7 @@ const Navbar = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
               <button type="submit" className="absolute right-0 top-0 bottom-0 px-4 text-xs bg-black text-white font-black uppercase hover:bg-neutral-800 transition-colors skew-x-6 flex items-center justify-center">
-                CARI
+                {language === 'id' ? 'CARI' : 'SEARCH'}
               </button>
             </div>
           </form>
@@ -381,21 +382,21 @@ const Navbar = () => {
                   <span className="skew-x-6">{language.toUpperCase()}</span>
                 </Button>
                 <Button variant="outline" size="sm" onClick={toggleTheme} className="border-white text-white hover:bg-white hover:text-black rounded-none -skew-x-6 font-bold">
-                  <span className="skew-x-6">{theme === "light" ? "DARK" : "LIGHT"}</span>
+                  <span className="skew-x-6">{theme === "light" ? (language === 'id' ? 'GELAP' : 'DARK') : (language === 'id' ? 'TERANG' : 'LIGHT')}</span>
                 </Button>
               </div>
               {isAuthenticated ? (
                 <Button variant="destructive" size="sm" className="w-full mt-4 bg-primary text-white hover:bg-white hover:text-black rounded-none border border-black font-black uppercase" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Logout
+                  {t("nav.logout")}
                 </Button>
               ) : (
                 <div className="flex gap-2 mt-4">
                   <Button variant="outline" size="sm" className="flex-1 border-white text-white hover:bg-white hover:text-black rounded-none -skew-x-6 font-bold" onClick={() => { openLogin(); setMobileOpen(false); }}>
-                    <span className="skew-x-6">LOGIN</span>
+                    <span className="skew-x-6">{t("nav.login")}</span>
                   </Button>
                   <Button size="sm" className="flex-1 bg-primary text-white hover:bg-white hover:text-black rounded-none -skew-x-6 font-bold border border-black shadow-[2px_2px_0_#000]" onClick={() => { openRegister(); setMobileOpen(false); }}>
-                    <span className="skew-x-6">REGISTER</span>
+                    <span className="skew-x-6">{t("nav.register")}</span>
                   </Button>
                 </div>
               )}
