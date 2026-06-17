@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MapPin, Store, Search, Navigation, X, Clock, Route } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { MapPin, Store, Search, Navigation, X, Clock, Route, ArrowLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../utils/api';
 import { useTranslation } from '../hooks/useTranslation';
@@ -98,7 +98,7 @@ function NearbyMap() {
   const hasFittedMarkersRef = useRef(false);
   const locationSourceRef = useRef('gps');
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   const applyCurrentLocation = (location, source = 'gps') => {
     if (!location) return;
@@ -379,6 +379,10 @@ function NearbyMap() {
       {/* Sidebar */}
       <div className="map-sidebar md:w-1/3 lg:w-1/4 p-4 border-r overflow-y-auto">
         <div className="sidebar-header mb-4">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-black text-muted-foreground hover:text-primary mb-3 uppercase tracking-wider transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            {language === 'id' ? 'Kembali ke Beranda' : 'Back to Home'}
+          </Link>
           <h2 className="text-xl font-bold">{t('nearby.findNearbySellers')}</h2>
           <p className="text-sm text-muted-foreground">{t('nearby.discoverMSMEs')}</p>
           {isUsingDefaultLocation && (

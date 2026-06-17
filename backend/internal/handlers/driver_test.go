@@ -2,19 +2,35 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"msme-marketplace/internal/database"
 )
 
 func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+
+	if database.DB == nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+		clientOpts := options.Client().ApplyURI("mongodb://localhost:27017")
+		client, err := mongo.Connect(ctx, clientOpts)
+		if err == nil {
+			database.DB = client.Database("test_msme_marketplace")
+		}
+	}
+
 	return router
 }
 

@@ -17,13 +17,20 @@ if (normalizedApiUrl.startsWith("http://") || normalizedApiUrl.startsWith("https
 }
 
 const API_URL = normalizedApiUrl;
-const BACKEND_URL = normalizedBackendUrl || derivedBackendUrl;
+// Prefer derived backend URL from absolute API URL to avoid mismatch with a stale VITE_BACKEND_URL
+const BACKEND_URL = (normalizedApiUrl.startsWith("http://") || normalizedApiUrl.startsWith("https://"))
+  ? derivedBackendUrl
+  : (normalizedBackendUrl || derivedBackendUrl || "");
 
 // Track if primary API failed
 let apiFailed = false;
 
-export const getBackendUrl = () => BACKEND_URL;
-export const getApiUrl = () => API_URL;
+export const getBackendUrl = () => {
+  return apiFailed ? FALLBACK_BACKEND_URL : BACKEND_URL;
+};
+export const getApiUrl = () => {
+  return apiFailed ? FALLBACK_API_URL : API_URL;
+};
 export const getFallbackApiUrl = () => FALLBACK_API_URL;
 export const getFallbackBackendUrl = () => FALLBACK_BACKEND_URL;
 

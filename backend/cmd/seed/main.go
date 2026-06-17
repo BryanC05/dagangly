@@ -248,8 +248,8 @@ func main() {
 
 	fmt.Println("\n✅ Database seeded successfully with realistic basic data!")
 	fmt.Println("\n--- TEST ACCOUNTS ---")
-	fmt.Println("All accounts use password: password123\n")
+	fmt.Println("All accounts use password: password123")
 	fmt.Println("👨‍💼 Seller 1 (Electronics): budi.seller@test.com")
 	fmt.Println("👩‍🍳 Seller 2 (Food):       siti.seller@test.com")
-	fmt.Println("🛒 Buyer 1:               andi.buyer@test.com\n")
+	fmt.Println("🛒 Buyer 1:               andi.buyer@test.com")
 }

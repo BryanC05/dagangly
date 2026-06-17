@@ -44,13 +44,13 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Try fallback to Railway if local fails (and not already tried)
+    // Try fallback to Render if local fails (and not already tried)
     if (!config?._fallbackRetried && !useFallback && !isUsingLocal) {
       const isNetworkError = !error.response;
       const isServerError = error.response?.status >= 500;
             
       if (isNetworkError || isServerError) {
-        console.log("[API] Primary failed, trying Railway fallback...");
+        console.log("[API] Primary failed, trying Render fallback...");
         useFallback = true;
         return api.request({
           ...config,
