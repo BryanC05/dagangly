@@ -1,6 +1,6 @@
-const CACHE_NAME = 'dagangly-v1';
-const STATIC_CACHE = 'dagangly-static-v1';
-const DYNAMIC_CACHE = 'dagangly-dynamic-v1';
+const CACHE_NAME = 'dagangly-v2';
+const STATIC_CACHE = 'dagangly-static-v2';
+const DYNAMIC_CACHE = 'dagangly-dynamic-v2';
 
 const STATIC_ASSETS = [
   '/',
@@ -50,6 +50,12 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (url.origin !== location.origin) {
+    return;
+  }
+
+  // App shell index.html must be fetched network-first to detect updates immediately
+  if (url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '/manifest.json') {
+    event.respondWith(networkFirst(request));
     return;
   }
 
