@@ -145,7 +145,7 @@ function SellerStore() {
               )}
             </div>
 
-            <h1 className="text-3xl font-bold mb-1">{seller.businessName || seller.name}</h1>
+            <h1 className="text-3xl font-bold mb-1 not-italic">{seller.businessName || seller.name}</h1>
             <p className="text-muted-foreground mb-4">by {seller.name}</p>
 
             <div className="flex flex-wrap gap-4 mb-6 text-sm">

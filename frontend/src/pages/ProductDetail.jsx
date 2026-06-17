@@ -247,12 +247,12 @@ function ProductDetail() {
             <div className="flex items-center gap-3">
               <Link to={resolvedSellerId ? `/store/${resolvedSellerId}` : '#'} className="flex items-center gap-2 text-sm font-medium text-primary hover:underline">
                 <Store className="h-4 w-4" />
-                {product.business?.name || seller?.businessName || seller?.name || 'Toko'}
+                <span className="not-italic">{product.business?.name || seller?.businessName || seller?.name || 'Toko'}</span>
                 {product.business?.isVerified && <Shield className="h-3 w-3 text-green-600" />}
               </Link>
             </div>
 
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">{product.name}</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground not-italic">{product.name}</h1>
 
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 fill-primary text-primary" />

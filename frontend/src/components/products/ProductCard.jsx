@@ -1,4 +1,4 @@
-﻿import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, Heart, Store } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -32,7 +32,7 @@ const ProductCard = ({ product, compact }) => {
 
     if (compact) {
         return (
-            <Link to={`/product/${productId}`} className="flex gap-3 bg-card border border-border rounded-lg p-3 hover:border-primary/30 hover:shadow-sm transition-all">
+            <Link to={`/product/${productId}`} className="flex gap-3 bg-card border-3 border-black dark:border-[#FACC15] rounded-lg p-3 shadow-[3px_3px_0px_0px_#F97316] hover:shadow-[4px_4px_0px_0px_#F97316] hover:-translate-y-0.5 transition-all">
                 <div className="w-20 h-20 rounded-md overflow-hidden bg-muted shrink-0">
                     {productImage ? (
                         <img src={productImage} alt={product.name} className="h-full w-full object-cover" />
@@ -41,8 +41,8 @@ const ProductCard = ({ product, compact }) => {
                     )}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm truncate">{product.name}</h3>
-                    {sellerName && <p className="text-xs text-muted-foreground mt-0.5">{sellerName}</p>}
+                    <h3 className="font-medium text-sm truncate not-italic">{product.name}</h3>
+                    {sellerName && <p className="text-xs text-muted-foreground mt-0.5 not-italic">{sellerName}</p>}
                     <div className="flex items-center gap-2 mt-1">
                         <p className="text-primary font-bold text-sm">Rp {product.price?.toLocaleString('id-ID')}</p>
                         {hasDiscount && <p className="text-xs text-muted-foreground line-through">Rp {product.originalPrice?.toLocaleString('id-ID')}</p>}
@@ -60,7 +60,7 @@ const ProductCard = ({ product, compact }) => {
 
     return (
         <Link to={`/product/${productId}`}>
-            <div className="group bg-card border border-border/40 rounded-xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-1">
+            <div className="group bg-card border-3 border-black dark:border-[#FACC15] rounded-xl overflow-hidden transition-all duration-300 shadow-[4px_4px_0px_0px_#F97316] hover:shadow-[6px_6px_0px_0px_#F97316] hover:-translate-y-1">
                 <div className="relative aspect-square overflow-hidden bg-muted/20">
                     {productImage ? (
                         <img
@@ -73,9 +73,9 @@ const ProductCard = ({ product, compact }) => {
                         <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
                     )}
                     {hasDiscount && (
-                        <Badge className="absolute top-2.5 left-2.5 bg-destructive text-destructive-foreground text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">
+                        <div className="absolute top-2.5 left-2.5 bg-destructive text-white text-[10px] px-2 py-0.5 rounded border-2 border-black font-black italic uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
                             -{discountPercent}%
-                        </Badge>
+                        </div>
                     )}
                     <Button
                         variant="ghost"
@@ -91,10 +91,10 @@ const ProductCard = ({ product, compact }) => {
                     {sellerName && (
                         <div className="flex items-center gap-1 mb-1 md:mb-1.5">
                             <Store className="h-2.5 w-2.5 md:h-3 md:w-3 text-primary" />
-                            <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{sellerName}</p>
+                            <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate not-italic">{sellerName}</p>
                         </div>
                     )}
-                    <h3 className="font-bold text-xs md:text-sm text-card-foreground line-clamp-2 mb-1.5 min-h-[2.5em] md:min-h-[2.8em] leading-snug">
+                    <h3 className="font-bold text-xs md:text-sm text-card-foreground line-clamp-2 mb-1.5 min-h-[2.5em] md:min-h-[2.8em] leading-snug not-italic">
                         {product.name}
                     </h3>
                     <div className="flex items-center gap-1.5">
@@ -104,9 +104,9 @@ const ProductCard = ({ product, compact }) => {
                         )}
                     </div>
                     {productRating != null && (
-                        <div className="flex items-center gap-1 mt-1.5 md:mt-2 bg-primary/5 self-start px-1.5 py-0.5 rounded-full w-fit">
-                            <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-primary text-primary" />
-                            <span className="text-[8px] md:text-[10px] font-bold text-primary">{productRating.toFixed(1)}</span>
+                        <div className="flex items-center gap-1 mt-1.5 md:mt-2 bg-primary text-black font-black italic border-2 border-black self-start px-2 py-0.5 rounded-md w-fit shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                            <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-black text-black" />
+                            <span className="text-[8px] md:text-[10px] font-bold">{productRating.toFixed(1)}</span>
                         </div>
                     )}
                 </div>

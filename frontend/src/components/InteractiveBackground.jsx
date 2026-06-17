@@ -21,14 +21,22 @@ const PersonaBackground = () => (
             .persona-bg {
                 position: absolute;
                 inset: 0;
-                background-color: #f7f7f7;
-                background-image: radial-gradient(rgba(0,102,255,0.1) 1px, transparent 1px);
-                background-size: 24px 24px;
+                background-color: #FACC15; /* P4G Yellow */
+                background-image: 
+                    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    radial-gradient(rgba(0, 0, 0, 0.12) 1.5px, transparent 1.5px);
+                background-size: 24px 24px, 24px 24px, 24px 24px;
+                background-position: 0 0, 0 0, 12px 12px;
             }
             .dark .persona-bg {
-                background-color: #050505;
-                background-image: radial-gradient(rgba(230,0,18,0.15) 1px, transparent 1px);
-                background-size: 24px 24px;
+                background-color: #0a0a0c; /* dark charcoal */
+                background-image: 
+                    linear-gradient(rgba(250, 204, 21, 0.06) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(250, 204, 21, 0.06) 1px, transparent 1px),
+                    radial-gradient(rgba(250, 204, 21, 0.15) 1.5px, transparent 1.5px);
+                background-size: 24px 24px, 24px 24px, 24px 24px;
+                background-position: 0 0, 0 0, 12px 12px;
             }
             .slash-panel-1 {
                 position: absolute;
@@ -36,16 +44,16 @@ const PersonaBackground = () => (
                 left: -15%;
                 width: 50%;
                 height: 120%;
-                background: #0066FF;
+                background: #FACC15; /* P4G Yellow */
                 transform: rotate(-12deg);
-                opacity: 0.85;
+                opacity: 0.75;
                 box-shadow: 10px 0px 0px #000;
                 animation: floatDiagonal 20s ease-in-out infinite;
             }
             .dark .slash-panel-1 {
-                background: #E60012;
-                box-shadow: 10px 0px 0px #fff;
-                opacity: 0.35;
+                background: #ea580c; /* Orange */
+                box-shadow: 10px 0px 0px #000;
+                opacity: 0.25;
             }
             .slash-panel-2 {
                 position: absolute;
@@ -53,15 +61,15 @@ const PersonaBackground = () => (
                 right: -10%;
                 width: 35%;
                 height: 90%;
-                background: #000;
+                background: #F97316; /* P4G Orange */
                 transform: rotate(15deg);
-                opacity: 0.9;
-                box-shadow: -5px -5px 0px #0066FF;
+                opacity: 0.75;
+                box-shadow: -5px -5px 0px #000;
                 animation: floatDiagonalOpposite 25s ease-in-out infinite;
             }
             .dark .slash-panel-2 {
                 background: #111;
-                box-shadow: -5px -5px 0px #E60012;
+                box-shadow: -5px -5px 0px #ea580c;
                 opacity: 0.8;
             }
             .slash-stripe {
@@ -72,23 +80,23 @@ const PersonaBackground = () => (
                 height: 150%;
                 background: repeating-linear-gradient(
                     45deg,
-                    #0066FF,
-                    #0066FF 8px,
+                    #FACC15,
+                    #FACC15 8px,
                     transparent 8px,
                     transparent 16px
                 );
                 transform: rotate(-15deg);
-                opacity: 0.15;
+                opacity: 0.25;
             }
             .dark .slash-stripe {
                 background: repeating-linear-gradient(
                     45deg,
-                    #E60012,
-                    #E60012 8px,
+                    #ea580c,
+                    #ea580c 8px,
                     transparent 8px,
                     transparent 16px
                 );
-                opacity: 0.08;
+                opacity: 0.12;
             }
         `}</style>
         <div className="persona-bg">
@@ -113,70 +121,8 @@ const InteractiveBackground = () => {
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (isMobile || prefersReducedMotion || reducedMotion) return;
 
-        let rafId;
-        let lastSpawnTime = 0;
-
-        const handleMouseMove = (e) => {
-            if (rafId) cancelAnimationFrame(rafId);
-
-            rafId = requestAnimationFrame(() => {
-                const now = Date.now();
-                // Spawn a particle every ~100ms
-                if (now - lastSpawnTime > 100 && containerRef.current) {
-                    lastSpawnTime = now;
-
-                    const particle = document.createElement('div');
-                    
-                    const shapes = ['★', '◆', '▲', '■', '⚡', '★', '◆'];
-                    const isDark = document.documentElement.classList.contains('dark');
-                    const colors = [isDark ? '#E60012' : '#0066FF', '#000000', '#FFFFFF'];
-                    const shape = shapes[Math.floor(Math.random() * shapes.length)];
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    
-                    particle.textContent = shape;
-                    particle.style.position = 'absolute';
-                    particle.style.left = `${e.clientX}px`;
-                    particle.style.top = `${e.clientY}px`;
-                    particle.style.fontSize = `${14 + Math.random() * 18}px`;
-                    particle.style.pointerEvents = 'none';
-                    particle.style.userSelect = 'none';
-                    particle.style.zIndex = '50';
-                    particle.style.color = color;
-                    
-                    // Style with outline to ensure visibility
-                    particle.style.textShadow = color === '#000000'
-                        ? '1px 1px 0px #fff, -1px -1px 0px #fff'
-                        : '1px 1px 0px #000';
-
-                    const angle = Math.random() * Math.PI * 2;
-                    const velocity = 40 + Math.random() * 100;
-                    const dx = Math.cos(angle) * velocity;
-                    const dy = Math.sin(angle) * velocity + Math.random() * 60;
-                    const rotation = (Math.random() - 0.5) * 360;
-
-                    particle.style.transition = 'transform 1s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 1s ease-out';
-                    particle.style.transform = 'translate(-50%, -50%) scale(0.5)';
-                    particle.style.opacity = '0.75';
-
-                    containerRef.current.appendChild(particle);
-
-                    requestAnimationFrame(() => {
-                        particle.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${rotation}deg) scale(1.2)`;
-                        particle.style.opacity = '0';
-                    });
-
-                    setTimeout(() => {
-                        if (particle.parentNode === containerRef.current) {
-                            containerRef.current.removeChild(particle);
-                        }
-                    }, 1000);
-                }
-            });
-        };
-
         const spawnBurst = (x, y, icons, count = 12, velocityRange = 300) => {
-            const isDark = document.documentElement.classList.contains('dark');
-            const colors = [isDark ? '#E60012' : '#0066FF', '#000000', '#FFFFFF'];
+            const colors = ['#FACC15', '#F97316', '#000000', '#FFFFFF'];
             for (let i = 0; i < count; i++) {
                 const particle = document.createElement('div');
                 const shape = icons[Math.floor(Math.random() * icons.length)];
@@ -235,15 +181,12 @@ const InteractiveBackground = () => {
             }
         };
 
-        window.addEventListener('mousemove', handleMouseMove, { passive: true });
         window.addEventListener('trigger-cart-burst', handleCartBurst);
         window.addEventListener('particle-burst', handleParticleBurst);
 
         return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('trigger-cart-burst', handleCartBurst);
             window.removeEventListener('particle-burst', handleParticleBurst);
-            if (rafId) cancelAnimationFrame(rafId);
         };
     }, [reducedMotion]);
 

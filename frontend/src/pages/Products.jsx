@@ -6,17 +6,12 @@ import { ProductsGridSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, X, Package, SlidersHorizontal, Grid3X3, List, ArrowRight } from "lucide-react";
+import { Search, X, Package, SlidersHorizontal, Grid3X3, List, ArrowRight, ArrowLeft } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "@/hooks/useTranslation";
 import SEO from "@/components/SEO";
+import PersonaSelect from "@/components/ui/PersonaSelect";
+import { cn } from "@/lib/utils";
 
 const normalizeProductsPayload = (payload) => {
   if (Array.isArray(payload)) return { products: payload, pagination: { page: 1, total: payload.length, pages: 1 } };
@@ -105,6 +100,10 @@ const Products = () => {
       <div className="container py-6 md:py-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
+            <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-black text-muted-foreground hover:text-primary mb-3 uppercase tracking-wider transition-colors">
+              <ArrowLeft className="h-4 w-4" />
+              {language === 'id' ? 'Kembali ke Beranda' : 'Back to Home'}
+            </Link>
             <h1 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">Produk UMKM</h1>
             {!loading && (
               <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
@@ -112,29 +111,24 @@ const Products = () => {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[140px] md:w-[150px] h-9 text-xs font-bold rounded-lg bg-card border-border/60">
-                <SelectValue placeholder={t('products.sortBy')} />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id} className="text-sm">
-                    {option.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="flex border border-border/60 rounded-lg overflow-hidden bg-card shadow-sm">
+          <div className="flex items-center gap-4">
+            <PersonaSelect
+              label={t('products.sortBy')}
+              value={sortBy}
+              onValueChange={setSortBy}
+              options={sortOptions}
+              color="yellow"
+            />
+            <div className="flex border-3 border-black dark:border-[#FACC15] rounded-lg overflow-hidden bg-white shadow-[2px_2px_0px_0px_#F97316]">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/50"}`}
+                className={`p-2 transition-colors ${viewMode === "grid" ? "bg-black text-white" : "text-black hover:bg-gray-100"}`}
               >
                 <Grid3X3 className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/50"}`}
+                className={`p-2 transition-colors ${viewMode === "list" ? "bg-black text-white" : "text-black hover:bg-gray-100"}`}
               >
                 <List className="h-4 w-4" />
               </button>
@@ -145,44 +139,52 @@ const Products = () => {
         <div className="flex flex-col lg:flex-row gap-4 mb-8">
           <div className="flex flex-col sm:flex-row gap-3 flex-1">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
+              <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-black font-black z-10" />
+              <input
+                type="text"
                 placeholder="Cari produk..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 text-sm bg-card border-border/60 rounded-lg"
+                className="w-full pl-11 pr-10 h-11 text-xs font-black italic uppercase bg-white border-3 border-black dark:border-[#FACC15] rounded-full shadow-[3px_3px_0px_0px_#F97316] focus:outline-none focus:translate-x-[1px] focus:translate-y-[1px] focus:shadow-[2px_2px_0px_0px_#F97316] transition-all font-black italic"
               />
               {searchQuery && (
                 <button 
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-black hover:text-gray-600 z-10"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-4 w-4 font-black" />
                 </button>
               )}
             </div>
             
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={() => setPriceRange({ min: "", max: "" })}
-              className={`h-10 gap-1.5 px-4 rounded-lg bg-card border-border/60 ${priceRange.min || priceRange.max ? "border-primary text-primary" : "text-muted-foreground"}`}
+              className={cn(
+                "h-11 px-5 rounded-lg border-3 border-black dark:border-[#FACC15] shadow-[3px_3px_0px_0px_#F97316] flex items-center gap-1.5 transition-all transform -skew-x-12 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#F97316] font-black italic uppercase text-xs",
+                priceRange.min || priceRange.max
+                  ? "bg-[#F97316] text-black"
+                  : "bg-white text-black hover:bg-gray-100"
+              )}
             >
-              <SlidersHorizontal className="h-4 w-4" />
-              <span className="text-sm font-bold">Harga</span>
-            </Button>
+              <SlidersHorizontal className="h-3.5 w-3.5 transform skew-x-12 shrink-0" />
+              <span className="transform skew-x-12 block">Harga</span>
+            </button>
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar lg:pb-0">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1.5 no-scrollbar lg:pb-0">
             {categories.map((cat) => (
-              <Badge
+              <button
                 key={cat.id}
-                variant={selectedCategory === cat.id ? "default" : "outline"}
-                className={`cursor-pointer whitespace-nowrap px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${selectedCategory === cat.id ? 'bg-primary shadow-md shadow-primary/20 border-transparent' : 'bg-card border-border/60 text-muted-foreground hover:border-primary/40'}`}
                 onClick={() => setSelectedCategory(cat.id)}
+                className={cn(
+                  "cursor-pointer whitespace-nowrap px-4.5 py-1.5 rounded-lg text-[10px] font-black italic uppercase tracking-wider transition-all transform -skew-x-12 border-3 border-black dark:border-[#FACC15] shadow-[2.5px_2.5px_0px_0px_#F97316] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#F97316]",
+                  selectedCategory === cat.id
+                    ? "bg-[#FACC15] text-black font-black"
+                    : "bg-white text-black hover:bg-gray-100"
+                )}
               >
-                {cat.name}
-              </Badge>
+                <span className="transform skew-x-12 block">{cat.name}</span>
+              </button>
             ))}
           </div>
         </div>

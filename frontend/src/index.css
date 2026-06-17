@@ -14,72 +14,86 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 0 0% 0%;
+    --background: 48 95% 53%; /* Golden Yellow #FACC15 */
+    --foreground: 240 10% 4%; /* Dark slate black */
     --card: 0 0% 100%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --surface: 0 0% 93%;
-    --surface-elevated: 0 0% 96%;
-    --sidebar-background: 0 0% 98%;
-    --input: 0 0% 92%;
+    --popover-foreground: 240 10% 4%;
+    --surface: 48 95% 53%;
+    --surface-elevated: 48 95% 56%;
+    --sidebar-background: 48 95% 53%;
+    --input: 0 0% 100%;
     --muted-foreground: 0 0% 30%;
-    --border: 0 0% 10%;
-    --geometric-border: 220 100% 45%;
+    --border: 240 10% 4%; /* Thick bold borders */
+    --geometric-border: 48 96% 53%; /* Golden Yellow */
     --text-tertiary: 0 0% 45%;
-    --primary: 220 100% 45%;
-    --primary-dark: 220 100% 35%;
-    --primary-light: 220 100% 95%;
-    --secondary: 0 0% 10%;
+    --primary: 48 96% 53%; /* Persona 4 Golden Yellow */
+    --primary-dark: 24 95% 53%; /* P4G Orange/Amber */
+    --primary-light: 48 100% 92%; /* Very light cream yellow */
+    --secondary: 240 10% 4%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 94%;
-    --accent: 220 100% 45%;
+    --muted: 48 30% 94%;
+    --accent: 48 96% 53%; /* Golden Yellow */
     --success: 142 70% 45%;
     --destructive: 0 100% 45%;
-    --warning: 48 96% 48%;
-    --ring: 220 100% 45%;
-    --radius: 0px;
+    --warning: 24 95% 53%;
+    --ring: 48 96% 53%;
+    --radius: 12px;
   }
 
   .dark {
-    --background: 0 0% 3%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 6%;
-    --popover: 0 0% 6%;
-    --popover-foreground: 0 0% 100%;
-    --surface: 0 0% 10%;
-    --surface-elevated: 0 0% 14%;
-    --sidebar-background: 0 0% 4%;
-    --input: 0 0% 14%;
-    --muted-foreground: 0 0% 70%;
-    --border: 0 0% 20%;
-    --geometric-border: 0 100% 45%;
-    --text-tertiary: 0 0% 60%;
-    --primary: 0 100% 45%;
-    --primary-dark: 0 100% 35%;
-    --primary-light: 0 100% 12%;
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 12%;
-    --accent: 0 100% 45%;
+    --background: 240 10% 4%; /* Deep charcoal black */
+    --foreground: 48 40% 95%; /* Cream white text */
+    --card: 240 10% 6%;
+    --popover: 240 10% 6%;
+    --popover-foreground: 48 40% 95%;
+    --surface: 240 10% 10%;
+    --surface-elevated: 240 10% 14%;
+    --sidebar-background: 240 10% 4%;
+    --input: 240 10% 14%;
+    --muted-foreground: 240 5% 70%;
+    --border: 48 96% 53%; /* Vibrant Golden Yellow border for dark mode */
+    --geometric-border: 48 96% 53%; /* Golden Yellow */
+    --text-tertiary: 240 5% 60%;
+    --primary: 48 96% 53%; /* Golden Yellow */
+    --primary-dark: 24 95% 53%; /* P4G Orange */
+    --primary-light: 48 100% 12%; /* Dark yellow tint */
+    --secondary: 48 40% 90%;
+    --secondary-foreground: 240 10% 4%;
+    --muted: 240 10% 12%;
+    --accent: 48 96% 53%; /* Golden Yellow */
     --success: 142 70% 55%;
     --destructive: 0 100% 45%;
-    --warning: 48 96% 58%;
-    --ring: 0 100% 45%;
+    --warning: 24 95% 58%;
+    --ring: 48 96% 53%;
   }
 }
 
 @layer base {
-  body {
+  body, .bg-background {
     @apply bg-background text-foreground antialiased;
     font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 16px;
     line-height: 1.6;
+    background-image: 
+      linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+      radial-gradient(rgba(0, 0, 0, 0.12) 1.5px, transparent 1.5px);
+    background-size: 24px 24px, 24px 24px, 24px 24px;
+    background-position: 0 0, 0 0, 12px 12px;
+    background-attachment: fixed;
+  }
+
+  .dark body, .dark .bg-background {
+    background-image: 
+      linear-gradient(rgba(250, 204, 21, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(250, 204, 21, 0.06) 1px, transparent 1px),
+      radial-gradient(rgba(250, 204, 21, 0.15) 1.5px, transparent 1.5px);
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: "Bebas Neue", "Impact", sans-serif;
-    @apply font-bold tracking-wider uppercase;
+    @apply font-bold tracking-wider uppercase italic;
   }
 
   ::selection {
@@ -89,31 +103,31 @@
 
 @layer utilities {
   .pattern-dots {
-    background-image: radial-gradient(rgba(0,102,255,0.15) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(250,204,21,0.25) 1px, transparent 1px);
     background-size: 20px 20px;
   }
   .dark .pattern-dots {
-    background-image: radial-gradient(rgba(230,0,18,0.2) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(250,204,21,0.3) 1px, transparent 1px);
   }
 
   .pattern-dots-sm {
-    background-image: radial-gradient(rgba(0,102,255,0.1) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(250,204,21,0.15) 1px, transparent 1px);
     background-size: 12px 12px;
   }
   .dark .pattern-dots-sm {
-    background-image: radial-gradient(rgba(230,0,18,0.15) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(250,204,21,0.2) 1px, transparent 1px);
   }
 
   .pattern-grid {
     background-image:
-      linear-gradient(rgba(0,102,255,0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,102,255,0.08) 1px, transparent 1px);
+      linear-gradient(rgba(249,115,22,0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(249,115,22,0.1) 1px, transparent 1px);
     background-size: 40px 40px;
   }
   .dark .pattern-grid {
     background-image:
-      linear-gradient(rgba(230,0,18,0.12) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(230,0,18,0.12) 1px, transparent 1px);
+      linear-gradient(rgba(249,115,22,0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(249,115,22,0.15) 1px, transparent 1px);
   }
 
   .pattern-diagonal {
@@ -121,8 +135,8 @@
       -45deg,
       transparent,
       transparent 8px,
-      rgba(0,102,255,0.06) 8px,
-      rgba(0,102,255,0.06) 10px
+      rgba(250,204,21,0.08) 8px,
+      rgba(250,204,21,0.08) 10px
     );
   }
   .dark .pattern-diagonal {
@@ -130,8 +144,8 @@
       -45deg,
       transparent,
       transparent 8px,
-      rgba(230,0,18,0.1) 8px,
-      rgba(230,0,18,0.1) 10px
+      rgba(250,204,21,0.12) 8px,
+      rgba(250,204,21,0.12) 10px
     );
   }
 
@@ -182,8 +196,8 @@
     height: 4px;
     background: repeating-linear-gradient(
       45deg,
-      #0066FF,
-      #0066FF 10px,
+      #FACC15,
+      #FACC15 10px,
       #000 10px,
       #000 20px
     );
@@ -192,18 +206,18 @@
   .dark .persona-slash::after {
     background: repeating-linear-gradient(
       45deg,
-      #E60012,
-      #E60012 10px,
-      #fff 10px,
-      #fff 20px
+      #FACC15,
+      #FACC15 10px,
+      #111 10px,
+      #111 20px
     );
   }
 
   .persona-stripe-red {
     background: repeating-linear-gradient(
       45deg,
-      rgba(0,102,255,0.15),
-      rgba(0,102,255,0.15) 10px,
+      rgba(250,204,21,0.15),
+      rgba(250,204,21,0.15) 10px,
       transparent 10px,
       transparent 20px
     );
@@ -212,8 +226,8 @@
   .dark .persona-stripe-red {
     background: repeating-linear-gradient(
       45deg,
-      rgba(230,0,18,0.15),
-      rgba(230,0,18,0.15) 10px,
+      rgba(250,204,21,0.2),
+      rgba(250,204,21,0.2) 10px,
       transparent 10px,
       transparent 20px
     );
@@ -241,5 +255,81 @@
 
   .geo-accent {
     box-shadow: inset 0 -2px 0 0 hsl(var(--primary));
+  }
+
+  /* Custom Persona Pill elements */
+  .persona-pill-input {
+    background-color: #ffffff;
+    border: 3.5px solid #000000;
+    border-radius: 9999px;
+    box-shadow: 3px 3px 0px 0px #000000;
+    color: #000000;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 0.875rem;
+    padding-left: 2.75rem;
+    padding-right: 1.25rem;
+    height: 3rem;
+    outline: none;
+    transition: all 0.15s ease-in-out;
+  }
+  .dark .persona-pill-input {
+    background-color: #1a1505;
+    border-color: #FACC15;
+    color: #ffffff;
+    box-shadow: 3px 3px 0px 0px #FACC15;
+  }
+  .persona-pill-input::placeholder {
+    color: #9ca3af;
+    text-transform: uppercase;
+    font-style: italic;
+    font-weight: 900;
+  }
+  .persona-pill-input:focus {
+    box-shadow: 5px 5px 0px 0px #000000;
+    transform: translate(-1px, -1px);
+  }
+  .dark .persona-pill-input:focus {
+    box-shadow: 5px 5px 0px 0px #FACC15;
+  }
+
+  .persona-pill-btn {
+    background-color: #000000;
+    color: #ffffff;
+    border: 3.5px solid #000000;
+    border-radius: 9999px;
+    box-shadow: 3px 3px 0px 0px #ffffff;
+    font-family: "Bebas Neue", "Impact", sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 1.125rem;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 1.75rem;
+    height: 3rem;
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dark .persona-pill-btn {
+    background-color: #F97316;
+    color: #000000;
+    border-color: #F97316;
+    box-shadow: 3px 3px 0px 0px #000000;
+  }
+  .persona-pill-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px 0px #ffffff;
+  }
+  .dark .persona-pill-btn:hover {
+    box-shadow: 4px 4px 0px 0px #000000;
+  }
+  .persona-pill-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #ffffff;
+  }
+  .dark .persona-pill-btn:active {
+    box-shadow: 1px 1px 0px 0px #000000;
   }
 }

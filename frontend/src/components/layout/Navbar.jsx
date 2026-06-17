@@ -109,31 +109,31 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-[9990] border-b-4 border-primary bg-black text-white shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+      <header className="sticky top-0 z-[9990] border-b-4 border-black bg-primary text-black shadow-[0_4px_0px_0px_rgba(0,0,0,1)]">
         <div className="container flex h-16 items-center gap-3">
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <div className="relative h-9 w-9 bg-primary -skew-x-12 flex items-center justify-center border-2 border-white shadow-[2px_2px_0_#000]">
+            <div className="relative h-9 w-9 bg-black -skew-x-12 flex items-center justify-center border-2 border-white shadow-[2px_2px_0_#000]">
               <span className="text-white font-display font-black text-lg skew-x-12">D</span>
             </div>
-            <span className="hidden sm:inline-flex items-center font-display text-2xl font-black uppercase tracking-tighter leading-none italic">
+            <span className="hidden sm:inline-flex items-center font-display text-2xl font-black uppercase tracking-tighter leading-none italic text-black">
               <span>DAGANG</span>
-              <span className="bg-primary text-white px-1.5 py-0.5 -skew-x-12 inline-block font-black ml-1">
+              <span className="bg-black text-primary px-1.5 py-0.5 -skew-x-12 inline-block font-black ml-1">
                 <span className="skew-x-12 inline-block">LY</span>
               </span>
             </span>
           </Link>
 
           <form onSubmit={submitSearch} className="hidden flex-1 md:block max-w-sm">
-            <div className="relative -skew-x-6 border-2 border-white bg-neutral-900 shadow-[2px_2px_0_hsl(var(--primary))] overflow-hidden">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 skew-x-6" />
+            <div className="relative -skew-x-6 border-2 border-black bg-white shadow-[2px_2px_0_#000] overflow-hidden">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/50 skew-x-6" />
               <input
                 type="text"
                 placeholder={t("nav.searchPlaceholder") || "Cari produk UMKM..."}
-                className="w-full h-9 bg-transparent pl-10 pr-20 text-sm text-white focus:outline-none focus:ring-0 skew-x-6"
+                className="w-full h-9 bg-transparent pl-10 pr-20 text-sm text-black focus:outline-none focus:ring-0 skew-x-6 font-black italic"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <button type="submit" className="absolute right-0 top-0 bottom-0 px-4 text-xs bg-white text-black font-black uppercase hover:bg-primary hover:text-white transition-colors skew-x-6 flex items-center justify-center">
+              <button type="submit" className="absolute right-0 top-0 bottom-0 px-4 text-xs bg-black text-white font-black uppercase hover:bg-neutral-800 transition-colors skew-x-6 flex items-center justify-center">
                 CARI
               </button>
             </div>
@@ -146,8 +146,8 @@ const Navbar = () => {
                 to={item.to}
                 className={`px-4 py-1 text-sm font-black tracking-wider uppercase transition-all -skew-x-12 ${
                   isActive(item.to)
-                    ? "text-black bg-white border border-black shadow-[2px_2px_0_hsl(var(--primary))]"
-                    : "text-white hover:text-primary hover:bg-neutral-900"
+                    ? "text-white bg-black border border-black shadow-[2px_2px_0_#fff]"
+                    : "text-black hover:bg-black/10"
                 }`}
               >
                 <span className="skew-x-12 block">{item.label}</span>
@@ -158,28 +158,26 @@ const Navbar = () => {
           <div className="flex items-center gap-2 ml-auto">
             <NotificationBell />
 
-            <Button variant="ghost" size="icon" asChild className={`relative text-white hover:text-primary hover:bg-neutral-900 rounded-none ${isActive('/cart') ? 'text-primary' : ''}`}>
+            <Button variant="ghost" size="icon" asChild className={`relative text-black hover:bg-black/10 rounded-none ${isActive('/cart') ? 'text-black' : ''}`}>
               <Link to="/cart">
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-none bg-primary text-[10px] text-white font-black border border-white">
+                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-none bg-black text-[10px] text-primary font-black border border-white">
                     {cartCount > 9 ? "9+" : cartCount}
                   </span>
                 )}
               </Link>
             </Button>
 
-            <Button variant="ghost" size="sm" onClick={toggleLanguage} className="text-white hover:text-primary hover:bg-neutral-900 rounded-none text-xs font-black min-w-[36px]">
+            <Button variant="ghost" size="sm" onClick={toggleLanguage} className="text-black hover:bg-black/10 rounded-none text-xs font-black min-w-[36px]">
               {language === 'en' ? 'EN' : 'ID'}
             </Button>
 
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-white hover:text-primary hover:bg-neutral-900 rounded-none">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-black hover:bg-black/10 rounded-none">
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
 
-
-
-            <Button variant="ghost" size="icon" className="lg:hidden text-white hover:text-primary hover:bg-neutral-900 rounded-none" onClick={() => setMobileOpen(true)}>
+            <Button variant="ghost" size="icon" className="lg:hidden text-black hover:bg-black/10 rounded-none" onClick={() => setMobileOpen(true)}>
               <Menu className="h-5 w-5" />
             </Button>
 
@@ -189,65 +187,89 @@ const Navbar = () => {
                   {isSeller && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="gap-1.5 text-xs border-white text-white bg-transparent hover:bg-white hover:text-black rounded-none -skew-x-6">
-                          <span className="skew-x-6 flex items-center gap-1.5">
+                        <Button size="sm" className="h-9 text-xs font-black italic uppercase border-3 border-black dark:border-[#FACC15] rounded-lg px-4 py-2 bg-transparent text-black hover:bg-black/10 transform -skew-x-12 cursor-pointer transition-all shadow-[2px_2px_0px_0px_#F97316]">
+                          <span className="transform skew-x-12 flex items-center gap-1.5">
                             <Store className="h-3.5 w-3.5" />
                             {t("nav.sellerMenu") || "Seller"}
-                            <ChevronDown className="h-3 w-3" />
+                            <ChevronDown className="h-3.5 w-3.5" />
                           </span>
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44 bg-black text-white border-2 border-white rounded-none">
-                        <DropdownMenuLabel className="text-xs font-black text-primary tracking-wider uppercase">{t("nav.sellerMenu") || "Seller Tools"}</DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-white/20" />
-                        {sellerMenuItems.map((item) => (
-                          <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)} className="hover:bg-primary hover:text-white rounded-none cursor-pointer">
-                            <item.icon className="h-4 w-4 mr-2" />
-                            {item.label}
-                          </DropdownMenuItem>
-                        ))}
+                      <DropdownMenuContent align="end" className="p-0 bg-transparent border-0 shadow-none overflow-visible">
+                        <div className="w-44 bg-white dark:bg-[#1a1505] border-3 border-black dark:border-[#FACC15] rounded-lg shadow-[5px_5px_0px_0px_#F97316] p-1.5 space-y-1 transform -skew-x-6">
+                          <DropdownMenuLabel className="text-[10px] font-black text-primary tracking-wider uppercase transform skew-x-6 ml-2">{t("nav.sellerMenu") || "Seller Tools"}</DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-border/20" />
+                          {sellerMenuItems.map((item) => (
+                            <DropdownMenuItem 
+                              key={item.to} 
+                              onClick={() => navigate(item.to)} 
+                              className="group cursor-pointer px-2.5 py-2 text-xs font-black italic uppercase rounded-md flex items-center gap-1.5 transition-all transform hover:-translate-x-1 border-2 border-transparent hover:border-black text-black dark:text-foreground hover:bg-[#FACC15] hover:text-black focus:bg-[#FACC15] focus:text-black focus:border-black"
+                            >
+                              <span className="transform skew-x-6 flex items-center gap-1.5 w-full">
+                                <span className="hidden group-hover:inline text-[#F97316] dark:text-black animate-pulse">★</span>
+                                <item.icon className="h-4 w-4 shrink-0" />
+                                {item.label}
+                              </span>
+                            </DropdownMenuItem>
+                          ))}
+                        </div>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="sm" className="gap-1.5 text-xs bg-white text-black hover:bg-primary hover:text-white rounded-none -skew-x-6 border border-black shadow-[2px_2px_0px_hsl(var(--primary))]">
-                        <span className="skew-x-6 flex items-center gap-1.5">
+                      <Button size="sm" className="h-9 text-xs font-black italic uppercase border-3 border-black dark:border-[#FACC15] rounded-lg px-4 py-2 bg-black dark:bg-[#F97316] text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-[#EA580C] transform -skew-x-12 cursor-pointer transition-all shadow-[2px_2px_0px_0px_#F97316] dark:shadow-[2px_2px_0px_0px_#FACC15]">
+                        <span className="transform skew-x-12 flex items-center gap-1.5">
                           <User className="h-3.5 w-3.5" />
                           {user?.name?.split(" ")[0] || t("nav.myAccount")}
-                          <ChevronDown className="h-3 w-3" />
+                          <ChevronDown className="h-3.5 w-3.5" />
                         </span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-44 bg-black text-white border-2 border-white rounded-none">
-                      <DropdownMenuLabel className="text-xs font-black text-primary tracking-wider uppercase">{t("nav.myAccount")}</DropdownMenuLabel>
-                      <DropdownMenuSeparator className="bg-white/20" />
-                      {userMenuItems.map((item) => (
-                        <DropdownMenuItem key={item.to} onClick={() => navigate(item.to)} className="hover:bg-primary hover:text-white rounded-none cursor-pointer">
-                          <item.icon className="h-4 w-4 mr-2" />
-                          {item.label}
-                          {item.badge > 0 && (
-                            <span className="ml-auto text-[10px] bg-primary text-white rounded-none h-4 min-w-4 px-1 flex items-center justify-center font-black border border-white">
-                              {item.badge > 9 ? "9+" : item.badge}
+                    <DropdownMenuContent align="end" className="p-0 bg-transparent border-0 shadow-none overflow-visible">
+                      <div className="w-44 bg-white dark:bg-[#1a1505] border-3 border-black dark:border-[#FACC15] rounded-lg shadow-[5px_5px_0px_0px_#F97316] p-1.5 space-y-1 transform -skew-x-6">
+                        <DropdownMenuLabel className="text-[10px] font-black text-primary tracking-wider uppercase transform skew-x-6 ml-2">{t("nav.myAccount")}</DropdownMenuLabel>
+                        <DropdownMenuSeparator className="bg-border/20" />
+                        {userMenuItems.map((item) => (
+                          <DropdownMenuItem 
+                            key={item.to} 
+                            onClick={() => navigate(item.to)} 
+                            className="group cursor-pointer px-2.5 py-2 text-xs font-black italic uppercase rounded-md flex items-center gap-1.5 transition-all transform hover:-translate-x-1 border-2 border-transparent hover:border-black text-black dark:text-foreground hover:bg-[#FACC15] hover:text-black focus:bg-[#FACC15] focus:text-black focus:border-black"
+                          >
+                            <span className="transform skew-x-6 flex items-center gap-1.5 w-full">
+                              <span className="hidden group-hover:inline text-[#F97316] dark:text-black animate-pulse">★</span>
+                              <item.icon className="h-4 w-4 shrink-0" />
+                              {item.label}
+                              {item.badge > 0 && (
+                                <span className="ml-auto text-[10px] bg-[#FACC15] text-black rounded h-4 min-w-4 px-1.5 flex items-center justify-center font-black border border-black">
+                                  {item.badge > 9 ? "9+" : item.badge}
+                                </span>
+                              )}
                             </span>
-                          )}
+                          </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator className="bg-border/20" />
+                        <DropdownMenuItem 
+                          onClick={handleLogout} 
+                          className="group cursor-pointer px-2.5 py-2 text-xs font-black italic uppercase rounded-md flex items-center gap-1.5 transition-all transform hover:-translate-x-1 border-2 border-transparent hover:border-black text-primary hover:bg-[#FACC15] hover:text-black focus:bg-[#FACC15] focus:text-black focus:border-black"
+                        >
+                          <span className="transform skew-x-6 flex items-center gap-1.5 w-full">
+                            <span className="hidden group-hover:inline text-[#F97316] dark:text-black animate-pulse">★</span>
+                            <LogOut className="h-4 w-4 shrink-0" />
+                            {t("nav.logout")}
+                          </span>
                         </DropdownMenuItem>
-                      ))}
-                      <DropdownMenuSeparator className="bg-white/20" />
-                      <DropdownMenuItem onClick={handleLogout} className="text-primary hover:bg-primary hover:text-white rounded-none cursor-pointer focus:bg-primary focus:text-white">
-                        <LogOut className="h-4 w-4 mr-2" />
-                        {t("nav.logout")}
-                      </DropdownMenuItem>
+                      </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" size="sm" className="text-xs text-white hover:text-primary hover:bg-neutral-900 rounded-none font-bold uppercase" onClick={openLogin}>
+                  <Button variant="ghost" size="sm" className="text-xs text-black hover:bg-black/10 rounded-none font-bold uppercase" onClick={openLogin}>
                     {t("nav.login") || "Login"}
                   </Button>
-                  <Button size="sm" className="text-xs bg-primary text-white hover:bg-white hover:text-black rounded-none border border-black font-bold uppercase shadow-[2px_2px_0px_#fff]" onClick={openRegister}>
+                  <Button size="sm" className="text-xs bg-black text-white hover:bg-neutral-800 rounded-none border border-black font-bold uppercase shadow-[2px_2px_0px_#fff]" onClick={openRegister}>
                     {t("nav.register") || "Register"}
                   </Button>
                 </>

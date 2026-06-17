@@ -181,12 +181,12 @@ const Home = () => {
         <div className="container h-full flex items-center justify-center relative z-10">
           <div className="max-w-2xl mx-auto text-center">
             <div 
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 text-white/90 text-[10px] font-bold tracking-widest mb-4"
+              className="inline-flex items-center gap-2 px-4 py-1.5 border-3 border-black bg-black text-primary text-[10px] font-black italic uppercase tracking-widest mb-4 shadow-[2px_2px_0px_0px_#fff]"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               MARKETPLACE UMKM INDONESIA
             </div>
-            <div className="h-[140px] sm:h-[150px] md:h-[165px] flex flex-col justify-center mb-6">
+            <div className="h-[180px] sm:h-[190px] md:h-[210px] flex flex-col justify-center mb-6">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
@@ -195,30 +195,33 @@ const Home = () => {
                   exit={{ opacity: 0, y: -15 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-3 leading-tight">
+                  <div className="inline-block bg-white border-4 border-black dark:border-[#FACC15] text-black font-display font-black italic uppercase text-2xl sm:text-3xl md:text-4xl px-6 py-4 rounded-lg shadow-[6px_6px_0px_0px_#F97316] rotate-[-1.5deg] mb-4 max-w-full">
                     {heroSlides[currentSlide].title}
-                  </h1>
-                  <p className="text-sm md:text-base text-white/80 mb-0 max-w-lg mx-auto font-medium">
+                  </div>
+                  <p className="text-sm md:text-base text-white font-black italic uppercase tracking-wider max-w-lg mx-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                     {heroSlides[currentSlide].desc}
                   </p>
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            <form onSubmit={handleSearch} className="max-w-md mx-auto">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <Input
+            <form onSubmit={handleSearch} className="max-w-md mx-auto flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-black font-black z-10" />
+                <input
                   type="search"
                   placeholder="Cari produk, toko, atau kategori..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 text-sm bg-white/95 border-0 text-gray-900 placeholder:text-gray-400 rounded-xl shadow-md"
+                  className="w-full pl-11 pr-4 h-12 text-sm bg-white border-3 border-black dark:border-[#FACC15] text-black placeholder:text-gray-400 placeholder:italic placeholder:font-black rounded-full shadow-[3px_3px_0px_0px_#F97316] focus:outline-none focus:translate-x-[1px] focus:translate-y-[1px] focus:shadow-[4px_4px_0px_0px_#F97316] font-black italic tracking-wide transition-all"
                 />
-                <Button type="submit" size="sm" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 px-4 rounded-lg text-xs">
-                  Cari
-                </Button>
               </div>
+              <button 
+                type="submit" 
+                className="persona-pill-btn shrink-0"
+              >
+                Cari!
+              </button>
             </form>
           </div>
         </div>
