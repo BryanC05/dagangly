@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, CheckCircle, QrCode, Banknote } from 'lucide-react';
+import { Upload, CheckCircle, QrCode, Banknote, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -7,6 +7,29 @@ import api from '@/utils/api';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import { showError, showSuccess } from '@/utils/toast';
 import { resolveOrderId } from '@/utils/orderStatus';
+
+const loadSnapScript = () => {
+  return new Promise((resolve) => {
+    if (window.snap) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    const isProduction = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
+    script.src = isProduction
+      ? 'https://app.midtrans.com/snap/snap.js'
+      : 'https://app.sandbox.midtrans.com/snap/snap.js';
+    
+    const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
+    if (clientKey) {
+      script.setAttribute('data-client-key', clientKey);
+    }
+    
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 export default function OrderPaymentPanel({
   order,
@@ -16,6 +39,7 @@ export default function OrderPaymentPanel({
 }) {
   const [uploading, setUploading] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   const orderId = resolveOrderId(order);
   const buyerId = order.buyer?._id || order.buyer;
@@ -24,10 +48,49 @@ export default function OrderPaymentPanel({
   const isSeller = String(sellerId) === String(user?.id);
   const isQris = order.paymentMethod === 'qris';
   const isCash = order.paymentMethod === 'cash';
+  const isMidtrans = order.paymentMethod === 'midtrans';
   const paymentStatus = order.paymentStatus || 'pending';
   const qrisUrl = order.paymentDetails?.qrisUrl || order.seller?.qrisImageUrl;
   const qrisCode = order.paymentDetails?.qrisCode || order.seller?.qrisCode;
   const proofUrl = order.paymentDetails?.transferProof;
+
+  const handleMidtransPay = async () => {
+    setPaying(true);
+    try {
+      const snapResponse = await api.post('/payments/checkout', { orderId });
+      const { snap_token } = snapResponse.data;
+
+      if (snap_token) {
+        const loaded = await loadSnapScript();
+        if (loaded && window.snap) {
+          window.snap.pay(snap_token, {
+            onSuccess: () => {
+              showSuccess('Payment Successful!', 'Your order has been paid and confirmed.');
+              onUpdated?.();
+            },
+            onPending: () => {
+              showSuccess('Payment Pending', 'Awaiting transaction settlement.');
+              onUpdated?.();
+            },
+            onError: () => {
+              showError('Payment Failed', 'Transaction was unsuccessful.');
+            },
+            onClose: () => {
+              showSuccess('Payment Closed', 'You can complete your payment later.');
+            }
+          });
+        } else {
+          showError('Error', 'Failed to load Midtrans SDK.');
+        }
+      } else {
+        showError('Error', 'Failed to retrieve payment token.');
+      }
+    } catch (payError) {
+      showError('Payment Error', payError.response?.data?.error || payError.message);
+    } finally {
+      setPaying(false);
+    }
+  };
 
   const uploadProof = async (file) => {
     if (!file || !orderId) return;
@@ -77,14 +140,43 @@ export default function OrderPaymentPanel({
     <Card className={compact ? 'border-primary/20' : ''}>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
-          {isQris ? <QrCode className="h-4 w-4" /> : <Banknote className="h-4 w-4" />}
-          {isQris ? 'Pay with QRIS' : 'Cash on pickup'}
+          {isQris ? <QrCode className="h-4 w-4" /> : isMidtrans ? <CreditCard className="h-4 w-4" /> : <Banknote className="h-4 w-4" />}
+          {isQris ? 'Pay with QRIS' : isMidtrans ? 'Online Payment (Midtrans)' : 'Cash on pickup'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         {isCash && (
           <p className="text-muted-foreground">
             Pay the seller in cash when you pick up your order.
+          </p>
+        )}
+
+        {isMidtrans && isBuyer && paymentStatus === 'pending' && (
+          <div className="space-y-2">
+            <p className="text-muted-foreground">
+              Complete your payment securely online via Midtrans.
+            </p>
+            <Button
+              size="sm"
+              className="w-full gap-2"
+              onClick={handleMidtransPay}
+              disabled={paying}
+            >
+              <CreditCard className="h-4 w-4" />
+              {paying ? 'Opening Midtrans...' : 'Pay Now'}
+            </Button>
+          </div>
+        )}
+
+        {isMidtrans && isSeller && paymentStatus === 'pending' && (
+          <p className="text-muted-foreground italic">
+            Awaiting automated online payment confirmation from Midtrans.
+          </p>
+        )}
+
+        {isMidtrans && paymentStatus === 'pending' && !isBuyer && !isSeller && (
+          <p className="text-muted-foreground">
+            Payment pending online verification.
           </p>
         )}
 

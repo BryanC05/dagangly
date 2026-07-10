@@ -52,6 +52,7 @@ const CREATOR_EMAIL = 'admin@umkm-marketplace.com';
 const paymentIcons = {
   cash: { icon: Banknote, label: 'Cash on Delivery' },
   qris: { icon: Smartphone, label: 'QRIS' },
+  midtrans: { icon: CreditCard, label: 'Online Payment (Midtrans)' },
   ewallet: { icon: Smartphone, label: 'E-Wallet' },
   bank_transfer: { icon: Building2, label: 'Bank Transfer' },
   credit_card: { icon: CreditCard, label: 'Credit Card' },
