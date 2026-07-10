@@ -103,9 +103,9 @@ function Orders() {
   });
 
   const filterTabs = [
-    { key: 'all', label: t('orders.allOrders') },
-    { key: 'active', label: t('orders.activeOrders') },
-    { key: 'completed', label: t('orders.completedOrders') },
+    { key: 'all', label: t('orderItems.allOrders') },
+    { key: 'active', label: t('orderItems.activeOrders') },
+    { key: 'completed', label: t('orderItems.completedOrders') },
   ];
 
   const hasToken = !!localStorage.getItem('token');
