@@ -19,6 +19,29 @@ import DeliveryMapPicker from '@/components/DeliveryMapPicker';
 import { showError, showSuccess, showInfo } from '../utils/toast';
 import { resolveOrderId, formatScheduledPickup } from '../utils/orderStatus';
 
+const loadSnapScript = () => {
+  return new Promise((resolve) => {
+    if (window.snap) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    const isProduction = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
+    script.src = isProduction
+      ? 'https://app.midtrans.com/snap/snap.js'
+      : 'https://app.sandbox.midtrans.com/snap/snap.js';
+    
+    const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
+    if (clientKey) {
+      script.setAttribute('data-client-key', clientKey);
+    }
+    
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 function Cart() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -75,6 +98,7 @@ function Cart() {
     const paymentMethods = [
         { id: 'cash', label: 'Cash on Delivery', icon: '💵', desc: 'Pay when you receive' },
         { id: 'qris', label: 'QRIS', icon: '📱', desc: 'Scan QR code at seller place' },
+        { id: 'midtrans', label: 'Online Payment (Midtrans)', icon: '💳', desc: 'Pay instantly with QRIS/VA/Gopay via Midtrans' }
     ];
 
     const deliveryTypes = [
@@ -180,6 +204,7 @@ function Cart() {
 
             const res = await api.post('/orders', orderData);
             const created = res.data;
+            const orderIdStr = created._id || created.id;
             clearSellerCart(checkoutSeller.sellerId);
             queryClient.invalidateQueries({ queryKey: ['orders'] });
 
@@ -187,19 +212,59 @@ function Cart() {
                 detail: { x: e.clientX, y: e.clientY }
             }));
 
-            setOrderSuccess({
-                orderId: resolveOrderId(created),
-                paymentMethod,
-                total,
-                sellerName: checkoutSeller.sellerName,
-                pickupTime: preorderTime,
-                pickupDate: preorderDate,
-            });
-            setCheckoutSeller(null);
-            setDeliveryLocation(null);
-            showSuccess('Order placed!', paymentMethod === 'qris'
-                ? 'Scan the seller QRIS on your Orders page and upload proof after paying.'
-                : 'Pay with cash when you pick up.');
+            if (paymentMethod === 'midtrans') {
+                try {
+                    const snapResponse = await api.post('/payments/checkout', { orderId: orderIdStr });
+                    const { snap_token } = snapResponse.data;
+
+                    if (snap_token) {
+                        const loaded = await loadSnapScript();
+                        if (loaded && window.snap) {
+                            window.snap.pay(snap_token, {
+                                onSuccess: () => {
+                                    showSuccess('Payment Successful!', 'Your order has been paid and confirmed.');
+                                    navigate('/orders');
+                                },
+                                onPending: () => {
+                                    showInfo('Payment Pending', 'Awaiting transaction settlement.');
+                                    navigate('/orders');
+                                },
+                                onError: () => {
+                                    showError('Payment Failed', 'Transaction was unsuccessful. You can pay from the Orders page.');
+                                    navigate('/orders');
+                                },
+                                onClose: () => {
+                                    showInfo('Payment Window Closed', 'You can complete your payment later in the Orders page.');
+                                    navigate('/orders');
+                                }
+                            });
+                        } else {
+                            showError('Error', 'Failed to load Midtrans SDK.');
+                            navigate('/orders');
+                        }
+                    } else {
+                        showError('Error', 'Failed to retrieve payment token.');
+                        navigate('/orders');
+                    }
+                } catch (payError) {
+                    showError('Payment Error', payError.response?.data?.error || payError.message);
+                    navigate('/orders');
+                }
+            } else {
+                setOrderSuccess({
+                    orderId: resolveOrderId(created),
+                    paymentMethod,
+                    total,
+                    sellerName: checkoutSeller.sellerName,
+                    pickupTime: preorderTime,
+                    pickupDate: preorderDate,
+                });
+                setCheckoutSeller(null);
+                setDeliveryLocation(null);
+                showSuccess('Order placed!', paymentMethod === 'qris'
+                    ? 'Scan the seller QRIS on your Orders page and upload proof after paying.'
+                    : 'Pay with cash when you pick up.');
+            }
         } catch (error) {
             const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Failed to place order';
             showError('Checkout failed', errorMsg);

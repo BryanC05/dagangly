@@ -29,7 +29,7 @@ func main() {
 	}
 
 	clientOptions := options.Client().ApplyURI(uri)
-	client, err := mongo.NewClient(clientOptions)
+	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,10 +37,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
 	defer client.Disconnect(ctx)
 
 	db := client.Database("msme_marketplace")
@@ -50,93 +46,180 @@ func main() {
 
 	passwordHash := hashPassword("password123")
 
-	fmt.Println("🌱 Starting basic data seed...")
+	fmt.Println("🌱 Revamping database mock simulation data...")
+
+	// Clear existing test/seeding data to start fresh
+	_, _ = usersCol.DeleteMany(ctx, bson.M{"email": bson.M{"$regex": "@test.com$"}})
+	_, _ = productsCol.DeleteMany(ctx, bson.M{})
 
 	// ==========================================
-	// 1. Create Sellers
+	// 1. Create Sellers (5 total, 3 new)
 	// ==========================================
-	fmt.Println("👤 Creating seller accounts...")
+	fmt.Println("👤 Creating 5 seller accounts at different locations...")
 
-	seller1ID := primitive.NewObjectID()
-	seller2ID := primitive.NewObjectID()
+	s1ID := primitive.NewObjectID()
+	s2ID := primitive.NewObjectID()
+	s3ID := primitive.NewObjectID()
+	s4ID := primitive.NewObjectID()
+	s5ID := primitive.NewObjectID()
 
-	budiBusinessName := "Budi Electronics & Accessories"
-	sitiBusinessName := "Dapur Bu Siti (Catering)"
-
-	seller1 := bson.M{
-		"_id":                 seller1ID,
-		"name":                "Budi Santoso",
-		"email":               "budi.seller@test.com",
-		"password":            passwordHash,
-		"phone":               "081234567890",
-		"isSeller":            true,
-		"businessName":        budiBusinessName,
-		"businessType":        "individual",
-		"businessAddress":     "Jl. Sudirman No. 45, Jakarta Pusat",
-		"registrationStatus":  "approved",
-		"isVerified":          true,
-		"isMember":            true,
-		"memberSince":         time.Now(),
-		"memberExpiry":        time.Now().AddDate(1, 0, 0),
-		"membershipStatus":    "active",
-		"location": bson.M{
-			"type":        "Point",
-			"coordinates": []float64{106.8229, -6.1931}, // Jakarta Pusat
-			"address":     "Jl. Sudirman No. 45",
-			"city":        "Jakarta Pusat",
-			"state":       "DKI Jakarta",
-			"pincode":     "10220",
+	sellers := []bson.M{
+		{
+			"_id":                 s1ID,
+			"name":                "Budi Santoso",
+			"email":               "budi.seller@test.com",
+			"password":            passwordHash,
+			"phone":               "081234567890",
+			"isSeller":            true,
+			"businessName":        "Warung Makan Padang Budi",
+			"businessType":        "individual",
+			"businessAddress":     "Jl. Sudirman No. 45, Jakarta Pusat",
+			"registrationStatus":  "approved",
+			"isVerified":          true,
+			"isMember":            true,
+			"memberSince":         time.Now(),
+			"memberExpiry":        time.Now().AddDate(1, 0, 0),
+			"membershipStatus":    "active",
+			"location": bson.M{
+				"type":        "Point",
+				"coordinates": []float64{106.8229, -6.1931}, // Jakarta Pusat
+				"address":     "Jl. Sudirman No. 45",
+				"city":        "Jakarta Pusat",
+				"state":       "DKI Jakarta",
+				"pincode":     "10220",
+			},
+			"rating":       4.8,
+			"totalReviews": 24,
+			"createdAt":    time.Now(),
+			"updatedAt":    time.Now(),
 		},
-		"rating":       4.8,
-		"totalReviews": 24,
-		"createdAt":    time.Now(),
-		"updatedAt":    time.Now(),
-	}
-
-	seller2 := bson.M{
-		"_id":                 seller2ID,
-		"name":                "Siti Rahmawati",
-		"email":               "siti.seller@test.com",
-		"password":            passwordHash,
-		"phone":               "081987654321",
-		"isSeller":            true,
-		"businessName":        sitiBusinessName,
-		"businessType":        "individual",
-		"businessAddress":     "Jl. Margonda Raya No. 10, Depok",
-		"registrationStatus":  "approved",
-		"isVerified":          true,
-		"isMember":            true,
-		"memberSince":         time.Now(),
-		"memberExpiry":        time.Now().AddDate(1, 0, 0),
-		"membershipStatus":    "active",
-		"location": bson.M{
-			"type":        "Point",
-			"coordinates": []float64{106.8330, -6.3731}, // Depok
-			"address":     "Jl. Margonda Raya No. 10",
-			"city":        "Depok",
-			"state":       "Jawa Barat",
-			"pincode":     "16424",
+		{
+			"_id":                 s2ID,
+			"name":                "Siti Rahmawati",
+			"email":               "siti.seller@test.com",
+			"password":            passwordHash,
+			"phone":               "081987654321",
+			"isSeller":            true,
+			"businessName":        "Dapur Bu Siti (Catering)",
+			"businessType":        "individual",
+			"businessAddress":     "Jl. Margonda Raya No. 10, Depok",
+			"registrationStatus":  "approved",
+			"isVerified":          true,
+			"isMember":            true,
+			"memberSince":         time.Now(),
+			"memberExpiry":        time.Now().AddDate(1, 0, 0),
+			"membershipStatus":    "active",
+			"location": bson.M{
+				"type":        "Point",
+				"coordinates": []float64{106.8330, -6.3731}, // Depok
+				"address":     "Jl. Margonda Raya No. 10",
+				"city":        "Depok",
+				"state":       "Jawa Barat",
+				"pincode":     "16424",
+			},
+			"rating":       4.9,
+			"totalReviews": 56,
+			"createdAt":    time.Now(),
+			"updatedAt":    time.Now(),
 		},
-		"rating":       4.9,
-		"totalReviews": 56,
-		"createdAt":    time.Now(),
-		"updatedAt":    time.Now(),
+		{
+			"_id":                 s3ID,
+			"name":                "Joko Widodo",
+			"email":               "joko.seller@test.com",
+			"password":            passwordHash,
+			"phone":               "081122334455",
+			"isSeller":            true,
+			"businessName":        "Warung Kopi Mas Joko",
+			"businessType":        "individual",
+			"businessAddress":     "Jl. Tebet Raya No. 12, Jakarta Selatan",
+			"registrationStatus":  "approved",
+			"isVerified":          true,
+			"isMember":            true,
+			"memberSince":         time.Now(),
+			"memberExpiry":        time.Now().AddDate(1, 0, 0),
+			"membershipStatus":    "active",
+			"location": bson.M{
+				"type":        "Point",
+				"coordinates": []float64{106.8480, -6.2250}, // Jakarta Selatan (Tebet)
+				"address":     "Jl. Tebet Raya No. 12",
+				"city":        "Jakarta Selatan",
+				"state":       "DKI Jakarta",
+				"pincode":     "12810",
+			},
+			"rating":       4.7,
+			"totalReviews": 35,
+			"createdAt":    time.Now(),
+			"updatedAt":    time.Now(),
+		},
+		{
+			"_id":                 s4ID,
+			"name":                "Dewi Lestari",
+			"email":               "dewi.seller@test.com",
+			"password":            passwordHash,
+			"phone":               "081223344556",
+			"isSeller":            true,
+			"businessName":        "Toko Kue & Dessert Dewi",
+			"businessType":        "individual",
+			"businessAddress":     "Jl. Panjang No. 15, Kebon Jeruk, Jakarta Barat",
+			"registrationStatus":  "approved",
+			"isVerified":          true,
+			"isMember":            true,
+			"memberSince":         time.Now(),
+			"memberExpiry":        time.Now().AddDate(1, 0, 0),
+			"membershipStatus":    "active",
+			"location": bson.M{
+				"type":        "Point",
+				"coordinates": []float64{106.7681, -6.1905}, // Jakarta Barat (Kebon Jeruk)
+				"address":     "Jl. Panjang No. 15, Kebon Jeruk",
+				"city":        "Jakarta Barat",
+				"state":       "DKI Jakarta",
+				"pincode":     "11530",
+			},
+			"rating":       4.9,
+			"totalReviews": 42,
+			"createdAt":    time.Now(),
+			"updatedAt":    time.Now(),
+		},
+		{
+			"_id":                 s5ID,
+			"name":                "Eko Prasetyo",
+			"email":               "eko.seller@test.com",
+			"password":            passwordHash,
+			"phone":               "081334455667",
+			"isSeller":            true,
+			"businessName":        "Sate & Ayam Goreng Pak Eko",
+			"businessType":        "individual",
+			"businessAddress":     "Jl. MT Haryono No. 5, Cawang, Jakarta Timur",
+			"registrationStatus":  "approved",
+			"isVerified":          true,
+			"isMember":            true,
+			"memberSince":         time.Now(),
+			"memberExpiry":        time.Now().AddDate(1, 0, 0),
+			"membershipStatus":    "active",
+			"location": bson.M{
+				"type":        "Point",
+				"coordinates": []float64{106.8720, -6.2480}, // Jakarta Timur (Cawang)
+				"address":     "Jl. MT Haryono No. 5, Cawang",
+				"city":        "Jakarta Timur",
+				"state":       "DKI Jakarta",
+				"pincode":     "13630",
+			},
+			"rating":       4.6,
+			"totalReviews": 18,
+			"createdAt":    time.Now(),
+			"updatedAt":    time.Now(),
+		},
 	}
 
 	opts := options.Update().SetUpsert(true)
-	usersCol.UpdateOne(ctx, bson.M{"email": "budi.seller@test.com"}, bson.M{"$set": seller1}, opts)
-	usersCol.UpdateOne(ctx, bson.M{"email": "siti.seller@test.com"}, bson.M{"$set": seller2}, opts)
-
-	// Fetch to get exact IDs in case they existed
-	usersCol.FindOne(ctx, bson.M{"email": "budi.seller@test.com"}).Decode(&seller1)
-	usersCol.FindOne(ctx, bson.M{"email": "siti.seller@test.com"}).Decode(&seller2)
-	s1ID := seller1["_id"].(primitive.ObjectID)
-	s2ID := seller2["_id"].(primitive.ObjectID)
+	for _, seller := range sellers {
+		usersCol.UpdateOne(ctx, bson.M{"email": seller["email"]}, bson.M{"$set": seller}, opts)
+	}
 
 	// ==========================================
-	// 2. Create Buyers
+	// 2. Create Buyer
 	// ==========================================
-	fmt.Println("👤 Creating buyer accounts...")
+	fmt.Println("👤 Creating buyer account...")
 
 	buyer1ID := primitive.NewObjectID()
 	buyer1 := bson.M{
@@ -151,7 +234,7 @@ func main() {
 			"type":        "Point",
 			"coordinates": []float64{106.8000, -6.2000},
 			"address":     "Jl. Gatot Subroto",
-			"city":        "Jakarta",
+			"city":        "Jakarta Pusat",
 			"state":       "DKI Jakarta",
 			"pincode":     "10270",
 		},
@@ -162,83 +245,495 @@ func main() {
 	usersCol.UpdateOne(ctx, bson.M{"email": "andi.buyer@test.com"}, bson.M{"$set": buyer1}, opts)
 
 	// ==========================================
-	// 3. Create Products
+	// 3. Create Products (28 items utilizing /uploads/products images)
 	// ==========================================
-	fmt.Println("📦 Creating products...")
+	fmt.Println("📦 Creating revamped products with authentic names and images...")
 
 	products := []bson.M{
+		// --- Seller 1 Products (Padang food) ---
 		{
 			"seller":      s1ID,
-			"name":        "Wireless Bluetooth Earbuds Pro",
-			"description": "High-quality wireless earbuds with noise cancellation and 24-hour battery life. Perfect for music and calls.",
-			"price":       250000,
-			"category":    "electronics",
+			"name":        "Nasi Padang Komplit",
+			"description": "Nasi Padang dengan ayam bakar, sayur nangka khas minang, sambal hijau, dan kuah gulai yang gurih.",
+			"price":       2500, // keep cheap for testing if needed
+			"category":    "food",
 			"stock":       50,
-			"unit":        "pieces",
-			"images":      []string{"/images/placeholder-product.jpg"},
-			"isAvailable": true,
-			"status":      "active",
-			"rating":      4.5,
-			"reviewCount": 12,
-			"createdAt":   time.Now(),
-			"updatedAt":   time.Now(),
-			"location":    seller1["location"],
-		},
-		{
-			"seller":      s1ID,
-			"name":        "Fast Charging Cable Type-C",
-			"description": "Durable braided fast charging cable, 2 meters length. Supports data transfer up to 480Mbps.",
-			"price":       45000,
-			"category":    "electronics",
-			"stock":       120,
-			"unit":        "pieces",
-			"images":      []string{"/images/placeholder-product.jpg"},
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/nasi-padang.jpg"},
 			"isAvailable": true,
 			"status":      "active",
 			"rating":      4.8,
-			"reviewCount": 45,
+			"reviewCount": 15,
 			"createdAt":   time.Now(),
 			"updatedAt":   time.Now(),
-			"location":    seller1["location"],
+			"location":    sellers[0]["location"],
 		},
 		{
-			"seller":      s2ID,
-			"name":        "Nasi Liwet Komplit",
-			"description": "Nasi liwet khas Sunda dengan ayam goreng, tahu, tempe, lalapan, dan sambal terasi pedas.",
-			"price":       35000,
+			"seller":      s1ID,
+			"name":        "Rendang Daging Sapi",
+			"description": "Rendang daging sapi empuk khas Minang yang dimasak dengan bumbu rempah pilihan selama berjam-jam.",
+			"price":       40000,
 			"category":    "food",
-			"stock":       20,
-			"unit":        "portions",
-			"images":      []string{"/images/placeholder-product.jpg"},
+			"stock":       30,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/rendang.webp"},
 			"isAvailable": true,
 			"status":      "active",
-			"hasVariants": true,
-			"variants": []bson.M{
-				{"name": "Ayam Bakar", "price": 35000, "stock": 10},
-				{"name": "Ayam Goreng", "price": 35000, "stock": 10},
-			},
 			"rating":      4.9,
-			"reviewCount": 89,
+			"reviewCount": 24,
 			"createdAt":   time.Now(),
 			"updatedAt":   time.Now(),
-			"location":    seller2["location"],
+			"location":    sellers[0]["location"],
+		},
+		{
+			"seller":      s1ID,
+			"name":        "Nasi Goreng Spesial",
+			"description": "Nasi goreng harum wajan dengan campuran telur, bakso sapi, suwiran ayam, dan kerupuk renyah.",
+			"price":       20000,
+			"category":    "food",
+			"stock":       40,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/nasi-goreng.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.7,
+			"reviewCount": 38,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[0]["location"],
+		},
+		{
+			"seller":      s1ID,
+			"name":        "Soto Ayam Madura",
+			"description": "Soto ayam berkuah kuning bening gurih dengan suwiran ayam, soun, kol, telur rebus, dan taburan koya.",
+			"price":       18000,
+			"category":    "food",
+			"stock":       35,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/soto-ayam.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.6,
+			"reviewCount": 19,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[0]["location"],
+		},
+		{
+			"seller":      s1ID,
+			"name":        "Teh Manis Segar",
+			"description": "Teh manis seduh tradisional dengan aroma melati yang wangi. Nikmat disajikan dingin maupun hangat.",
+			"price":       5000,
+			"category":    "drinks",
+			"stock":       100,
+			"unit":        "glass",
+			"images":      []string{"/uploads/products/teh-manis.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.5,
+			"reviewCount": 85,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[0]["location"],
+		},
+
+		// --- Seller 2 Products (Traditional Indonesian Dishes) ---
+		{
+			"seller":      s2ID,
+			"name":        "Nasi Uduk Gurih Betawi",
+			"description": "Nasi yang dimasak dengan santan wangi, disajikan dengan bihun goreng, orek tempe, telur dadar iris, dan sambal kacang.",
+			"price":       15000,
+			"category":    "food",
+			"stock":       45,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/nasi-uduk.jpeg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.8,
+			"reviewCount": 42,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[1]["location"],
 		},
 		{
 			"seller":      s2ID,
-			"name":        "Kue Kering Nastar Premium",
-			"description": "Nastar isi nanas asli dengan butter premium. Tekstur lumer di mulut. Toples ukuran 500 gram.",
-			"price":       85000,
+			"name":        "Nasi Kuning Tumpeng Mini",
+			"description": "Nasi kuning wangi rempah dengan lauk ayam goreng, perkedel kentang, serundeng kelapa wangi, dan sambal goreng ati.",
+			"price":       15000,
+			"category":    "food",
+			"stock":       30,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/nasi-kuning.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.9,
+			"reviewCount": 29,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[1]["location"],
+		},
+		{
+			"seller":      s2ID,
+			"name":        "Gado Gado Bumbu Kacang",
+			"description": "Sayuran rebus segar, tahu, tempe, kentang, dan lontong disiram saus bumbu kacang tanah gurih kental.",
+			"price":       17000,
+			"category":    "food",
+			"stock":       25,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/gadogado.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.7,
+			"reviewCount": 51,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[1]["location"],
+		},
+		{
+			"seller":      s2ID,
+			"name":        "Bakso Malang Asli",
+			"description": "Bakso halus, bakso urat, pangsit goreng renyah, tahu bakso, dan siomay basah disajikan hangat dengan kuah kaldu sapi bening.",
+			"price":       20000,
+			"category":    "food",
+			"stock":       35,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/bakso-malang.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.8,
+			"reviewCount": 63,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[1]["location"],
+		},
+		{
+			"seller":      s2ID,
+			"name":        "Es Cendol Gula Merah",
+			"description": "Minuman manis dingin dari cendol pandan kenyal, santan kelapa segar, dan sirup gula merah jawa asli.",
+			"price":       8000,
+			"category":    "drinks",
+			"stock":       60,
+			"unit":        "glass",
+			"images":      []string{"/uploads/products/es-cendol.jpeg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.9,
+			"reviewCount": 44,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[1]["location"],
+		},
+
+		// --- Seller 3 Products (Coffee shop / Drinks) ---
+		{
+			"seller":      s3ID,
+			"name":        "Kopi Hitam Tubruk",
+			"description": "Seduhan kopi hitam arabika lokal berkualitas tinggi dengan rasa bold dan aroma pekat.",
+			"price":       8000,
+			"category":    "drinks",
+			"stock":       80,
+			"unit":        "cup",
+			"images":      []string{"/uploads/products/kopi-hitam.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.6,
+			"reviewCount": 31,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[2]["location"],
+		},
+		{
+			"seller":      s3ID,
+			"name":        "Kopi Susu Aren Gula Semut",
+			"description": "Perpaduan kopi espresso, susu cair creamy, dan manis legit dari gula aren cair asli.",
+			"price":       12000,
+			"category":    "drinks",
+			"stock":       90,
+			"unit":        "cup",
+			"images":      []string{"/uploads/products/kopi-susu.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.8,
+			"reviewCount": 78,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[2]["location"],
+		},
+		{
+			"seller":      s3ID,
+			"name":        "Matcha Latte Premium",
+			"description": "Minuman susu dengan bubuk matcha jepang impor murni tanpa pemanis buatan, disajikan creamy dingin.",
+			"price":       15000,
+			"category":    "drinks",
+			"stock":       50,
+			"unit":        "glass",
+			"images":      []string{"/uploads/products/matcha-latte.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.7,
+			"reviewCount": 26,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[2]["location"],
+		},
+		{
+			"seller":      s3ID,
+			"name":        "Lemon Tea Dingin",
+			"description": "Teh hitam dingin dengan perasan lemon segar asli, memberikan rasa manis kecut yang menyegarkan dahaga.",
+			"price":       10000,
+			"category":    "drinks",
+			"stock":       70,
+			"unit":        "glass",
+			"images":      []string{"/uploads/products/lemon-tea.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.6,
+			"reviewCount": 15,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[2]["location"],
+		},
+		{
+			"seller":      s3ID,
+			"name":        "Es Teh Lemon Mint",
+			"description": "Es teh lemon dingin yang disajikan dengan tambahan daun mint segar untuk kesegaran ekstra.",
+			"price":       10000,
+			"category":    "drinks",
+			"stock":       65,
+			"unit":        "glass",
+			"images":      []string{"/uploads/products/es-teh-lemon.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.7,
+			"reviewCount": 22,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[2]["location"],
+		},
+
+		// --- Seller 4 Products (Cakes and Desserts) ---
+		{
+			"seller":      s4ID,
+			"name":        "Kue Lapis Legit Spesial",
+			"description": "Kue lapis panggang premium beraroma rempah wisman harum dengan tekstur padat lumer di mulut.",
+			"price":       60000,
 			"category":    "food",
 			"stock":       15,
-			"unit":        "pieces",
-			"images":      []string{"/images/placeholder-product.jpg"},
+			"unit":        "box",
+			"images":      []string{"/uploads/products/kue-lapis.webp"},
 			"isAvailable": true,
 			"status":      "active",
 			"rating":      5.0,
-			"reviewCount": 34,
+			"reviewCount": 49,
 			"createdAt":   time.Now(),
 			"updatedAt":   time.Now(),
-			"location":    seller2["location"],
+			"location":    sellers[3]["location"],
+		},
+		{
+			"seller":      s4ID,
+			"name":        "Brownies Cokelat Panggang",
+			"description": "Brownies cokelat panggang dengan crust tipis mengkilap di atas, sangat fudgy di dalam bertabur chocochips.",
+			"price":       45000,
+			"category":    "food",
+			"stock":       20,
+			"unit":        "box",
+			"images":      []string{"/uploads/products/brownies.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.8,
+			"reviewCount": 31,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[3]["location"],
+		},
+		{
+			"seller":      s4ID,
+			"name":        "Donat Kentang Tabur Gula",
+			"description": "Donat kentang jadul yang super empuk dan mengembang sempurna, dibalut gula halus dingin melimpah.",
+			"price":       6000,
+			"category":    "food",
+			"stock":       100,
+			"unit":        "piece",
+			"images":      []string{"/uploads/products/donat.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.9,
+			"reviewCount": 82,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[3]["location"],
+		},
+		{
+			"seller":      s4ID,
+			"name":        "Pisang Cokelat Lumer (Piscok)",
+			"description": "Pisang uli matang dibungkus kulit lumpia dengan cokelat melimpah, digoreng garing renyah.",
+			"price":       5000,
+			"category":    "food",
+			"stock":       80,
+			"unit":        "piece",
+			"images":      []string{"/uploads/products/pisang-cokelat.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.7,
+			"reviewCount": 46,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[3]["location"],
+		},
+		{
+			"seller":      s4ID,
+			"name":        "Risole Ragout Ayam Mayonaise",
+			"description": "Risoles dengan isian ragout ayam gurih creamy dicampur mayonaise tebal dan irisan telur rebus.",
+			"price":       4000,
+			"category":    "food",
+			"stock":       60,
+			"unit":        "piece",
+			"images":      []string{"/uploads/products/risole.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.8,
+			"reviewCount": 38,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[3]["location"],
+		},
+
+		// --- Seller 5 Products (Grilled food & snacks/drinks) ---
+		{
+			"seller":      s5ID,
+			"name":        "Sate Ayam Madura",
+			"description": "Sate daging ayam pilihan dibakar kecap manis, disajikan dengan bumbu kacang tanah gurih dan irisan bawang merah.",
+			"price":       25000,
+			"category":    "food",
+			"stock":       50,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/sate-ayam.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.8,
+			"reviewCount": 54,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[4]["location"],
+		},
+		{
+			"seller":      s5ID,
+			"name":        "Ayam Goreng Kremes",
+			"description": "Ayam goreng bumbu ungkep jawa yang gurih disajikan dengan taburan kremesan renyah bersari kelapa, lalapan, dan sambal terasi.",
+			"price":       22000,
+			"category":    "food",
+			"stock":       30,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/ayam-goreng-kremes.jpeg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.7,
+			"reviewCount": 27,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[4]["location"],
+		},
+		{
+			"seller":      s5ID,
+			"name":        "Ayam Penyet Sambal Korek",
+			"description": "Ayam goreng gurih yang dimemarkan di atas ulekan sambal bawang (sambal korek) pedas ekstra segar.",
+			"price":       20000,
+			"category":    "food",
+			"stock":       30,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/ayam-penyet.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.8,
+			"reviewCount": 36,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[4]["location"],
+		},
+		{
+			"seller":      s5ID,
+			"name":        "Bakmi Ayam Jamur",
+			"description": "Mie kenyal dengan suwiran ayam gurih, tumisan jamur kancing kecap manis, disajikan terpisah dengan kuah kaldu gurih hangat.",
+			"price":       18000,
+			"category":    "food",
+			"stock":       40,
+			"unit":        "portion",
+			"images":      []string{"/uploads/products/bakmi.png"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.7,
+			"reviewCount": 42,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[4]["location"],
+		},
+		{
+			"seller":      s5ID,
+			"name":        "Bacang Ayam Spesial",
+			"description": "Bacang ketan pulen wangi berisi tumisan ayam cincang kecap manis gurih dibalut daun bambu tradisional.",
+			"price":       12000,
+			"category":    "food",
+			"stock":       25,
+			"unit":        "piece",
+			"images":      []string{"/uploads/products/bacang-ayam.jpg"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.6,
+			"reviewCount": 14,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[4]["location"],
+		},
+		{
+			"seller":      s5ID,
+			"name":        "Jus Alpukat Susu Cokelat",
+			"description": "Jus alpukat matang segar dikocok kental disajikan dingin dengan siraman susu kental manis cokelat di dinding gelas.",
+			"price":       12000,
+			"category":    "drinks",
+			"stock":       40,
+			"unit":        "glass",
+			"images":      []string{"/uploads/products/jus-alpukat.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.8,
+			"reviewCount": 39,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[4]["location"],
+		},
+		{
+			"seller":      s5ID,
+			"name":        "Chocolate Milkshake Creamy",
+			"description": "Susu milkshake cokelat pekat dicampur es krim vanila, disajikan super creamy dingin.",
+			"price":       15000,
+			"category":    "drinks",
+			"stock":       30,
+			"unit":        "glass",
+			"images":      []string{"/uploads/products/chocolate-milkshake.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.7,
+			"reviewCount": 18,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[4]["location"],
+		},
+		{
+			"seller":      s5ID,
+			"name":        "Thai Tea Asli Dingin",
+			"description": "Teh tradisional Thailand berwarna oranye dengan campuran susu evaporasi legit dan creamy.",
+			"price":       12000,
+			"category":    "drinks",
+			"stock":       50,
+			"unit":        "glass",
+			"images":      []string{"/uploads/products/thai-tea.webp"},
+			"isAvailable": true,
+			"status":      "active",
+			"rating":      4.9,
+			"reviewCount": 57,
+			"createdAt":   time.Now(),
+			"updatedAt":   time.Now(),
+			"location":    sellers[4]["location"],
 		},
 	}
 
@@ -246,10 +741,13 @@ func main() {
 		productsCol.UpdateOne(ctx, bson.M{"name": p["name"], "seller": p["seller"]}, bson.M{"$set": p}, opts)
 	}
 
-	fmt.Println("\n✅ Database seeded successfully with realistic basic data!")
+	fmt.Println("\n✅ Database seeded successfully with realistic revamped Indonesian products!")
 	fmt.Println("\n--- TEST ACCOUNTS ---")
 	fmt.Println("All accounts use password: password123")
-	fmt.Println("👨‍💼 Seller 1 (Electronics): budi.seller@test.com")
-	fmt.Println("👩‍🍳 Seller 2 (Food):       siti.seller@test.com")
-	fmt.Println("🛒 Buyer 1:               andi.buyer@test.com")
+	fmt.Println("👨‍💼 Seller 1 (Padang food):    budi.seller@test.com  - Jakarta Pusat")
+	fmt.Println("👩‍🍳 Seller 2 (Dishes/Catering): siti.seller@test.com  - Depok")
+	fmt.Println("👨‍☕ Seller 3 (Coffee/Drinks):    joko.seller@test.com  - Jakarta Selatan")
+	fmt.Println("👩‍🎂 Seller 4 (Cakes/Dessert):   dewi.seller@test.com  - Jakarta Barat")
+	fmt.Println("👨‍🍖 Seller 5 (Grill/Meat):      eko.seller@test.com   - Jakarta Timur")
+	fmt.Println("🛒 Buyer 1:                  andi.buyer@test.com   - Jakarta Pusat")
 }

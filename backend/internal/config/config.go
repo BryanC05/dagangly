@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Config struct {
@@ -67,8 +68,8 @@ func Load() (*Config, error) {
 		ProductImageMaxSize:  getEnvInt("PRODUCT_IMAGE_MAX_SIZE_MB", 5),
 		ProductImageMaxCount: getEnvInt("PRODUCT_IMAGE_MAX_COUNT", 4),
 		ProductEnhanceLimit:  getEnvInt("PRODUCT_ENHANCE_DAILY_LIMIT", 20),
-		MidtransServerKey:    getEnv("MIDTRANS_SERVER_KEY", ""),
-		MidtransClientKey:    getEnv("MIDTRANS_CLIENT_KEY", ""),
+		MidtransServerKey:    strings.TrimSpace(getEnv("MIDTRANS_SERVER_KEY", "")),
+		MidtransClientKey:    strings.TrimSpace(getEnv("MIDTRANS_CLIENT_KEY", "")),
 		MidtransIsProduction: getEnv("MIDTRANS_IS_PRODUCTION", "false") == "true",
 	}, nil
 }

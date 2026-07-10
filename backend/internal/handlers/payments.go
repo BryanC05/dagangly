@@ -435,3 +435,110 @@ func (h *PaymentHandler) MidtransWebhook(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }
+
+// CreateOrderSnapToken generates a Midtrans Snap transaction token for product purchases
+func (h *PaymentHandler) CreateOrderSnapToken(c *gin.Context) {
+	var req struct {
+		OrderID string `json:"orderId" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	orderObjID, err := primitive.ObjectIDFromHex(req.OrderID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	// 1. Fetch order details
+	ordersCollection := database.GetDB().Collection("orders")
+	var order models.Order
+	err = ordersCollection.FindOne(context.Background(), bson.M{"_id": orderObjID}).Decode(&order)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	// 2. Fetch buyer details
+	usersCollection := database.GetDB().Collection("users")
+	var buyer models.User
+	err = usersCollection.FindOne(context.Background(), bson.M{"_id": order.Buyer}).Decode(&buyer)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Buyer not found"})
+		return
+	}
+
+	serverKey := h.cfg.MidtransServerKey
+	if serverKey == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Midtrans server key not configured"})
+		return
+	}
+
+	isProduction := h.cfg.MidtransIsProduction
+	snapURL := "https://app.sandbox.midtrans.com/snap/v1/transactions"
+	if isProduction {
+		snapURL = "https://app.midtrans.com/snap/v1/transactions"
+	}
+
+	// 3. Create Snap Request Payload (TotalAmount + DeliveryFee)
+	grossAmount := order.TotalAmount + order.DeliveryFee
+
+	payload := map[string]interface{}{
+		"transaction_details": map[string]interface{}{
+			"order_id":     order.ID.Hex(),
+			"gross_amount": grossAmount,
+		},
+		"credit_card": map[string]interface{}{
+			"secure": true,
+		},
+		"customer_details": map[string]interface{}{
+			"first_name": buyer.Name,
+			"email":      buyer.Email,
+		},
+	}
+
+	payloadBytes, _ := json.Marshal(payload)
+	authHeader := base64.StdEncoding.EncodeToString([]byte(serverKey + ":"))
+
+	// 4. Send POST request to Midtrans Snap API
+	httpReq, err := http.NewRequest("POST", snapURL, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create payment transaction"})
+		return
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Authorization", "Basic "+authHeader)
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Midtrans payment gateway"})
+		return
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Midtrans API error: %s", string(bodyBytes))})
+		return
+	}
+
+	var snapResp struct {
+		Token       string `json:"token"`
+		RedirectURL string `json:"redirect_url"`
+	}
+	if err := json.Unmarshal(bodyBytes, &snapResp); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse Midtrans transaction details"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success":      true,
+		"snap_token":   snapResp.Token,
+		"redirect_url": snapResp.RedirectURL,
+		"orderId":      order.ID.Hex(),
+	})
+}

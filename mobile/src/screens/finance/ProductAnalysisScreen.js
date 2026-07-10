@@ -311,10 +311,10 @@ export default function ProductAnalysisScreen({ navigation }) {
                                 </View>
                             </View>
                             
-<View style={styles.inputRow}>
+                            <View style={styles.inputRow}>
                                 <View style={styles.inputGroup}>
                                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                                        {t.otherCosts}
+                                        {t.platformFee}
                                     </Text>
                                     <View style={styles.feeRow}>
                                         <TextInput
@@ -350,29 +350,13 @@ export default function ProductAnalysisScreen({ navigation }) {
 
                         <View style={[styles.section, { backgroundColor: colors.card }]}>
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                                {language === 'id' ? 'Penjualan' : 'Sales'}
+                                {t.salesSection}
                             </Text>
-                            
-<View style={styles.inputRow}>
-                                <View style={styles.inputGroup}>
-                                    <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                                        {t.otherCosts}
-                                    </Text>
-                                    <TextInput
-                                        style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
-                                        placeholder="0"
-                                        placeholderTextColor={colors.textSecondary}
-                                        keyboardType="numeric"
-                                        value={form.otherCosts}
-                                        onChangeText={(text) => setForm({ ...form, otherCosts: text })}
-                                    />
-                                </View>
-                            </View>
                             
                             <View style={styles.inputRow}>
                                 <View style={styles.inputGroupExtra}>
                                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                                        {t.platformFee}
+                                        {t.sellingPrice}
                                     </Text>
                                     <TextInput
                                         style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
@@ -385,7 +369,7 @@ export default function ProductAnalysisScreen({ navigation }) {
                                 </View>
                                 <View style={styles.inputGroup}>
                                     <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                                        {language === 'id' ? 'Terjual' : 'Units Sold'}
+                                        {t.unitsSold}
                                     </Text>
                                     <TextInput
                                         style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}

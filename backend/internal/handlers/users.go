@@ -1,12 +1,18 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha512"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"msme-marketplace/internal/database"
@@ -1079,4 +1085,166 @@ func (h *UserHandler) GetRegistrationStatus(c *gin.Context) {
 		"registeredAt":       user.RegisteredAt,
 		"approvedAt":         user.ApprovedAt,
 	})
+}
+
+// CreateMembershipTransaction creates a snap transaction for membership upgrades
+func (h *UserHandler) CreateMembershipTransaction(c *gin.Context) {
+	userID := c.GetString("userID")
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// 1. Fetch user details
+	usersCollection := database.GetDB().Collection("users")
+	var user models.User
+	err = usersCollection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&user)
+	if err != nil {
+		c.JSON(404, gin.H{"error": "User not found"})
+		return
+	}
+
+	// 2. Check if Server Key is configured. If not, use fallback DirectActivate
+	serverKey := strings.TrimSpace(os.Getenv("MIDTRANS_SERVER_KEY"))
+	if serverKey == "" {
+		h.DirectActivateMembership(c)
+		return
+	}
+
+	isProduction := os.Getenv("MIDTRANS_IS_PRODUCTION") == "true"
+	snapURL := "https://app.sandbox.midtrans.com/snap/v1/transactions"
+	if isProduction {
+		snapURL = "https://app.midtrans.com/snap/v1/transactions"
+	}
+
+	// 3. Generate a unique Order ID for membership checkout
+	orderID := fmt.Sprintf("MEMBERSHIP-%s-%d", userID, time.Now().Unix())
+
+	// 4. Create Snap Request Payload
+	payload := map[string]interface{}{
+		"transaction_details": map[string]interface{}{
+			"order_id":     orderID,
+			"gross_amount": 10000, // Rp 10.000 / month
+		},
+		"credit_card": map[string]interface{}{
+			"secure": true,
+		},
+		"customer_details": map[string]interface{}{
+			"first_name": user.Name,
+			"email":      user.Email,
+		},
+	}
+
+	payloadBytes, _ := json.Marshal(payload)
+	authHeader := base64.StdEncoding.EncodeToString([]byte(serverKey + ":"))
+
+	// 5. Send POST request to Midtrans Snap API
+	httpReq, err := http.NewRequest("POST", snapURL, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to create payment transaction"})
+		return
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Authorization", "Basic "+authHeader)
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to reach Midtrans payment gateway"})
+		return
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		c.JSON(500, gin.H{"error": fmt.Sprintf("Midtrans API error: %s", string(bodyBytes))})
+		return
+	}
+
+	var snapResp struct {
+		Token       string `json:"token"`
+		RedirectURL string `json:"redirect_url"`
+	}
+	if err := json.Unmarshal(bodyBytes, &snapResp); err != nil {
+		c.JSON(500, gin.H{"error": "Failed to parse Midtrans transaction details"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success":      true,
+		"snap_token":   snapResp.Token,
+		"redirect_url": snapResp.RedirectURL,
+		"order_id":     orderID,
+	})
+}
+
+// HandlePaymentWebhook processes unauthenticated callback notification from Midtrans membership checkout
+func (h *UserHandler) HandlePaymentWebhook(c *gin.Context) {
+	var notification map[string]interface{}
+	if err := c.ShouldBindJSON(&notification); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid notification payload"})
+		return
+	}
+
+	orderID, _ := notification["order_id"].(string)
+	statusCode, _ := notification["status_code"].(string)
+	grossAmount, _ := notification["gross_amount"].(string)
+	signatureKey, _ := notification["signature_key"].(string)
+	transactionStatus, _ := notification["transaction_status"].(string)
+
+	if orderID == "" || statusCode == "" || grossAmount == "" || signatureKey == "" {
+		c.JSON(400, gin.H{"error": "Missing mandatory parameters"})
+		return
+	}
+
+	// Verify Signature: SHA512(order_id + status_code + gross_amount + server_key)
+	serverKey := strings.TrimSpace(os.Getenv("MIDTRANS_SERVER_KEY"))
+	payload := orderID + statusCode + grossAmount + serverKey
+
+	hash := sha512.New()
+	hash.Write([]byte(payload))
+	computedSignature := fmt.Sprintf("%x", hash.Sum(nil))
+
+	if computedSignature != signatureKey {
+		c.JSON(403, gin.H{"error": "Signature key mismatch. Request untrusted."})
+		return
+	}
+
+	// Parse User ID from OrderID: MEMBERSHIP-USERID-TIMESTAMP
+	parts := strings.Split(orderID, "-")
+	if len(parts) < 2 {
+		c.JSON(400, gin.H{"error": "Malformed order ID identifier"})
+		return
+	}
+	targetUserID := parts[1]
+	objID, err := primitive.ObjectIDFromHex(targetUserID)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid user ID encoded in order"})
+		return
+	}
+
+	// Upgrade user membership status on success
+	if transactionStatus == "settlement" || transactionStatus == "capture" {
+		collection := database.GetDB().Collection("users")
+		now := time.Now()
+
+		update := bson.M{
+			"$set": bson.M{
+				"isMember":         true,
+				"membershipStatus": "active",
+				"memberSince":      now,
+				"memberExpiry":     now.AddDate(0, 1, 0), // Active for 1 month
+				"updatedAt":        now,
+			},
+		}
+		_, err = collection.UpdateOne(context.Background(), bson.M{"_id": objID}, update)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "Database update failed"})
+			return
+		}
+	}
+
+	c.JSON(200, gin.H{"status": "success"})
 }

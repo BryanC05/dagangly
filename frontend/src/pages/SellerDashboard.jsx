@@ -154,6 +154,29 @@ const AIConsultantWidget = ({ period, analytics, sales, customers, products }) =
   );
 };
 
+const loadSnapScript = () => {
+  return new Promise((resolve) => {
+    if (window.snap) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    const isProduction = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
+    script.src = isProduction
+      ? 'https://app.midtrans.com/snap/snap.js'
+      : 'https://app.sandbox.midtrans.com/snap/snap.js';
+    
+    const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
+    if (clientKey) {
+      script.setAttribute('data-client-key', clientKey);
+    }
+    
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 function SellerDashboard() {
   const { user, setUser } = useAuthStore();
   const { t } = useTranslation();
@@ -303,13 +326,44 @@ function SellerDashboard() {
       const response = await api.post('/users/membership/checkout');
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setShowPaymentDialog(false);
-      refetchMembership();
-      alert(data.message || 'Membership upgraded successfully!');
+      
+      if (data.snap_token) {
+        const loaded = await loadSnapScript();
+        if (!loaded) {
+          toast.error('Failed to load Midtrans payment library.');
+          return;
+        }
+
+        if (window.snap) {
+          window.snap.pay(data.snap_token, {
+            onSuccess: () => {
+              toast.success('Membership upgraded successfully!');
+              refetchMembership();
+            },
+            onPending: () => {
+              toast.info('Payment pending. Waiting for settlement.');
+              refetchMembership();
+            },
+            onError: () => {
+              toast.error('Payment failed. Please try again.');
+            },
+            onClose: () => {
+              toast.info('Payment window closed.');
+              refetchMembership();
+            }
+          });
+        } else {
+          toast.error('Payment gateway SDK not ready.');
+        }
+      } else {
+        refetchMembership();
+        toast.success(data.message || 'Membership upgraded successfully!');
+      }
     },
     onError: (error) => {
-      alert(`Checkout failed: ${error.response?.data?.error || error.message}`);
+      toast.error(`Checkout failed: ${error.response?.data?.error || error.message}`);
     },
   });
 

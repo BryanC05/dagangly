@@ -132,7 +132,7 @@ func main() {
 			// Membership routes
 			users.GET("/membership/status", userHandler.GetMembershipStatus)
 			users.POST("/membership/payment", userHandler.SubmitMembershipPayment)
-			users.POST("/membership/checkout", userHandler.DirectActivateMembership)
+			users.POST("/membership/checkout", userHandler.CreateMembershipTransaction)
 
 			// Instagram routes
 			users.GET("/instagram/status", handlers.InstagramStatus)
@@ -259,9 +259,11 @@ func main() {
 		payments.Use(middleware.AuthRequired(cfg.JWTSecret))
 		{
 			payments.POST("/create", paymentHandler.CreatePayment)
+			payments.POST("/checkout", paymentHandler.CreateOrderSnapToken)
 			payments.GET("/:orderId/status", paymentHandler.GetPaymentStatus)
 		}
 		api.POST("/webhooks/midtrans", paymentHandler.MidtransWebhook)
+		api.POST("/webhooks/midtrans/membership", userHandler.HandlePaymentWebhook)
 
 		// Device registration for push notifications
 		deviceHandler := handlers.NewDeviceHandler()

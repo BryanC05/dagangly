@@ -105,7 +105,7 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	}
 
 	validMethods := map[string]bool{
-		"cash": true, "qris": true,
+		"cash": true, "qris": true, "midtrans": true,
 	}
 	if !validMethods[req.PaymentMethod] {
 		c.JSON(400, gin.H{"message": "Invalid payment method"})
