@@ -36,7 +36,8 @@ export default function DeliveryMapPicker({
   maxDistance = 5,
   initialLocation = null,
 }) {
-  const [position, setPosition] = useState(initialLocation);
+  const defaultCenter = sellerLocation || DEFAULT_LOCATION.Jakarta;
+  const [position, setPosition] = useState(initialLocation || defaultCenter);
   const [distance, setDistance] = useState(null);
   const [address, setAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -100,7 +101,6 @@ export default function DeliveryMapPicker({
   const selectedMarkerRef = useRef(null);
   const isInitRef = useRef(false);
 
-  const defaultCenter = sellerLocation || DEFAULT_LOCATION.Jakarta;
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -184,6 +184,11 @@ export default function DeliveryMapPicker({
       setDistance(dist);
     } else {
       setDistance(null);
+    }
+
+    // Call immediately so parent is updated with coordinates instantly
+    if (!sellerLocation || (dist !== null && dist <= maxDistance)) {
+      onLocationSelect({ lat: position.lat, lng: position.lng, address: address || 'Resolving address...' });
     }
 
     // Always reverse geocode and call onLocationSelect to unblock checkout
