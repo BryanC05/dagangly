@@ -522,6 +522,7 @@ func (h *PaymentHandler) CreateOrderSnapToken(c *gin.Context) {
 
 	bodyBytes, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		fmt.Printf("❌ Midtrans API error (Status %d): %s\n", resp.StatusCode, string(bodyBytes))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Midtrans API error: %s", string(bodyBytes))})
 		return
 	}
