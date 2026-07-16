@@ -178,21 +178,24 @@ export default function DeliveryMapPicker({
     }
     mapRef.current.setView([position.lat, position.lng]);
 
+    let dist = null;
     if (sellerLocation) {
-      const dist = haversineDistanceKm(sellerLocation, position);
+      dist = haversineDistanceKm(sellerLocation, position);
       setDistance(dist);
-
-      // Reverse geocode
-      nominatimReverse(position.lat, position.lng).then((data) => {
-        const newAddress = (data && !data.error) ? (data.display_name || '') : '';
-        setAddress(newAddress);
-        
-        // Auto-select location for checkout
-        if (dist <= maxDistance) {
-          onLocationSelect({ lat: position.lat, lng: position.lng, address: newAddress });
-        }
-      });
+    } else {
+      setDistance(null);
     }
+
+    // Always reverse geocode and call onLocationSelect to unblock checkout
+    nominatimReverse(position.lat, position.lng).then((data) => {
+      const newAddress = (data && !data.error) ? (data.display_name || '') : '';
+      setAddress(newAddress);
+      
+      // Auto-select location for checkout
+      if (!sellerLocation || (dist !== null && dist <= maxDistance)) {
+        onLocationSelect({ lat: position.lat, lng: position.lng, address: newAddress });
+      }
+    });
   }, [position, sellerLocation]);
 
   const handleGetCurrentLocation = () => {
