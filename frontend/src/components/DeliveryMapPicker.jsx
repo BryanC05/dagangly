@@ -184,8 +184,12 @@ export default function DeliveryMapPicker({
 
       // Reverse geocode
       nominatimReverse(position.lat, position.lng).then((data) => {
-        if (data && !data.error) {
-          setAddress(data.display_name || '');
+        const newAddress = (data && !data.error) ? (data.display_name || '') : '';
+        setAddress(newAddress);
+        
+        // Auto-select location for checkout
+        if (dist <= maxDistance) {
+          onLocationSelect({ lat: position.lat, lng: position.lng, address: newAddress });
         }
       });
     }
@@ -207,11 +211,6 @@ export default function DeliveryMapPicker({
     );
   };
 
-  const handleConfirm = () => {
-    if (position && distance !== null && distance <= maxDistance) {
-      onLocationSelect({ lat: position.lat, lng: position.lng, address });
-    }
-  };
 
   const isValid = position && distance !== null && distance <= maxDistance;
 
@@ -284,10 +283,7 @@ export default function DeliveryMapPicker({
         </div>
       )}
 
-      <Button onClick={handleConfirm} disabled={!isValid} className="w-full h-10 font-semibold">
-        <MapPin className="h-4 w-4 mr-2" />
-        Confirm Delivery Location
-      </Button>
+
     </div>
   );
 }
