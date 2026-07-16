@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, ArrowRight, ArrowLeft, ShoppingBag, MapPin, Plus, Minus, CreditCard, Check, Store, ChevronDown, ChevronUp, Truck, Clock, Navigation, AlertCircle } from 'lucide-react';
+import { Trash2, ArrowRight, ArrowLeft, ShoppingBag, MapPin, Plus, Minus, CreditCard, Check, Store, ChevronDown, ChevronUp, Truck, Clock, Navigation, AlertCircle, RefreshCw } from 'lucide-react';
 import { useCartStore, useAuthStore } from '../store/authStore';
 import { useAuthModalStore } from '../store/authModalStore';
 import { useTranslation } from '../hooks/useTranslation';
@@ -62,7 +62,7 @@ function Cart() {
     });
     const [notes, setNotes] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('cash');
-    const [deliveryType, setDeliveryType] = useState('pickup'); // Delivery disabled
+    const [deliveryType, setDeliveryType] = useState('pickup');
     const [preorderTime, setPreorderTime] = useState('');
     const [preorderDate, setPreorderDate] = useState('');
     const [loading, setLoading] = useState(false);
@@ -70,8 +70,12 @@ function Cart() {
     const [distanceError, setDistanceError] = useState(null);
     const [orderSuccess, setOrderSuccess] = useState(null);
 
+    const [shippingRates, setShippingRates] = useState([]);
+    const [loadingRates, setLoadingRates] = useState(false);
+    const [selectedCourier, setSelectedCourier] = useState(null);
+
     const subtotal = checkoutSeller ? getSellerTotal(checkoutSeller.sellerId) : 0;
-    const deliveryFee = 0; // Delivery disabled — pickup only
+    const deliveryFee = deliveryType === 'delivery' && selectedCourier ? selectedCourier.price : 0;
     const total = subtotal + deliveryFee;
 
     // Get seller location from first product
@@ -154,6 +158,33 @@ function Cart() {
         setCurrentStep(prev => Math.min(prev + 1, 4));
     };
 
+    useEffect(() => {
+        if (deliveryType === 'delivery' && deliveryLocation && checkoutSeller) {
+            const fetchRates = async () => {
+                setLoadingRates(true);
+                try {
+                    const response = await api.post('/delivery/rates', {
+                        sellerId: checkoutSeller.sellerId,
+                        destination_latitude: deliveryLocation.lat,
+                        destination_longitude: deliveryLocation.lng
+                    });
+                    setShippingRates(response.data.couriers || []);
+                    if (response.data.couriers && response.data.couriers.length > 0) {
+                        setSelectedCourier(response.data.couriers[0]);
+                    }
+                } catch (err) {
+                    showError('Failed to fetch delivery rates', err.response?.data?.error || err.message);
+                } finally {
+                    setLoadingRates(false);
+                }
+            };
+            fetchRates();
+        } else {
+            setShippingRates([]);
+            setSelectedCourier(null);
+        }
+    }, [deliveryLocation, deliveryType, checkoutSeller]);
+
     const prevStep = () => {
         setDistanceError(null);
         setCurrentStep(prev => Math.max(prev - 1, 1));
@@ -197,6 +228,9 @@ function Cart() {
                 notes,
                 paymentMethod,
                 deliveryType,
+                deliveryVendor: selectedCourier?.vendor || null,
+                deliveryService: selectedCourier?.service || null,
+                deliveryFee: deliveryFee,
                 isPreorder: !!preorderTime || !!preorderDate,
                 preorderTime: preorderTime || null,
                 deliveryDate: preorderDate || null
@@ -359,112 +393,223 @@ function Cart() {
                 return (
                     <div className="space-y-6">
                         <h2 className="text-xl font-semibold flex items-center gap-2">
-                            <Store className="h-6 w-6" />
-                            Pickup Details
+                            {deliveryType === 'delivery' ? <Truck className="h-6 w-6" /> : <Store className="h-6 w-6" />}
+                            Fulfillment Method
                         </h2>
 
-                        {/* Pickup confirmation card */}
-                        <div className="p-5 bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 rounded-xl">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                                    <Store className="h-6 w-6 text-emerald-600" />
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-emerald-900 text-base">Pickup at {checkoutSeller?.sellerName}</p>
-                                    <p className="text-sm text-emerald-700 mt-0.5">
-                                        Pick up your order directly from the store — no extra fees!
-                                    </p>
-                                </div>
-                                <Check className="h-6 w-6 text-emerald-500 shrink-0 ml-auto" />
-                            </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            {deliveryTypes.map((type) => {
+                                const isSelected = deliveryType === type.id;
+                                return (
+                                    <button
+                                        key={type.id}
+                                        type="button"
+                                        className={`flex flex-col items-center justify-center p-4 rounded-xl border text-center transition-all ${
+                                            isSelected
+                                                ? 'border-primary bg-primary/5 text-primary shadow-sm font-semibold'
+                                                : 'border-muted hover:bg-muted/50 text-muted-foreground'
+                                        }`}
+                                        onClick={() => {
+                                            setDeliveryType(type.id);
+                                            setDistanceError(null);
+                                        }}
+                                    >
+                                        <span className="text-2xl mb-1">{type.icon}</span>
+                                        <span className="text-sm font-medium">{type.label}</span>
+                                        <span className="text-xs text-muted-foreground mt-0.5">{type.desc}</span>
+                                    </button>
+                                );
+                            })}
                         </div>
 
-                        {distanceError && (
-                            <Alert variant="destructive">
-                                <AlertCircle className="h-4 w-4" />
-                                <AlertDescription>{distanceError}</AlertDescription>
-                            </Alert>
+                        <Separator />
+
+                        {deliveryType === 'pickup' ? (
+                            <>
+                                <div className="p-5 bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 rounded-xl">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                            <Store className="h-6 w-6 text-emerald-600" />
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-emerald-900 text-base">Pickup at {checkoutSeller?.sellerName}</p>
+                                            <p className="text-sm text-emerald-700 mt-0.5">
+                                                Pick up your order directly from the store — no extra fees!
+                                            </p>
+                                        </div>
+                                        <Check className="h-6 w-6 text-emerald-500 shrink-0 ml-auto" />
+                                    </div>
+                                </div>
+
+                                {distanceError && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertDescription>{distanceError}</AlertDescription>
+                                    </Alert>
+                                )}
+
+                                <Separator />
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <Label className="text-base font-semibold flex items-center gap-2 mb-3">
+                                            <Clock className="h-5 w-5" />
+                                            Pickup Time
+                                        </Label>
+                                        <Input
+                                            type="time"
+                                            value={preorderTime}
+                                            onChange={(e) => setPreorderTime(e.target.value)}
+                                            className="h-12 text-base"
+                                            placeholder="Select a pickup time"
+                                        />
+                                        <p className="text-xs text-muted-foreground mt-1.5">
+                                            Let the seller know when you'll arrive to collect your order
+                                        </p>
+                                    </div>
+
+                                    <div className="border rounded-xl p-4 bg-secondary/20">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <input
+                                                type="checkbox"
+                                                id="enablePreorder"
+                                                checked={!!preorderDate}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        const tomorrow = new Date();
+                                                        tomorrow.setDate(tomorrow.getDate() + 1);
+                                                        setPreorderDate(tomorrow.toISOString().split('T')[0]);
+                                                    } else {
+                                                        setPreorderDate('');
+                                                    }
+                                                }}
+                                                className="w-4 h-4 rounded accent-primary"
+                                            />
+                                            <Label htmlFor="enablePreorder" className="text-base font-semibold cursor-pointer">
+                                                Schedule pickup for another day
+                                            </Label>
+                                        </div>
+                                        {preorderDate && (
+                                            <div className="space-y-3 pl-7">
+                                                <div>
+                                                    <Label className="text-sm">Pickup Date</Label>
+                                                    <Input
+                                                        type="date"
+                                                        value={preorderDate}
+                                                        min={new Date().toISOString().split('T')[0]}
+                                                        max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                                                        onChange={(e) => setPreorderDate(e.target.value)}
+                                                        className="h-10"
+                                                    />
+                                                    <p className="text-xs text-muted-foreground mt-1">
+                                                        Up to 30 days in advance
+                                                    </p>
+                                                </div>
+                                                <Alert>
+                                                    <AlertCircle className="h-4 w-4" />
+                                                    <AlertDescription className="text-sm">
+                                                        The seller will confirm your scheduled pickup before preparation.
+                                                    </AlertDescription>
+                                                </Alert>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="space-y-4">
+                                    <Label className="text-base font-semibold flex items-center gap-2">
+                                        <MapPin className="h-5 w-5" />
+                                        Select Delivery Location
+                                    </Label>
+                                    
+                                    <div className="h-[280px] rounded-xl overflow-hidden border">
+                                        <DeliveryMapPicker
+                                            sellerLocation={getSellerLocation()}
+                                            onLocationSelect={handleLocationSelect}
+                                            initialLocation={deliveryLocation}
+                                        />
+                                    </div>
+
+                                    {address.address && (
+                                        <div className="p-4 bg-secondary/30 rounded-xl border">
+                                            <p className="text-xs text-muted-foreground uppercase font-bold">Delivery Address</p>
+                                            <p className="text-sm font-medium mt-1">{address.address}</p>
+                                        </div>
+                                    )}
+
+                                    {distanceError && (
+                                        <Alert variant="destructive">
+                                            <AlertCircle className="h-4 w-4" />
+                                            <AlertDescription>{distanceError}</AlertDescription>
+                                        </Alert>
+                                    )}
+
+                                    {deliveryLocation && (
+                                        <div className="space-y-3 pt-2">
+                                            <Label className="text-base font-semibold flex items-center gap-2">
+                                                <Truck className="h-5 w-5" />
+                                                Select Courier Service
+                                            </Label>
+
+                                            {loadingRates ? (
+                                                <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground bg-secondary/10 rounded-xl border animate-pulse">
+                                                    <RefreshCw className="h-4 w-4 animate-spin" />
+                                                    Calculating shipping rates...
+                                                </div>
+                                            ) : shippingRates.length === 0 ? (
+                                                <Alert>
+                                                    <AlertCircle className="h-4 w-4" />
+                                                    <AlertDescription>No delivery services available for this distance.</AlertDescription>
+                                                </Alert>
+                                            ) : (
+                                                <div className="grid gap-3">
+                                                    {shippingRates.map((courier) => {
+                                                        const isSelected = selectedCourier?.courier_name === courier.courier_name;
+                                                        return (
+                                                            <button
+                                                                key={courier.courier_name}
+                                                                type="button"
+                                                                className={`flex items-center justify-between p-4 rounded-xl border text-left transition-all ${
+                                                                    isSelected
+                                                                        ? 'border-primary bg-primary/5 text-primary font-semibold shadow-sm'
+                                                                        : 'border-muted hover:bg-muted/50 text-muted-foreground'
+                                                                }`}
+                                                                onClick={() => setSelectedCourier(courier)}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className="text-2xl">🏍️</span>
+                                                                    <div>
+                                                                        <p className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                                                                            {courier.courier_name}
+                                                                            <span className="text-[10px] uppercase font-bold tracking-wider bg-primary/10 text-primary border border-primary/25 px-1.5 py-0.5 rounded-full">{courier.courier_service_name}</span>
+                                                                        </p>
+                                                                        <p className="text-xs text-muted-foreground mt-0.5">Est. time: {courier.duration}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <span className="font-bold text-foreground text-base">Rp {courier.price.toLocaleString('id-ID')}</span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </>
                         )}
 
                         <Separator />
 
-                        {/* Pickup time */}
-                        <div className="space-y-4">
-                            <div>
-                                <Label className="text-base font-semibold flex items-center gap-2 mb-3">
-                                    <Clock className="h-5 w-5" />
-                                    Pickup Time
-                                </Label>
-                                <Input
-                                    type="time"
-                                    value={preorderTime}
-                                    onChange={(e) => setPreorderTime(e.target.value)}
-                                    className="h-12 text-base"
-                                    placeholder="Select a pickup time"
-                                />
-                                <p className="text-xs text-muted-foreground mt-1.5">
-                                    Let the seller know when you'll arrive to collect your order
-                                </p>
-                            </div>
-
-                            {/* Schedule for future date */}
-                            <div className="border rounded-xl p-4 bg-secondary/20">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <input
-                                        type="checkbox"
-                                        id="enablePreorder"
-                                        checked={!!preorderDate}
-                                        onChange={(e) => {
-                                            if (e.target.checked) {
-                                                const tomorrow = new Date();
-                                                tomorrow.setDate(tomorrow.getDate() + 1);
-                                                setPreorderDate(tomorrow.toISOString().split('T')[0]);
-                                            } else {
-                                                setPreorderDate('');
-                                            }
-                                        }}
-                                        className="w-4 h-4 rounded accent-primary"
-                                    />
-                                    <Label htmlFor="enablePreorder" className="text-base font-semibold cursor-pointer">
-                                        Schedule pickup for another day
-                                    </Label>
-                                </div>
-                                {preorderDate && (
-                                    <div className="space-y-3 pl-7">
-                                        <div>
-                                            <Label className="text-sm">Pickup Date</Label>
-                                            <Input
-                                                type="date"
-                                                value={preorderDate}
-                                                min={new Date().toISOString().split('T')[0]}
-                                                max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                                                onChange={(e) => setPreorderDate(e.target.value)}
-                                                className="h-10"
-                                            />
-                                            <p className="text-xs text-muted-foreground mt-1">
-                                                Up to 30 days in advance
-                                            </p>
-                                        </div>
-                                        <Alert>
-                                            <AlertCircle className="h-4 w-4" />
-                                            <AlertDescription className="text-sm">
-                                                The seller will confirm your scheduled pickup before preparation.
-                                            </AlertDescription>
-                                        </Alert>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Notes */}
-                            <div>
-                                <Label className="text-base font-semibold mb-2 block">Special instructions (optional)</Label>
-                                <Textarea
-                                    placeholder="Any special requests? e.g., extra spicy, no onions, etc."
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    className="text-base min-h-[80px]"
-                                />
-                            </div>
+                        <div>
+                            <Label className="text-base font-semibold mb-2 block">Special instructions (optional)</Label>
+                            <Textarea
+                                placeholder="Any special requests? e.g., extra spicy, no onions, etc."
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                className="text-base min-h-[80px]"
+                            />
                         </div>
                     </div>
                 );
@@ -666,8 +811,12 @@ function Cart() {
                                         <span>Rp {subtotal.toLocaleString('id-ID')}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                        <span>Pickup</span>
-                                        <span className="text-emerald-600">Free</span>
+                                         <span>{deliveryType === 'delivery' ? 'Delivery fee' : 'Pickup'}</span>
+                                         <span className={deliveryType === 'delivery' ? 'font-medium font-bold' : 'text-emerald-600 font-semibold'}>
+                                             {deliveryType === 'delivery'
+                                                 ? `Rp ${deliveryFee.toLocaleString('id-ID')}`
+                                                 : 'Free'}
+                                         </span>
                                     </div>
                                     <Separator />
                                     <div className="flex justify-between font-bold text-lg">

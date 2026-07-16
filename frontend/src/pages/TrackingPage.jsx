@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import wsService from '@/services/websocket';
 import {
   ArrowLeft, Navigation, Phone, User, Clock, MapPin,
   Store, Package, CheckCircle, RefreshCw
@@ -45,6 +46,22 @@ export default function TrackingPage() {
   const isInitRef = useRef(false);
 
   const defaultCenter = DEFAULT_LOCATION.Jakarta;
+
+  // Listen to live driver and delivery WebSocket updates
+  useEffect(() => {
+    const handleDeliveryUpdate = (updateData) => {
+      if (updateData.orderId === orderId) {
+        queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+        queryClient.invalidateQueries({ queryKey: ['driverLocation', orderId] });
+      }
+    };
+
+    wsService.on('delivery_update', handleDeliveryUpdate);
+
+    return () => {
+      wsService.off('delivery_update', handleDeliveryUpdate);
+    };
+  }, [orderId, queryClient]);
 
   // Fetch order details
   const {

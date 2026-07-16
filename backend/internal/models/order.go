@@ -20,7 +20,12 @@ type Order struct {
 	Notes           string             `bson:"notes" json:"notes"`
 
 	// Delivery options
-	DeliveryType string `bson:"deliveryType" json:"deliveryType"` // "delivery" or "pickup"
+	DeliveryType       string `bson:"deliveryType" json:"deliveryType"`             // "delivery" or "pickup"
+	DeliveryVendor     string `bson:"deliveryVendor" json:"deliveryVendor"`         // "gosend", "grab", "lalamove", "simulated"
+	DeliveryService    string `bson:"deliveryService" json:"deliveryService"`       // "instant", "same_day"
+	ShipmentTrackingID string `bson:"shipmentTrackingId" json:"shipmentTrackingId"` // BiteShip Shipment ID or simulated tracking ID
+	ShipmentStatus     string `bson:"shipmentStatus" json:"shipmentStatus"`         // "allocated", "picking_up", "dropping_off", "delivered", "rejected"
+	DriverPlate        string `bson:"driverPlate,omitempty" json:"driverPlate,omitempty"`
 
 	// Preorder / Scheduled delivery
 	IsPreorder     bool   `bson:"isPreorder" json:"isPreorder"`         // used for scheduled delivery

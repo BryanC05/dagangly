@@ -23,6 +23,8 @@ type Config struct {
 	MidtransServerKey    string
 	MidtransClientKey    string
 	MidtransIsProduction bool
+	BiteshipAPIKey        string
+	BiteshipWebhookSecret string
 }
 
 func Load() (*Config, error) {
@@ -71,6 +73,8 @@ func Load() (*Config, error) {
 		MidtransServerKey:    strings.TrimSpace(getEnv("MIDTRANS_SERVER_KEY", "")),
 		MidtransClientKey:    strings.TrimSpace(getEnv("MIDTRANS_CLIENT_KEY", "")),
 		MidtransIsProduction: getEnv("MIDTRANS_IS_PRODUCTION", "false") == "true",
+		BiteshipAPIKey:        strings.TrimSpace(getEnv("BITESHIP_API_KEY", "")),
+		BiteshipWebhookSecret: strings.TrimSpace(getEnv("BITESHIP_WEBHOOK_SECRET", "")),
 	}, nil
 }
 

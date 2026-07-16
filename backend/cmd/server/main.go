@@ -265,6 +265,11 @@ func main() {
 		api.POST("/webhooks/midtrans", paymentHandler.MidtransWebhook)
 		api.POST("/webhooks/midtrans/membership", userHandler.HandlePaymentWebhook)
 
+		// Delivery routes (BiteShip / GoSend)
+		deliveryHandler := handlers.NewDeliveryHandler(cfg)
+		api.POST("/delivery/rates", middleware.AuthRequired(cfg.JWTSecret), deliveryHandler.GetDeliveryRates)
+		api.POST("/webhooks/delivery", deliveryHandler.ReceiveDeliveryWebhook)
+
 		// Device registration for push notifications
 		deviceHandler := handlers.NewDeviceHandler()
 		devices := api.Group("/devices")

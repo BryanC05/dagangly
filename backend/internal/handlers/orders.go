@@ -82,7 +82,10 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		PaymentMethod   string                 `json:"paymentMethod" binding:"required"`
 
 		// Delivery options
-		DeliveryType string `json:"deliveryType"` // "delivery" or "pickup"
+		DeliveryType    string  `json:"deliveryType"` // "delivery" or "pickup"
+		DeliveryVendor  string  `json:"deliveryVendor"`
+		DeliveryService string  `json:"deliveryService"`
+		DeliveryFee     float64 `json:"deliveryFee"`
 
 		// Preorder / Scheduled delivery
 		IsPreorder     bool   `json:"isPreorder"`
@@ -313,7 +316,7 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		Buyer:       userObjID,
 		Seller:      sellerID,
 		Products:    orderProducts,
-		TotalAmount: totalAmount,
+		TotalAmount: totalAmount + req.DeliveryFee,
 		Status:      initialStatus,
 		DeliveryAddress: models.DeliveryAddress{
 			Address:     req.DeliveryAddress.Address,
@@ -322,14 +325,17 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 			Pincode:     req.DeliveryAddress.Pincode,
 			Coordinates: coords,
 		},
-		PaymentStatus:  "pending",
-		PaymentMethod:  req.PaymentMethod,
-		PaymentDetails: paymentDetails,
-		Notes:        req.Notes,
-		DeliveryType: req.DeliveryType,
-		IsPreorder:   isScheduled,
-		PreorderTime: req.PreorderTime,
-		DeliveryDate: req.DeliveryDate,
+		PaymentStatus:      "pending",
+		PaymentMethod:      req.PaymentMethod,
+		PaymentDetails:     paymentDetails,
+		Notes:              req.Notes,
+		DeliveryType:       req.DeliveryType,
+		DeliveryVendor:     req.DeliveryVendor,
+		DeliveryService:    req.DeliveryService,
+		DeliveryFee:        req.DeliveryFee,
+		IsPreorder:         isScheduled,
+		PreorderTime:       req.PreorderTime,
+		DeliveryDate:       req.DeliveryDate,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
@@ -560,7 +566,7 @@ func (h *OrderHandler) UpdateOrderStatus(c *gin.Context) {
 
 	validStatuses := map[string]bool{
 		"pending": true, "payment_pending": true, "confirmed": true, "preparing": true,
-		"ready": true, "delivered": true, "cancelled": true,
+		"ready": true, "out_for_delivery": true, "delivered": true, "cancelled": true,
 	}
 	if !validStatuses[req.Status] {
 		c.JSON(400, gin.H{"message": "Invalid status"})
@@ -586,10 +592,44 @@ func (h *OrderHandler) UpdateOrderStatus(c *gin.Context) {
 	var updatedOrder models.Order
 	ordersCollection.FindOne(context.Background(), bson.M{"_id": orderObjID}).Decode(&updatedOrder)
 
+	// Trigger delivery simulation if order is a delivery order
+	if (req.Status == "confirmed" || req.Status == "out_for_delivery") && updatedOrder.DeliveryType == "delivery" && updatedOrder.DeliveryVendor != "" && updatedOrder.ShipmentStatus == "" {
+		var seller models.User
+		usersCollection := database.GetDB().Collection("users")
+		_ = usersCollection.FindOne(context.Background(), bson.M{"_id": updatedOrder.Seller}).Decode(&seller)
+		
+		var sellerLat, sellerLng float64
+		if len(seller.Location.Coordinates) >= 2 {
+			sellerLng = seller.Location.Coordinates[0]
+			sellerLat = seller.Location.Coordinates[1]
+		} else {
+			sellerLng = 106.8272
+			sellerLat = -6.1754
+		}
+		
+		var buyerLat, buyerLng float64
+		if len(updatedOrder.DeliveryAddress.Coordinates) >= 2 {
+			buyerLng = updatedOrder.DeliveryAddress.Coordinates[0]
+			buyerLat = updatedOrder.DeliveryAddress.Coordinates[1]
+		} else {
+			buyerLng = 106.8456
+			buyerLat = -6.2088
+		}
+
+		StartDeliverySimulation(
+			updatedOrder.ID.Hex(),
+			sellerLat, sellerLng,
+			buyerLat, buyerLng,
+			updatedOrder.DeliveryVendor,
+			updatedOrder.Buyer.Hex(),
+			updatedOrder.Seller.Hex(),
+		)
+	}
+
 	// Notify buyer about order status change
 	statusLabels := map[string]string{
-		"payment_pending": "Awaiting Payment", "confirmed": "Paid", "preparing": "Being Prepared",
-		"ready": "Ready", "delivered": "Delivered", "cancelled": "Cancelled",
+		"payment_pending": "Awaiting Payment", "confirmed": "Confirmed", "preparing": "Being Prepared",
+		"ready": "Ready", "out_for_delivery": "Out for Delivery", "delivered": "Delivered", "cancelled": "Cancelled",
 	}
 	label := statusLabels[req.Status]
 	if label == "" {

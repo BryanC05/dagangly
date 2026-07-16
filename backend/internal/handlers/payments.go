@@ -431,6 +431,40 @@ func (h *PaymentHandler) MidtransWebhook(c *gin.Context) {
 			"New Payment Received!",
 			fmt.Sprintf("Payment for order %s has been confirmed", order.ID.Hex()),
 			map[string]interface{}{"orderId": order.ID.Hex()})
+
+		// Trigger delivery simulation if order is a delivery order
+		if order.DeliveryType == "delivery" && order.DeliveryVendor != "" && order.ShipmentStatus == "" {
+			var seller models.User
+			usersCollection := database.GetDB().Collection("users")
+			_ = usersCollection.FindOne(context.Background(), bson.M{"_id": order.Seller}).Decode(&seller)
+			
+			var sellerLat, sellerLng float64
+			if len(seller.Location.Coordinates) >= 2 {
+				sellerLng = seller.Location.Coordinates[0]
+				sellerLat = seller.Location.Coordinates[1]
+			} else {
+				sellerLng = 106.8272
+				sellerLat = -6.1754
+			}
+			
+			var buyerLat, buyerLng float64
+			if len(order.DeliveryAddress.Coordinates) >= 2 {
+				buyerLng = order.DeliveryAddress.Coordinates[0]
+				buyerLat = order.DeliveryAddress.Coordinates[1]
+			} else {
+				buyerLng = 106.8456
+				buyerLat = -6.2088
+			}
+
+			StartDeliverySimulation(
+				order.ID.Hex(),
+				sellerLat, sellerLng,
+				buyerLat, buyerLng,
+				order.DeliveryVendor,
+				order.Buyer.Hex(),
+				order.Seller.Hex(),
+			)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"success": true})
