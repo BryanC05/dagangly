@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { MapPin, AlertCircle, Navigation } from 'lucide-react';
+import { MapPin, AlertCircle, Navigation, Search } from 'lucide-react';
 import { DEFAULT_LOCATION } from '../utils/constants';
 import { haversineDistanceKm } from '../utils/helpers';
 
@@ -40,6 +41,59 @@ export default function DeliveryMapPicker({
   const [address, setAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [mapError, setMapError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Auto locate user on mount if no initial location is provided
+  useEffect(() => {
+    if (!initialLocation && navigator.geolocation) {
+      setIsLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setPosition(coords);
+          setIsLoading(false);
+          if (mapRef.current) {
+            mapRef.current.setView([coords.lat, coords.lng], 15);
+          }
+        },
+        (error) => {
+          console.error('Auto location error:', error);
+          setIsLoading(false);
+          if (sellerLocation) {
+            setPosition({ lat: sellerLocation.lat, lng: sellerLocation.lng });
+          }
+        }
+      );
+    }
+  }, [initialLocation, sellerLocation]);
+
+  const handleSearch = async (e) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const { lat, lon, display_name } = data[0];
+        const newPos = { lat: parseFloat(lat), lng: parseFloat(lon) };
+        setPosition(newPos);
+        setAddress(display_name);
+        if (mapRef.current) {
+          mapRef.current.setView([newPos.lat, newPos.lng], 16);
+        }
+      } else {
+        alert('No locations found for your search query.');
+      }
+    } catch (err) {
+      console.error('Search error:', err);
+      alert('Failed to search location. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -163,7 +217,30 @@ export default function DeliveryMapPicker({
 
   return (
     <div className="space-y-4">
-      <div className="h-[400px] w-full rounded-lg overflow-hidden border">
+      {/* Search Input Bar */}
+      <form onSubmit={handleSearch} className="flex gap-2">
+        <div className="relative flex-1">
+          <Input
+            type="text"
+            placeholder="Search address, street, or city..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pr-10 h-10 text-sm"
+          />
+          <button
+            type="submit"
+            disabled={isSearching}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+        </div>
+        <Button type="submit" disabled={isSearching} size="sm" className="h-10 px-4">
+          {isSearching ? 'Searching...' : 'Search'}
+        </Button>
+      </form>
+
+      <div className="h-[280px] w-full rounded-lg overflow-hidden border">
         {mapError ? (
           <div className="h-full w-full flex items-center justify-center p-4 text-sm text-destructive">
             {mapError}
@@ -174,35 +251,40 @@ export default function DeliveryMapPicker({
       </div>
 
       <div className="flex gap-2">
-        <Button variant="outline" onClick={handleGetCurrentLocation} disabled={isLoading} className="flex-1">
-          <Navigation className="h-4 w-4 mr-2" />
-          {isLoading ? 'Getting location...' : 'Use My Location'}
+        <Button
+          variant="outline"
+          onClick={handleGetCurrentLocation}
+          disabled={isLoading}
+          className="flex-1 h-10"
+        >
+          <Navigation className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          {isLoading ? 'Refreshing GPS...' : 'Refresh GPS Location'}
         </Button>
       </div>
 
       {distance !== null && (
-        <Alert variant={isValid ? 'default' : 'destructive'}>
+        <Alert variant={isValid ? 'default' : 'destructive'} className="py-2.5">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+          <AlertDescription className="text-xs">
             Distance from store: <strong>{distance.toFixed(2)} km</strong>
             {distance > maxDistance && (
-              <span className="block mt-1 text-red-600">
+              <span className="block mt-1 text-red-600 font-semibold">
                 Location is outside {maxDistance}km delivery range
               </span>
             )}
-            {isValid && <span className="block mt-1 text-green-600">Within delivery range</span>}
+            {isValid && <span className="block mt-1 text-green-600 font-semibold">Within delivery range</span>}
           </AlertDescription>
         </Alert>
       )}
 
       {address && (
-        <div className="p-3 bg-secondary rounded-lg">
-          <p className="text-sm font-medium">Selected Address:</p>
-          <p className="text-sm text-muted-foreground">{address}</p>
+        <div className="p-3 bg-secondary/30 border rounded-lg text-xs">
+          <p className="font-semibold text-foreground">Selected Location:</p>
+          <p className="text-muted-foreground mt-0.5">{address}</p>
         </div>
       )}
 
-      <Button onClick={handleConfirm} disabled={!isValid} className="w-full">
+      <Button onClick={handleConfirm} disabled={!isValid} className="w-full h-10 font-semibold">
         <MapPin className="h-4 w-4 mr-2" />
         Confirm Delivery Location
       </Button>
