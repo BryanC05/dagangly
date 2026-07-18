@@ -16,7 +16,14 @@ The Dagangly platform has achieved full production readiness across all environm
 - **Cross-Platform Support:** Fully implemented with clean, user-friendly error handling on both the React Web App and the React Native Mobile App.
 
 ### 🛒 Core Commerce & Order Management
-- **On-Demand Delivery (GoSend & GrabExpress):** Integrates with the **BiteShip API** to calculate delivery fees, pick locations using a Leaflet map with GPS refresh and geocoding search, and track driver coordinates in real-time via WebSockets (includes a built-in sandbox simulator).
+- **Nationwide Shipping Integration (Biteship):** Integrated with **Biteship API** for multi-courier shipping (JNE, J&T, SiCepat, Ninja Express, Antar Aja). Features include:
+  - Real-time shipping rate calculation from multiple couriers
+  - Interactive courier selection during checkout
+  - Automatic shipment creation with tracking ID
+  - Live shipment tracking via webhook updates
+  - Public tracking page at `/track/:trackingId`
+  - Built-in driver simulator for local testing
+- **On-Demand Local Delivery:** Leaflet-based map picker with GPS refresh and geocoding search for precise delivery location selection.
 - **Scheduled Delivery Orders:** Buyers can request specific delivery dates and times. Includes a full negotiation flow allowing sellers to accept, decline, or request changes to the schedule.
 - **Payment Processing:** Integrated **Midtrans Snap SDK (QRIS, VA, E-Wallet)** checkout logic for seller premium memberships, complementing standard manual transfer receipt upload and Cash on Delivery (COD) workflows.
 - **Digital Wallet & Installments:** Users have an in-app digital wallet for quick checkouts and refunds, plus Buy Now Pay Later (BNPL) installment options (3, 6, 12 months).
@@ -114,8 +121,8 @@ npx expo start --clear
 
 For detailed implementation instructions, troubleshooting, and architecture guides, refer to the following specialized documentation files:
 
-* **Plans & Specifications (`plans/`)**:
-  * [delivery_integration.md](plans/delivery_integration.md) - BiteShip delivery rates and real-time Leaflet driver tracking map integration guide.
+* [Plans & Specifications (`plans/`)](plans/):
+  * [delivery_integration.md](plans/delivery_integration.md) - **Biteship API integration** with JNE, J&T, SiCepat, Ninja, Antar Aja for shipping rates, shipment creation, and real-time tracking via webhooks.
   * [midtrans_implementation.md](plans/midtrans_implementation.md) - Go backend & React frontend Midtrans integration specification.
   * [pwa_implementation.md](plans/pwa_implementation.md) - PWA shell caching and installation documentation.
   * [GOLANG_MIGRATION_PLAN.md](plans/GOLANG_MIGRATION_PLAN.md) - Plan for the Go backend rewrite.
