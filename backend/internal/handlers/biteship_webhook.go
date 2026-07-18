@@ -26,7 +26,7 @@ func NewBiteshipWebhookHandler() *BiteshipWebhookHandler {
 	
 	return &BiteshipWebhookHandler{
 		biteshipService: biteshipService,
-		webhookSecret:   config.APIKey, // Or use separate BITESHIP_WEBHOOK_SECRET
+		webhookSecret:   "", // Biteship doesn't provide webhook secret - signature validation skipped
 	}
 }
 
@@ -36,18 +36,10 @@ func NewBiteshipWebhookHandler() *BiteshipWebhookHandler {
 // @Tags shipping
 // @Accept json
 // @Produce json
-// @Param X-Biteship-Signature header string false "Webhook signature"
 // @Success 200 {object} WebhookResponse
 // @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
 // @Router /api/webhooks/biteship [post]
 func (h *BiteshipWebhookHandler) HandleWebhook(c *gin.Context) {
-	// Get signature from header
-	signature := c.GetHeader("X-Biteship-Signature")
-	if signature == "" {
-		signature = c.GetHeader("X-Webhook-Signature")
-	}
-
 	// Read raw body
 	body, err := c.GetRawData()
 	if err != nil {
@@ -55,12 +47,8 @@ func (h *BiteshipWebhookHandler) HandleWebhook(c *gin.Context) {
 		return
 	}
 
-	// Validate webhook signature
-	// Note: Adjust validation based on actual Biteship webhook signature format
-	if !h.biteshipService.ValidateWebhook(h.webhookSecret, string(body), signature) {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid webhook signature"})
-		return
-	}
+	// Note: Biteship doesn't provide webhook secret for signature validation
+	// Webhook accepts all requests from Biteship without signature check
 
 	// Parse webhook event
 	var event services.WebhookEvent

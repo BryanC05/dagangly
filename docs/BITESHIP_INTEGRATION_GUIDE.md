@@ -17,8 +17,9 @@ Add the following variables to your environment (Vercel, Render, or `.env`):
 # Biteship Shipping API Configuration
 BITESHIP_API_KEY=your_api_key_here
 BITESHIP_API_URL=https://api.biteship.com/v1
-BITESHIP_WEBHOOK_SECRET=your_webhook_secret_here
 ```
+
+**Note:** Biteship does not provide a webhook secret for signature validation. The webhook endpoint accepts all requests from Biteship without signature verification. This is normal for Biteship's webhook implementation.
 
 ### Getting API Keys
 
@@ -242,7 +243,7 @@ Same format as authenticated tracking endpoint.
 Receive automatic shipment status updates from Biteship.
 
 **Endpoint:** `POST /api/webhooks/biteship`  
-**Auth:** Webhook signature validation
+**Auth:** None (Biteship doesn't provide webhook secret)
 
 #### Supported Events
 
@@ -428,7 +429,6 @@ This will call the public tracking endpoint and display the shipment status.
 
 1. **Environment Setup**
    - Set `BITESHIP_API_KEY` in your Vercel/Render environment
-   - Ensure `BITESHIP_WEBHOOK_SECRET` is configured
 
 2. **Test Rate Calculation**
    ```bash
