@@ -36,6 +36,7 @@ const LogoGenerator = lazy(() => import('./pages/LogoGenerator'));
 const Projects = lazy(() => import('./pages/Projects'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const TrackingPage = lazy(() => import('./pages/TrackingPage'));
+const ShipmentTrackingPage = lazy(() => import('./pages/ShipmentTrackingPage'));
 const AdminMembership = lazy(() => import('./pages/AdminMembership'));
 const AdminPendingRegistrations = lazy(() => import('./pages/AdminPendingRegistrations'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -157,6 +158,7 @@ function App() {
                 <Route path="/finance/ai" element={<Suspense fallback={<LoadingFallback />}><FinanceAI /></Suspense>} />
                 <Route path="/finance/product-expenses" element={<Suspense fallback={<LoadingFallback />}><ProductExpenses /></Suspense>} />
                 <Route path="/finance/invoices" element={<Suspense fallback={<LoadingFallback />}><FinanceInvoices /></Suspense>} />
+                <Route path="/track/:trackingId" element={<Suspense fallback={<LoadingFallback />}><ShipmentTrackingPage /></Suspense>} />
                 <Route path="*" element={<Suspense fallback={<LoadingFallback />}><NotFound /></Suspense>} />
               </Route>
             </Routes>

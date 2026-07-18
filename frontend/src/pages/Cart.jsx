@@ -75,6 +75,10 @@ function Cart() {
     const [selectedCourier, setSelectedCourier] = useState(null);
 
     const subtotal = checkoutSeller ? getSellerTotal(checkoutSeller.sellerId) : 0;
+    const totalWeight = checkoutSeller?.items.reduce((sum, item) => {
+        const itemWeight = item.product.weight || 0.5; // Default 0.5kg if not specified
+        return sum + (itemWeight * item.quantity);
+    }, 0) || 0;
     const deliveryFee = deliveryType === 'delivery' && selectedCourier ? selectedCourier.price : 0;
     const total = subtotal + deliveryFee;
 
@@ -163,14 +167,34 @@ function Cart() {
             const fetchRates = async () => {
                 setLoadingRates(true);
                 try {
-                    const response = await api.post('/delivery/rates', {
-                        sellerId: checkoutSeller.sellerId,
-                        destination_latitude: deliveryLocation.lat,
-                        destination_longitude: deliveryLocation.lng
+                    const response = await api.post('/shipping/rates', {
+                        deliverFrom: {
+                            latitude: checkoutSeller.location?.lat || -6.2088,
+                            longitude: checkoutSeller.location?.lng || 106.8456,
+                            address: checkoutSeller.address || '',
+                            cityName: checkoutSeller.city || '',
+                            stateName: checkoutSeller.province || '',
+                            zipCode: checkoutSeller.postalCode || ''
+                        },
+                        deliverTo: {
+                            latitude: deliveryLocation.lat,
+                            longitude: deliveryLocation.lng,
+                            address: deliveryLocation.address || '',
+                            cityName: deliveryLocation.city || '',
+                            stateName: deliveryLocation.province || '',
+                            zipCode: deliveryLocation.postalCode || ''
+                        },
+                        courierCodes: ['jne', 'jnt', 'sicepat', 'ninja', 'antaraja'],
+                        package: {
+                            weight: totalWeight || 1.0,
+                            length: 30,
+                            width: 20,
+                            height: 15
+                        }
                     });
-                    setShippingRates(response.data.couriers || []);
-                    if (response.data.couriers && response.data.couriers.length > 0) {
-                        setSelectedCourier(response.data.couriers[0]);
+                    setShippingRates(response.data.rates || []);
+                    if (response.data.rates && response.data.rates.length > 0) {
+                        setSelectedCourier(response.data.rates[0]);
                     }
                 } catch (err) {
                     showError('Failed to fetch delivery rates', err.response?.data?.error || err.message);
@@ -228,8 +252,9 @@ function Cart() {
                 notes,
                 paymentMethod,
                 deliveryType,
-                deliveryVendor: selectedCourier?.vendor || null,
-                deliveryService: selectedCourier?.service || null,
+                deliveryCourierCode: selectedCourier?.courierCode || null,
+                deliveryServiceCode: selectedCourier?.serviceCode || null,
+                deliveryRateId: selectedCourier?.rateId || null,
                 deliveryFee: deliveryFee,
                 isPreorder: !!preorderTime || !!preorderDate,
                 preorderTime: preorderTime || null,
