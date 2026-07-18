@@ -3,9 +3,13 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -25,13 +29,44 @@ func NewWebhookHandler() *WebhookHandler {
 }
 
 func (h *WebhookHandler) N8nCallback(c *gin.Context) {
-	secret := c.GetHeader("X-Webhook-Secret")
-	expectedSecret := "msme-webhook-secret-2024"
-
-	if secret != expectedSecret {
-		c.JSON(401, gin.H{"error": "Invalid webhook secret"})
+	// Get webhook secret from environment (NEVER hardcoded)
+	webhookSecret := os.Getenv("N8N_WEBHOOK_SECRET")
+	if webhookSecret == "" {
+		log.Printf("[Webhook] CRITICAL: N8N_WEBHOOK_SECRET not configured")
+		c.JSON(500, gin.H{"error": "Server configuration error"})
 		return
 	}
+
+	// Verify HMAC signature if provided (preferred) or fallback to header secret
+	signature := c.GetHeader("X-Webhook-Signature")
+	requestBody, err := c.GetRawData()
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// If signature header exists, verify HMAC
+	if signature != "" {
+		mac := hmac.New(sha256.New, []byte(webhookSecret))
+		mac.Write(requestBody)
+		expectedMAC := hex.EncodeToString(mac.Sum(nil))
+		if !hmac.Equal([]byte(signature), []byte(expectedMAC)) {
+			log.Printf("[Webhook] Invalid HMAC signature")
+			c.JSON(401, gin.H{"error": "Invalid signature"})
+			return
+		}
+	} else {
+		// Fallback: verify simple secret header (less secure, for backward compatibility)
+		secret := c.GetHeader("X-Webhook-Secret")
+		if secret != webhookSecret {
+			log.Printf("[Webhook] Invalid webhook secret")
+			c.JSON(401, gin.H{"error": "Invalid webhook secret"})
+			return
+		}
+	}
+
+	// Restore request body for JSON parsing
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(requestBody))
 
 	var req struct {
 		Action string      `json:"action"`

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -51,10 +52,13 @@ func Load() (*Config, error) {
 
 	jwtSecret := getEnv("JWT_SECRET", "")
 	if jwtSecret == "" {
-		jwtSecret = "default-dev-secret-key" // Use a default for development
-		if nodeEnv == "production" {
-			fmt.Println("⚠️  WARNING: JWT_SECRET not set in production, using default (INSECURE!)")
-		}
+		jwtSecret = os.Getenv("JWT_SECRET") // Explicit re-check
+	}
+	if strings.TrimSpace(jwtSecret) == "" {
+		log.Fatal("FATAL: JWT_SECRET environment variable is required. Generate one with: openssl rand -base64 64")
+	}
+	if len(strings.TrimSpace(jwtSecret)) < 32 {
+		log.Fatal("FATAL: JWT_SECRET must be at least 32 characters for security")
 	}
 
 	return &Config{

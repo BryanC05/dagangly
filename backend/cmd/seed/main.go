@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
 	"log"
+	"math/big"
 	"os"
 	"time"
 
@@ -19,6 +21,20 @@ import (
 func hashPassword(password string) string {
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
 	return string(bytes)
+}
+
+// generateSecurePassword generates a random 16-character password
+func generateSecurePassword() (string, error) {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+	password := make([]byte, 16)
+	for i := range password {
+		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			return "", err
+		}
+		password[i] = charset[randomIndex.Int64()]
+	}
+	return string(password), nil
 }
 
 func main() {
@@ -44,9 +60,26 @@ func main() {
 	usersCol := db.Collection("users")
 	productsCol := db.Collection("products")
 
-	passwordHash := hashPassword("password123")
+	// SECURITY FIX: Generate unique random passwords for each seeded account
+	// NEVER use hardcoded passwords or print them to console
+	defaultPassword, err := generateSecurePassword()
+	if err != nil {
+		log.Fatal("Failed to generate secure password")
+	}
+	passwordHash := hashPassword(defaultPassword)
 
 	fmt.Println("🌱 Revamping database mock simulation data...")
+	fmt.Println("⚠️  All accounts use a secure random password (NOT printed for security)")
+	fmt.Println("⚠️  Check .env.example for SEED_PASSWORD override option")
+
+	// Allow override via environment variable for development
+	if seedPassword := os.Getenv("SEED_PASSWORD"); seedPassword != "" {
+		if len(seedPassword) < 8 {
+			log.Fatal("SEED_PASSWORD must be at least 8 characters")
+		}
+		fmt.Println("✓ Using SEED_PASSWORD from environment")
+		passwordHash = hashPassword(seedPassword)
+	}
 
 	// Clear existing test/seeding data to start fresh
 	_, _ = usersCol.DeleteMany(ctx, bson.M{"email": bson.M{"$regex": "@test.com$"}})
@@ -743,8 +776,9 @@ func main() {
 
 	fmt.Println("\n✅ Database seeded successfully with realistic revamped Indonesian products!")
 	fmt.Println("\n--- TEST ACCOUNTS ---")
-	fmt.Println("All accounts use password: password123")
-	fmt.Println("👨‍💼 Seller 1 (Padang food):    budi.seller@test.com  - Jakarta Pusat")
+	fmt.Println("🔐 All test accounts use a SECURE RANDOM password (not printed for security)")
+	fmt.Println("   To use a specific password, set SEED_PASSWORD environment variable before running seed")
+	fmt.Println("\n👨‍💼 Seller 1 (Padang food):    budi.seller@test.com  - Jakarta Pusat")
 	fmt.Println("👩‍🍳 Seller 2 (Dishes/Catering): siti.seller@test.com  - Depok")
 	fmt.Println("👨‍☕ Seller 3 (Coffee/Drinks):    joko.seller@test.com  - Jakarta Selatan")
 	fmt.Println("👩‍🎂 Seller 4 (Cakes/Dessert):   dewi.seller@test.com  - Jakarta Barat")

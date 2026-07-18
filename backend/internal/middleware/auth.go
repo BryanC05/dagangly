@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -8,9 +9,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// normalizeJWTSecret validates JWT secret - no fallbacks allowed
 func normalizeJWTSecret(jwtSecret string) string {
 	if strings.TrimSpace(jwtSecret) == "" {
-		return "your-secret-key"
+		log.Fatal("FATAL: JWT secret is empty. Set JWT_SECRET environment variable.")
+	}
+	if len(strings.TrimSpace(jwtSecret)) < 32 {
+		log.Fatal("FATAL: JWT_SECRET must be at least 32 characters")
 	}
 	return jwtSecret
 }
@@ -58,21 +63,42 @@ func AuthRequired(jwtSecret string) gin.HandlerFunc {
 	}
 }
 
+// Allowed origins for CORS - SECURITY FIX: No wildcards with credentials
+var allowedOrigins = map[string]bool{
+	// Production
+	"https://dagangly.com":      true,
+	"https://www.dagangly.com":  true,
+	"https://app.dagangly.com":  true,
+	// Development (localhost)
+	"http://localhost:3000":     true,
+	"http://localhost:5173":     true,
+	"http://127.0.0.1:3000":     true,
+	"http://127.0.0.1:5173":     true,
+	// Replit development
+	"https://*.replit.dev":      true,
+	"https://*.repl.co":         true,
+}
+
+// CORSMiddleware implements secure CORS with origin whitelist
+// SECURITY FIX: No longer allows arbitrary origins with credentials
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 
-		// Set CORS headers
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH, WS, WSS")
-
-		// Echo back the origin to allow all sources (required for dynamic local dev ports)
-		if origin != "" {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
-		} else {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		// Check if origin is allowed
+	if !isOriginAllowed(origin) {
+			// For disallowed origins, still allow the request but without CORS headers
+			// This prevents preflight from succeeding for malicious sites
+			c.Next()
+			return
 		}
+
+		// Set CORS headers for allowed origins only
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, X-Webhook-Signature")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH, WS, WSS")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+		c.Writer.Header().Set("Vary", "Origin")
 
 		// Handle preflight
 		if c.Request.Method == "OPTIONS" {
@@ -82,4 +108,36 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// isOriginAllowed checks if the origin is in the whitelist
+func isOriginAllowed(origin string) bool {
+	if origin == "" {
+		return false
+	}
+	
+	// Direct match
+	if allowedOrigins[origin] {
+		return true
+	}
+	
+	// Handle wildcard subdomains for Replit
+	for allowed := range allowedOrigins {
+		if hasPrefix(allowed, "https://*.") {
+			pattern := allowed[len("https://*"):]
+			if hasSuffix(origin, pattern) {
+				return true
+			}
+		}
+	}
+	
+	return false
+}
+
+func hasPrefix(s, prefix string) bool {
+	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
+}
+
+func hasSuffix(s, suffix string) bool {
+	return len(s) >= len(suffix) && s[len(s)-len(suffix):] == suffix
 }
