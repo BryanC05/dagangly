@@ -270,6 +270,15 @@ func main() {
 		api.POST("/delivery/rates", middleware.AuthRequired(cfg.JWTSecret), deliveryHandler.GetDeliveryRates)
 		api.POST("/webhooks/delivery", deliveryHandler.ReceiveDeliveryWebhook)
 
+		// Biteship Shipping Integration
+		shippingHandler := handlers.NewShippingHandler()
+		biteshipWebhook := handlers.NewBiteshipWebhookHandler()
+		api.POST("/shipping/rates", middleware.AuthRequired(cfg.JWTSecret), shippingHandler.CalculateShippingRates)
+		api.POST("/shipping/shipments", middleware.AuthRequired(cfg.JWTSecret), shippingHandler.CreateShipment)
+		api.GET("/shipping/track/:trackingId", shippingHandler.TrackShipment)
+		api.GET("/shipping/public/track/:trackingId", handlers.PublicTrackShipment)
+		api.POST("/webhooks/biteship", biteshipWebhook.HandleWebhook)
+
 		// Device registration for push notifications
 		deviceHandler := handlers.NewDeviceHandler()
 		devices := api.Group("/devices")
