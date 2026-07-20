@@ -209,21 +209,57 @@ export default function DeliveryMapPicker({
     }
 
     // Draw route line
-    if (routeLineRef.current) {
-      routeLineRef.current.remove();
-      routeLineRef.current = null;
-    }
     if (sellerLocation) {
-      const line = L.polyline([
-        [sellerLocation.lat, sellerLocation.lng],
-        [position.lat, position.lng]
-      ], {
-        color: '#2563eb',
-        weight: 4,
-        opacity: 0.7,
-        dashArray: '8, 8'
-      }).addTo(mapRef.current);
-      routeLineRef.current = line;
+      const url = `https://router.project-osrm.org/route/v1/driving/${sellerLocation.lng},${sellerLocation.lat};${position.lng},${position.lat}?overview=full&geometries=geojson`;
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (routeLineRef.current) {
+            routeLineRef.current.remove();
+            routeLineRef.current = null;
+          }
+          
+          if (data && data.routes && data.routes.length > 0) {
+            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+            const line = L.polyline(coords, {
+              color: '#3b82f6', // Premium blue road color
+              weight: 5,
+              opacity: 0.85,
+              lineJoin: 'round'
+            }).addTo(mapRef.current);
+            routeLineRef.current = line;
+          } else {
+            // Straight line fallback
+            const line = L.polyline([
+              [sellerLocation.lat, sellerLocation.lng],
+              [position.lat, position.lng]
+            ], {
+              color: '#3b82f6',
+              weight: 4,
+              opacity: 0.7,
+              dashArray: '8, 8'
+            }).addTo(mapRef.current);
+            routeLineRef.current = line;
+          }
+        })
+        .catch(err => {
+          console.error("OSRM Routing Error: ", err);
+          if (routeLineRef.current) {
+            routeLineRef.current.remove();
+            routeLineRef.current = null;
+          }
+          const line = L.polyline([
+            [sellerLocation.lat, sellerLocation.lng],
+            [position.lat, position.lng]
+          ], {
+            color: '#3b82f6',
+            weight: 4,
+            opacity: 0.7,
+            dashArray: '8, 8'
+          }).addTo(mapRef.current);
+          routeLineRef.current = line;
+        });
 
       // Fit bounds to show both seller and buyer
       const bounds = L.latLngBounds([
