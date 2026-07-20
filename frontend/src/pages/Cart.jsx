@@ -66,8 +66,34 @@ function Cart() {
     const [preorderTime, setPreorderTime] = useState('');
     const [preorderDate, setPreorderDate] = useState('');
     const [loading, setLoading] = useState(false);
-    const [deliveryLocation, setDeliveryLocation] = useState(null);
+    const [deliveryLocation, setDeliveryLocation] = useState(() => {
+        if (user?.location?.coordinates && user.location.coordinates.length >= 2 && (user.location.coordinates[0] !== 0 || user.location.coordinates[1] !== 0)) {
+            return {
+                lat: user.location.coordinates[1],
+                lng: user.location.coordinates[0],
+                address: user.location.address || ''
+            };
+        }
+        return null;
+    });
     const [distanceError, setDistanceError] = useState(null);
+
+    useEffect(() => {
+        if (user?.location?.coordinates && user.location.coordinates.length >= 2 && (user.location.coordinates[0] !== 0 || user.location.coordinates[1] !== 0) && !deliveryLocation) {
+            setDeliveryLocation({
+                lat: user.location.coordinates[1],
+                lng: user.location.coordinates[0],
+                address: user.location.address || ''
+            });
+            setAddress({
+                address: user.location.address || '',
+                city: user.location.city || '',
+                state: user.location.state || '',
+                pincode: user.location.pincode || '',
+                coordinates: user.location.coordinates,
+            });
+        }
+    }, [user, deliveryLocation]);
     const [orderSuccess, setOrderSuccess] = useState(null);
 
     const [shippingRates, setShippingRates] = useState([]);
