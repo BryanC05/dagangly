@@ -192,9 +192,10 @@ function Cart() {
                             height: 15
                         }
                     });
-                    setShippingRates(response.data.rates || []);
-                    if (response.data.rates && response.data.rates.length > 0) {
-                        setSelectedCourier(response.data.rates[0]);
+                    const ratesList = response.data.data?.rates || response.data.rates || [];
+                    setShippingRates(ratesList);
+                    if (ratesList.length > 0) {
+                        setSelectedCourier(ratesList[0]);
                     }
                 } catch (err) {
                     showError('Failed to fetch delivery rates', err.response?.data?.error || err.message);

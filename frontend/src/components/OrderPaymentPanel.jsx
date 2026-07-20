@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, CheckCircle, QrCode, Banknote, CreditCard } from 'lucide-react';
+import { Upload, CheckCircle, QrCode, Banknote, CreditCard, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -205,10 +205,20 @@ export default function OrderPaymentPanel({
         )}
 
         {proofUrl && (
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Uploaded proof</p>
-            <a href={resolveImageUrl(proofUrl)} target="_blank" rel="noreferrer" className="text-primary underline text-sm">
-              View payment proof
+          <div className="mt-3 p-3 bg-muted/40 rounded-xl border">
+            <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
+              <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
+              Uploaded Payment Proof
+            </p>
+            <a href={resolveImageUrl(proofUrl)} target="_blank" rel="noreferrer" className="block relative group overflow-hidden rounded-lg border max-w-[120px] aspect-[3/4] hover:border-primary transition-all">
+              <img 
+                src={resolveImageUrl(proofUrl)} 
+                alt="Payment Proof" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-all"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-white text-[10px] font-medium">
+                Click to zoom
+              </div>
             </a>
           </div>
         )}
@@ -226,7 +236,7 @@ export default function OrderPaymentPanel({
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 w-full"
+              className="gap-2 w-full mt-3"
               disabled={uploading}
               onClick={() => document.getElementById(`proof-upload-${orderId}`)?.click()}
             >
@@ -237,13 +247,22 @@ export default function OrderPaymentPanel({
         )}
 
         {isBuyer && paymentStatus === 'proof_submitted' && (
-          <Alert>
+          <Alert className="mt-3">
             <AlertDescription>Proof sent — waiting for seller to confirm payment.</AlertDescription>
           </Alert>
         )}
 
+        {isSeller && isQris && paymentStatus === 'proof_submitted' && (
+          <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800/30 my-3">
+            <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <AlertDescription className="text-amber-800 dark:text-amber-300 text-xs">
+              Buyer has uploaded a payment proof. Please review it above before marking as paid.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {isSeller && (isQris || isCash) && (
-          <Button size="sm" className="w-full gap-2" onClick={markPaid} disabled={confirming}>
+          <Button size="sm" className="w-full gap-2 mt-3" onClick={markPaid} disabled={confirming}>
             <CheckCircle className="h-4 w-4" />
             {confirming ? 'Updating...' : 'Mark payment received'}
           </Button>
