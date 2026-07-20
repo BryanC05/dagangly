@@ -60,35 +60,45 @@ func main() {
 	usersCol := db.Collection("users")
 	productsCol := db.Collection("products")
 
-	// SECURITY FIX: Generate unique random passwords for each seeded account
-	// NEVER use hardcoded passwords or print them to console
-	defaultPassword, err := generateSecurePassword()
-	if err != nil {
-		log.Fatal("Failed to generate secure password")
-	}
-	passwordHash := hashPassword(defaultPassword)
-
-	fmt.Println("🌱 Revamping database mock simulation data...")
-	fmt.Println("⚠️  All accounts use a secure random password (NOT printed for security)")
-	fmt.Println("⚠️  Check .env.example for SEED_PASSWORD override option")
-
-	// Allow override via environment variable for development
+	// Set default password to password123 (or use SEED_PASSWORD environment variable)
+	defaultPassword := "password123"
 	if seedPassword := os.Getenv("SEED_PASSWORD"); seedPassword != "" {
 		if len(seedPassword) < 8 {
 			log.Fatal("SEED_PASSWORD must be at least 8 characters")
 		}
 		fmt.Println("✓ Using SEED_PASSWORD from environment")
-		passwordHash = hashPassword(seedPassword)
+		defaultPassword = seedPassword
+	} else {
+		fmt.Println("✓ Using default password: password123")
+	}
+	passwordHash := hashPassword(defaultPassword)
+
+	fmt.Println("🌱 Purging all existing user data collections...")
+	collectionsToPurge := []string{
+		"users",
+		"products",
+		"orders",
+		"expenses",
+		"businesses",
+		"reports",
+		"finance_chats",
+		"reviews",
+		"forumthreads",
+		"drivers",
+		"driver_earnings",
+		"chats",
+		"messages",
+		"notifications",
+		"wallets",
+	}
+	for _, colName := range collectionsToPurge {
+		_, _ = db.Collection(colName).DeleteMany(ctx, bson.M{})
 	}
 
-	// Clear existing test/seeding data to start fresh
-	_, _ = usersCol.DeleteMany(ctx, bson.M{"email": bson.M{"$regex": "@test.com$"}})
-	_, _ = productsCol.DeleteMany(ctx, bson.M{})
-
 	// ==========================================
-	// 1. Create Sellers (5 total, 3 new)
+	// 1. Create Sellers (5 total, 3 with membership, 2 without)
 	// ==========================================
-	fmt.Println("👤 Creating 5 seller accounts at different locations...")
+	fmt.Println("👤 Creating 5 seller accounts within 5km radius of the buyer...")
 
 	s1ID := primitive.NewObjectID()
 	s2ID := primitive.NewObjectID()
@@ -115,7 +125,7 @@ func main() {
 			"membershipStatus":    "active",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.8229, -6.1931}, // Jakarta Pusat
+				"coordinates": []float64{106.8250, -6.1930}, // Jakarta Pusat (~0.3 km)
 				"address":     "Jl. Sudirman No. 45",
 				"city":        "Jakarta Pusat",
 				"state":       "DKI Jakarta",
@@ -135,7 +145,7 @@ func main() {
 			"isSeller":            true,
 			"businessName":        "Dapur Bu Siti (Catering)",
 			"businessType":        "individual",
-			"businessAddress":     "Jl. Margonda Raya No. 10, Depok",
+			"businessAddress":     "Jl. Kebon Sirih No. 10, Jakarta Pusat",
 			"registrationStatus":  "approved",
 			"isVerified":          true,
 			"isMember":            true,
@@ -144,11 +154,11 @@ func main() {
 			"membershipStatus":    "active",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.8330, -6.3731}, // Depok
-				"address":     "Jl. Margonda Raya No. 10",
-				"city":        "Depok",
-				"state":       "Jawa Barat",
-				"pincode":     "16424",
+				"coordinates": []float64{106.8200, -6.1950}, // Jakarta Pusat (~0.4 km)
+				"address":     "Jl. Kebon Sirih No. 10",
+				"city":        "Jakarta Pusat",
+				"state":       "DKI Jakarta",
+				"pincode":     "10340",
 			},
 			"rating":       4.9,
 			"totalReviews": 56,
@@ -164,7 +174,7 @@ func main() {
 			"isSeller":            true,
 			"businessName":        "Warung Kopi Mas Joko",
 			"businessType":        "individual",
-			"businessAddress":     "Jl. Tebet Raya No. 12, Jakarta Selatan",
+			"businessAddress":     "Jl. Kramat Raya No. 12, Jakarta Pusat",
 			"registrationStatus":  "approved",
 			"isVerified":          true,
 			"isMember":            true,
@@ -173,11 +183,11 @@ func main() {
 			"membershipStatus":    "active",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.8480, -6.2250}, // Jakarta Selatan (Tebet)
-				"address":     "Jl. Tebet Raya No. 12",
-				"city":        "Jakarta Selatan",
+				"coordinates": []float64{106.8300, -6.2000}, // Jakarta Pusat (~1.1 km)
+				"address":     "Jl. Kramat Raya No. 12",
+				"city":        "Jakarta Pusat",
 				"state":       "DKI Jakarta",
-				"pincode":     "12810",
+				"pincode":     "10450",
 			},
 			"rating":       4.7,
 			"totalReviews": 35,
@@ -185,28 +195,26 @@ func main() {
 			"updatedAt":    time.Now(),
 		},
 		{
-			"_id":                 s4ID,
-			"name":                "Dewi Lestari",
-			"email":               "dewi.seller@test.com",
-			"password":            passwordHash,
-			"phone":               "081223344556",
-			"isSeller":            true,
-			"businessName":        "Toko Kue & Dessert Dewi",
-			"businessType":        "individual",
-			"businessAddress":     "Jl. Panjang No. 15, Kebon Jeruk, Jakarta Barat",
-			"registrationStatus":  "approved",
-			"isVerified":          true,
-			"isMember":            true,
-			"memberSince":         time.Now(),
-			"memberExpiry":        time.Now().AddDate(1, 0, 0),
-			"membershipStatus":    "active",
+			"_id":                s4ID,
+			"name":               "Dewi Lestari",
+			"email":              "dewi.seller@test.com",
+			"password":           passwordHash,
+			"phone":              "081223344556",
+			"isSeller":           true,
+			"businessName":       "Toko Kue & Dessert Dewi",
+			"businessType":       "individual",
+			"businessAddress":    "Jl. Wahid Hasyim No. 15, Jakarta Pusat",
+			"registrationStatus": "approved",
+			"isVerified":         true,
+			"isMember":           false,
+			"membershipStatus":   "inactive",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.7681, -6.1905}, // Jakarta Barat (Kebon Jeruk)
-				"address":     "Jl. Panjang No. 15, Kebon Jeruk",
-				"city":        "Jakarta Barat",
+				"coordinates": []float64{106.8150, -6.1850}, // Jakarta Pusat (~1.2 km)
+				"address":     "Jl. Wahid Hasyim No. 15",
+				"city":        "Jakarta Pusat",
 				"state":       "DKI Jakarta",
-				"pincode":     "11530",
+				"pincode":     "10350",
 			},
 			"rating":       4.9,
 			"totalReviews": 42,
@@ -214,28 +222,26 @@ func main() {
 			"updatedAt":    time.Now(),
 		},
 		{
-			"_id":                 s5ID,
-			"name":                "Eko Prasetyo",
-			"email":               "eko.seller@test.com",
-			"password":            passwordHash,
-			"phone":               "081334455667",
-			"isSeller":            true,
-			"businessName":        "Sate & Ayam Goreng Pak Eko",
-			"businessType":        "individual",
-			"businessAddress":     "Jl. MT Haryono No. 5, Cawang, Jakarta Timur",
-			"registrationStatus":  "approved",
-			"isVerified":          true,
-			"isMember":            true,
-			"memberSince":         time.Now(),
-			"memberExpiry":        time.Now().AddDate(1, 0, 0),
-			"membershipStatus":    "active",
+			"_id":                s5ID,
+			"name":               "Eko Prasetyo",
+			"email":              "eko.seller@test.com",
+			"password":           passwordHash,
+			"phone":              "081334455667",
+			"isSeller":           true,
+			"businessName":       "Sate & Ayam Goreng Pak Eko",
+			"businessType":       "individual",
+			"businessAddress":    "Jl. Salemba Raya No. 5, Jakarta Pusat",
+			"registrationStatus": "approved",
+			"isVerified":         true,
+			"isMember":           false,
+			"membershipStatus":   "inactive",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.8720, -6.2480}, // Jakarta Timur (Cawang)
-				"address":     "Jl. MT Haryono No. 5, Cawang",
-				"city":        "Jakarta Timur",
+				"coordinates": []float64{106.8400, -6.1900}, // Jakarta Pusat (~1.9 km)
+				"address":     "Jl. Salemba Raya No. 5",
+				"city":        "Jakarta Pusat",
 				"state":       "DKI Jakarta",
-				"pincode":     "13630",
+				"pincode":     "10440",
 			},
 			"rating":       4.6,
 			"totalReviews": 18,
@@ -250,9 +256,9 @@ func main() {
 	}
 
 	// ==========================================
-	// 2. Create Buyer
+	// 2. Create Buyers
 	// ==========================================
-	fmt.Println("👤 Creating buyer account...")
+	fmt.Println("👤 Creating buyer accounts...")
 
 	buyer1ID := primitive.NewObjectID()
 	buyer1 := bson.M{
@@ -265,17 +271,39 @@ func main() {
 		"isVerified": true,
 		"location": bson.M{
 			"type":        "Point",
-			"coordinates": []float64{106.8000, -6.2000},
-			"address":     "Jl. Gatot Subroto",
+			"coordinates": []float64{106.8227, -6.1931}, // Central Reference (Jakarta Pusat)
+			"address":     "Jl. Thamrin No. 1",
 			"city":        "Jakarta Pusat",
 			"state":       "DKI Jakarta",
-			"pincode":     "10270",
+			"pincode":     "10210",
+		},
+		"createdAt": time.Now(),
+		"updatedAt": time.Now(),
+	}
+
+	buyer2ID := primitive.NewObjectID()
+	buyer2 := bson.M{
+		"_id":        buyer2ID,
+		"name":       "Rina Wijayanti",
+		"email":      "rina.buyer@test.com",
+		"password":   passwordHash,
+		"phone":      "085712345678",
+		"isSeller":   false,
+		"isVerified": true,
+		"location": bson.M{
+			"type":        "Point",
+			"coordinates": []float64{106.8210, -6.1910}, // Jakarta Pusat (~0.3 km)
+			"address":     "Jl. Thamrin No. 8",
+			"city":        "Jakarta Pusat",
+			"state":       "DKI Jakarta",
+			"pincode":     "10210",
 		},
 		"createdAt": time.Now(),
 		"updatedAt": time.Now(),
 	}
 
 	usersCol.UpdateOne(ctx, bson.M{"email": "andi.buyer@test.com"}, bson.M{"$set": buyer1}, opts)
+	usersCol.UpdateOne(ctx, bson.M{"email": "rina.buyer@test.com"}, bson.M{"$set": buyer2}, opts)
 
 	// ==========================================
 	// 3. Create Products (28 items utilizing /uploads/products images)
@@ -776,12 +804,12 @@ func main() {
 
 	fmt.Println("\n✅ Database seeded successfully with realistic revamped Indonesian products!")
 	fmt.Println("\n--- TEST ACCOUNTS ---")
-	fmt.Println("🔐 All test accounts use a SECURE RANDOM password (not printed for security)")
-	fmt.Println("   To use a specific password, set SEED_PASSWORD environment variable before running seed")
-	fmt.Println("\n👨‍💼 Seller 1 (Padang food):    budi.seller@test.com  - Jakarta Pusat")
-	fmt.Println("👩‍🍳 Seller 2 (Dishes/Catering): siti.seller@test.com  - Depok")
-	fmt.Println("👨‍☕ Seller 3 (Coffee/Drinks):    joko.seller@test.com  - Jakarta Selatan")
-	fmt.Println("👩‍🎂 Seller 4 (Cakes/Dessert):   dewi.seller@test.com  - Jakarta Barat")
-	fmt.Println("👨‍🍖 Seller 5 (Grill/Meat):      eko.seller@test.com   - Jakarta Timur")
-	fmt.Println("🛒 Buyer 1:                  andi.buyer@test.com   - Jakarta Pusat")
+	fmt.Printf("🔐 All test accounts password: %s\n", defaultPassword)
+	fmt.Println("\n👨‍💼 Seller 1 (Padang - Member):     budi.seller@test.com  - Jakarta Pusat (~0.3km)")
+	fmt.Println("👩‍🍳 Seller 2 (Catering - Member):   siti.seller@test.com  - Jakarta Pusat (~0.4km)")
+	fmt.Println("👨‍☕ Seller 3 (Coffee - Member):     joko.seller@test.com  - Jakarta Pusat (~1.1km)")
+	fmt.Println("👩‍🎂 Seller 4 (Dessert - No Member):  dewi.seller@test.com  - Jakarta Pusat (~1.2km)")
+	fmt.Println("👨‍🍖 Seller 5 (Grill - No Member):    eko.seller@test.com   - Jakarta Pusat (~1.9km)")
+	fmt.Println("🛒 Buyer 1:                         andi.buyer@test.com   - Jakarta Pusat (Reference)")
+	fmt.Println("🛒 Buyer 2:                         rina.buyer@test.com   - Jakarta Pusat (~0.3km)")
 }
