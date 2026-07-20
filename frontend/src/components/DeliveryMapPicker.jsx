@@ -36,7 +36,7 @@ export default function DeliveryMapPicker({
   maxDistance = 5,
   initialLocation = null,
 }) {
-  const defaultCenter = sellerLocation || DEFAULT_LOCATION.Jakarta;
+  const defaultCenter = DEFAULT_LOCATION.Bekasi;
   const [position, setPosition] = useState(initialLocation || defaultCenter);
   const [distance, setDistance] = useState(null);
   const [address, setAddress] = useState('');
@@ -61,9 +61,7 @@ export default function DeliveryMapPicker({
         (error) => {
           console.error('Auto location error:', error);
           setIsLoading(false);
-          if (sellerLocation) {
-            setPosition({ lat: sellerLocation.lat, lng: sellerLocation.lng });
-          }
+          setPosition(DEFAULT_LOCATION.Bekasi);
         }
       );
     }
