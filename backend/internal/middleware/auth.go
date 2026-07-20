@@ -69,6 +69,9 @@ var allowedOrigins = map[string]bool{
 	"https://dagangly.com":      true,
 	"https://www.dagangly.com":  true,
 	"https://app.dagangly.com":  true,
+	// Vercel deployment
+	"https://dagangly.vercel.app": true,
+	"https://*.vercel.app":        true,
 	// Development (localhost)
 	"http://localhost:3000":     true,
 	"http://localhost:5173":     true,
