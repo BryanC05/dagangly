@@ -401,6 +401,32 @@ func (e *APIError) Error() string {
 	return fmt.Sprintf("Biteship API Error [%s]: %s", e.Code, e.Message)
 }
 
+// UnmarshalJSON custom unmarshaler to support both JSON string and JSON object formats
+func (e *APIError) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return nil
+	}
+
+	// If the JSON value starts with a double quote, it is a JSON string
+	if data[0] == '"' {
+		var s string
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		e.Message = s
+		return nil
+	}
+
+	// Otherwise, unmarshal as standard JSON object
+	type Alias APIError
+	var aux Alias
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	*e = APIError(aux)
+	return nil
+}
+
 // ============== Webhook Validation ==============
 
 // WebhookEvent represents a Biteship webhook event
