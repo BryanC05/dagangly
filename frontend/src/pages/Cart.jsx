@@ -79,7 +79,7 @@ function Cart() {
         const itemWeight = item.product.weight || 0.5; // Default 0.5kg if not specified
         return sum + (itemWeight * item.quantity);
     }, 0) || 0;
-    const deliveryFee = deliveryType === 'delivery' && selectedCourier ? selectedCourier.price : 0;
+    const deliveryFee = deliveryType === 'delivery' && selectedCourier ? (selectedCourier.price !== undefined ? selectedCourier.price : selectedCourier.amount) : 0;
     const total = subtotal + deliveryFee;
 
     // Get seller location from first product (memoized to keep reference stable)
@@ -253,8 +253,8 @@ function Cart() {
                 notes,
                 paymentMethod,
                 deliveryType,
-                deliveryCourierCode: selectedCourier?.courierCode || null,
-                deliveryServiceCode: selectedCourier?.serviceCode || null,
+                deliveryCourierCode: selectedCourier?.courierCode || selectedCourier?.courier_code || selectedCourier?.vendor || null,
+                deliveryServiceCode: selectedCourier?.serviceCode || selectedCourier?.service_code || selectedCourier?.service || null,
                 deliveryRateId: selectedCourier?.rateId || null,
                 deliveryFee: deliveryFee,
                 isPreorder: !!preorderTime || !!preorderDate,
@@ -592,10 +592,15 @@ function Cart() {
                                             ) : (
                                                 <div className="grid gap-3">
                                                     {shippingRates.map((courier) => {
-                                                        const isSelected = selectedCourier?.courier_name === courier.courier_name;
+                                                        const name = courier.courier_name || courier.courierName;
+                                                        const service = courier.courier_service_name || courier.serviceName;
+                                                        const price = courier.price !== undefined ? courier.price : courier.amount;
+                                                        const duration = courier.duration || (courier.estimatedDays !== undefined ? (courier.estimatedDays === 0 ? "Instant" : `${courier.estimatedDays} days`) : '');
+                                                        
+                                                        const isSelected = selectedCourier && (selectedCourier.courier_name || selectedCourier.courierName) === name;
                                                         return (
                                                             <button
-                                                                key={courier.courier_name}
+                                                                key={`${name}-${service}`}
                                                                 type="button"
                                                                 className={`flex items-center justify-between p-4 rounded-xl border text-left transition-all ${
                                                                     isSelected
@@ -608,13 +613,13 @@ function Cart() {
                                                                     <span className="text-2xl">🏍️</span>
                                                                     <div>
                                                                         <p className="font-semibold text-foreground text-sm flex items-center gap-1.5">
-                                                                            {courier.courier_name}
-                                                                            <span className="text-[10px] uppercase font-bold tracking-wider bg-primary/10 text-primary border border-primary/25 px-1.5 py-0.5 rounded-full">{courier.courier_service_name}</span>
+                                                                            {name}
+                                                                            <span className="text-[10px] uppercase font-bold tracking-wider bg-primary/10 text-primary border border-primary/25 px-1.5 py-0.5 rounded-full">{service}</span>
                                                                         </p>
-                                                                        <p className="text-xs text-muted-foreground mt-0.5">Est. time: {courier.duration}</p>
+                                                                        <p className="text-xs text-muted-foreground mt-0.5">Est. time: {duration}</p>
                                                                     </div>
                                                                 </div>
-                                                                <span className="font-bold text-foreground text-base">Rp {courier.price.toLocaleString('id-ID')}</span>
+                                                                <span className="font-bold text-foreground text-base">Rp {price?.toLocaleString('id-ID')}</span>
                                                             </button>
                                                         );
                                                     })}
