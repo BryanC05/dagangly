@@ -116,7 +116,7 @@ func main() {
 			"isSeller":            true,
 			"businessName":        "Warung Makan Padang Budi",
 			"businessType":        "individual",
-			"businessAddress":     "Jl. Sudirman No. 45, Jakarta Pusat",
+			"businessAddress":     "Ruko Sinpasa, Summarecon Bekasi, Jawa Barat",
 			"registrationStatus":  "approved",
 			"isVerified":          true,
 			"isMember":            true,
@@ -125,11 +125,11 @@ func main() {
 			"membershipStatus":    "active",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.8250, -6.1930}, // Jakarta Pusat (~0.3 km)
-				"address":     "Jl. Sudirman No. 45",
-				"city":        "Jakarta Pusat",
-				"state":       "DKI Jakarta",
-				"pincode":     "10220",
+				"coordinates": []float64{106.9950, -6.2210}, // Bekasi (~0.3 km from Binus)
+				"address":     "Ruko Sinpasa, Summarecon Bekasi",
+				"city":        "Bekasi",
+				"state":       "Jawa Barat",
+				"pincode":     "17142",
 			},
 			"rating":       4.8,
 			"totalReviews": 24,
@@ -145,7 +145,7 @@ func main() {
 			"isSeller":            true,
 			"businessName":        "Dapur Bu Siti (Catering)",
 			"businessType":        "individual",
-			"businessAddress":     "Jl. Kebon Sirih No. 10, Jakarta Pusat",
+			"businessAddress":     "Ruko Emerald, Summarecon Bekasi, Jawa Barat",
 			"registrationStatus":  "approved",
 			"isVerified":          true,
 			"isMember":            true,
@@ -154,11 +154,11 @@ func main() {
 			"membershipStatus":    "active",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.8200, -6.1950}, // Jakarta Pusat (~0.4 km)
-				"address":     "Jl. Kebon Sirih No. 10",
-				"city":        "Jakarta Pusat",
-				"state":       "DKI Jakarta",
-				"pincode":     "10340",
+				"coordinates": []float64{106.9910, -6.2260}, // Bekasi (~0.4 km from Binus)
+				"address":     "Ruko Emerald, Summarecon Bekasi",
+				"city":        "Bekasi",
+				"state":       "Jawa Barat",
+				"pincode":     "17142",
 			},
 			"rating":       4.9,
 			"totalReviews": 56,
@@ -174,7 +174,7 @@ func main() {
 			"isSeller":            true,
 			"businessName":        "Warung Kopi Mas Joko",
 			"businessType":        "individual",
-			"businessAddress":     "Jl. Kramat Raya No. 12, Jakarta Pusat",
+			"businessAddress":     "Jl. Boulevard Selatan, Summarecon Bekasi, Jawa Barat",
 			"registrationStatus":  "approved",
 			"isVerified":          true,
 			"isMember":            true,
@@ -183,11 +183,11 @@ func main() {
 			"membershipStatus":    "active",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.8300, -6.2000}, // Jakarta Pusat (~1.1 km)
-				"address":     "Jl. Kramat Raya No. 12",
-				"city":        "Jakarta Pusat",
-				"state":       "DKI Jakarta",
-				"pincode":     "10450",
+				"coordinates": []float64{107.0050, -6.2280}, // Bekasi (~1.4 km from Binus)
+				"address":     "Jl. Boulevard Selatan, Summarecon Bekasi",
+				"city":        "Bekasi",
+				"state":       "Jawa Barat",
+				"pincode":     "17142",
 			},
 			"rating":       4.7,
 			"totalReviews": 35,
@@ -203,18 +203,18 @@ func main() {
 			"isSeller":           true,
 			"businessName":       "Toko Kue & Dessert Dewi",
 			"businessType":       "individual",
-			"businessAddress":    "Jl. Wahid Hasyim No. 15, Jakarta Pusat",
+			"businessAddress":    "Jl. Perjuangan, Bekasi Utara, Jawa Barat",
 			"registrationStatus": "approved",
 			"isVerified":         true,
 			"isMember":           false,
 			"membershipStatus":   "inactive",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.8150, -6.1850}, // Jakarta Pusat (~1.2 km)
-				"address":     "Jl. Wahid Hasyim No. 15",
-				"city":        "Jakarta Pusat",
-				"state":       "DKI Jakarta",
-				"pincode":     "10350",
+				"coordinates": []float64{106.9800, -6.2150}, // Bekasi Utara (~1.7 km from Binus)
+				"address":     "Jl. Perjuangan, Bekasi Utara",
+				"city":        "Bekasi",
+				"state":       "Jawa Barat",
+				"pincode":     "17121",
 			},
 			"rating":       4.9,
 			"totalReviews": 42,
@@ -230,18 +230,18 @@ func main() {
 			"isSeller":           true,
 			"businessName":       "Sate & Ayam Goreng Pak Eko",
 			"businessType":       "individual",
-			"businessAddress":    "Jl. Salemba Raya No. 5, Jakarta Pusat",
+			"businessAddress":    "Jl. KH Noer Ali, Bekasi Barat, Jawa Barat",
 			"registrationStatus": "approved",
 			"isVerified":         true,
 			"isMember":           false,
 			"membershipStatus":   "inactive",
 			"location": bson.M{
 				"type":        "Point",
-				"coordinates": []float64{106.8400, -6.1900}, // Jakarta Pusat (~1.9 km)
-				"address":     "Jl. Salemba Raya No. 5",
-				"city":        "Jakarta Pusat",
-				"state":       "DKI Jakarta",
-				"pincode":     "10440",
+				"coordinates": []float64{106.9700, -6.2350}, // Bekasi Barat (~2.8 km from Binus)
+				"address":     "Jl. KH Noer Ali, Bekasi Barat",
+				"city":        "Bekasi",
+				"state":       "Jawa Barat",
+				"pincode":     "17144",
 			},
 			"rating":       4.6,
 			"totalReviews": 18,
@@ -805,11 +805,11 @@ func main() {
 	fmt.Println("\n✅ Database seeded successfully with realistic revamped Indonesian products!")
 	fmt.Println("\n--- TEST ACCOUNTS ---")
 	fmt.Printf("🔐 All test accounts password: %s\n", defaultPassword)
-	fmt.Println("\n👨‍💼 Seller 1 (Padang - Member):     budi.seller@test.com  - Jakarta Pusat (~0.3km)")
-	fmt.Println("👩‍🍳 Seller 2 (Catering - Member):   siti.seller@test.com  - Jakarta Pusat (~0.4km)")
-	fmt.Println("👨‍☕ Seller 3 (Coffee - Member):     joko.seller@test.com  - Jakarta Pusat (~1.1km)")
-	fmt.Println("👩‍🎂 Seller 4 (Dessert - No Member):  dewi.seller@test.com  - Jakarta Pusat (~1.2km)")
-	fmt.Println("👨‍🍖 Seller 5 (Grill - No Member):    eko.seller@test.com   - Jakarta Pusat (~1.9km)")
-	fmt.Println("🛒 Buyer 1:                         andi.buyer@test.com   - Jakarta Pusat (Reference)")
-	fmt.Println("🛒 Buyer 2:                         rina.buyer@test.com   - Jakarta Pusat (~0.3km)")
+	fmt.Println("\n👨‍💼 Seller 1 (Padang - Member):     budi.seller@test.com  - Summarecon Bekasi (~0.3km)")
+	fmt.Println("👩‍🍳 Seller 2 (Catering - Member):   siti.seller@test.com  - Summarecon Bekasi (~0.4km)")
+	fmt.Println("👨‍☕ Seller 3 (Coffee - Member):     joko.seller@test.com  - Summarecon Bekasi (~1.4km)")
+	fmt.Println("👩‍🎂 Seller 4 (Dessert - No Member):  dewi.seller@test.com  - Bekasi Utara (~1.7km)")
+	fmt.Println("👨‍🍖 Seller 5 (Grill - No Member):    eko.seller@test.com   - Bekasi Barat (~2.8km)")
+	fmt.Println("🛒 Buyer 1:                         andi.buyer@test.com   - Binus University Bekasi (Reference)")
+	fmt.Println("🛒 Buyer 2:                         rina.buyer@test.com   - Summarecon Mall Bekasi (~0.5km)")
 }

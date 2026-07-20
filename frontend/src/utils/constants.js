@@ -1,6 +1,6 @@
 // Default location coordinates
 export const DEFAULT_LOCATION = {
-  Bekasi: { lat: -6.2567, lng: 107.0782 },
+  Bekasi: { lat: -6.2235, lng: 106.9935 },
   Jakarta: { lat: -6.2088, lng: 106.8456 },
 };
 
