@@ -53,9 +53,10 @@ func GetBiteshipConfigFromEnv() BiteshipAPIConfig {
 
 // RateRequest represents a shipping rate calculation request
 type RateRequest struct {
-	DeliverFrom Address `json:"deliver_from"`
-	DeliverTo   Address `json:"deliver_to"`
+	DeliverFrom  Address  `json:"deliver_from"`
+	DeliverTo    Address  `json:"deliver_to"`
 	CourierCodes []string `json:"courier_codes,omitempty"` // Optional filter
+	Items        []Item   `json:"items,omitempty"`
 }
 
 // Address represents a location for shipping

@@ -76,6 +76,11 @@ func (h *ShippingHandler) CalculateShippingRates(c *gin.Context) {
 	}
 
 	// Convert to Biteship RateRequest
+	weightGrams := req.Package.Weight * 1000.0
+	if weightGrams <= 0 {
+		weightGrams = 1000.0 // Default to 1kg if not specified
+	}
+
 	rateReq := services.RateRequest{
 		DeliverFrom: services.Address{
 			Latitude:   req.DeliverFrom.Latitude,
@@ -96,6 +101,13 @@ func (h *ShippingHandler) CalculateShippingRates(c *gin.Context) {
 			CountryISO2: "ID",
 		},
 		CourierCodes: req.CourierCodes,
+		Items: []services.Item{
+			{
+				Name:     "Shipping Item",
+				Quantity: 1,
+				Weight:   weightGrams, // Biteship expects weight in grams
+			},
+		},
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
