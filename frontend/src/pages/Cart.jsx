@@ -169,12 +169,12 @@ function Cart() {
                 try {
                     const response = await api.post('/shipping/rates', {
                         deliverFrom: {
-                            latitude: checkoutSeller.location?.lat || -6.2088,
-                            longitude: checkoutSeller.location?.lng || 106.8456,
-                            address: checkoutSeller.address || '',
-                            cityName: checkoutSeller.city || '',
-                            stateName: checkoutSeller.province || '',
-                            zipCode: checkoutSeller.postalCode || ''
+                            latitude: sellerLocation?.lat || -6.2235,
+                            longitude: sellerLocation?.lng || 106.9935,
+                            address: checkoutSeller.items?.[0]?.product?.seller?.address || '',
+                            cityName: checkoutSeller.items?.[0]?.product?.seller?.city || '',
+                            stateName: checkoutSeller.items?.[0]?.product?.seller?.province || '',
+                            zipCode: checkoutSeller.items?.[0]?.product?.seller?.postalCode || ''
                         },
                         deliverTo: {
                             latitude: deliveryLocation.lat,
