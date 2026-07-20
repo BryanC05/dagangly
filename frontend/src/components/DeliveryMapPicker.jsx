@@ -201,7 +201,7 @@ export default function DeliveryMapPicker({
         onLocationSelect({ lat: position.lat, lng: position.lng, address: newAddress });
       }
     });
-  }, [position, sellerLocation]);
+  }, [position.lat, position.lng, sellerLocation?.lat, sellerLocation?.lng, maxDistance]);
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) return;

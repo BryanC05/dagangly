@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, ArrowRight, ArrowLeft, ShoppingBag, MapPin, Plus, Minus, CreditCard, Check, Store, ChevronDown, ChevronUp, Truck, Clock, Navigation, AlertCircle, RefreshCw } from 'lucide-react';
@@ -82,8 +82,8 @@ function Cart() {
     const deliveryFee = deliveryType === 'delivery' && selectedCourier ? selectedCourier.price : 0;
     const total = subtotal + deliveryFee;
 
-    // Get seller location from first product
-    const getSellerLocation = () => {
+    // Get seller location from first product (memoized to keep reference stable)
+    const sellerLocation = useMemo(() => {
         if (!checkoutSeller || !checkoutSeller.items.length) return null;
         const firstItem = checkoutSeller.items[0];
         const seller = firstItem.product.seller;
@@ -94,7 +94,7 @@ function Cart() {
             };
         }
         return null;
-    };
+    }, [checkoutSeller]);
 
     const steps = [
         { label: t('checkout.step1') },
@@ -551,7 +551,7 @@ function Cart() {
                                     
                                     <div className="h-[280px] rounded-xl overflow-hidden border">
                                         <DeliveryMapPicker
-                                            sellerLocation={getSellerLocation()}
+                                            sellerLocation={sellerLocation}
                                             onLocationSelect={handleLocationSelect}
                                             initialLocation={deliveryLocation}
                                         />
