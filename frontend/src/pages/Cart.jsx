@@ -474,6 +474,28 @@ function Cart() {
                                     </Alert>
                                 )}
 
+                                <div className="space-y-4">
+                                    <Label className="text-base font-semibold flex items-center gap-2">
+                                        <Navigation className="h-5 w-5 text-emerald-600" />
+                                        Route to Store Location
+                                    </Label>
+                                    <div className="h-[280px] rounded-xl overflow-hidden border shadow-sm">
+                                        <DeliveryMapPicker
+                                            sellerLocation={sellerLocation}
+                                            onLocationSelect={handleLocationSelect}
+                                            initialLocation={deliveryLocation}
+                                        />
+                                    </div>
+                                    {deliveryLocation && (
+                                        <div className="p-4 bg-secondary/30 rounded-xl border flex items-center justify-between text-sm">
+                                            <div>
+                                                <p className="text-xs text-muted-foreground uppercase font-bold">Your Location</p>
+                                                <p className="font-medium mt-1">{address.address || deliveryLocation.address}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <Separator />
 
                                 <div className="space-y-4">

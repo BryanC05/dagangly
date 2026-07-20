@@ -99,6 +99,8 @@ export default function DeliveryMapPicker({
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const selectedMarkerRef = useRef(null);
+  const sellerMarkerRef = useRef(null);
+  const routeLineRef = useRef(null);
   const isInitRef = useRef(false);
 
 
@@ -158,6 +160,8 @@ export default function DeliveryMapPicker({
         mapRef.current = null;
       }
       selectedMarkerRef.current = null;
+      sellerMarkerRef.current = null;
+      routeLineRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -166,8 +170,24 @@ export default function DeliveryMapPicker({
   useEffect(() => {
     if (!position || !mapRef.current) return;
 
+    // Custom icons for better visual presentation
+    const storeIcon = L.divIcon({
+      html: `<div class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500 border-2 border-white shadow-md text-white text-xs">🏪</div>`,
+      className: 'custom-div-icon',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+
+    const buyerIcon = L.divIcon({
+      html: `<div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 border-2 border-white shadow-md text-white text-xs">📍</div>`,
+      className: 'custom-div-icon',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+
+    // Update or create buyer marker
     if (!selectedMarkerRef.current) {
-      const m = L.marker([position.lat, position.lng], { draggable: true }).addTo(mapRef.current);
+      const m = L.marker([position.lat, position.lng], { draggable: true, icon: buyerIcon }).addTo(mapRef.current);
       m.on('dragend', () => {
         const ll = m.getLatLng();
         setPosition({ lat: ll.lat, lng: ll.lng });
@@ -176,7 +196,44 @@ export default function DeliveryMapPicker({
     } else {
       selectedMarkerRef.current.setLatLng([position.lat, position.lng]);
     }
-    mapRef.current.setView([position.lat, position.lng]);
+
+    // Update or create seller marker
+    if (sellerLocation) {
+      if (!sellerMarkerRef.current) {
+        const sm = L.marker([sellerLocation.lat, sellerLocation.lng], { icon: storeIcon }).addTo(mapRef.current);
+        sm.bindPopup("<b>Seller Store Location</b>");
+        sellerMarkerRef.current = sm;
+      } else {
+        sellerMarkerRef.current.setLatLng([sellerLocation.lat, sellerLocation.lng]);
+      }
+    }
+
+    // Draw route line
+    if (routeLineRef.current) {
+      routeLineRef.current.remove();
+      routeLineRef.current = null;
+    }
+    if (sellerLocation) {
+      const line = L.polyline([
+        [sellerLocation.lat, sellerLocation.lng],
+        [position.lat, position.lng]
+      ], {
+        color: '#2563eb',
+        weight: 4,
+        opacity: 0.7,
+        dashArray: '8, 8'
+      }).addTo(mapRef.current);
+      routeLineRef.current = line;
+
+      // Fit bounds to show both seller and buyer
+      const bounds = L.latLngBounds([
+        [sellerLocation.lat, sellerLocation.lng],
+        [position.lat, position.lng]
+      ]);
+      mapRef.current.fitBounds(bounds, { padding: [45, 45] });
+    } else {
+      mapRef.current.setView([position.lat, position.lng], 15);
+    }
 
     let dist = null;
     if (sellerLocation) {

@@ -522,8 +522,8 @@ func getSimulatedRates(lat1, lon1, lat2, lon2 float64) []ShippingRateOption {
 	dist := 6371.0 * c
 
 	// Estimate simulated prices (rounding to nearest hundred)
-	goSendPrice := 15000.0 + (dist * 2500.0)
-	grabPrice := 16000.0 + (dist * 2700.0)
+	goSendPrice := 8000.0 + (dist * 1500.0)
+	grabPrice := 9000.0 + (dist * 1700.0)
 	jnePrice := 9000.0
 	sicepatPrice := 8000.0
 
