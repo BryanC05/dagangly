@@ -39,9 +39,7 @@ function ThreadDetail() {
 
     const replyMutation = useMutation({
         mutationFn: async (formData) => {
-            const response = await api.post(`/forum/${id}/reply`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
+            const response = await api.post(`/forum/${id}/reply`, formData);
             return response.data;
         },
         onSuccess: () => {

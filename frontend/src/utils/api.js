@@ -23,11 +23,15 @@ api.interceptors.request.use((config) => {
   // If sending FormData, delete Content-Type header to let the browser/Axios set the correct boundary
   if (config.data && (config.data instanceof FormData || typeof config.data.append === 'function')) {
     if (config.headers) {
-      Object.keys(config.headers).forEach((key) => {
-        if (key.toLowerCase() === 'content-type') {
-          delete config.headers[key];
-        }
-      });
+      if (typeof config.headers.delete === 'function') {
+        config.headers.delete('content-type');
+      } else {
+        Object.keys(config.headers).forEach((key) => {
+          if (key.toLowerCase() === 'content-type') {
+            delete config.headers[key];
+          }
+        });
+      }
     }
   }
 

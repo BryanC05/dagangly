@@ -26,9 +26,7 @@ function NewThread() {
 
     const createMutation = useMutation({
         mutationFn: async (formData) => {
-            const response = await api.post('/forum', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
+            const response = await api.post('/forum', formData);
             return response.data;
         },
         onSuccess: (data) => {
