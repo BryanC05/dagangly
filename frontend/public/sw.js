@@ -1,6 +1,6 @@
-const CACHE_NAME = 'dagangly-v2';
-const STATIC_CACHE = 'dagangly-static-v2';
-const DYNAMIC_CACHE = 'dagangly-dynamic-v2';
+const CACHE_NAME = 'dagangly-v3';
+const STATIC_CACHE = 'dagangly-static-v3';
+const DYNAMIC_CACHE = 'dagangly-dynamic-v3';
 
 const STATIC_ASSETS = [
   '/',
