@@ -23,6 +23,11 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  // If sending FormData, delete Content-Type header to let the browser/Axios set the correct boundary
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   // Add cache buster to bypass aggressive 301 cached redirects from previous backend CORS bug
   if (config.method?.toLowerCase() === 'get') {
     config.params = { ...config.params, _cb: Date.now() };
