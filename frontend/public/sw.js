@@ -89,7 +89,16 @@ async function cacheFirst(request) {
     
     return networkResponse;
   } catch (error) {
-    return caches.match('/');
+    // Only return the offline fallback (app shell) for navigation requests
+    if (request.mode === 'navigate' || (request.headers.get('accept') && request.headers.get('accept').includes('text/html'))) {
+      const fallback = await caches.match('/');
+      if (fallback) {
+        return fallback;
+      }
+    }
+    // Return a proper network error response for dynamic chunks, styles, or other assets 
+    // to prevent syntax/type errors caused by executing HTML as JavaScript
+    return new Response('Network error occurred', { status: 408, statusText: 'Network Error' });
   }
 }
 
