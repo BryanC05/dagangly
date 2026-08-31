@@ -22,13 +22,10 @@ The platform has recently undergone massive upgrades across all environments (We
 - **Advanced Analytics & Inventory:** Sellers get access to a rich dashboard showing revenue, top products, and low-stock alerts.
 - **Dynamic UI Components:** Real-time visual feedback including `LiveStockBadge` (urgency indicators), `OrderStatusCountdown`, and `BalanceAnimation`.
 
-### 🤖 Automation Engine (n8n Integration)
-- **Workflow Automation:** Fully integrated with **n8n** (running via Docker) to automate seller tasks.
-- **Transactional Emails:** Automated Order Confirmations, Status Updates, and Low Inventory alerts sent via Gmail SMTP or SendGrid.
+### 🤖 Automation Engine 
 - **Instagram Auto-Posting:** Sellers can link their Instagram accounts (via Meta Graph API). New product listings can automatically post to their Instagram feed, utilizing ImgBB for robust image binary handling.
 
 ### 💬 Communication & Community
-- **Video Call Consultations:** 1:1 WebRTC-powered video calls directly between buyers and sellers for product demonstrations.
 - **WhatsApp Integration:** Direct "Chat on WhatsApp" buttons on product and store pages.
 - **Fraud & Scam Reporting:** Built-in reporting system escalating issues to admins via SMTP/SendGrid or Mailto fallbacks.
 - **Social Media Hub:** Both buyers and sellers can attach auto-detected social media links (TikTok, IG, Twitter, WhatsApp) to their profiles and store pages.
